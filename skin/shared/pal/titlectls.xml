@@ -1,0 +1,10 @@
+<control>
+    <description>logo small label</description>
+    <id>small_logo</id>
+    <type>image</type>
+    <posX>(icon_x)</posX>
+    <posY>(icon_y)</posY>
+    <width>(icon_w)</width>
+    <height>(icon_h)</height>
+    <texture>mythtv-icon.png</texture>
+</control>

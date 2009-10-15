@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<mythtv>
+    <mythtv_host>192.168.1.11</mythtv_host>
+    <mythtv_port>6543</mythtv_port>
+    <mythtv_minlivebufsize>1000</mythtv_minlivebufsize>
+    <mythtv_tunewait>3</mythtv_tunewait>
+    <mythtv_version_override>False</mythtv_version_override>
+    <mysql_host>192.168.1.11</mysql_host>
+    <mysql_port>3306</mysql_port>
+    <mysql_database>mythconverg</mysql_database>
+    <mysql_user>mythtv</mysql_user>
+    <mysql_password>change_me</mysql_password>
+    <mysql_encoding_override>latin1</mysql_encoding_override>
+    <paths_recordedprefix>/usr2/mythtv</paths_recordedprefix>
+    <recorded_view_by>4</recorded_view_by>
+    <upcoming_view_by>2</upcoming_view_by>
+    <recorded_default_group>All Groups</recorded_default_group>
+</mythtv>

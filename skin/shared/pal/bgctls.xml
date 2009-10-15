@@ -1,0 +1,44 @@
+<control>
+    <description>background image</description>
+    <id>imgbackground</id>
+    <type>image</type>
+    <posX>0</posX>
+    <posY>0</posY>
+    <width>(width)</width>
+    <height>(height)</height>
+    <texture>background.png</texture>
+</control>
+
+<control>
+    <description>vertical panel left edge</description>
+    <id>imgvpanel</id>
+    <type>image</type>
+    <posX>(l_w) + (menu_dn_x)-(menu_up_x)</posX>
+    <posY>0</posY>
+    <width>30</width>
+    <height>(dn_y)</height>
+    <texture>vpanel1.png</texture>
+</control>
+
+<control>
+    <description>vertical panel filler and right edge</description>
+    <id>imgvpanel2</id>
+    <type>image</type>
+    <posX>(l_w) + (menu_dn_x)-(menu_up_x) + 30</posX>
+    <posY>0</posY>
+    <width>(width) * 2</width>
+    <height>(dn_y)</height>
+    <texture>vpanel2.png</texture>
+</control>
+
+<control>
+    <description>header image</description>
+    <id>imgheader</id>
+    <type>image</type>
+    <posX>0</posX>
+    <posY>0</posY>
+    <width>(width)</width>
+    <height>(menu_up_y)</height>
+    <texture>header.png</texture>
+</control>
+

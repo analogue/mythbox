@@ -1,0 +1,183 @@
+<window>
+    <id>2</id>
+    <defaultgroup>main</defaultgroup>
+
+#include vars.xml
+
+    <detail_x>(list_x)</detail_x>
+    <detail_y>(list_y)+(list_h)+(list_dh)</detail_y>
+    <detail_w>(data_w)</detail_w>
+
+#include listdetailvars.xml
+<!-- #include osdvars.xml -->
+#include popupvars.xml
+    <controls>
+#include popupctls.xml
+#include bgctls.xml
+#include titlectls.xml
+        <control>
+#include titleattrs.xml
+            <label>2</label>
+        </control>
+
+        <control>
+            <description>View by button</description>
+            <id>view_by</id>
+            <type>button</type>
+            <posX>(menu_up_x)</posX>
+            <posY>(menu_up_y)+0*((menubtn_h)+(menubtn_dh))</posY>
+            <offsetX>(btn_off_x)</offsetX>
+            <offsetY>(btn_off_y)</offsetY>
+            <alignment>(btn_align)</alignment>
+            <width>(menubtn_w)</width>
+            <height>(menubtn_h)</height>
+            <font>(menubtn_font)</font>
+            <group>main</group>
+            <onup>refresh</onup>
+            <ondown>refresh</ondown>
+            <onleft>recgroup_list</onleft>
+            <onright>recgroup_list</onright>
+            <texturefocus>button_focus.png</texturefocus>
+            <texturenofocus>button_nofocus.png</texturenofocus>
+        </control>
+        <control>
+            <description>Refresh button</description>
+            <id>refresh</id>
+            <type>button</type>
+            <posX>(menu_up_x)</posX>
+            <posY>(menu_up_y)+1*((menubtn_h)+(menubtn_dh))</posY>
+            <offsetX>(btn_off_x)</offsetX>
+            <offsetY>(btn_off_y)</offsetY>
+            <alignment>(btn_align)</alignment>
+            <width>(menubtn_w)</width>
+            <height>(menubtn_h)</height>
+            <font>(menubtn_font)</font>
+            <label>53</label>
+            <group>main</group>
+            <onup>view_by</onup>
+            <ondown>view_by</ondown>
+            <onleft>recgroup_list</onleft>
+            <onright>recgroup_list</onright>
+            <texturefocus>button_focus.png</texturefocus>
+            <texturenofocus>button_nofocus.png</texturenofocus>
+        </control>
+<!--//*************   NEW CONTROLS   ************//-->
+<!--//*************   BACKGROUNDS    ************//-->
+<!--//
+        <control>
+            <description>rec group background</description>
+            <id>rec_group_bg</id>
+            <type>image</type>
+            <posX>(list_x)</posX>
+            <posY>(list_y)</posY>
+            <width>(list_w)</width>
+            <height>((listitem_h)*3)-((listitem_space_h)*6)</height>
+            <group>main</group>
+            <texture>shade_25.png</texture>
+        </control>
+
+        <control>
+            <description>show list background</description>
+            <id>show_list_bg</id>
+            <type>image</type>
+            <posX>(list_x)</posX>
+            <posY>(list_y)+(((listitem_h)+(listitem_space_h)))*1.5</posY>
+            <width>(list_w)</width>
+            <height>((listitem_h)*3)-((listitem_space_h)*6)</height>
+            <group>main</group>
+            <texture>shade_25.png</texture>
+        </control> 
+//-->
+        <control>
+            <description>recorded shows background</description>
+            <id>episode_bg</id>
+            <type>image</type>
+            <posX>(list_x)</posX>
+            <posY>(list_y)+(((listitem_h)+(listitem_space_h)))*3</posY>
+            <width>(list_w)</width>
+            <height>(list_h)-((((listitem_h)+(listitem_space_h)))*4)</height>
+            <group>main</group>
+            <texture>shade_25.png</texture>
+        </control>
+        
+        <!--//*************      LABELS      ************//-->
+        <control>
+            <description>rec group label</description>
+            <id>rec_group_lbl</id>
+            <type>label</type>
+            <posX>(list_x)+(dt_title_l_w)-((listitem_offset_x)*4)</posX>
+            <posY>(list_y)</posY>
+            <width>(dt_title_l_w)</width>
+            <height>(listitem_h)</height>
+            <alignment>1</alignment>
+            <font>(main_font)</font>
+            <group>main</group>
+            <label>159</label>
+        </control>
+        <control>
+            <description>show listing label</description>
+            <id>show_list_lbl</id>
+            <type>label</type>
+            <posX>(list_x)+(dt_title_l_w)-((listitem_offset_x)*4)</posX>
+            <posY>(list_y)+(((listitem_h)+(listitem_space_h)))*1.5</posY>
+            <width>(dt_title_l_w)</width>
+            <height>(listitem_h)</height>
+            <alignment>1</alignment>
+            <font>(main_font)</font>
+            <group>main</group>
+            <label>160</label>
+        </control>
+        
+        <!--//*************     CONTROLS     ************//-->
+        <control>
+            <description>Recording Group list</description>
+            <id>recgroup_list</id>
+            <type>listcontrol</type>
+            <posX>(list_x)+(dt_title_l_w)</posX>
+            <posY>(list_y)</posY>
+            <width>(list_w)-(dt_title_l_w)</width>
+            <height>((listitem_h)+(listitem_space_h))*(list_extra_h)</height>
+            <offsetx>(listitem_offset_x)</offsetx>
+            <space>(listitem_space_h)</space>
+            <itemheight>(listitem_h)</itemheight>
+            <default>yes</default>
+            <group>main</group>
+            <onleft>view_by</onleft>
+            <onright>show_list</onright>
+        </control>
+        <control>
+            <description>Show listing</description>
+            <id>show_list</id>
+            <type>listcontrol</type>
+            <posX>(list_x)+(dt_title_l_w)</posX>
+            <posY>(list_y)+(((listitem_h)+(listitem_space_h)))*1.5</posY>
+            <width>(list_w)-(dt_title_l_w)</width>
+            <height>((listitem_h)+(listitem_space_h))*(list_extra_h)</height>
+            <offsetx>(listitem_offset_x)</offsetx>
+            <space>(listitem_space_h)</space>
+            <itemheight>(listitem_h)</itemheight>
+            <group>main</group>
+            <onleft>recgroup_list</onleft>
+            <onright>episode_list</onright>
+        </control>
+
+        <!--//************* END NEW CONTROLS ************//-->
+        <control>
+            <description>Recorded Shows list</description>
+            <id>episode_list</id>
+            <type>listcontrol</type>
+            <posX>(list_x)</posX>
+            <posY>(list_y)+(((listitem_h)+(listitem_space_h)))*3</posY>
+            <width>(list_w)</width>
+            <offsetx>(listitem_offset_x)</offsetx>
+            <space>(listitem_space_h)</space>
+            <itemheight>(listitem_h)</itemheight>
+            <font>(list_font)</font>
+            <height>(list_h)-((((listitem_h)+(listitem_space_h)))*3)</height>
+            <group>main</group>
+            <onleft>show_list</onleft>
+            <onright>view_by</onright>
+        </control>
+#include listdetailctls.xml
+    </controls>
+</window>

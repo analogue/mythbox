@@ -1,0 +1,24 @@
+
+Changeset 21998
+View differences
+Show lines around each change
+Ignore:
+Blank lines
+Case changes
+White space changes
+
+Timestamp:
+    08/04/2009 08:28:22 PM (20 hours ago)
+Author:
+    elupus
+Message:
+
+    changed: allow reading of growing avi files (ie currently being written)
+Files:
+
+        1 modified
+
+
+        *
+          branches/linuxport/XBMC/xbmc/cores/dvdplayer/Codecs/ffmpeg/libavformat/avidec.c (modified) (4 diffs)
+

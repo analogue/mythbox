@@ -1,0 +1,7 @@
+<free_h>(menubtn_h)</free_h>
+<free_dh>5.0/720.0*(height)</free_dh>
+<free_x>(menu_up_x)</free_x>
+<free_y>(menu_dn_y)-(free_h)-(menubtn_h)</free_y>
+<free_w>(menubtn_w)</free_w>
+<freetitle_x>(free_x)</freetitle_x>
+<freetitle_y>(free_y)-(free_h)-(free_dh)</freetitle_y>

@@ -1,0 +1,65 @@
+<!--
+    These are variables for controls to display program details for a selected
+    row in a list of programs.
+
+    This assumes that the following varialbes are already defined:
+
+    (detail_x)
+    (detail_y)
+    (detail_w)
+-->
+<dt_x>(detail_x)+(dt_dw)</dt_x>
+<dt_y>(detail_y)+(dt_dh)</dt_y>
+
+<dt_col_w>((detail_w)-5.0*(dt_dw))/4.0</dt_col_w>
+
+<dt_title_l_x>(dt_x)</dt_title_l_x>
+<dt_title_l_y>(dt_y)</dt_title_l_y>
+<dt_title_l_w>(dt_col_w)</dt_title_l_w>
+<dt_title_l_h>(dt_title_row_h)</dt_title_l_h>
+
+<dt_title_x>(dt_x)+(dt_col_w)+(dt_dw)</dt_title_x>
+<dt_title_y>(dt_y)</dt_title_y>
+<dt_title_w>3*(dt_col_w)+2*(dt_dw)</dt_title_w>
+<dt_title_h>(dt_title_row_h)</dt_title_h>
+
+<dt_date_l_x>(dt_x)</dt_date_l_x>
+<dt_date_l_y>(dt_y)+(dt_title_row_h)+(dt_dh)</dt_date_l_y>
+<dt_date_l_w>(dt_col_w)</dt_date_l_w>
+<dt_date_l_h>(dt_row_h)</dt_date_l_h>
+
+<dt_date_x>(dt_x)+(dt_col_w)+(dt_dw)</dt_date_x>
+<dt_date_y>(dt_y)+(dt_title_row_h)+(dt_dh)</dt_date_y>
+<dt_date_w>3*(dt_col_w)+2*(dt_dw)</dt_date_w>
+<dt_date_h>(dt_row_h)</dt_date_h>
+
+<dt_chan_l_x>(dt_x)</dt_chan_l_x>
+<dt_chan_l_y>(dt_y)+(dt_title_row_h)+2*(dt_dh)+(dt_row_h)</dt_chan_l_y>
+<dt_chan_l_w>(dt_col_w)</dt_chan_l_w>
+<dt_chan_l_h>(dt_row_h)</dt_chan_l_h>
+
+<dt_chan_x>(dt_x)+(dt_col_w)+(dt_dw)</dt_chan_x>
+<dt_chan_y>(dt_y)+(dt_title_row_h)+2*(dt_dh)+(dt_row_h)</dt_chan_y>
+<dt_chan_w>(dt_col_w)</dt_chan_w>
+<dt_chan_h>(dt_row_h)</dt_chan_h>
+
+<dt_air_l_x>(dt_x)+2*(dt_col_w)+2*(dt_dw)</dt_air_l_x>
+<dt_air_l_y>(dt_y)+(dt_title_row_h)+2*(dt_dh)+(dt_row_h)</dt_air_l_y>
+<dt_air_l_w>(dt_col_w)</dt_air_l_w>
+<dt_air_l_h>(dt_row_h)</dt_air_l_h>
+
+<dt_air_x>(dt_x)+3*(dt_col_w)+3*(dt_dw)</dt_air_x>
+<dt_air_y>(dt_y)+(dt_title_row_h)+2*(dt_dh)+(dt_row_h)</dt_air_y>
+<dt_air_w>(dt_col_w)</dt_air_w>
+<dt_air_h>(dt_row_h)</dt_air_h>
+
+<dt_desc_l_x>(dt_x)</dt_desc_l_x>
+<dt_desc_l_y>(dt_y)+(dt_title_row_h)+3*(dt_dh)+2*(dt_row_h)</dt_desc_l_y>
+<dt_desc_l_w>(dt_col_w)</dt_desc_l_w>
+<dt_desc_l_h>(dt_row_h)</dt_desc_l_h>
+
+<dt_desc_x>(dt_x)+(dt_col_w)+(dt_dw)</dt_desc_x>
+<dt_desc_y>(dt_y)+(dt_title_row_h)+3*(dt_dh)+2*(dt_row_h)</dt_desc_y>
+<dt_desc_w>3*(dt_col_w)+2*(dt_dw)</dt_desc_w>
+<dt_desc_h>(dt_row_h)</dt_desc_h>
+

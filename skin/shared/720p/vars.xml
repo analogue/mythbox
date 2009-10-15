@@ -1,0 +1,120 @@
+<!-- Common variables available in all skins
+
+    NOTE:
+    These calculations use 720p pixel values to derive fractions (i.e.
+    16:9 ratio is assumed).
+-->
+<!-- define fonts -->
+<title_font>font14</title_font>
+<main_font>font14</main_font>
+<list_font>font14</list_font>
+<menubtn_font>font14</menubtn_font>
+<label_font>font14</label_font>
+<detail_font>font14</detail_font>
+<guide_font>font14</guide_font>
+<channel_font>font14</channel_font>
+<time_font>font14</time_font>
+
+<!-- default height of list items -->
+<listitem_h>(24.0/720.0)*(height)</listitem_h>
+
+<!-- defines viewable coordinates - no controls defined outside this -->
+<up_x>(60.0/1280.0)*(width)</up_x>
+<up_y>(30.0/720.0)*(height)</up_y>
+<dn_x>(1220.0/1280.0)*(width)</dn_x>
+<dn_y>(690.0/720.0)*(height)</dn_y>
+
+<!-- defines borders for viewable areas -->
+<up_h>(up_y)</up_h>
+<dn_h>(height)-(dn_y)</dn_h>
+<l_w>(up_x)</l_w>
+<r_w>(width)-(dn_x)</r_w>
+
+<!-- defines area for title -->
+<title_x>(up_x)</title_x>
+<title_y>(up_y)</title_y>
+<title_w>(760.0-(title_x))/1280.0*(width)</title_w>
+<title_h>(40.0/720.0)*(height)</title_h>
+
+<!-- defines area for menu buttons -->
+<menu_up_x>(l_w)</menu_up_x>
+<menu_up_y>(150.0/720.0)*(height)</menu_up_y>
+<menu_dn_x>(340.0/1280.0)*(width)</menu_dn_x>
+<menu_dn_y>(dn_y)</menu_dn_y>
+<menu_w>(menu_dn_x)-(menu_up_x)</menu_w>
+<menu_h>(menu_dn_y)-(menu_dn_y)</menu_h>
+<menubtn_w>(menu_w)</menubtn_w>
+
+<menubtn_h>(45.0/720.0)*(height)</menubtn_h>
+<!-- XXX <menubtn_h>(30.0/720.0)*(height)</menubtn_h>-->
+
+<menubtn_dw>(12.0/1280.0)*(width)</menubtn_dw>
+
+<!-- XXX <menubtn_dh>(15.0/720.0)*(height)</menubtn_dh> -->
+<menubtn_dh>(0.0/720.0)*(height)</menubtn_dh> <!-- hgap between buttons = none -->
+
+<!-- defines area for data -->
+<data_up_x>(390.0/1280.0)*(width)</data_up_x>
+<data_up_y>(menu_up_y)</data_up_y>
+<data_dn_x>(dn_x)</data_dn_x>
+<data_dn_y>(630.0/720.0)*(height)</data_dn_y>
+<data_w>(data_dn_x)-(data_up_x)</data_w>
+<data_h>(data_dn_y)-(data_up_y)</data_h>
+
+<!-- defines area for icon -->
+<icon_x>(1120.0/1280.0)*(width)</icon_x>
+<icon_y>(40.0/720.0)*(height)</icon_y>
+<icon_w>(100.0/1280.0)*(width)</icon_w>
+<icon_h>(60.0/720.0)*(height)</icon_h>
+
+<!-- defines default button text offset -->
+<btn_off_x>30.0/1280.0*(width)</btn_off_x>
+<btn_off_y>2.0/720.0*(height)</btn_off_y>
+<btn_align>4</btn_align>
+
+<!-- list detail variables -->
+<dt_dh>7.0/720.0*(height)</dt_dh>
+<dt_dw>12.0/1280.0*(width)</dt_dw>
+<dt_title_row_h>20.0/720.0*(height)</dt_title_row_h>
+<dt_row_h>(listitem_h)</dt_row_h>
+<detail_h>5*(dt_dh)+3*(dt_row_h)+(dt_title_row_h)</detail_h>
+<detailnotes_h>12*(dt_dh)+4*(dt_row_h)+(dt_title_row_h)</detailnotes_h>
+
+<!-- show list variables -->
+<list_dh>10.0/720.0*(height)</list_dh>
+<list_x>(data_up_x)</list_x>
+<list_y>(data_up_y)</list_y>
+<list_w>(data_w)</list_w>
+<list_h>(data_h)-(list_dh)-(detail_h)</list_h>
+<listitem_space_h>2/720.0*(height)</listitem_space_h>
+<listitem_offset_x>0.5/1280.0*(width)</listitem_offset_x>
+<listnotes_h>(data_h)-(list_dh)-(detailnotes_h)</listnotes_h>
+<!-- recorded show list variables (adjust for show and group listings) -->
+<list_extra_h>2</list_extra_h>
+
+<!-- show detail variables -->
+<show_dt_dh>12.0/720.0*(height)</show_dt_dh>
+<show_dt_dw>12.0/1280.0*(width)</show_dt_dw>
+<show_dt_title_row_h>25.0/720.0*(height)</show_dt_title_row_h>
+<show_dt_row_h>20.0/720.0*(height)</show_dt_row_h>
+
+<!-- tv guide variables -->
+<channel_x>(menu_up_x)</channel_x>
+<channel_h>30.0/720.0*(height)</channel_h>
+<channel_w>(menu_w)</channel_w>
+<channel_dx>5.0/1280.0*(width)</channel_dx>
+
+<time_y>(data_up_y)</time_y>
+<time_h>30.0/720.0*(height)</time_h>
+
+<guide_dx>12.0/1280.0*(width)</guide_dx>
+<guide_dy>7.0/720.0*(height)</guide_dy>
+<guide_x>(data_up_x)</guide_x>
+<guide_y>(time_y)+(time_h)+(guide_dy)</guide_y>
+<guide_w>(data_w)</guide_w>
+<guide_h>(data_h)-(time_h)-(guide_dy)</guide_h>
+
+<chk_align>5</chk_align>
+
+
+

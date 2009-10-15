@@ -1,0 +1,29 @@
+<!--
+    These are the controls to display Program Details for a row selected in
+    the list.
+-->
+
+#include listdetailctls.xml
+<control>
+    <description>show notes label</description>
+    <id>show_notes_lbl</id>
+    <type>label</type>
+    <posX>(dt_notes_l_x)</posX>
+    <posY>(dt_notes_l_y)</posY>
+    <width>(dt_notes_l_w)</width>
+    <height>(dt_notes_l_h)</height>
+    <font>(label_font)</font>
+    <label>87</label>
+    <textcolor>0xffffffff</textcolor>
+</control>
+<control>
+    <description>show notes</description>
+    <id>show_notes</id>
+    <type>fadelabel</type>
+    <posX>(dt_notes_x)</posX>
+    <posY>(dt_notes_y)</posY>
+    <width>(dt_notes_w)</width>
+    <height>(dt_notes_h)</height>
+    <font>(detail_font)</font>
+    <textcolor>0xffddddff</textcolor>
+</control>

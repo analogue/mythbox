@@ -1,0 +1,130 @@
+<!--
+    These are the controls to display Program Details for a row selected in
+    the list.
+-->
+
+<control>
+    <description>info background</description>
+    <id>info_bg</id>
+    <type>image</type>
+    <posX>(detail_x)</posX>
+    <posY>(detail_y)</posY>
+    <width>(detail_w)</width>
+    <height>(detail_h)</height>
+    <texture>shade_25.png</texture>
+</control>
+<control>
+    <description>show title label</description>
+    <id>show_title_lbl</id>
+    <type>label</type>
+    <posX>(dt_title_l_x)</posX>
+    <posY>(dt_title_l_y)</posY>
+    <width>(dt_title_l_w)</width>
+    <height>(dt_title_l_h)</height>
+    <font>(label_font)</font>
+    <label>40</label>
+    <textcolor>0xffffffff</textcolor>
+</control>
+<control>
+    <description>show title</description>
+    <id>show_title</id>
+    <type>fadelabel</type>
+    <posX>(dt_title_x)</posX>
+    <posY>(dt_title_y)</posY>
+    <width>(dt_title_w)</width>
+    <height>(dt_title_h)</height>
+    <font>(detail_font)</font>
+    <textcolor>0xffddddff</textcolor>
+</control>
+<control>
+    <description>show air date label</description>
+    <id>show_air_date_lbl</id>
+    <type>label</type>
+    <posX>(dt_date_l_x)</posX>
+    <posY>(dt_date_l_y)</posY>
+    <width>(dt_date_l_w)</width>
+    <height>(dt_date_l_h)</height>
+    <font>(label_font)</font>
+    <label>43</label>
+    <textcolor>0xffffffff</textcolor>
+</control>
+<control>
+    <description>show air date</description>
+    <id>show_air_date</id>
+    <type>label</type>
+    <posX>(dt_date_x)</posX>
+    <posY>(dt_date_y)</posY>
+    <width>(dt_date_w)</width>
+    <height>(dt_date_h)</height>
+    <font>(detail_font)</font>
+    <textcolor>0xffddddff</textcolor>
+</control>
+<control>
+    <description>show channel label</description>
+    <id>show_channel_lbl</id>
+    <type>label</type>
+    <posX>(dt_chan_l_x)</posX>
+    <posY>(dt_chan_l_y)</posY>
+    <width>(dt_chan_l_w)</width>
+    <height>(dt_chan_l_h)</height>
+    <font>(label_font)</font>
+    <label>41</label>
+    <textcolor>0xffffffff</textcolor>
+</control>
+<control>
+    <description>show channel</description>
+    <id>show_channel</id>
+    <type>label</type>
+    <posX>(dt_chan_x)</posX>
+    <posY>(dt_chan_y)</posY>
+    <width>(dt_chan_w)</width>
+    <height>(dt_chan_h)</height>
+    <font>(detail_font)</font>
+    <textcolor>0xffddddff</textcolor>
+</control>
+<control>
+    <description>show orig air label</description>
+    <id>show_orig_air_lbl</id>
+    <type>label</type>
+    <posX>(dt_air_l_x)</posX>
+    <posY>(dt_air_l_y)</posY>
+    <width>(dt_air_l_w)</width>
+    <height>(dt_air_l_h)</height>
+    <font>(label_font)</font>
+    <label>42</label>
+    <textcolor>0xffffffff</textcolor>
+</control>
+<control>
+    <description>show orig air</description>
+    <id>show_orig_air</id>
+    <type>label</type>
+    <posX>(dt_air_x)</posX>
+    <posY>(dt_air_y)</posY>
+    <width>(dt_air_w)</width>
+    <height>(dt_air_h)</height>
+    <font>(detail_font)</font>
+    <textcolor>0xffddddff</textcolor>
+</control>
+<control>
+    <description>show description label</description>
+    <id>show_descr_lbl</id>
+    <type>label</type>
+    <posX>(dt_desc_l_x)</posX>
+    <posY>(dt_desc_l_y)</posY>
+    <width>(dt_desc_l_w)</width>
+    <height>(dt_desc_l_h)</height>
+    <font>(label_font)</font>
+    <label>44</label>
+    <textcolor>0xffffffff</textcolor>
+</control>
+<control>
+    <description>show description</description>
+    <id>show_descr</id>
+    <type>fadelabel</type>
+    <posX>(dt_desc_x)</posX>
+    <posY>(dt_desc_y)</posY>
+    <width>(dt_desc_w)</width>
+    <height>(dt_desc_h)</height>
+    <font>(detail_font)</font>
+    <textcolor>0xffddddff</textcolor>
+</control>

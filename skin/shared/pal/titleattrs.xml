@@ -1,0 +1,8 @@
+<description>main window label</description>
+<type>label</type>
+<posX>(title_x)</posX>
+<posY>(title_y)</posY>
+<width>(title_w)</width>
+<height>(title_h)</height>
+<font>(title_font)</font>
+<textcolor>0xffddddff</textcolor>

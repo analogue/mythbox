@@ -1,0 +1,37 @@
+Metadata-Version: 1.0
+Name: threadpool
+Version: 1.2.5
+Summary: Easy to use object-oriented thread pool framework
+Home-page: http://chrisarndt.de/projects/threadpool/
+Author: Christopher Arndt
+Author-email: chris@chrisarndt.de
+License: MIT license
+Download-URL: http://chrisarndt.de/projects/threadpool/download/
+Description: A thread pool is an object that maintains a pool of worker threads to perform
+        time consuming operations in parallel. It assigns jobs to the threads
+        by putting them in a work request queue, where they are picked up by the
+        next available thread. This then performs the requested operation in the
+        background and puts the results in another queue.
+        
+        The thread pool object can then collect the results from all threads from
+        this queue as soon as they become available or after all threads have
+        finished their work. It's also possible, to define callbacks to handle
+        each result as it comes in.
+        
+        .. note::
+        This module is regarded as an extended example, not as a finished product.
+        Feel free to adapt it too your needs.
+        
+        
+Keywords: threads,design pattern,thread pool
+Platform: POSIX
+Platform: Windows
+Platform: MacOS X
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Python Software Foundation License
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Libraries :: Python Modules

@@ -1,0 +1,2 @@
+SQLAlchemy==0.4
+boto

@@ -1,0 +1,1 @@
+c:\python\python24\Scripts\epydoc.py --dotpath "c:\Program Files\Graphviz2.22\bin\dot.exe" --graph all --graph-font="Tahoma" --name MythBox --url http://mythbox.googlecode.com resources/src/*.py resources/test/*.py

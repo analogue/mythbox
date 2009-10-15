@@ -1,0 +1,30 @@
+
+<!-- livetv osd variables -->
+<osdlabel_w>100</osdlabel_w>
+<osddata_w>100</osddata_w>
+
+<osd_space_y>13.0/720*(height)</osd_space_y>
+<osd_space_x>13.0/1280*(width)</osd_space_x>
+
+<!-- info osd -->
+<osd_h>216.0/720*(height)</osd_h>
+<osd_w>720.0/1280*(width)</osd_w>
+<osd_x>((width)/2)-((osd_w)/2)</osd_x>
+<osd_y>(dn_y)-(osd_h)</osd_y>
+
+<osd_channel_x>(osd_x)+(70.0/1280.0*(width))</osd_channel_x>
+<osd_channel_y>(osd_y)+(60.0/720*(height))</osd_channel_y>
+<osd_channel_h>(96.0/1280.0*(width))</osd_channel_h>
+<osd_channel_w>(96.0/720.0*(height))</osd_channel_w>
+
+<osd_use_x>(osd_channel_x)+(osd_channel_w)+(osd_space_x)</osd_use_x>
+
+<osd_title_y>(osd_y)+(osd_space_y)</osd_title_y>
+<osd_title_h>35.0/720.0*(height)</osd_title_h>
+
+<osd_use_y>(osd_title_y)+(osd_title_h)+(osd_space_y)</osd_use_y>
+<osd_use_h>115.0/720.0*(height)</osd_use_h>
+<osd_use_w>600.0/1280.0*(width)</osd_use_w>
+
+<osd_line_h>(osd_use_h)/3</osd_line_h>
+

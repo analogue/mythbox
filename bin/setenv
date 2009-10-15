@@ -1,0 +1,24 @@
+#!/bin/bash
+
+export PYTHONPATH=\
+$PYTHONPATH:\
+resources/src:\
+resources/test:\
+resources/itest:\
+resources/lib/mockito:\
+resources/lib/pyxcoder:\
+resources/lib/decorator:\
+resources/lib/odict:\
+resources/lib/BeautifulSoup:\
+resources/lib/elementtree:\
+resources/lib/tvdb_api:\
+resources/lib/themoviedb:\
+resources/lib/IMDbPY:\
+resources/lib/simplejson:\
+resources/lib/nose:\
+resources/lib/shove:\
+resources/lib/durus:\
+resources/lib/mysql-connector-python
+#/var/lib/python-support/python2.5
+
+export PATH=resources/lib/nose/bin:$PATH

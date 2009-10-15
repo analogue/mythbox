@@ -1,0 +1,85 @@
+        <control>
+            <description>osd background image</description>
+            <id>osd_background</id>
+            <group>osd</group>
+            <type>image</type>
+            <posX>(osd_x)</posX>
+            <posY>(osd_y)</posY>
+            <width>(osd_w)</width>
+            <height>(osd_h)</height>
+            <texture>dialog-panel.png</texture>
+        </control>
+
+        <!--//  OSD CONTROLS //-->
+        <control>
+            <description>channel icon</description>
+            <id>osd_channel_icon</id>
+            <group>osd</group>
+            <type>image</type>
+            <posX>(osd_channel_x)</posX>
+            <posY>(osd_channel_y)</posY>
+            <width>(osd_channel_w)</width>
+            <height>(osd_channel_h)</height>
+            <texture>background.png</texture>
+        </control>
+        <control>
+            <description>osd title</description>
+            <id>osd_title</id>
+            <group>osd</group>
+            <type>label</type>
+            <posX>(osd_use_x)</posX>
+            <posY>(osd_title_y)</posY>
+            <width>(osd_use_w)-(90.0/1280.0*(width))</width>
+            <height>(osd_title_h)</height>
+            <font>font14</font>
+            <textcolor>0xffffffff</textcolor>
+        </control>
+        <control>
+            <description>cur time</description>
+            <id>osd_cur_time</id>
+            <type>label</type>
+            <group>osd</group>
+            <posX>(osd_use_x)+((osd_use_w)-(80.0/1280.0*(width)))</posX>
+            <posY>(osd_title_y)</posY>
+            <alignment>1</alignment>
+            <width>90.0/1280.0*(width)</width>
+            <height>(osd_title_h)</height>
+            <font>font14</font>
+            <textcolor>0xffffffff</textcolor>
+        </control>
+        <control>
+            <description>show title</description>
+            <id>osd_show_title</id>
+            <group>osd</group>
+            <type>fadelabel</type>
+            <posX>(osd_use_x)</posX>
+            <posY>(osd_use_y)+((osd_line_h)*0)</posY>
+            <width>(osd_use_w)</width>
+            <height>(osd_use_h)</height>
+            <font>font14</font>
+            <textcolor>0xffffffff</textcolor>
+        </control>
+        <control>
+            <description>show desc</description>
+            <id>osd_show_desc</id>
+            <type>fadelabel</type>
+            <group>osd</group>
+            <posX>(osd_use_x)</posX>
+            <posY>(osd_use_y)+((osd_line_h)*1)</posY>
+            <width>(osd_use_w)</width>
+            <height>(osd_use_h)</height>
+            <font>font12</font>
+            <textcolor>0xffddddff</textcolor>
+        </control>
+        <control>
+            <description>rec warn</description>
+            <id>osd_rec_warn</id>
+            <type>fadelabel</type>
+            <group>osd</group>
+            <posX>(osd_use_x)</posX>
+            <posY>(osd_use_y)+((osd_line_h)*2)</posY>
+            <width>(osd_use_w)</width>
+            <height>(osd_use_h)</height>
+            <font>font12</font>
+            <textcolor>0xffffffff</textcolor>
+        </control>

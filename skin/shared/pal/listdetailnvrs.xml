@@ -1,0 +1,12 @@
+#include listdetailvars.xml
+
+<dt_notes_l_x>(dt_x)</dt_notes_l_x>
+<dt_notes_l_y>(dt_y)+(dt_title_row_h)+4*(dt_dh)+3*(dt_row_h)</dt_notes_l_y>
+<dt_notes_l_w>(dt_col_w)</dt_notes_l_w>
+<dt_notes_l_h>(dt_row_h)</dt_notes_l_h>
+
+<dt_notes_x>(dt_x)+(dt_col_w)+(dt_dw)</dt_notes_x>
+<dt_notes_y>(dt_y)+(dt_title_row_h)+4*(dt_dh)+3*(dt_row_h)</dt_notes_y>
+<dt_notes_w>3*(dt_col_w)+2*(dt_dw)</dt_notes_w>
+<dt_notes_h>(dt_row_h)</dt_notes_h>
+

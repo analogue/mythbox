@@ -1,0 +1,21 @@
+    <status_dh>(dt_dh)</status_dh>
+    <status_dw>(dt_dw)</status_dw>
+    <status_x>(data_up_x)+(dt_dw)</status_x>
+    <status_y>(data_up_y)+(dt_dh)</status_y>
+    <status_w>(data_w)-2*(dt_dw)</status_w>
+    <status_h>(data_h)-2*(dt_dh)</status_h>
+
+    <status_l_w>(180.0/1280.0)*(width)</status_l_w>
+    <status_col_w>(180.0/1280.0)*(width)*1.5</status_col_w>
+    <status_row_h>(dt_row_h)</status_row_h>
+
+    <status_mach_w>(status_w)</status_mach_w>
+    <status_mach_h>7*(status_row_h)+8*(status_dh)</status_mach_h>
+    <status_mach_x>(status_x)</status_mach_x>
+    <status_mach_y>(status_y)+((status_row_h)*4)+((status_dh)*4)+((listitem_h)*9)</status_mach_y>
+<!--    <status_mach_y>(status_y)+(status_h)-(status_mach_h)</status_mach_y> //-->
+
+    <status_list_x>(status_x)</status_list_x>
+    <status_list_y>(status_y)+2*((status_row_h)*3.5)+2*(status_dh)</status_list_y>
+    <status_list_w>(status_w)</status_list_w>
+    <status_list_h>(status_h)-(status_mach_h)-2*(status_row_h)-2*(status_dh)</status_list_h>

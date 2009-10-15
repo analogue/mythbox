@@ -1,0 +1,23 @@
+<!-- popup osd -->
+<popup_space_y>13.0/720*(height)</popup_space_y>
+
+<popup_channel_h>(96.0/1280.0*(width))</popup_channel_h>
+<popup_channel_w>(96.0/720.0*(height))</popup_channel_w>
+
+<popup_h>300.0/720*(height)</popup_h>
+<popup_w>512.0/1280.0*(width)</popup_w>
+<popup_x>((width)/2)-((popup_w)/2)</popup_x>
+<popup_y>((height)/2)-((popup_h)/2)</popup_y>
+<popup_title_y>(popup_y)+(popup_space_y)</popup_title_y>
+<popup_title_h>35.0/720.0*(height)</popup_title_h>
+<popup_channel_y>(popup_y)+(50.0/720*(height))</popup_channel_y>
+<popup_use_y>(popup_channel_y)+(popup_channel_h)+(popup_space_y)</popup_use_y>
+<popup_use_x>(popup_x)+(50.0/1280.0*(width))</popup_use_x>
+<popup_use_h>(200.0/720.0*(height))-(popup_channel_h)</popup_use_h>
+<popup_use_w>430.0/1280.0*(width)</popup_use_w>
+
+<popup_title_x>(popup_use_x)</popup_title_x>
+
+<popup_space>(25.0/720*(height))</popup_space>
+<popup_line_h>(popup_use_h)/3</popup_line_h>
+<popup_channel_x>(popup_x)+((popup_w)/2)-((popup_channel_w)/2)</popup_channel_x>

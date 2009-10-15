@@ -1,0 +1,16 @@
+<window>
+    <id>2</id>
+    <defaultgroup>main</defaultgroup>
+
+#include vars.xml
+
+    <controls>
+#include bgctls.xml
+#include titlectls.xml
+        <control>
+            <id>title</id>
+#include titleattrs.xml
+            <label>107</label>
+        </control>
+    </controls>
+</window>

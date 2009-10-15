@@ -1,0 +1,3 @@
+#!/bin/bash
+find . -name "*.pyc" | xargs rm -fv
+find . -name "*.pyo" | xargs rm -fv

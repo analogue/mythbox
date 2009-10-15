@@ -1,0 +1,74 @@
+        <control>
+    		<description>popup background image</description>
+    		<id>popupbackground</id>
+    		<type>image</type>
+            <group>popup</group>
+    		<posX>(popup_x)</posX>
+    		<posY>(popup_y)</posY>
+    		<width>(popup_w)</width>
+    		<height>(popup_h)</height>
+    		<texture>background_dialog.png</texture>
+        </control>
+        <control>
+            <description>popup icon</description>
+            <id>popup_icon</id>
+            <group>popup</group>
+            <type>image</type>
+            <posX>(popup_channel_x)</posX>
+            <posY>(popup_channel_y)</posY>
+            <width>(popup_channel_w)</width>
+            <height>(popup_channel_h)</height>
+            <texture>background.png</texture>
+        </control>
+        <control>
+            <description>popup title</description>
+            <id>popup_title</id>
+            <type>label</type>
+            <posX>(popup_use_x)+10</posX>
+            <posY>(popup_title_y)</posY>
+            <group>popup</group>
+            <alignment>0</alignment>
+            <width>(popup_use_w)-10</width>
+            <height>(popup_title_h)</height>
+            <font>font14</font>
+            <textcolor>0xffffffff</textcolor>
+        </control>
+        <control>
+            <description>popup line a</description>
+            <id>popup_line_a</id>
+            <type>fadelabel</type>
+            <posX>(popup_use_x)</posX>
+            <posY>(popup_use_y)+((popup_line_h)*0)</posY>
+            <group>popup</group>
+            <alignment>0</alignment>
+            <width>(popup_use_w)</width>
+            <height>(popup_line_h)</height>
+            <font>font14</font>
+            <textcolor>0xffffffff</textcolor>
+        </control>
+        <control>
+            <description>popup line b</description>
+            <id>popup_line_b</id>
+            <type>fadelabel</type>
+            <posX>(popup_use_x)</posX>
+            <posY>(popup_use_y)+((popup_line_h)*1)</posY>
+            <group>popup</group>
+            <alignment>0</alignment>
+            <width>(popup_use_w)</width>
+            <height>(popup_line_h)</height>
+            <font>font14</font>
+            <textcolor>0xffffffff</textcolor>
+        </control>
+        <control>
+            <description>popup line c</description>
+            <id>popup_line_c</id>
+            <type>fadelabel</type>
+            <posX>(popup_use_x)</posX>
+            <posY>(popup_use_y)+((popup_line_h)*2)</posY>
+            <group>popup</group>
+            <alignment>0</alignment>
+            <width>(popup_use_w)</width>
+            <height>(popup_line_h)</height>
+            <font>font14</font>
+            <textcolor>0xffffffff</textcolor>
+        </control>

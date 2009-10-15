@@ -1,0 +1,92 @@
+What is MythBox?
+================
+MythBox is a MythTV frontend for XBMC. 
+
+Features:
+  - watch livetv
+  - watch recordings with commercial skipping
+  - schedule recordings (create + edit)
+  - view program guide 
+  - compatible with 0.21 (stable) and 0.22 (trunk) versions of MythTV
+
+Requirements
+================
+  
+  All Platforms
+    - A working MythTV backend 0.21 or 0.22 (trunk)
+    - MythTV recordings directory(s) accessible via the local filesystem  
+      (pre-mounted using nfs, samba, sshfs, etc) 
+
+  Linux
+    - XBMC Babylon 9.04 or later preferably running Ubuntu (32bit). 
+    - ffmpeg installed (sudo apt-get install ffmpeg)
+    - python bindings for MySQL (sudo apt-get install python-mysqldb)
+
+  Mac OSX
+    - XBMC Babylon 9.04 running on Mac OSX 10.5 (Leopard) - Intel only 
+
+  Windows
+    - XBMC Babylon 9.04 running on Windows XP or Vista (32-bit or 64-bit)
+  
+  Sorry, MythBox does not work on the XBox.
+  
+  
+Installation
+================
+  
+  1. Extract mythbox.tar.gz to the following directory:
+     Linux   : ~/.xbmc/scripts 
+     Mac     : ~/Library/Application Support/XBMC/scripts
+     Windows : C:\Documents and Settings\[user]\Application Data\XBMC\scripts
+     Vista   : C:\Users\[user]\AppData\Roaming\XBMC\scripts
+           
+  2. Launch XBMC
+  
+  3. Select Scripts from the main menu in XBMC
+  
+  4. Select MythBox to execute the script
+  
+  5. You'll be sent straight to the Settings screen. 
+     Fill in all the settings and click on the 'Test Settings'
+     button until you get a 'Settings OK' message.
+  
+  6. Exit the Settings screen & enjoy!
+  
+
+Future plans
+=============
+- Complete re-write of UI to use WindowXML (skinners/gfx help needed)
+- Standalone python bindings for MythTV
+- MythTV RSS feeds
+
+  
+TODO
+=============================
+- Get rid of settings for mythbackend hostname and port. These values can be queried from the settings tables
+  as MasterServerIP and MasterServerPort
+- RSS feed of the latest MythTV news using RSS Feed control - http://xbmc.org/wiki/?title=Controls#Available_controls
+- patch xbmc.Dialog.select(...) to support selection by index
+- patch to expose ControlSlider via the python interface
+
+
+History
+==========================
+MythBox was forked from xbmc-mythtv (http://xbmc-mythtv.sourceforge.net) 
+and heavily modified to bring MythTV protocol support up to date, 
+add new features, and make MythTV a pleasure to use in XBMC (obviously, not there yet).
+Many thanks to all the developers whose time and effort went into the original 
+xbmc-mythtv project!
+
+
+Contact Info
+==========================
+Email      : analogue@yahoo.com
+Bugs       : Create a defect @ http://mythbox.googlecode.com
+Suggestions: Create an enhancement request @ http://mythbox.googlecode.com
+
+
+Acknowledgements
+==========================
+Thanks to Team XBMC for an awesome mediacenter!
+Thanks to the MythTV devs!
+Thanks to the folks at www.iconshock.com for the TV icon.
