@@ -4,22 +4,22 @@
 <pydev_project>
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python 2.4</pydev_property>
 <pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
-<path>/mythbox/resources/test</path>
-<path>/mythbox/resources/itest</path>
-<path>/mythbox/resources/lib/decorator</path>
-<path>/mythbox/resources/lib/mockito</path>
-<path>/mythbox/resources/lib/odict</path>
-<path>/mythbox/resources/lib/pyxcoder</path>
-<path>/mythbox/resources/lib/BeautifulSoup</path>
-<path>/mythbox/resources/lib/tvdb_api</path>
-<path>/mythbox/resources/lib/themoviedb</path>
-<path>/mythbox/resources/lib/elementtree</path>
-<path>/mythbox/resources/src</path>
-<path>/mythbox/resources/lib/IMDbPY</path>
-<path>/mythbox/resources/lib/simplejson</path>
-<path>/mythbox/resources/lib/shove</path>
-<path>/mythbox/resources/lib/durus</path>
-<path>/mythbox/resources/lib/mysql-connector-python</path>
+<path>/xbmc-mythtv2/resources/test</path>
+<path>/xbmc-mythtv2/resources/itest</path>
+<path>/xbmc-mythtv2/resources/lib/decorator</path>
+<path>/xbmc-mythtv2/resources/lib/mockito</path>
+<path>/xbmc-mythtv2/resources/lib/odict</path>
+<path>/xbmc-mythtv2/resources/lib/pyxcoder</path>
+<path>/xbmc-mythtv2/resources/lib/BeautifulSoup</path>
+<path>/xbmc-mythtv2/resources/lib/tvdb_api</path>
+<path>/xbmc-mythtv2/resources/lib/themoviedb</path>
+<path>/xbmc-mythtv2/resources/lib/elementtree</path>
+<path>/xbmc-mythtv2/resources/src</path>
+<path>/xbmc-mythtv2/resources/lib/IMDbPY</path>
+<path>/xbmc-mythtv2/resources/lib/simplejson</path>
+<path>/xbmc-mythtv2/resources/lib/shove</path>
+<path>/xbmc-mythtv2/resources/lib/durus</path>
+<path>/xbmc-mythtv2/resources/lib/mysql-connector-python</path>
 </pydev_pathproperty>
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">Default</pydev_property>
 </pydev_project>
