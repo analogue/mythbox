@@ -1,7 +1,55 @@
-??/??/2009 - MythBox SVN ????
+XX/XX/2010 - Mythbox SVN XXXX
 =============================
+ - new     : PageUp/PageDn (Channel Up/Channel Down on the remote) in the Recording Details screen now navigates
+             to the next or previous recording
+ - faster  : UI responsiveness tweaked to run well on an Acer Aspire Revo (1.6Ghz Atom + NVidia ION GPU) 
+ - rewrite : TV Guide screen is back - PgUp/PgDown keys now scroll up/down an entire page
+ - new     : Program cells in the TV guide have an HD overlay indicator when appropriate
+ - update  : Higher resolution thumbnails in Recording Details screen
+ - new     : Non-idle tuners bubble to the top of the tuners list when there are more than two tuners
+ - faster  : After deleting a recording from the Recording Details window the Recordings window would take quite a 
+             while to update for a large number of recordings
+ - new     : Automatic forwarding through a commercial break when you land in the middle of the commercial break
+ - fixed   : Requesting a recording's thumbnail from a slave backend didn't work              
+ - fixed   : UI tweaks when the active skin is confluence (radio button color, active selection in coverflow, etc)
+ - fixed   : Unnecessary refresh of the program listings on the Watch TV screen after stopping live tv.
+ - new     : Added keybindings and remote control buttons section to the README
+ - updated : Replaced autoexpire flag with original air date on the Recording Details screen
+ - fixed   : XBMC crashes occasionally when exiting from MythBox
+ - new     : Added keybindings section to README
+ - fixed   : Clicking on Edit Schedule in the Recording Details screen when the schedule no longer exists how shows an error message
+ - fixed   : Attempting to watch live tv on tuner which is already recording on a slave backend no longer fails silently
+ - update  : IMDbPy updated to 4.5.1  
+ 
+01/17/2010 - MythBox SVN 1797
+=============================
+ - new     : Watch Recordings screen rewritten in WindowXML
+ - wip     : TV Guide screen temporarily disabled -- work in progress
+ - new     : Home screen coverflow now supports a context menu from which you can delete or re-rerecord the recording
+ - new     : Twitter feed of mythbox news events added to the bottom of the home screen
+ - new     : Public twitter feeds can be added to the news feed from Settings -> Advanced -> Twitter
+ - update  : Codebase purged of all legacy windowing/skinning code (non-WindowXML)
+ - fixed   : File cache thread safety issues fixed
+ - new     : All screens with listboxes now restore the last selected listitem
+ - fixed   : Unnecessary induced reject on all but the first myth connection negotiation   
+ - updated : The 'x' in the mythbox logo fixed to match the xbmc logo (tnx Jezz_X)
+ - fixed   : Home screen coverflow images scaled instead of stretched
+ - fixed   : Delete recording thumbnail from cache when recording deleted or marked for re-record
+ - updated : Added Q15 to the FAQ - Connect to MySQL failed: 1156 (08S01): Got packets out of order,10000)
+ - updated : IMDbPy updated to download higher resolution box covers (4.5)
+ - new     : Tuners table on home screen now shows the time of the next scheduled recording if the tuner is currently idle
+ - fixed   : Cover flow on Home screen would not get updated when a recording was deleted from the Recording Details screen
+ - fixed   : Issue 70 - recordings not visible in Recording Schedules screen
+ - fixed   : Issue 79 - extra set of quotes needed in call to os.system(...) on Windows (tschutte)
+ - fixed   : Issue 80 - worker threads reaped before exiting script - prevents xbmc from dumping core
+ - fixed   : Issue 83 - recordings from all recording groups are shown instead of just the ones from Default
+  
+10/21/2009 - MythBox SVN 1556
+=============================
+ - updated: Added solution for Issue 63 (old style mysql password hashing) to the FAQ
+ - new    : Added coverflow of the latest recordings to the home screen
  - new    : Added French translations (tnx w.veilleux)
- - changed: switched livetv impl to use xbmc's myth:// protocol (broken if you're running 0.22 for now)
+ - changed: switched livetv to use xbmc's myth:// protocol for 0.21 backends.
  - new    : Added enable debug log setting to Settings -> Advanced
  - new    : fanart is persisted across MythBox sessions now instead of having to be re-retrieved
  - new    : fanart is randomized if more than one result is returned for a given title
@@ -14,7 +62,6 @@
  - new    : Recording Schedules screen rewritten in WindowXML with fanart 
  - new    : Home screen rewritten in WindowXML (added table listing jobs)
  - new    : Updated the FAQ with the MythTV setup I test with
- - changed: Switched object db for fanart providers from shove+file to shove+durus
  - updated: Support for myth protocol versions 46-50 (latest mythtv trunk) 
  - updated: Added 'green screen' solution to FAQ
  - fixed  : Issue 53 - Handle channels with a value for iconPath even if the icon does not exist
