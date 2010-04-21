@@ -1,0 +1,10 @@
+include README
+include COPYING
+include EXCEPTIONS-CLIENT
+include setup.py
+include metasetupinfo.py
+include setup.cfg
+include unittests.py
+recursive-include tests *.py
+recursive-include examples *.py
+recursive-include mysql *.py

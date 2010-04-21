@@ -1,0 +1,61 @@
+# MythTV Protocol Messages
+# ==========================
+# QUERY_RECORDER cardID
+#    [IS_RECORDING | 
+#     GET_FRAMERATE | 
+#     GET_FRAMES_WRITTEN | 
+#     GET_FILE_POSITION | 
+#     GET_MAX_BITRATE | 
+#     GET_CURRENT_RECORDING | 
+#     GET_KEYFRAME_POS | 
+#     FILL_POSITION_MAP |
+#     GET_RECORDING |     
+#     FRONTEND_READY |
+#     CANCEL_NEXT_RECORDING |
+#     SPAWN_LIVETV |
+#     STOP_LIVETV |
+#     PAUSE |
+#     FINISH_RECORDING |
+#     SET_LIVE_RECORDING |
+#     GET_FREE_INPUTS |
+#     GET_nnINPUT => ['UNKNOWN'|rc] |
+#     SET_INPUT input => ['UNKNOWN' | rc] |
+#     TOGGLE_CHANNEL_FAVORITE |
+#     CHANGE_CHANNEL direction => 'ok' |
+#     SET_SIGNAL_MONITORING_RATE newRate notifyFrontend => oldRate
+#     CHECK_CHANNEL channelName => channelID |
+#     SHOULD_SWITCH_CARD channelID => cardID |
+#     CHECK_CHANNEL_PREFIX prefix => ? ? ? ? |
+#     GET_NEXT_PROGRAM_INFO channelName channelID direction startTime => buncha stuff |
+#     GET_CHANNEL_INFO channelID => channelID sourceid callsign channum channame ]
+#     
+# QUERY_REMOTEENCODER cardID
+#     [GET_STATE => [int TVState] |
+#      GET_FLAGS => [int deciper flags ] |
+#      IS_BUSY [timeout?]  => buncha stuff |
+#      MATCHES_RECORDING buncha stuff => int |
+#      START_RECORDING buncha stuff => int |
+#      RECORD_PENDING secsLeft hasLater bunchaStuff => 'OK' |
+#      CANCEL_NEXT_RECORDING ? => 'OK' |
+#      STOP_RECORDING => 'OK' |
+#      GET_MAX_BITRATE => long |
+#      GET_CURRENT_RECORDING => buncha stuff |
+#      GET_FREE_INPUTS => 'EMPTY_LIST' | inputs |
+#    
+# GET_RECORDER_FROM_NUM
+#
+# GET_RECORDER_NUM
+#
+# BACKEND_MESSAGE
+#
+# QUERY_RECORDINGS
+#
+# QUERY_RECORDING
+#
+# GET_FREE_RECORDER => cardID hostname port
+#
+# GET_FREE_RECORDER_COUNT => int numFreeRecorders
+#
+# GET_FREE_RECORDER_LIST => '0' | cardID1 cardID2 cardIDn 
+#
+# XXX

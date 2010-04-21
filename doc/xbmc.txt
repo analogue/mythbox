@@ -1,0 +1,116 @@
+
+player.cpp - c++ to python binding for xbmc.Player
+
+pyutil.h - 
+	Py_AddPendingCall() 
+	Py_MakePendingCalls()
+
+Application.h - 
+	CApplication : IPlayerCallback, IMsgTargetCallback
+	
+		Attrs:
+		======
+		DWORD m_threadID
+		IPLayer* m_pPlayer
+		int m_frameCount
+		
+		Friends
+		=======
+		CApplicationMessenger
+		
+		Methods
+		=======
+		FrameMove()
+		OnPlayBackStarted()
+        OnPlayBackEnded()
+        OnPlayBackStopped()
+        OnAction()
+        OnKey()
+        OnMessage()
+        SeekTime()
+		IsPlaying()
+		CheckPlayingProgress()
+		StopPlaying()
+		GetPlaySpeed()
+		SetPlaySpeed()
+		SwitchToFullScreen()
+
+		void CApplication::OnPlayBackStarted()
+		{
+			#ifdef HAS_PYTHON
+			  // informs python script currently running playback has started
+			  // (does nothing if python is not loaded)
+			  g_pythonParser.OnPlayBackStarted();
+			#endif
+			CLog::Log(LOGDEBUG, "Playback has started");
+		}				                
+                
+
+
+XBPython.cpp + XBPython.h: IMsgSenderCallback, IPlayerCallback
+
+		Looks like all the glue necessary for XBMC to call python code - treat
+		as "Python Parser" object
+		Redirects python stdout to xbmcout
+		Runs python script on its own XBPyThread
+		PyElem - represents each running script with thread and filename
+		
+		Global Attrs:
+		=============
+		XBPython g_pythonParser;
+		
+		Methods
+		=======
+		OnPlayBackEnded();
+  		OnPlayBackStarted();
+  		OnPlayBackStopped();
+		bool SendMessage(CGUIMessage& message);
+		void RegisterPythonPlayerCallBack(IPlayerCallback* pCallback);
+  		void UnregisterPythonPlayerCallBack(IPlayerCallback* pCallback);
+  		evalFile(char *)
+  		isRunning(int scriptId)
+  		isStopping(int scriptId)
+  		stopScript(int scriptId)
+  		
+		// message all registered callbacks that we started playing
+		void XBPython::OnPlayBackStarted()
+		{
+		  if (m_bInitialized)
+		  {
+		    PlayerCallbackList::iterator it = vecPlayerCallbackList.begin();
+		    while (it != vecPlayerCallbackList.end())
+		    {
+		      ((IPlayerCallback*)(*it))->OnPlayBackStarted();
+		      it++;
+		    }
+		  }
+		}
+  		
+	
+PythonPlayer.cpp -
+
+	CPythonPlayer : IPlayerCallback
+	
+		Calls XBPython::RegisterPythonPlayerCallBack(IPlayerCallback* pCallback);
+		Calls XBPython::UnregisterPythonPlayerCallBack(IPlayerCallback* pCallback);
+	    Destructor unregisters on* callback methods
+	    
+		Methods
+		=======
+        void    SetCallback(PyObject *object);
+        void    OnPlayBackStarted();
+        void    OnPlayBackEnded();
+        void    OnPlayBackStopped();
+		
+myth:// protocol
+
+    livetv   : myth://dbname:dbpassword@hostname:port/channels/channel_number.ts
+    recording: myth://dbname:dbpassword@hostname:port/recordings/filename.mpg
+    
+
+=============================================================================
+
+Is there a command to start the videoplayer windowed?
+At this time i have a bad hack around:
+
+Catch the onPlaybackstarted event and then wait until the player.getTime is 2sec., then send the screen toggle command "xbmc.executehttpapi("Action(18)")"	

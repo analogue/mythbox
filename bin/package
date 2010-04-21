@@ -1,0 +1,35 @@
+#!/bin/bash
+#
+# Packages mythbox for distribution as a tarball.
+#
+find . -name "*.pyc" | xargs rm -fv
+find . -name "*.pyo" | xargs rm -fv
+
+export rev=`svn -r HEAD  info | grep Revision | cut -d ' ' -f 2`
+echo Packaging svn-$rev 
+
+tar czf mythbox_stage.tar.gz \
+    --exclude=*.log \
+    --exclude=*.gz \
+    --exclude=*.*~ \
+    --exclude=".svn" \
+    --exclude=".project" \
+    --exclude=".svnignore" \
+    --exclude=".pydevproject" \
+    --exclude=".settings" \
+    --exclude=ondemandconfig.ini \
+    --exclude=doc \
+    --exclude="trac" \
+    --transform s/^./MythBox/g .
+
+mkdir -p target
+cd target
+tar xf ../mythbox_stage.tar.gz
+rm ../mythbox_stage.tar.gz
+find . -print0 | xargs -r0 touch
+sed --in-place "s/^__svn_revision__.*/__svn_revision__ = ${rev}/g" MythBox/default.py
+
+tar czf ../mythbox-svn-${rev}.tar.gz *
+cd ..
+rm -rf target
+

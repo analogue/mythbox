@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>threadpool.ThreadPool</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="threadpool-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://chrisarndt.de/projects/threadpool/">Threadpool</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="threadpool-module.html">Module&nbsp;threadpool</a> ::
+        Class&nbsp;ThreadPool
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="threadpool.ThreadPool-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class ThreadPool</h1><p class="nomargin-top"><span class="codelink"><a href="threadpool-pysrc.html#ThreadPool">source&nbsp;code</a></span></p>
+<p>A thread pool, distributing work requests and collecting results.</p>
+<p>See the module docstring for more information.</p>
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td align="left" colspan="2" class="table-header">
+    <span class="table-header">Instance Methods</span></td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="threadpool.ThreadPool-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">num_workers</span>,
+        <span class="summary-sig-arg">q_size</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">resq_size</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">poll_timeout</span>=<span class="summary-sig-default">5</span>)</span><br />
+      Set up the thread pool and start num_workers worker threads.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="threadpool-pysrc.html#ThreadPool.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="threadpool.ThreadPool-class.html#createWorkers" class="summary-sig-name">createWorkers</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">num_workers</span>,
+        <span class="summary-sig-arg">poll_timeout</span>=<span class="summary-sig-default">5</span>)</span><br />
+      Add num_workers worker threads to the pool.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="threadpool-pysrc.html#ThreadPool.createWorkers">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="dismissWorkers"></a><span class="summary-sig-name">dismissWorkers</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">num_workers</span>,
+        <span class="summary-sig-arg">do_join</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Tell num_workers worker threads to quit after their current task.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="threadpool-pysrc.html#ThreadPool.dismissWorkers">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="joinAllDismissedWorkers"></a><span class="summary-sig-name">joinAllDismissedWorkers</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Perform Thread.join() on all worker threads that have been dismissed.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="threadpool-pysrc.html#ThreadPool.joinAllDismissedWorkers">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="putRequest"></a><span class="summary-sig-name">putRequest</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">request</span>,
+        <span class="summary-sig-arg">block</span>=<span class="summary-sig-default">True</span>,
+        <span class="summary-sig-arg">timeout</span>=<span class="summary-sig-default">0</span>)</span><br />
+      Put work request into work queue and save its id for later.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="threadpool-pysrc.html#ThreadPool.putRequest">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="poll"></a><span class="summary-sig-name">poll</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">block</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Process any new results in the queue.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="threadpool-pysrc.html#ThreadPool.poll">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="wait"></a><span class="summary-sig-name">wait</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Wait for results, blocking until all have arrived.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="threadpool-pysrc.html#ThreadPool.wait">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td align="left" colspan="2" class="table-header">
+    <span class="table-header">Method Details</span></td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">num_workers</span>,
+        <span class="sig-arg">q_size</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">resq_size</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">poll_timeout</span>=<span class="sig-default">5</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="threadpool-pysrc.html#ThreadPool.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Set up the thread pool and start num_workers worker threads.</p>
+<p><tt class="rst-docutils literal"><span class="pre">num_workers</span></tt> is the number of worker threads to start initially.</p>
+<p>If <tt class="rst-docutils literal"><span class="pre">q_size</span> <span class="pre">&gt;</span> <span class="pre">0</span></tt> the size of the work <em>request queue</em> is limited and
+the thread pool blocks when the queue is full and it tries to put
+more work requests in it (see <tt class="rst-docutils literal"><span class="pre">putRequest</span></tt> method), unless you also
+use a positive <tt class="rst-docutils literal"><span class="pre">timeout</span></tt> value for <tt class="rst-docutils literal"><span class="pre">putRequest</span></tt>.</p>
+<p>If <tt class="rst-docutils literal"><span class="pre">resq_size</span> <span class="pre">&gt;</span> <span class="pre">0</span></tt> the size of the <em>results queue</em> is limited and the
+worker threads will block when the queue is full and they try to put
+new results in it.</p>
+<!-- warning:
+If you set both ``q_size`` and ``resq_size`` to ``!= 0`` there is
+the possibilty of a deadlock, when the results queue is not pulled
+regularly and too many jobs are put in the work requests queue.
+To prevent this, always set ``timeout > 0`` when calling
+``ThreadPool.putRequest()`` and catch ``Queue.Full`` exceptions. -->
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="createWorkers"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">createWorkers</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">num_workers</span>,
+        <span class="sig-arg">poll_timeout</span>=<span class="sig-default">5</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="threadpool-pysrc.html#ThreadPool.createWorkers">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Add num_workers worker threads to the pool.</p>
+<p><tt class="rst-docutils literal"><span class="pre">poll_timout</span></tt> sets the interval in seconds (int or float) for how
+ofte threads should check whether they are dismissed, while waiting for
+requests.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="threadpool-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://chrisarndt.de/projects/threadpool/">Threadpool</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Wed Nov 19 18:43:47 2008
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

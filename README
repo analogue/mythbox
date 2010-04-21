@@ -3,30 +3,33 @@ What is MythBox?
 MythBox is a MythTV frontend for XBMC. 
 
 Features:
-  - watch livetv
-  - watch recordings with commercial skipping
-  - schedule recordings (create + edit)
-  - view program guide 
-  - compatible with 0.21 (stable) and 0.22 (trunk) versions of MythTV
+  - Watch recordings with commercial skipping
+  - Watch Live TV
+  - Create new and edit existing recording schedules
+  - View the schedule of upcoming recordings 
+  - Enhanced program guide
+  - TV show and movie fanart downloaded from tvdb, tmdb, imdb, and google image search
+  - View MythTV stats (tuners, jobs, loadavg, etc)
+  - Compatible with MythTV 0.21 and 0.22
+  - Add your own Twitter feeds
 
 Requirements
 ================
   
   All Platforms
-    - A working MythTV backend 0.21 or 0.22 (trunk)
-    - MythTV recordings directory(s) accessible via the local filesystem  
-      (pre-mounted using nfs, samba, sshfs, etc) 
+    - A working MythTV backend
+    - MythTV recordings directory(s) and/or storage groups accessible via the local 
+      filesystem (the machine running XBMC) pre-mounted using nfs, samba, afp, etc)  
 
   Linux
-    - XBMC Babylon 9.04 or later preferably running Ubuntu (32bit). 
-    - ffmpeg installed (sudo apt-get install ffmpeg)
-    - python bindings for MySQL (sudo apt-get install python-mysqldb)
+    - XBMC Camelot 9.11 running a recent 32-bit or 64-bit distro (Ubuntu, Debian, Fedora, Gentoo, Arch, OpenSuse, etc) 
+    - ffmpeg installed as /usr/bin/ffmpeg (Ubuntu/Debian users: sudo apt-get install ffmpeg)
 
   Mac OSX
-    - XBMC Babylon 9.04 running on Mac OSX 10.5 (Leopard) - Intel only 
+    - XBMC Camelot 9.11 running on Mac OSX 10.5 (Leopard) - Intel only 
 
   Windows
-    - XBMC Babylon 9.04 running on Windows XP or Vista (32-bit or 64-bit)
+    - XBMC Camelot 9.11 running on Windows XP or Vista (32-bit or 64-bit)
   
   Sorry, MythBox does not work on the XBox.
   
@@ -42,31 +45,55 @@ Installation
            
   2. Launch XBMC
   
-  3. Select Scripts from the main menu in XBMC
+  3. From the main XBMC screen, select Scripts
   
-  4. Select MythBox to execute the script
+  4. From the Scripts screen, select MythBox 
   
-  5. You'll be sent straight to the Settings screen. 
-     Fill in all the settings and click on the 'Test Settings'
-     button until you get a 'Settings OK' message.
+  5. You'll be sent straight to the Settings screen (with an error message). 
+     Fill in all the settings and click on the 'Test Settings' button until 
+     you get a 'Settings OK' message.
   
   6. Exit the Settings screen & enjoy!
-  
 
-Future plans
-=============
-- Complete re-write of UI to use WindowXML (skinners/gfx help needed)
-- Standalone python bindings for MythTV
-- MythTV RSS feeds
 
-  
+Keybindings and MCE Remote actions that may not be that obvious
+============================================================================
+Context         Keyboard       MCE Remote     Action
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Navigation      Backspace        <-           Go back to previous screen 
+                M              Win Button     Go back to main menu
+                
+----------------------------------------------------------------------------                   
+Playing Video   X              Stop           Stop video
+                Space          Pause          Pause video
+                PrtScrn        Record         Take screenshot
+                I              Info           Show program info                               
+                O              Guide          Show audio/video/fps stats
+                Z              OK             Toggle zoom modes
+                Tab            N/A            Toggle video mode
+                \              N/A            Toggle fullscreen  
+----------------------------------------------------------------------------
+Home Window    Context Menu    TV Guide Btn   Activate popup menu to delete
+Coverflow                                     recording
+----------------------------------------------------------------------------
+Recording      PgUp           Channel Up      Show previous recording
+Details Window PgDown         Channel Dn      Show next recording
+----------------------------------------------------------------------------
+TV Guide       PgUp           Channel Up      Scroll TV guide up one page
+               PgDown         Channel Dn      Scroll TV guide down one page
+               R              FastRewind      Scroll TV guide left one page
+               F              FastForward     Scroll TV guide right one page                                                    
+               ?              End             Scroll TV guide forward 1 day
+               ?              Begin           Scroll TV guide back 1 day  
+----------------------------------------------------------------------------
+
+
 TODO
 =============================
+- Confluence skin (any skinners out there?)
 - Get rid of settings for mythbackend hostname and port. These values can be queried from the settings tables
   as MasterServerIP and MasterServerPort
-- RSS feed of the latest MythTV news using RSS Feed control - http://xbmc.org/wiki/?title=Controls#Available_controls
 - patch xbmc.Dialog.select(...) to support selection by index
-- patch to expose ControlSlider via the python interface
 
 
 History
@@ -83,6 +110,7 @@ Contact Info
 Email      : analogue@yahoo.com
 Bugs       : Create a defect @ http://mythbox.googlecode.com
 Suggestions: Create an enhancement request @ http://mythbox.googlecode.com
+Discuss    : http://xbmc.org/forum/showthread.php?t=43115
 
 
 Acknowledgements
