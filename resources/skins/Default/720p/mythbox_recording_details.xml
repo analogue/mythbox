@@ -166,6 +166,7 @@
             <texture background="false">-</texture>
             <info>Window.Property(thumbnail)</info>
             <aspectratio>scale</aspectratio>
+            <fadetime>400</fadetime>
         </control>
         
         <control type="videowindow" id="4011">

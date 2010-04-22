@@ -90,6 +90,7 @@
                                 <bordertexture border="0">button-nofocus.png</bordertexture>
                                 <bordersize>5</bordersize>
                                 <texture background="false">$INFO[ListItem.Property(thumb)]</texture>
+                                <fadetime>400</fadetime>
                                 <visible>true</visible>
                             </control>
                             <control type="image">
@@ -101,6 +102,7 @@
                                 <bordertexture border="5" flipy="true" diffuse="diffuse_mirror2.png">button-nofocus.png</bordertexture>
                                 <bordersize>5</bordersize>
                                 <texture background="false" flipy="true" diffuse="diffuse_mirror2.png">$INFO[ListItem.Property(thumb)]</texture>
+                                <fadetime>400</fadetime>
                                 <visible>true</visible>
                             </control>
                             
@@ -131,6 +133,7 @@
                                 <texture background="false" border="5">$INFO[ListItem.Property(thumb)]</texture>
                                 <animation reversible="false" effect="zoom" start="2,0,150,220" end="-8,-10,170,240" time="200">focus</animation>
                                 <animation reversible="false" effect="zoom" end="2,0,150,220" start="-8,-10,170,240" time="200">unfocus</animation>
+                                <fadetime>400</fadetime>
                                 <visible>true</visible>
                             </control>
                             <control type="image">
@@ -144,6 +147,7 @@
                                 <texture background="false" flipy="true" diffuse="diffuse_mirror2.png">$INFO[ListItem.Property(thumb)]</texture>
                                 <animation reversible="false" effect="zoom" start="2,0,150,220" end="-8,-10,170,240" time="200">focus</animation>
                                 <animation reversible="false" effect="zoom" end="2,0,150,220" start="-8,-10,170,240" time="200">unfocus</animation>
+                                <fadetime>400</fadetime>
                                 <visible>true</visible>
                             </control>
     <!--                        <control type="image">-->
