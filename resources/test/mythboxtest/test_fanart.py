@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -25,7 +25,8 @@ import unittest
 from mockito import Mock, when, verify, any, verifyZeroInteractions
 from mythbox.fanart import chain, ImdbFanartProvider, TvdbFanartProvider, \
     TheMovieDbFanartProvider, GoogleImageSearchProvider, CachingFanartProvider, \
-    SuperFastFanartProvider, OneStrikeAndYoureOutFanartProvider 
+    SuperFastFanartProvider, OneStrikeAndYoureOutFanartProvider ,\
+    SpamSkippingFanartProvider
 from mythbox.mythtv.domain import TVProgram, Program
 
 log = logging.getLogger('mythtv.unittest')
@@ -561,7 +562,30 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
             self.fail('Expected exception to be thrown when delegate is null')
         except Exception, e:
             log.debug('SUCCESS: got exception on null delegate')
+
+# =============================================================================
+class SpamSkippingFanartProviderTest(unittest.TestCase):
         
+    def setUp(self):
+        self.spam = TVProgram({'title': 'Paid Programming', 'category_type':'series'}, translator=Mock())
+        self.notSpam = TVProgram({'title': 'I am not spam', 'category_type':'series'}, translator=Mock())
+        self.next = Mock()
+        self.provider = SpamSkippingFanartProvider(nextProvider=self.next)  
+            
+    def test_getPosters_When_spam_Then_returns_no_posters(self):
+        self.assertEquals(0, len(self.provider.getPosters(self.spam)))
+        
+    def test_getPosters_When_not_spam_Then_forwards_to_next(self):
+        when(self.next).getPosters(any()).thenReturn(['blah.png'])
+        self.assertEquals('blah.png', self.provider.getPosters(self.notSpam)[0])
+     
+    def test_hasPosters_When_spam_Then_true(self):
+        self.assertTrue(self.provider.hasPosters(self.spam))
+
+    def test_hasPosters_When_not_spam_Then_forwards_to_next(self):
+        when(self.next).hasPosters(any()).thenReturn(False)
+        self.assertFalse(self.provider.hasPosters(self.notSpam))
+           
 # =============================================================================    
 if __name__ == '__main__':
     import logging.config

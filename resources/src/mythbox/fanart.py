@@ -145,6 +145,11 @@ class SpamSkippingFanartProvider(BaseFanartProvider):
         if self.nextProvider:
             return self.nextProvider.getPosters(program)
                 
+    def hasPosters(self, program):
+        if (program.title() in SpamSkippingFanartProvider.SPAM):
+            return True
+        return self.nextProvider.hasPosters(program)
+        
 # =============================================================================
 class SuperFastFanartProvider(BaseFanartProvider):
     """
@@ -174,6 +179,9 @@ class SuperFastFanartProvider(BaseFanartProvider):
                 # TODO: Figure out if this is detrimental to performance -- sync on update
                 self.imagePathsByKey.sync()
         return posters
+        
+    def hasPosters(self, program):
+        return self.createKey('getPosters', program) in self.imagePathsByKey
         
     def createKey(self, methodName, program):
         key = "%s-%s" % (methodName, safe_str(program.title()))
@@ -400,6 +408,9 @@ class FanArt(object):
     def getPosters(self, program):
         return self.provider.getPosters(program)
 
+    def hasPosters(self, program):
+        return self.provider.hasPosters(program)
+    
     def clear(self):
         self.provider.clear() 
 

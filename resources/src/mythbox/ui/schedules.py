@@ -126,6 +126,7 @@ class SchedulesWindow(BaseWindow):
                 self.setListItemProperty(listItem, 'fullTitle', s.fullTitle())
                 self.setListItemProperty(listItem, 'priority', '%s' % s.getPriority())
                 self.setListItemProperty(listItem, 'channelName', s.getChannelName())
+                self.setListItemProperty(listItem, 'poster', 'loading.gif')
                 #self.setListItemProperty(listItem, 'description', s.formattedDescription())
                 #self.setListItemProperty(listItem, 'airDate', s.formattedAirDateTime())
                 #self.setListItemProperty(listItem, 'originalAirDate', s.formattedOriginalAirDate())
@@ -153,9 +154,8 @@ class SchedulesWindow(BaseWindow):
     @catchall
     @coalesce
     def renderPosters(self):
-        for i, schedule in enumerate(self.listItemsBySchedule.keys()):
+        for schedule in self.listItemsBySchedule.keys():
             if self.closed: return
-            #log.debug('Poster %d/%d for %s' % (i+1, len(self.listItemsBySchedule), schedule.title()))
             posterPath = self.fanArt.getRandomPoster(schedule)
             listItem = self.listItemsBySchedule[schedule]
             if posterPath:

@@ -388,6 +388,13 @@ class LiveTvWindow(BaseWindow):
                     self.setListItemProperty(listItem, 'title', channel.currentProgram.title())
                     self.setListItemProperty(listItem, 'description', channel.currentProgram.formattedDescription())
                     self.setListItemProperty(listItem, 'category', channel.currentProgram.category())
+                    
+                    if self.fanArt.hasPosters(channel.currentProgram):
+                        channel.needsPoster = False
+                        self.lookupPoster(listItem, channel)
+                    else:
+                        channel.needsPoster = True
+                        self.setListItemProperty(listItem, 'poster', 'loading.gif')
                 else:
                     self.setListItemProperty(listItem, 'title', 'No Data')
                     
@@ -399,19 +406,23 @@ class LiveTvWindow(BaseWindow):
         self.channelsListBox.addItems(listItems)
         self.channelsListBox.selectItem(self.lastSelected)
     
+    def lookupPoster(self, listItem, channel):
+        posterPath = self.fanArt.getRandomPoster(channel.currentProgram)
+        if posterPath:
+            self.setListItemProperty(listItem, 'poster', posterPath)
+        elif channel.getIconPath():
+            self.setListItemProperty(listItem, 'poster', self.mythChannelIconCache.get(channel))
+        else:
+            self.setListItemProperty(listItem, 'poster', 'mythbox.png')
+        
     @run_async
     @catchall
     @coalesce
     def renderPosters(self):
-        for i, channel in enumerate(self.listItemsByChannel.keys()):
+        for channel in self.listItemsByChannel.keys():
             if self.closed: 
                 return
-            if channel.currentProgram:
+            if channel.currentProgram and channel.needsPoster:
                 listItem = self.listItemsByChannel[channel]
-                #log.debug('Poster %d/%d for %s' % (i+1, len(channels), channel.currentProgram.title()))
-                posterPath = self.fanArt.getRandomPoster(channel.currentProgram)
-                if posterPath:
-                    self.setListItemProperty(listItem, 'poster', posterPath)
-                elif channel.getIconPath():
-                    self.setListItemProperty(listItem, 'poster', self.mythChannelIconCache.get(channel))
+                self.lookupPoster(listItem, channel)
             

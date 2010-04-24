@@ -123,6 +123,7 @@ class UpcomingRecordingsWindow(BaseWindow):
                 self.setListItemProperty(listItem, 'channelName', program.getChannelName())
                 self.setListItemProperty(listItem, 'channelNumber', program.getChannelNumber())
                 self.setListItemProperty(listItem, 'callSign', program.getCallSign())
+                self.setListItemProperty(listItem, 'poster', 'loading.gif')
                 
                 tuner = self.tunersById[program.getTunerId()]
                 self.setListItemProperty(listItem, 'tuner', '%s %s' % (tuner.tunerType, tuner.tunerId))
@@ -153,14 +154,15 @@ class UpcomingRecordingsWindow(BaseWindow):
     @catchall
     @coalesce
     def renderPosters(self):
-        for i, (program, listItem) in enumerate(self.listItemsByProgram.items()):
+        for (program, listItem) in self.listItemsByProgram.items():
             if self.closed: return
-            #log.debug('Poster %d/%d for %s' % (i+1, len(self.listItemsByProgram), program.title()))
             posterPath = self.fanArt.getRandomPoster(program)
             if posterPath:
                 self.setListItemProperty(listItem, 'poster', posterPath)
             elif self.channelsById[program.getChannelId()].getIconPath():
                 self.setListItemProperty(listItem, 'poster', self.mythChannelIconCache.get(self.channelsById[program.getChannelId()]))
+            else:
+                self.setListItemProperty(listItem, 'poster', 'mythbox.png')
 
     @staticmethod
     def formattedAirDate(previous, current):

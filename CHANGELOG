@@ -20,6 +20,7 @@ XX/XX/2010 - Mythbox SVN XXXX
  - fixed   : Clicking on Edit Schedule in the Recording Details screen when the schedule no longer exists how shows an error message
  - fixed   : Attempting to watch live tv on tuner which is already recording on a slave backend no longer fails silently
  - update  : IMDbPy updated to 4.5.1  
+ - update  : Faster fanart lookup on all screens + wait indicators
  
 01/17/2010 - MythBox SVN 1797
 =============================

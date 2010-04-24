@@ -166,7 +166,12 @@ class RecordingsWindow(BaseWindow):
                 self.setListItemProperty(listItem, 'title', p.fullTitle())
                 self.setListItemProperty(listItem, 'date', p.formattedAirDate())
                 self.setListItemProperty(listItem, 'time', p.formattedStartTime())
-                self.setListItemProperty(listItem, 'poster', 'loading.gif')
+                if self.fanArt.hasPosters(p):
+                    p.needsPoster = False
+                    self.lookupPoster(listItem, p)
+                else:
+                    p.needsPoster = True
+                    self.setListItemProperty(listItem, 'poster', 'loading.gif')
 
         @timed
         def othertime():
@@ -177,6 +182,13 @@ class RecordingsWindow(BaseWindow):
         constructorTime()
         propertyTime()
         othertime()
+
+    def lookupPoster(self, listItem, p):
+        posterPath = self.fanArt.getRandomPoster(p)
+        if posterPath:
+            self.setListItemProperty(listItem, 'poster', posterPath)
+        else:
+            self.setListItemProperty(listItem, 'poster', self.mythThumbnailCache.get(p))
 
     def renderProgramDeleted(self, deletedProgram, selectionIndex):
         # straight render() takes too long..shortcut for removal
@@ -193,15 +205,10 @@ class RecordingsWindow(BaseWindow):
     @catchall
     @coalesce
     def renderPosters(self):
-        for i, (listItem, program) in enumerate(self.programsByListItem.items()[:]):
+        for (listItem, program) in self.programsByListItem.items()[:]:
             if self.closed: 
                 return
-            #log.debug('Poster %d/%d for %s' % (i+1, len(self.programsByListItem), program.title()))
-            posterPath = self.fanArt.getRandomPoster(program)
-            if posterPath:
-                self.setListItemProperty(listItem, 'poster', posterPath)
-            else:
-                self.setListItemProperty(listItem, 'poster', self.mythThumbnailCache.get(program))
+            self.lookupPoster(listItem, program)
 
     def goRecordingDetails(self):
         self.lastSelected = self.programsListBox.getSelectedPosition()
