@@ -71,8 +71,8 @@
                 <posx>75</posx>
                 <width>1140</width>
                 <height>120</height>
-                <colordiffuse>66FFFFFF</colordiffuse>
-                <texture border="5">black-back.png</texture>
+                <!-- <colordiffuse>66FFFFFF</colordiffuse>  -->
+                <texture border="5" flipy="true" diffuse="mb-diffuse-mirror.png">black-back.png</texture>
             </control>
             
             <control type="label">
@@ -87,18 +87,24 @@
             </control>
             <control type="label">
                 <posy>30</posy>
-                <width>1100</width>
+                <posx>275</posx>
+                <width>925</width>
                 <info>Window.Property(description)</info>
+                <wrapmultiline>true</wrapmultiline>
             </control>
             <control type="label">
-                <posy>60</posy>
+                <posy>30</posy>
                 <info>Window.Property(airtime)</info>
             </control>
             <control type="label">
-                <posy>90</posy>
+                <posy>60</posy>
                 <info>Window.Property(duration)</info>
+                <visible>false</visible>
             </control>
-            
+            <control type="label">
+                <posy>60</posy>
+                <info>Window.Property(originalAirDate)</info>
+            </control>
         </control>
                 
     </control>

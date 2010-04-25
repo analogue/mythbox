@@ -294,6 +294,7 @@ class TvGuideWindow(ui.BaseWindow):
             self.setWindowProperty('subtitle', program.subtitle())
             self.setWindowProperty('airtime', program.formattedAirTime())
             self.setWindowProperty('duration', program.formattedDuration())
+            self.setWindowProperty('originalAirDate', program.formattedOriginalAirDate())
         else:
             self.setWindowProperty('title', u'')
             self.setWindowProperty('category', u'')
@@ -301,6 +302,7 @@ class TvGuideWindow(ui.BaseWindow):
             self.setWindowProperty('subtitle', u'')
             self.setWindowProperty('airtime', u'')
             self.setWindowProperty('duration', u'')
+            self.setWindowProperty('originalAirDate', u'')
             
     @catchall_ui
     @lirc_hack

@@ -423,15 +423,16 @@ class Program(object):
         
     def formattedOriginalAirDate(self):
         """
-        @return: original air date or the localized string for no airdate if no airdate exists
+        @return: original air date or the localized string for no airdate
         @rtype: string
         """
-        value = self.translator.get(45)
         try:
             if self.originalAirDate():
-                value = self.originalAirDate()
+                value = u'%s' % self.originalAirDate()
+            else:
+                value = u''
         except:
-            pass
+            value = self.translator.get(45)
         return value
 
     def formattedDescription(self):
