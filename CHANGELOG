@@ -3,7 +3,9 @@ XX/XX/2010 - Mythbox SVN XXXX
  - new     : PageUp/PageDn (Channel Up/Channel Down on the remote) in the Recording Details screen now navigates
              to the next or previous recording
  - faster  : UI responsiveness tweaked to run well on an Acer Aspire Revo (1.6Ghz Atom + NVidia ION GPU) 
- - rewrite : TV Guide screen is back - PgUp/PgDown keys now scroll up/down an entire page
+ - rewrite : TV Guide screen is back 
+             PgUp/PgDown keys now scroll up/down an entire page
+             Clicking on a currently playing program starts Live TV
  - new     : Program cells in the TV guide have an HD overlay indicator when appropriate
  - update  : Higher resolution thumbnails in Recording Details screen
  - new     : Non-idle tuners bubble to the top of the tuners list when there are more than two tuners

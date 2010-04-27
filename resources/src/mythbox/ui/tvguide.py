@@ -29,10 +29,11 @@ import xbmcgui
 import mythbox.ui.toolkit as ui
 
 from datetime import datetime, timedelta
+from mythbox.mythtv.conn import inject_conn
 from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.domain import ScheduleFromProgram, Channel
 from mythbox.ui.schedules import ScheduleDialog
-from mythbox.ui.toolkit import Action, Align
+from mythbox.ui.toolkit import Action, Align, window_busy
 from mythbox.util import catchall_ui, timed, lirc_hack, catchall, ui_locked2
 
 log = logging.getLogger('mythtv.ui')
@@ -303,6 +304,17 @@ class TvGuideWindow(ui.BaseWindow):
             self.setWindowProperty('airtime', u'')
             self.setWindowProperty('duration', u'')
             self.setWindowProperty('originalAirDate', u'')
+
+    @window_busy
+    @inject_conn
+    def watchLiveTv(self, program):
+        channel = filter(lambda c: c.getChannelId() == program.getChannelId(), self.channels).pop()
+        brain = self.conn().protocol.getLiveTvBrain(self.settings)
+        try:
+            brain.watchLiveTV(channel)
+        except Exception, e:
+            log.exception(e)
+            xbmcgui.Dialog().ok('Error', '', str(e))
             
     @catchall_ui
     @lirc_hack
@@ -320,26 +332,24 @@ class TvGuideWindow(ui.BaseWindow):
                 break
         
         if program:
-#            if TODO: selected program is playing now:
-#                log.debug( "launching livetv" )
-#                rc = livetv.showWindow(None, program)
-#            else:  # bring up schedule
-            log.debug( "converting program to schedule" )
-            schedule = ScheduleFromProgram(program, self.translator)
-            log.debug( "launching schedule details window" )
-
-            createScheduleDialog = ScheduleDialog(
-                "mythbox_schedule_dialog.xml",
-                os.getcwd(),
-                forceFallback=True,
-                schedule=schedule,
-                translator=self.translator,
-                platform=self.platform,
-                settings=self.settings)
-            createScheduleDialog.doModal()
-            
-            if createScheduleDialog.shouldRefresh:
-                log.debug('schedule saved')
+            if program.isShowing():
+                log.debug('launching livetv')
+                self.watchLiveTv(program)
+            else:
+                log.debug( "launching schedule details window" )
+                schedule = ScheduleFromProgram(program, self.translator)
+                createScheduleDialog = ScheduleDialog(
+                    "mythbox_schedule_dialog.xml",
+                    os.getcwd(),
+                    forceFallback=True,
+                    schedule=schedule,
+                    translator=self.translator,
+                    platform=self.platform,
+                    settings=self.settings)
+                createScheduleDialog.doModal()
+                
+                if createScheduleDialog.shouldRefresh:
+                    log.debug('schedule saved')
         return actionConsumed
 
     def _addGridCell(self, program, cell, relX, relY, width, height):
