@@ -656,6 +656,7 @@
         <scroll>true</scroll>
         <align>left</align>
         <aligny>center</aligny>
+        <wrapmultiline>false</wrapmultiline>
         <label>$INFO[Window.Property(newsfeed)]</label>
     </control>
 
@@ -694,6 +695,3 @@
         
   </controls>
 </window>
-
-
-
