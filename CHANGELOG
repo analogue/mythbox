@@ -1,5 +1,6 @@
 XX/XX/2010 - Mythbox SVN XXXX
 =============================
+ - update  : Protocol version 56 support addec - MythTV 0.23
  - new     : PageUp/PageDn (Channel Up/Channel Down on the remote) in the Recording Details screen now navigates
              to the next or previous recording
  - faster  : UI responsiveness tweaked to run well on an Acer Aspire Revo (1.6Ghz Atom + NVidia ION GPU) 

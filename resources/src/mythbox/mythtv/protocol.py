@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -142,9 +142,16 @@ class Protocol50(Protocol49):
     
     def version(self):
         return 50
+
+# =============================================================================    
+class Protocol56(Protocol50):
+    
+    def version(self):
+        return 56
     
 # =============================================================================
 
+# Current rev in mythversion.h
 protocols = {
     40: Protocol40(),
     41: Protocol41(),
@@ -156,5 +163,6 @@ protocols = {
     47: Protocol47(),
     48: Protocol48(),
     49: Protocol49(),
-    50: Protocol50()
+    50: Protocol50(),  # 0.22
+    56: Protocol56()   # 0.23
 }    
