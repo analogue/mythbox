@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -65,7 +65,8 @@ class MythSettings(object):
         'recordings_last_selected',
         'recordings_sort_by',
         'recordings_sort_ascending',
-        'recordings_recording_group']
+        'recordings_recording_group',
+        'tv_guide_last_selected']
 
 
     def __init__(self, platform, translator, filename='settings.xml', bus=None):
@@ -222,6 +223,7 @@ class MythSettings(object):
   <recordings_sort_by>Date</recordings_sort_by>
   <recordings_sort_ascending>False</recordings_sort_ascending>
   <recordings_recording_group>Default</recordings_recording_group>
+  <tv_guide_last_selected>0</tv_guide_last_selected>
 </mythtv>"""
         
         dom = minidom.parseString(defaultsXml)

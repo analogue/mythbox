@@ -186,7 +186,7 @@ class TvGuideWindow(ui.BaseWindow):
             self.channels.sort(key=Channel.getSortableChannelNumber)
             self.pager = Pager(len(self.channels), self.channelsPerPage)
             
-            self.setChannel(0)
+            self.setChannel(int(self.settings.get('tv_guide_last_selected')))
             self.setTime(datetime.now() - timedelta(minutes=30))
             self.initialized = True
 
@@ -219,6 +219,7 @@ class TvGuideWindow(ui.BaseWindow):
         
         if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
             self.closed = True
+            self.settings.put('tv_guide_last_selected', '%s' % self.startChan)
             self.close()
         elif action == Action.DOWN       : actionConsumed = self._checkPageDown(self.prevFocus)
         elif action == Action.UP         : actionConsumed = self._checkPageUp(self.prevFocus)
