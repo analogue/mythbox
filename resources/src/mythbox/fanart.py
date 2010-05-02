@@ -30,7 +30,7 @@ import urllib2
 import urllib
 
 from decorator import decorator
-from mythbox.util import synchronized, safe_str
+from mythbox.util import synchronized, safe_str, run_async
 from tvdb_api import Tvdb
 
 log = logging.getLogger('mythtv.fanart')
@@ -212,11 +212,30 @@ class CachingFanartProvider(BaseFanartProvider):
         posters = []
         if self.nextProvider:
             httpPosters = self.nextProvider.getPosters(program)
-            for p in httpPosters:
-                poster = self.tryToCache(p)
-                if poster:
-                    posters.append(poster)
+            posters = self.cachePosters(httpPosters)
+            #for p in httpPosters:
+            #    poster = self.tryToCache(p)
+            #    if poster:
+            #        posters.append(poster)
         return posters
+
+    def cachePosters(self, httpPosters):
+        results = []
+        
+        @run_async
+        def async_wrapper(poster):
+            poster = self.tryToCache(poster)
+            if poster:
+                results.append(poster)
+        
+        workers = []
+        for p in httpPosters:    
+            workers.append(async_wrapper(p))
+            
+        for w in workers:
+            w.join()
+    
+        return results
     
     def tryToCache(self, poster):
         if poster and poster[:4] == 'http':
