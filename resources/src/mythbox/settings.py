@@ -19,6 +19,7 @@
 import logging
 import os
 import socket
+import string
 
 from mythbox.bus import Event, EventBus
 from mythbox.mythtv.db import MythDatabase
@@ -37,40 +38,11 @@ class MythSettings(object):
     """
     Settings reside in $HOME/.xbmc/userdata/script_data/MythBox/settings.xml
     """
-    
-    settingsTags = [
-        'mythtv_host',
-        'mythtv_port',
-        'mythtv_minlivebufsize',
-        'mythtv_tunewait',
-        'mysql_host',
-        'mysql_port',
-        'mysql_database',
-        'mysql_user',
-        'mysql_password',
-        'paths_recordedprefix',
-        'paths_ffmpeg',
-        'recorded_view_by',
-        'upcoming_view_by',
-        'confirm_on_delete',
-        'fanart_tvdb',
-        'fanart_tmdb',
-        'fanart_imdb',
-        'fanart_google',
-        'feeds_twitter',
-        'lirc_hack',
-        'logging_enabled',
-        'schedules_last_selected',
-        'livetv_last_selected',
-        'recordings_last_selected',
-        'recordings_sort_by',
-        'recordings_sort_ascending',
-        'recordings_recording_group',
-        'tv_guide_last_selected']
-
 
     def __init__(self, platform, translator, filename='settings.xml', bus=None):
         self.platform = platform
+        self.initDefaults()
+        self.d = self.defaults.copy()
         self.translator = translator
         self.settingsFilename = filename
         self.settingsPath = os.path.join(self.platform.getScriptDataDir(), self.settingsFilename)
@@ -78,43 +50,42 @@ class MythSettings(object):
         self.listeners = []
         try:
             self.load()
-            self.loadMergedDefaults()
         except SettingsException:
-            self.dom = self.loadDefaults()
+            pass
         self.bus = bus # defer event publishing until after initial load
 
     def getFFMpegPath(self): return self.get('paths_ffmpeg')
-    def setFFMpegPath(self, ffmpegPath): self.put('paths_ffmpeg', ffmpegPath, True)
+    def setFFMpegPath(self, ffmpegPath): self.put('paths_ffmpeg', ffmpegPath)
  
-    def setLiveTvBuffer(self, sizeKB): self.put('mythtv_minlivebufsize', '%s' % sizeKB, True)
+    def setLiveTvBuffer(self, sizeKB): self.put('mythtv_minlivebufsize', '%s' % sizeKB)
     def getLiveTvBuffer(self): return int(self.get('mythtv_minlivebufsize'))
 
-    def setLiveTvTimeout(self, seconds): self.put('mythtv_tunewait', '%s' % seconds, True)
+    def setLiveTvTimeout(self, seconds): self.put('mythtv_tunewait', '%s' % seconds)
     def getLiveTvTimeout(self): int(self.get('mythtv_tunewait'))
      
     def isConfirmOnDelete(self): return self.getBoolean('confirm_on_delete')
-    def setConfirmOnDelete(self, b): self.put('confirm_on_delete', ['False', 'True'][b], True)
+    def setConfirmOnDelete(self, b): self.put('confirm_on_delete', ['False', 'True'][b])
             
     def getMySqlHost(self): return self.get('mysql_host')
-    def setMySqlHost(self, host): self.put('mysql_host', host, True)
+    def setMySqlHost(self, host): self.put('mysql_host', host)
 
-    def setMySqlPort(self, port): self.put('mysql_port', '%s' % port, True)
+    def setMySqlPort(self, port): self.put('mysql_port', '%s' % port)
     def getMySqlPort(self): return int(self.get('mysql_port'))
 
     def getMySqlDatabase(self): return self.get('mysql_database')
-    def setMySqlDatabase(self, db): self.put('mysql_database', db, True)
+    def setMySqlDatabase(self, db): self.put('mysql_database', db)
     
     def getMySqlUser(self): return self.get('mysql_user')
-    def setMySqlUser(self, user): self.put('mysql_user', user, True)
+    def setMySqlUser(self, user): self.put('mysql_user', user)
 
     def getMySqlPassword(self): return self.get('mysql_password')
-    def setMySqlPassword(self, password): self.put('mysql_password', password, True)
+    def setMySqlPassword(self, password): self.put('mysql_password', password)
 
     def getMythTvHost(self): return self.get('mythtv_host')
-    def setMythTvHost(self, host): self.put('mythtv_host', host, True)
+    def setMythTvHost(self, host): self.put('mythtv_host', host)
     
     def getMythTvPort(self): return int(self.get('mythtv_port'))
-    def setMythTvPort(self, port): self.put('mythtv_port', '%s' % port, True)
+    def setMythTvPort(self, port): self.put('mythtv_port', '%s' % port)
 
     def addListener(self, listener):
         self.listeners.append(listener)
@@ -138,109 +109,62 @@ class MythSettings(object):
         """
         return self.get('paths_recordedprefix').split(os.pathsep)
         
-    def get(self, tag, dom=None):
-        value = ""
-        if not dom:
-            dom = self.dom
-        tmpNode = dom.getElementsByTagName(tag)[0]
-        for n in tmpNode.childNodes:
-            value += n.nodeValue
-            
-        if slog.isEnabledFor(logging.DEBUG):
-            pvalue = value
-            if 'password' in tag:
-                pvalue = '*secret*'
-            slog.debug("<= settings['%s'] = %s" % (tag, pvalue))
-
-        return value
-
-    def put(self, tag, value, shouldCreate=0, dom=None):
-        tmpNode = None
-        if not dom:
-            dom = self.dom
-        try:
-            tmpNode = dom.getElementsByTagName(tag)[0]
-        except IndexError:
-            if shouldCreate != 1:
-                raise
-            
-        if not tmpNode:
-            tmpNode = dom.getElementsByTagName("mythtv")[0]
-            n = dom.createElement(tag)
-            tmpNode.appendChild(n)
-            tmpNode = n
-            
-        if not tmpNode.firstChild:
-            n = dom.createTextNode(value)
-            tmpNode.appendChild(n)
+    def get(self, tag):
+        if self.d.has_key(tag):
+            return self.d[tag]
         else:
-            old = tmpNode.firstChild.nodeValue
-            tmpNode.firstChild.nodeValue = value
-            
-            # Only notify of changes if the new value is different
-            if old != value:
-                # TODO: Listener support deprecated in favor of event bus
-                for listener in self.listeners:
-                    listener.settingChanged(tag, old, value)
-                if self.bus:
-                    self.bus.publish({'id': Event.SETTING_CHANGED, 'tag': tag, 'old': old, 'new': value})
-            
-        if slog.isEnabledFor(logging.DEBUG):
-            pvalue = value
-            if 'password' in tag:
-                pvalue = '*secret*'
-            slog.debug("=> settings['%s'] = %s" % (tag, pvalue))
+            return None
 
-    def loadDefaults(self):
-        slog.debug('loading defaults...')
-        defaultsXml = """
-<mythtv>
-  <mythtv_host>localhost</mythtv_host>
-  <mythtv_port>6543</mythtv_port>
-  <mythtv_minlivebufsize>4096</mythtv_minlivebufsize>
-  <mythtv_tunewait>60</mythtv_tunewait>
-  <mysql_host>localhost</mysql_host>
-  <mysql_port>3306</mysql_port>
-  <mysql_database>mythconverg</mysql_database>
-  <mysql_user>mythtv</mysql_user>
-  <mysql_password>change_me</mysql_password>
-  <mysql_encoding_override>latin1</mysql_encoding_override>
-  <paths_recordedprefix>""" + self.platform.getDefaultRecordingsDir() + """</paths_recordedprefix>
-  <paths_ffmpeg>""" + self.platform.getFFMpegPath() + """</paths_ffmpeg>
-  <recorded_view_by>2</recorded_view_by>
-  <upcoming_view_by>2</upcoming_view_by>
-  <confirm_on_delete>True</confirm_on_delete>
-  <fanart_tvdb>True</fanart_tvdb>
-  <fanart_tmdb>True</fanart_tmdb>
-  <fanart_imdb>True</fanart_imdb>
-  <fanart_google>True</fanart_google>
-  <feeds_twitter>mythboxfeed</feeds_twitter>
-  <lirc_hack>False</lirc_hack>
-  <logging_enabled>True</logging_enabled>
-  <schedules_last_selected>0</schedules_last_selected>
-  <livetv_last_selected>0</livetv_last_selected>
-  <recordings_last_selected>0</recordings_last_selected>
-  <recordings_sort_by>Date</recordings_sort_by>
-  <recordings_sort_ascending>False</recordings_sort_ascending>
-  <recordings_recording_group>Default</recordings_recording_group>
-  <tv_guide_last_selected>0</tv_guide_last_selected>
-</mythtv>"""
+    def put(self, tag, value):
+        old = None
+        if self.d.has_key(tag):
+            old = self.d[tag]
+        self.d[tag] = value
         
-        dom = minidom.parseString(defaultsXml)
-        return dom
+        # Only notify of changes if the new value is different
+        if old is not None and old != value:
+            # TODO: Listener support deprecated in favor of event bus
+            for listener in self.listeners:
+                listener.settingChanged(tag, old, value)
+            if self.bus:
+                self.bus.publish({'id': Event.SETTING_CHANGED, 'tag': tag, 'old': old, 'new': value})
+                
+        #if slog.isEnabledFor(logging.DEBUG):
+        #    pvalue = value
+        #    if 'password' in tag:
+        #        pvalue = '*secret*'
+        #    slog.debug("=> settings['%s'] = %s" % (tag, pvalue))
 
-    def loadMergedDefaults(self):
-        filePath = self.settingsPath
-        dom = self.loadDefaults()
-        if os.path.exists(filePath):
-            for tag in self.settingsTags:
-                try:
-                    value = self.get(tag)
-                except IndexError:
-                    value = ""
-                    pass
-                if len(value) == 0:
-                    self.put(tag, self.get(tag, dom), shouldCreate=1)
+    def initDefaults(self):
+        self.defaults = {
+            'mythtv_host'             : 'localhost',
+            'mythtv_port'             : '6543',
+            'mysql_host'              : 'localhost',
+            'mysql_port'              : '3306',
+            'mysql_database'          : 'mythconverg',
+            'mysql_user'              : 'mythtv',
+            'mysql_password'          : 'change_me',
+            'mysql_encoding_override' : 'latin1',
+            'paths_recordedprefix'    : self.platform.getDefaultRecordingsDir(),
+            'paths_ffmpeg'            : self.platform.getFFMpegPath(),
+            'recorded_view_by'        : '2', 
+            'upcoming_view_by'        : '2',
+            'confirm_on_delete'       : 'True',
+            'fanart_tvdb'             : 'True',
+            'fanart_tmdb'             : 'True',
+            'fanart_imdb'             : 'True',
+            'fanart_google'           : 'True',
+            'feeds_twitter'           : 'mythboxfeed',
+            'lirc_hack'               : 'False',
+            'logging_enabled'         : 'True',
+            'schedules_last_selected' : '0',
+            'livetv_last_selected'    : '0',
+            'recordings_last_selected': '0',
+            'recordings_sort_by'      : 'Date',
+            'recordings_sort_ascending':'False',
+            'recordings_recording_group':'Default',
+            'tv_guide_last_selected'  : '0'
+        }
 
     def load(self):
         """
@@ -251,24 +175,35 @@ class MythSettings(object):
         if not os.path.exists(filePath):
             raise SettingsException('File %s does not exist.' % filePath)
         else:
-            # use existing configuration
-            self.dom = minidom.parse(filePath)
-
+            # use saved configuration
+            dom = minidom.parse(filePath)
+            mythtv = dom.getElementsByTagName('mythtv')[0]
+            assert(mythtv is not None)
+            for tag in self.defaults.keys():
+                results = mythtv.getElementsByTagName(tag)
+                if len(results) > 0:
+                    #print results[0].toxml()
+                    self.d[tag] = string.strip(results[0].firstChild.nodeValue)
+                else:
+                    slog.error('no tag found for %s ' % tag)
+                    
     def save(self):
-        filePath = self.settingsPath
         settingsDir = self.platform.getScriptDataDir()
         
         if not os.path.exists(settingsDir):
             slog.debug('Creating mythbox settings dir %s' % self.platform.getScriptDataDir())
             os.makedirs(settingsDir)
-            
-        if self.dom is not None:
-            slog.debug('Saving settings to %s' % filePath)
-            fh = file(filePath, 'w')
-            fh.write(self.dom.toxml())
-            fh.close()
-        else:
-            slog.error('Could not save settings. XML dom not set')
+
+        dom = minidom.parseString('<mythtv></mythtv>')
+        for key in self.d.keys():
+            e = dom.createElement(key)
+            n = dom.createTextNode(string.strip(self.d[key]))
+            e.appendChild(n)
+            dom.childNodes[0].appendChild(e)
+        slog.debug('Saving settings to %s' % self.settingsPath)
+        fh = file(self.settingsPath, 'w')
+        fh.write(dom.toxml())
+        fh.close()
 
     def getBoolean(self, tag):
         return self.get(tag) in ('True', 'true', '1')
@@ -277,10 +212,8 @@ class MythSettings(object):
         """
         @raise SettingsException: on invalid settings
         """
-        for tag in self.settingsTags:
-            try:
-                self.get(tag)
-            except IndexError:
+        for tag in self.defaults.keys():
+            if self.get(tag) is None:
                 raise SettingsException('%s %s' % (self.translator.get(34), tag))
         
         MythSettings.verifyMythTVHost(self.getMythTvHost())
@@ -289,7 +222,6 @@ class MythSettings(object):
         MythSettings.verifyMySQLPort(self.get('mysql_port'))
         MythSettings.verifyMySQLDatabase(self.get('mysql_database'))
         MythSettings.verifyString(self.get('mysql_user'), 'Enter MySQL user. Hint: mythtv is the MythTV default')
-        #MythSettings.verifyLiveTVBufferSize(self.get('mythtv_minlivebufsize'))
         MythSettings.verifyRecordingDirs(self.get('paths_recordedprefix'))
         MythSettings.verifyFFMpeg(self.get('paths_ffmpeg'), self.platform)
         MythSettings.verifyBoolean(self.get('confirm_on_delete'), 'Confirm on delete must be True or False')
@@ -316,11 +248,8 @@ class MythSettings(object):
     
     def __repr__(self):
         sb = ''
-        for tag in self.settingsTags:
-            try:
-                sb += '%s = %s\n' % (tag, self.get(tag)) 
-            except IndexError:
-                sb += '%s = <EMPTY>\n' % tag
+        for tag in self.defaults.keys():
+            sb += '%s = %s\n' % (tag, [self.get(tag), '<EMPTY>'][self.get(tag) is None]) 
         return sb
             
     @staticmethod

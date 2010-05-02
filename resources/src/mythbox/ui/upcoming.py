@@ -65,7 +65,7 @@ class UpcomingRecordingsWindow(BaseWindow):
         if source == self.programsListBox: 
             xbmcgui.Dialog().ok('Info', 'Program selected')
         elif source == self.refreshButton:
-            self.render()
+            self.refresh()
              
     def onFocus(self, controlId):
         pass
