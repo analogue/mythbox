@@ -263,9 +263,9 @@ class MythSettings(object):
             raise SettingsException("ffmpeg executable '%s' is not a file" % filepath)
         
         ptype = type(p)
-        if ptype in (WindowsPlatform, MacPlatform):
+        if ptype in (WindowsPlatform,):
             pass
-        elif ptype == UnixPlatform:
+        elif ptype in (UnixPlatform, MacPlatform):
             if not os.access(filepath, os.X_OK):
                 raise SettingsException("ffmpeg executable '%s' is not chmod +x" % filepath)
         else:
