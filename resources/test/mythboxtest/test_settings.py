@@ -329,7 +329,7 @@ class MythSettingsTest(unittest.TestCase):
         s.addListener(listener)
         
         # Test
-        s.put('foo', 'bar', True)
+        s.put('foo', 'bar')
 
         # Verify
         verifyZeroInteractions(listener)
