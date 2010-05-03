@@ -136,7 +136,11 @@ def inject_db(func, *args, **kwargs):
             # store db in thread local storage
             threadlocals[tlsKey].db = dbPool.checkout()
             ilog.debug('--> injected db %s into %s' % (threadlocals[tlsKey].db, threadlocals[tlsKey]))
-            
+        
+        # TODO: Recover from broken pipe (for example, after suspend/resume cycle)
+        #       File "mysql-connector-python/mysql/connector/connection.py", line 71, in send
+        #           raise errors.OperationalError('%s' % e)
+        #           OperationalError: (32, 'Broken pipe')
         result = func(*args, **kwargs) 
     finally:
         if not alreadyAcquired:
