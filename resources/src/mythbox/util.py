@@ -585,7 +585,7 @@ class OnDemandConfig(object):
     to a config file so future invocations can run unattended.  
     """ 
     
-    def __init__(self, filename='ondemandconfig.ini', section='default'):
+    def __init__(self, filename='ondemandconfig.ini', section='blah'):
         self.filename = filename
         self.section = section
         self.config = ConfigParser.ConfigParser()

@@ -228,6 +228,20 @@ class TvdbFanartProviderTest(unittest.TestCase):
         for posterUrl in posterUrls:
             self.assertEquals("http", posterUrl[0:4])
 
+
+    def test_getPosters_When_title_has_funny_chars_Then_dont_fail_miserably(self):
+        # Setup
+        program = TVProgram({'title': u'Königreich der Himmel', 'category_type':'series'}, translator=Mock())
+        provider = TvdbFanartProvider(self.platform, nextProvider=None)
+        
+        # Test
+        posters = provider.getPosters(program)
+        
+        # Verify
+        log.debug('Posters = %s' % posters)
+        for p in posters:
+            self.assertEquals('http', p[0:4])
+
 # =============================================================================
 class TheMovieDbFanartProviderTest(unittest.TestCase):
         
@@ -303,6 +317,19 @@ class GoogleImageSearchProviderTest(unittest.TestCase):
     def test_getPosters_works(self):
         # Setup
         program = TVProgram({'title': 'Top Chef', 'category_type':'series'}, translator=Mock())
+        provider = GoogleImageSearchProvider(nextProvider=None)
+        
+        # Test
+        posters = provider.getPosters(program)
+        
+        # Verify
+        log.debug('Posters = %s' % posters)
+        for p in posters:
+            self.assertEquals('http', p[0:4])
+
+    def test_getPosters_When_title_has_funny_chars_Then_dont_fail_miserably(self):
+        # Setup
+        program = TVProgram({'title': u'Königreich der Himmel', 'category_type':'series'}, translator=Mock())
         provider = GoogleImageSearchProvider(nextProvider=None)
         
         # Test

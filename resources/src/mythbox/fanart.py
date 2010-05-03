@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
 #  Copyright (C) 2010 analogue@yahoo.com
@@ -300,7 +301,7 @@ class TvdbFanartProvider(BaseFanartProvider):
                 # Example: tvdb['scrubs']['_banners']['poster']['680x1000']['35308']['_bannerpath']
                 #posterUrl = self.tvdb[program.title()]['_banners']['poster'].itervalues().next().itervalues().next()['_bannerpath']
                 
-                # TODO: Fix this --  TVDB errored out on "Kšnigreich der Himmel" with error "'ascii' codec can't decode byte 0xc3 in position 1: ordinal not in range(128)"
+                # TODO: Fix this --  TVDB errored out on "Kï¿½nigreich der Himmel" with error "'ascii' codec can't decode byte 0xc3 in position 1: ordinal not in range(128)"
                 postersByDimension = self._queryTvDb(program.title()) 
                 for dimension in postersByDimension.keys():
                     log.debug('key=%s' % dimension)
@@ -384,7 +385,7 @@ class GoogleImageSearchProvider(BaseFanartProvider):
         posters = []
         try:
             # TODO: Verify this is no longer an issue -- 
-            #       GOOGLE fanart search:  Kšnigreich der Himmel 'ascii' codec can't decode byte 0xc3 in position 1: ordinal not in range(128)
+            #       GOOGLE fanart search:  Kï¿½nigreich der Himmel 'ascii' codec can't decode byte 0xc3 in position 1: ordinal not in range(128)
             searchUrl = '%s&q=%s' % (self.URL, urllib.quote("'%s'"% unicode(program.title()).encode('utf-8')))
             req = urllib2.Request(searchUrl)
             req.add_header('Referer', self.REFERRER)
