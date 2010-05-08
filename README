@@ -93,8 +93,6 @@ TODO
 - Confluence skin (any skinners out there?)
 - Get rid of settings for mythbackend hostname and port. These values can be queried from the settings tables
   as MasterServerIP and MasterServerPort
-- patch xbmc.Dialog.select(...) to support selection by index
-
 
 History
 ==========================
