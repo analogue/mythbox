@@ -20,10 +20,12 @@
 import datetime
 import logging
 import odict
+import os
 import xbmcgui
 
 from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.conn import inject_conn
+from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import BaseWindow, window_busy, Action
 from mythbox.util import catchall_ui, lirc_hack, timed, run_async, catchall, ui_locked, coalesce, ui_locked2
 
@@ -48,6 +50,7 @@ class UpcomingRecordingsWindow(BaseWindow):
         self.channelsById = None                 # {int:Channel}
         self.tunersById = None                   # {int:Tuner}
         self.listItemsByProgram = odict.odict()  # {Program:ListItem}
+        self.programsByListItem = odict.odict()  # {ListItem:Program}
         self.closed = False
         
     @catchall_ui
@@ -62,13 +65,37 @@ class UpcomingRecordingsWindow(BaseWindow):
     @lirc_hack    
     def onClick(self, controlId):
         source = self.getControl(controlId)
-        if source == self.programsListBox: 
-            xbmcgui.Dialog().ok('Info', 'Program selected')
+        if source == self.programsListBox:
+            self.onEditSchedule()
         elif source == self.refreshButton:
             self.refresh()
              
     def onFocus(self, controlId):
         pass
+
+    @inject_db
+    def onEditSchedule(self):
+        log.debug('Launching edit recording schedule dialog...')
+        listItem = self.programsListBox.getSelectedItem()
+        program = self.programsByListItem[listItem]
+        scheduleId = program.getScheduleId()
+        if not scheduleId:
+            xbmcgui.Dialog().ok('Error', 'Program has no associated recording schedule')
+            return
+        
+        schedules = self.db().getRecordingSchedules(scheduleId=scheduleId)
+        if not schedules:
+            xbmcgui.Dialog().ok('Error', 'Recording schedule %d not found' % scheduleId)
+            return
+        
+        ScheduleDialog(
+            'mythbox_schedule_dialog.xml', 
+            os.getcwd(), 
+            forceFallback=True,
+            schedule=schedules[0], 
+            translator=self.translator,
+            platform=self.platform,
+            settings=self.settings).doModal()
             
     @catchall_ui
     @lirc_hack            
@@ -104,6 +131,7 @@ class UpcomingRecordingsWindow(BaseWindow):
     @ui_locked
     def render(self):
         self.listItemsByProgram.clear()
+        self.programsByListItem.clear()
         listItems = []
         
         log.debug('Rendering %d upcoming recordings...' % len(self.programs))
@@ -130,6 +158,7 @@ class UpcomingRecordingsWindow(BaseWindow):
                 
                 listItems.append(listItem)
                 self.listItemsByProgram[program] = listItem
+                self.programsByListItem[listItem] = program
                 previous = program
 
         buildListItems()
