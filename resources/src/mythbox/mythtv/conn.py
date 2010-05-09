@@ -34,9 +34,9 @@ from mythbox.mythtv.enums import TVState, Upcoming
 from mythbox.mythtv.protocol import ProtocolException
 from mythbox.util import timed, threadlocals
 
-log     = logging.getLogger('mythtv.core')     # mythtv core logger
-wirelog = logging.getLogger('mythtv.wire')     # wire level protocol logger
-ilog    = logging.getLogger('mythtv.inject')   # dependency injection via decorators
+log     = logging.getLogger('mythbox.core')     # mythtv core logger
+wirelog = logging.getLogger('mythbox.wire')     # wire level protocol logger
+ilog    = logging.getLogger('mythbox.inject')   # dependency injection via decorators
 
 # =============================================================================
 def createChainId():

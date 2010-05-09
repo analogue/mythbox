@@ -30,7 +30,7 @@ from mythbox.platform import Platform
 from mythbox.settings import MythSettings
 from mythbox.util import OnDemandConfig
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class MythDatabaseTest(unittest.TestCase):

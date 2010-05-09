@@ -20,7 +20,7 @@ import logging
 import unittest
 import twitter
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class TwitterTest(unittest.TestCase):

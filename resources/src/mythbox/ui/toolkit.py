@@ -21,8 +21,9 @@ import xbmc
 import xbmcgui
 
 from decorator import decorator
+from mythbox.util import timed
 
-log = logging.getLogger('mythtv.ui')
+log = logging.getLogger('mythbox.ui')
 elog = logging.getLogger('mythbox.event')
 
 # =============================================================================
@@ -200,6 +201,7 @@ class WindowMixin(object):
         else:
             log.warn('Setting listitem with a None: listItem=%s name=%s value=%s' % (listItem, name, value))
 
+    @timed
     def setWindowProperty(self, name, value):
         """
         Convenience method to make sure None values don't get set on a Window

@@ -21,7 +21,7 @@ import unittest
 
 from mythbox.platform import getPlatform
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class PlatformTest(unittest.TestCase):

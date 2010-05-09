@@ -26,7 +26,7 @@ from mythbox.mythtv.db import MythDatabase
 from mythbox.platform import WindowsPlatform, MacPlatform, UnixPlatform
 from xml.dom import minidom
 
-slog = logging.getLogger('mythtv.settings')
+slog = logging.getLogger('mythbox.settings')
 
 # =============================================================================
 class SettingsException(Exception):
@@ -156,7 +156,7 @@ class MythSettings(object):
             'fanart_google'           : 'True',
             'feeds_twitter'           : 'mythboxfeed',
             'lirc_hack'               : 'False',
-            'logging_enabled'         : 'True',
+            'logging_enabled'         : 'False',
             'schedules_last_selected' : '0',
             'livetv_last_selected'    : '0',
             'recordings_last_selected': '0',

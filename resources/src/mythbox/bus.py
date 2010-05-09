@@ -19,7 +19,7 @@
 
 import logging
 
-log = logging.getLogger('mythtv.event')
+log = logging.getLogger('mythbox.event')
 
 # =============================================================================
 class Event(object):

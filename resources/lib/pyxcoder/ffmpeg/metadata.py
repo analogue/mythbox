@@ -1,7 +1,7 @@
 import logging
 import re
 
-log = logging.getLogger('mythtv.core')
+log = logging.getLogger('mythbox.core')
 
 class Metadata:
 	duration = None # the duration of a movie or audio file in seconds.

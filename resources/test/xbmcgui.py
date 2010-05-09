@@ -20,7 +20,7 @@ import logging
 
 from mockito import *
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 ICON_OVERLAY_HAS_TRAINER = 4
 ICON_OVERLAY_HD = 8

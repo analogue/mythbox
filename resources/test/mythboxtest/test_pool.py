@@ -23,7 +23,7 @@ import unittest
 from mythbox.pool import PoolableFactory, Pool
 from mythbox.util import run_async
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class Widget(object):

@@ -34,7 +34,7 @@ from decorator import decorator
 from mythbox.util import synchronized, safe_str, run_async
 from tvdb_api import Tvdb
 
-log = logging.getLogger('mythtv.fanart')
+log = logging.getLogger('mythbox.fanart')
 
 # =============================================================================
 @decorator

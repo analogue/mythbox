@@ -36,7 +36,7 @@ from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import Action, Align, window_busy
 from mythbox.util import catchall_ui, timed, lirc_hack, catchall, ui_locked2
 
-log = logging.getLogger('mythtv.ui')
+log = logging.getLogger('mythbox.ui')
 elog = logging.getLogger('mythbox.event')
 
 # =============================================================================

@@ -36,8 +36,8 @@ from mythbox import pool
 from mythbox.pool import PoolableFactory
 from mythbox.util import timed, threadlocals
         
-log = logging.getLogger('mythtv.core')
-ilog = logging.getLogger('mythtv.inject')
+log = logging.getLogger('mythbox.core')
+ilog = logging.getLogger('mythbox.inject')
 
 # =============================================================================
 def mythtime2dbtime(mythtime):

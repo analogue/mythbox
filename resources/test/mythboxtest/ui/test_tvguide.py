@@ -21,7 +21,7 @@ import unittest
 
 from mythbox.ui.tvguide import Pager
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class PagerTest(unittest.TestCase):

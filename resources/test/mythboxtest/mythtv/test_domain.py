@@ -32,7 +32,7 @@ from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, FlagMask, 
     JobType, TVState
 from mythbox.platform import Platform
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class ModuleFunctionsTest(unittest.TestCase):

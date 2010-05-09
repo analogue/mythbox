@@ -27,7 +27,7 @@ from mythbox.mythtv.conn import inject_conn
 from mythbox.ui.toolkit import BaseWindow, window_busy, Action
 from mythbox.util import catchall_ui, lirc_hack, timed, run_async, catchall, ui_locked, coalesce, ui_locked2
 
-log = logging.getLogger('mythtv.ui')
+log = logging.getLogger('mythbox.ui')
 
 ONE_DAY = datetime.timedelta(days=1)
 ONE_WEEK = datetime.timedelta(weeks=1)

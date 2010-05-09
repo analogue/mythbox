@@ -22,7 +22,7 @@ import unittest
 from mockito import Mock, when
 from mythbox.updater import UpdateChecker
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class UpdateCheckerTest(unittest.TestCase):

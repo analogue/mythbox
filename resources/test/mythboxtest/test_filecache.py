@@ -28,7 +28,7 @@ import string
 from mythbox.filecache import FileResolver, FileSystemResolver, FileCache
 from mythbox.util import run_async
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 class FileResolverTest(unittest.TestCase):
     

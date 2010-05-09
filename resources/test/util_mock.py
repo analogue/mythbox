@@ -28,7 +28,7 @@ import xbmc
 
 from xml.dom import minidom, Node
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # ============================================================================
 class Translator(object):

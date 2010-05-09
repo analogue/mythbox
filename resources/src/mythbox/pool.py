@@ -22,7 +22,7 @@ import threading
 
 from mythbox.util import sync_instance
 
-log = logging.getLogger('mythtv.inject')
+log = logging.getLogger('mythbox.inject')
 
 # Globally available resources pools
 #    key   = name of pool

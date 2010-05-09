@@ -31,7 +31,7 @@ from mythbox.ui.toolkit import *
 from mythbox.util import catchall, catchall_ui, timed, run_async, lirc_hack, ui_locked, coalesce, ui_locked2
 from odict import odict
 
-log = logging.getLogger('mythtv.ui')
+log = logging.getLogger('mythbox.ui')
     
 # =============================================================================
 class BaseLiveTvBrain(object):

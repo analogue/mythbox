@@ -35,7 +35,7 @@ from mythbox.ui.toolkit import *
 from mythbox.util import catchall_ui, catchall, lirc_hack, run_async, coalesce 
 from mythbox.util import hasPendingWorkers, waitForWorkersToDie, formatSize
 
-log = logging.getLogger('mythtv.ui')
+log = logging.getLogger('mythbox.ui')
 
 ID_COVERFLOW_GROUP    = 499
 ID_COVERFLOW_WRAPLIST = 500

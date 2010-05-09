@@ -29,7 +29,7 @@ from mythbox.fanart import chain, ImdbFanartProvider, TvdbFanartProvider, \
     SpamSkippingFanartProvider
 from mythbox.mythtv.domain import TVProgram, Program
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class ChainDecoratorTest(unittest.TestCase):

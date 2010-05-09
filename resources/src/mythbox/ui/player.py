@@ -26,8 +26,8 @@ import xbmcgui
 from mythbox.ui.toolkit import showPopup
 from mythbox.util import formatSeconds, BoundedEvictingQueue
 
-log = logging.getLogger('mythtv.ui')
-mlog = logging.getLogger('mythtv.method')
+log = logging.getLogger('mythbox.ui')
+mlog = logging.getLogger('mythbox.method')
 
 mythPlayer = None
 

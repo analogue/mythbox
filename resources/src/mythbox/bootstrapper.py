@@ -66,7 +66,7 @@ class BootStrapper(object):
             loggerIniFile = os.path.join(os.getcwd(), 'mythbox_log.ini')
         xbmc.log('MythBox: loggerIniFile = %s' % loggerIniFile)
         logging.config.fileConfig(loggerIniFile)
-        self.log = logging.getLogger('mythtv.core')
+        self.log = logging.getLogger('mythbox.core')
         self.log.info('Mythbox Logger Initialized')
     
     def bootstrapPlatform(self):
@@ -167,7 +167,7 @@ class LogSettingsListener(object):
                 level = logging.WARN
                 
             for name in self.loggerNames:
-                logger = logging.getLogger('mythtv.%s' %  name)
+                logger = logging.getLogger('mythbox.%s' %  name)
                 logger.setLevel(level)
             
             # TODO: Adjust xbmc loglevel 

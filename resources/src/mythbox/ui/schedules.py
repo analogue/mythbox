@@ -29,7 +29,7 @@ from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, EpisodeFil
 from mythbox.ui.toolkit import BaseDialog, BaseWindow, window_busy, Action 
 from mythbox.util import catchall_ui, lirc_hack, catchall, run_async, ui_locked, slice, coalesce, ui_locked2
 
-log = logging.getLogger('mythtv.ui')
+log = logging.getLogger('mythbox.ui')
 
 ID_SCHEDULES_LISTBOX = 600
 ID_REFRESH_BUTTON = 250

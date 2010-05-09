@@ -32,7 +32,7 @@ from mythbox.settings import MythSettings
 from mythbox.util import OnDemandConfig
 from mythbox.platform import getPlatform
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class MythChannelIconResolverTest(unittest.TestCase):

@@ -32,8 +32,8 @@ from decorator import decorator
 from odict import odict
 from threading import RLock
 
-log = logging.getLogger('mythtv.core')
-plog = logging.getLogger('mythtv.perf')
+log = logging.getLogger('mythbox.core')
+plog = logging.getLogger('mythbox.perf')
 elog = logging.getLogger('mythbox.event')
 
 #

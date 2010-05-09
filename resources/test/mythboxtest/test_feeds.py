@@ -22,7 +22,7 @@ import unittest
 from mockito import Mock, when, any
 from mythbox.feeds import TwitterFeed, FeedHose
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class FeedHostTest(unittest.TestCase):

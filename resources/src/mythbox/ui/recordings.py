@@ -27,7 +27,7 @@ from mythbox.ui.toolkit import window_busy, BaseWindow, Action
 from mythbox.util import catchall_ui, run_async, lirc_hack, timed, catchall, ui_locked, ui_locked2, coalesce
 from mythbox.util import CyclingBidiIterator
 
-log = logging.getLogger('mythtv.ui')
+log = logging.getLogger('mythbox.ui')
 
 ID_PROGRAMS_LISTBOX = 600
 ID_REFRESH_BUTTON = 250

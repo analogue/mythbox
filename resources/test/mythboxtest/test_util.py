@@ -26,7 +26,7 @@ from mockito import Mock, when, any
 from mythbox.util import *
 from mythbox.platform import getPlatform, Platform, WindowsPlatform, MacPlatform, UnixPlatform
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class RunAsyncDecoratorTest(unittest.TestCase):

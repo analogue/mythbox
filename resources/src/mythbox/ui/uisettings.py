@@ -23,7 +23,7 @@ from mythbox.settings import MythSettings, SettingsException
 from mythbox.ui.toolkit import window_busy, BaseWindow, enterNumeric, enterText, Action
 from mythbox.util import catchall, lirc_hack
 
-log = logging.getLogger('mythtv.ui')
+log = logging.getLogger('mythbox.ui')
 
 # =============================================================================
 class SettingValidator(object):

@@ -26,7 +26,7 @@ from mythbox.platform import getPlatform, UnixPlatform
 from mythbox.settings import MythSettings, SettingsException
 from mythbox.util import OnDemandConfig
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class MythSettingsTest(unittest.TestCase):

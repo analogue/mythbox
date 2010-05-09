@@ -24,7 +24,7 @@ import xbmc
 from mockito import Mock, when, verify, any, verifyZeroInteractions
 from mythbox.ui.toolkit import enterText
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class ModuleTest(unittest.TestCase):

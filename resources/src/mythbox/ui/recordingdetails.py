@@ -29,7 +29,7 @@ from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import *
 from mythbox.util import catchall, catchall_ui, run_async, lirc_hack, coalesce, CyclingBidiIterator
 
-log = logging.getLogger('mythtv.ui')
+log = logging.getLogger('mythbox.ui')
 
 # =============================================================================
 class RecordingDetailsWindow(BaseWindow):

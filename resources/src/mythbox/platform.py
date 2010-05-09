@@ -22,7 +22,7 @@ import socket
 import sys
 import xbmc
 
-log = logging.getLogger('mythtv.core')
+log = logging.getLogger('mythbox.core')
 
 __instance = None
 

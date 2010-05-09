@@ -18,7 +18,7 @@
 #
 import logging
 
-ilog = logging.getLogger('mythtv.inject')   # dependency injection via decorators
+ilog = logging.getLogger('mythbox.inject')   # dependency injection via decorators
 
 
 ## =============================================================================

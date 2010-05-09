@@ -20,7 +20,7 @@ import logging
 import unittest
 import feedparser
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class FeedParserTest(unittest.TestCase):

@@ -23,7 +23,7 @@ import unittest
 from mockito import Mock, when
 from mythbox.ui.upcoming import UpcomingRecordingsWindow
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class UpcomingRecordingsWindowTest(unittest.TestCase):

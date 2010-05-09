@@ -34,7 +34,7 @@ from mythbox.util import timed, formatSeconds, formatSize
 from odict import odict
 
 
-log = logging.getLogger('mythtv.core')
+log = logging.getLogger('mythbox.core')
 
 # =============================================================================
 def dbTime2MythTime(dt):

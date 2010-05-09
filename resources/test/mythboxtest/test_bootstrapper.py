@@ -21,7 +21,7 @@ import unittest
 
 from mythbox.bootstrapper import LogSettingsListener
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class LogSettingsListenerTest(unittest.TestCase):
@@ -31,11 +31,11 @@ class LogSettingsListenerTest(unittest.TestCase):
         
         listener.settingChanged('logging_enabled', 'True', 'False')
         log.debug('I should not see this log message')
-        self.assertEquals(logging.WARN, logging.getLogger('mythtv.perf').getEffectiveLevel())
+        self.assertEquals(logging.WARN, logging.getLogger('mythbox.perf').getEffectiveLevel())
         
         listener.settingChanged('logging_enabled', 'False', 'True')
         log.debug('I should see this log message')
-        self.assertEquals(logging.DEBUG, logging.getLogger('mythtv.perf').getEffectiveLevel())
+        self.assertEquals(logging.DEBUG, logging.getLogger('mythbox.perf').getEffectiveLevel())
         
 # =============================================================================
 if __name__ == "__main__":

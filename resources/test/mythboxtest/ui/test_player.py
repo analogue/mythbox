@@ -27,7 +27,7 @@ from mythbox.mythtv.domain import CommercialBreak
 from mythbox.ui.player import EdlCommercialSkipper, PositionTracker, TrackerSample, \
     TrackingCommercialSkipper, SLEEP_MILLIS
 
-log = logging.getLogger('mythtv.unittest')
+log = logging.getLogger('mythbox.unittest')
 
 # =============================================================================
 class PositionTrackerTest(unittest.TestCase):
