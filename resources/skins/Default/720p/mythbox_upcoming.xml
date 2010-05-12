@@ -63,9 +63,9 @@
             <description>table header</description>
             <posx>315</posx>
             <posy>140</posy>
-            <width>900</width>
+            <width>940</width>
             <height>40</height>
-            <texture flipx="true">mb-header.png</texture>
+            <texture flipy="false" flipx="true">mb-header.png</texture>
         </control>
         
         <control type="label">
@@ -123,7 +123,7 @@
         <control type="label">
             <posx>1145</posx>
             <posy>140</posy>
-            <width>100</width>
+            <width>140</width>
             <height>35</height>
             <font>font12</font>
             <textcolor>ffddddff</textcolor>
@@ -139,7 +139,7 @@
         <control type="list" id="600">
             <posx>315</posx>
             <posy>180</posy>
-            <width>900</width>
+            <width>940</width>
             <height>460</height>
             <onleft>2000</onleft>
             <onright>6000</onright>
@@ -257,7 +257,7 @@
                 <control type="label">
                     <posx>830</posx>
                     <posy>0</posy>
-                    <width>100</width>
+                    <width>140</width>
                     <height>30</height>
                     <font>font10</font>
                     <textcolor>FFFFFFFF</textcolor>
@@ -273,7 +273,7 @@
                 <control type="image">
                     <posx>0</posx>
                     <posy>0</posy>
-                    <width>900</width>
+                    <width>940</width>
                     <height>60</height>
                     <texture border="3">input-focus.png</texture>
                     <visible>Control.HasFocus(600)</visible>
@@ -281,7 +281,7 @@
                 <control type="image">
                     <posx>0</posx>
                     <posy>0</posy>
-                    <width>900</width>
+                    <width>940</width>
                     <height>60</height>
                     <texture border="3">input-nofocus.png</texture>
                     <visible>!Control.HasFocus(600)</visible>
@@ -377,7 +377,7 @@
                 <control type="label">
                     <posx>830</posx>
                     <posy>0</posy>
-                    <width>100</width>
+                    <width>140</width>
                     <height>31</height>
                     <font>font10</font>
                     <textcolor>FFFFFFFF</textcolor>
