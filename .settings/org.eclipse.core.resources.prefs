@@ -1,4 +1,4 @@
-#Mon May 03 01:02:47 CDT 2010
+#Sat May 15 22:14:30 CDT 2010
 eclipse.preferences.version=1
 encoding//resources/lib/BeautifulSoup/BeautifulSoupTests.py=UTF-8
 encoding//resources/lib/mysql-connector-python/examples/config.py=utf-8
@@ -21,8 +21,5 @@ encoding//resources/lib/odict/odict.py=UTF-8
 encoding//resources/lib/themoviedb/test_tmdb.py=utf-8
 encoding//resources/lib/themoviedb/tmdb.py=utf-8
 encoding//resources/lib/threadpool/src/threadpool.py=UTF-8
-encoding//resources/lib/tvdb_api/cache.py=utf-8
-encoding//resources/lib/tvdb_api/tvdb_api.py=utf-8
-encoding//resources/lib/tvdb_api/tvdb_ui.py=UTF-8
 encoding//resources/src/mythbox/fanart.py=utf-8
 encoding//resources/test/mythboxtest/test_fanart.py=utf-8
