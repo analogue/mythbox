@@ -10,7 +10,7 @@
 urllib2 caching handler
 Modified from http://code.activestate.com/recipes/491261/
 """
-from __future__ import with_statement
+#from __future__ import with_statement
 
 __author__ = "dbr/Ben"
 __version__ = "1.5"
@@ -21,7 +21,12 @@ import errno
 import httplib
 import urllib2
 import StringIO
-from hashlib import md5
+
+try:
+    from hashlib import md5
+except ImportError:
+    import md5
+
 from threading import RLock
 
 cache_lock = RLock()
@@ -39,7 +44,7 @@ def locked_function(origfunc):
 def calculate_cache_path(cache_location, url):
     """Checks if [cache_location]/[hash_of_url].headers and .body exist
     """
-    thumb = md5(url).hexdigest()
+    thumb = md5.new(url).hexdigest()
     header = os.path.join(cache_location, thumb + ".headers")
     body = os.path.join(cache_location, thumb + ".body")
     return header, body
