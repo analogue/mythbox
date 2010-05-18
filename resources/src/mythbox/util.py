@@ -470,6 +470,24 @@ def coalesce(func):
     return wrapper
 
 # =============================================================================
+def max_threads(t=1):
+    '''Limits the number of threads that can execute the decorated method concurrently'''
+    def wrap(f):
+        def wrapped_f(*args, **kwargs):
+            if not hasattr(f, '_semaphore'):
+                import threading
+                f._semaphore = threading.BoundedSemaphore(t)
+            f._semaphore.acquire()
+            try:
+                r = f(*args, **kwargs)
+            finally:
+                f._semaphore.release()
+            return r
+        
+        return wrapped_f
+    return wrap
+    
+# =============================================================================
 def timed_cache(seconds=0, minutes=0, hours=0, days=0):
     """
     Lifted from http://www.willmcgugan.com/blog/tech/2007/10/14/timed-caching-decorator/

@@ -622,7 +622,27 @@ class TimedCacheDecoratorTest(unittest.TestCase):
             self.assertTrue(2, self.foo())
         time.sleep(2)
         self.assertTrue(3, self.foo())
+
+# =============================================================================
+class MaxThreadsDecoratorTest(unittest.TestCase):
     
+    @run_async
+    @max_threads(3)
+    def foo(self):
+        self.count += 1
+        self.assertTrue(self.count <= 3)
+        time.sleep(0.2)
+        self.assertTrue(self.count <= 3)
+        self.count -= 1
+    
+    def test_max_threads_works(self):
+        self.count = 0
+        workers = []
+        for i in xrange(20):
+            workers.append(self.foo())
+        for w in workers:
+            w.join()    
+        
 # =============================================================================
 if __name__ == '__main__':
     import logging.config
