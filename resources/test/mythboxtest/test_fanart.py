@@ -28,6 +28,7 @@ from mythbox.fanart import chain, ImdbFanartProvider, TvdbFanartProvider, \
     SuperFastFanartProvider, OneStrikeAndYoureOutFanartProvider ,\
     SpamSkippingFanartProvider
 from mythbox.mythtv.domain import TVProgram, Program
+from mythbox.util import run_async
 
 log = logging.getLogger('mythbox.unittest')
 
@@ -100,9 +101,96 @@ class ChainDecoratorTest(unittest.TestCase):
         link3.nextProvider = None
         result = link3.foo()
         self.assertTrue(len(result) == 0)
+
+# =============================================================================        
+class BaseFanartProviderTestCase(unittest.TestCase):
+    
+    movies = [
+        u'The Shawshank Redemption',
+        u'Ghostbusters',
+        u'Memento',
+        u'Pulp Fiction',
+        u'No Country For Old Men',
+        u'There Will Be Blood',
+        u'Red Dawn',
+        u'The Prestige',
+        u'Caddyshack',
+        u'Lost In Translation',
+        u'Inglorious Basterds',
+        u'Minority Report',
+        u'Bottle Rocket',
+        u'The Station Agent',
+        u'Sling Blade',
+        u'Apocalypse Now',
+        u'Forrest Gump', 
+        u'Born on the Fourth of July'
+    ]
+
+    tvShows = [
+        u'Seinfeld',
+        u'House',
+        u'Desperate Housewives',
+        u'30 Rock',
+        u'The Office',
+        u'The Mentalist',
+        u'Parks and Recreation',
+        u'Smallville',
+        u'The Simpsons',
+        u'The Big Bang Theory',
+        u'Chuck',
+        u'The Good Wife',
+        u'The Biggest Loser',
+        u'Dancing with the Stars',
+        u'Lost',
+        u'Criminal Minds',
+        u'The Marriage Ref',
+        u'Star Trek',
+        u'Family Guy',
+        u'Dirty Jobs',
+        u'Jackass',
+        u'Ghost Whisperer',
+        u'Friday Night Lights',
+        u'Perry Mason'
+    ]
+
+    def getMovies(self):
+        return map(lambda t: TVProgram({'title': t, 'category_type':'movie'}, translator=Mock()), self.movies)
+        
+    def getTvShows(self):
+        return map(lambda t: TVProgram({'title': t, 'category_type':'series'}, translator=Mock()), self.tvShows)
+        
+    def base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
+        programs = self.getPrograms()
+        provider = self.getProvider()
+        
+        @run_async
+        def work(p):
+            posters = provider.getPosters(p)
+            if not posters:
+                self.fail = True
+            for poster in posters:
+                log.debug('%s - %s' % (p.title(), poster))
+
+        self.fail = False
+        threads = [] 
+        for p in programs:
+            threads.append(work(p))
+        for t in threads:
+            t.join()
+            
+        self.assertFalse(self.fail)
         
 # =============================================================================
-class ImdbFanartProviderTest(unittest.TestCase):
+class ImdbFanartProviderTest(BaseFanartProviderTestCase):
+
+    def getPrograms(self):
+        return self.getMovies()
+    
+    def getProvider(self):
+        return ImdbFanartProvider(nextProvider=None)
+                
+    def test_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
+        self.base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably()
         
     def test_getRandomPoster_When_program_is_a_movie_Then_returns_fanart(self):
         # Setup
@@ -157,7 +245,7 @@ class ImdbFanartProviderTest(unittest.TestCase):
         self.assertTrue(len(posters) == 0)
         
 # =============================================================================
-class TvdbFanartProviderTest(unittest.TestCase):
+class TvdbFanartProviderTest(BaseFanartProviderTestCase):
     
     def setUp(self):
         self.platform = Mock()
@@ -166,13 +254,42 @@ class TvdbFanartProviderTest(unittest.TestCase):
             
     def tearDown(self):
         shutil.rmtree(self.sandbox, ignore_errors=True)
+    
+    def getPrograms(self):
+        return self.getTvShows()
+    
+    def getProvider(self):
+        return TvdbFanartProvider(self.platform, nextProvider=None)
+
+    def test_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
+        self.base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably()
         
     def test_getRandomPoster_When_program_is_not_movie_Then_returns_poster(self):
         # Setup
         program = TVProgram({'title':'Seinfeld', 'category_type':'series'}, translator=Mock())
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
         
-        # Test
+        # Test    def test_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
+        programs = map(lambda t: TVProgram({'title': t, 'category_type':'movie'}, translator=Mock()), self.movies)
+        provider = TheMovieDbFanartProvider(nextProvider=None)
+        
+        @run_async
+        def work(p):
+            posters = provider.getPosters(p)
+            if not posters:
+                self.fail = True
+            for poster in posters:
+                log.debug('%s - %s' % (p.title(), poster))
+
+        self.fail = False
+        threads = [] 
+        for p in programs:
+            threads.append(work(p))
+        for t in threads:
+            t.join()
+            
+        self.assertFalse(self.fail)
+
         posterUrl = provider.getRandomPoster(program)
         
         # Verify
@@ -242,8 +359,41 @@ class TvdbFanartProviderTest(unittest.TestCase):
         for p in posters:
             self.assertEquals('http', p[0:4])
 
+    def test_getPosters_When_pounded_by_many_threads_looking_up_same_program_Then_doesnt_fail_miserably(self):
+        
+        programs = []
+        for i in xrange(10):
+            programs.append(TVProgram({'title': 'Seinfeld', 'category_type':'series'}, translator=Mock()))
+        provider = TvdbFanartProvider(self.platform, nextProvider=None)
+        
+        @run_async
+        def work(p):
+            posters = provider.getPosters(p)
+            if not posters:
+                self.fail = True
+            for poster in posters:
+                log.debug('%s - %s' % (p.title(), poster))
+
+        self.fail = False
+        threads = [] 
+        for p in programs:
+            threads.append(work(p))
+        for t in threads:
+            t.join()
+
+        self.assertFalse(self.fail)
+        
 # =============================================================================
-class TheMovieDbFanartProviderTest(unittest.TestCase):
+class TheMovieDbFanartProviderTest(BaseFanartProviderTestCase):
+
+    def getPrograms(self):
+        return self.getMovies()
+    
+    def getProvider(self):
+        return TheMovieDbFanartProvider(nextProvider=None)
+
+    def test_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
+        self.base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably()
         
     def test_getRandomPoster_When_program_is_movie_Then_returns_poster(self):
         # Setup
@@ -297,8 +447,17 @@ class TheMovieDbFanartProviderTest(unittest.TestCase):
         self.assertTrue(len(posters) == 0)
 
 # =============================================================================
-class GoogleImageSearchProviderTest(unittest.TestCase):
-        
+class GoogleImageSearchProviderTest(BaseFanartProviderTestCase):
+
+    def getPrograms(self):
+        return self.getMovies()
+    
+    def getProvider(self):
+        return GoogleImageSearchProvider(nextProvider=None)
+
+    def test_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
+        self.base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably()
+
     def test_getRandomPoster_works(self):
         # Setup
         program = TVProgram({'title': 'Two Fat Ladies', 'category_type':'series'}, translator=Mock())

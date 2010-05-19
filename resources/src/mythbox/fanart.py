@@ -31,7 +31,7 @@ import urllib2
 import urllib
 
 from decorator import decorator
-from mythbox.util import synchronized, safe_str, run_async
+from mythbox.util import synchronized, safe_str, run_async, max_threads, timed
 from tvdb_api import Tvdb
 
 log = logging.getLogger('mythbox.fanart')
@@ -260,6 +260,7 @@ class ImdbFanartProvider(BaseFanartProvider):
         self.imdb = imdb.IMDb(accessSystem='httpThin')
 
     @chain
+    @max_threads(2)
     def getPosters(self, program):
         posters = []
         if program.isMovie():
@@ -319,9 +320,9 @@ class TvdbFanartProvider(BaseFanartProvider):
         shutil.rmtree(self.tvdbCacheDir, ignore_errors=True)
         os.makedirs(self.tvdbCacheDir)
 
-    @synchronized
+    # tvdb site rejects queries if > 2 per originating IP
+    @max_threads(2)
     def _queryTvDb(self, title):
-        # serialize queries to tvdb since tvdb api seems to have concurrency issues
         return self.tvdb[title]['_banners']['poster']
 
 # =============================================================================
@@ -333,6 +334,7 @@ class TheMovieDbFanartProvider(BaseFanartProvider):
         self.mdb = tmdb.MovieDb()
     
     @chain
+    @max_threads(2)
     def getPosters(self, program):
         posters = []
         if program.isMovie():
@@ -381,6 +383,7 @@ class GoogleImageSearchProvider(BaseFanartProvider):
         BaseFanartProvider.__init__(self, nextProvider)        
     
     @chain
+    @max_threads(2)
     def getPosters(self, program):
         posters = []
         try:
