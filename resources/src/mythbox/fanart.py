@@ -29,6 +29,7 @@ import shutil
 import simplejson as json
 import urllib2
 import urllib
+import Queue
 
 from decorator import decorator
 from mythbox.util import synchronized, safe_str, run_async, max_threads, timed
@@ -178,14 +179,18 @@ class SuperFastFanartProvider(BaseFanartProvider):
             if posters:  # cache returned poster 
                 self.imagePathsByKey[key] = posters
                 # TODO: Figure out if this is detrimental to performance -- sync on update
-                self.imagePathsByKey.sync()
+                #       Sometimes throws RuntimeError if iterating while changing.
+                try:
+                    self.imagePathsByKey.sync()
+                except RuntimeError, re:
+                    pass
         return posters
         
     def hasPosters(self, program):
         return self.createKey('getPosters', program) in self.imagePathsByKey
         
     def createKey(self, methodName, program):
-        key = "%s-%s" % (methodName, safe_str(program.title()))
+        key = '%s-%s' % (methodName, safe_str(program.title()))
         return key
     
     def clear(self):
@@ -214,10 +219,6 @@ class CachingFanartProvider(BaseFanartProvider):
         if self.nextProvider:
             httpPosters = self.nextProvider.getPosters(program)
             posters = self.cachePosters(httpPosters)
-            #for p in httpPosters:
-            #    poster = self.tryToCache(p)
-            #    if poster:
-            #        posters.append(poster)
         return posters
 
     def cachePosters(self, httpPosters):
@@ -251,6 +252,76 @@ class CachingFanartProvider(BaseFanartProvider):
     def clear(self):
         super(CachingFanartProvider, self).clear()
         self.httpCache.clear()
+
+# =============================================================================
+class HttpCachingFanartProvider(BaseFanartProvider):
+    """
+    Caches images retrieved via http on the local filesystem
+    """
+    
+    def __init__(self, httpCache, nextProvider=None):
+        BaseFanartProvider.__init__(self, nextProvider)
+        self.httpCache = httpCache
+        self.workQueue = Queue.Queue()   
+        self.workThread = self.workerBee()
+        self.closeRequested = False
+        
+    @run_async
+    def workerBee(self):
+        while not self.closeRequested:
+            try:
+                if not self.workQueue.empty():
+                    log.debug('Work queue size: %d' % self.workQueue.qsize())
+                workUnit = self.workQueue.get(block=True, timeout=5)
+                results = workUnit['results']
+                httpUrl = workUnit['httpUrl']
+                filePath = self.tryToCache(httpUrl)
+                if filePath:
+                    results.append(filePath)
+            except Queue.Empty:
+                pass
+        
+    def getPosters(self, program):
+        # If the chained provider returns a http:// style url, 
+        # cache the contents and return the locally cached file path
+        posters = []
+        if self.nextProvider:
+            httpPosters = self.nextProvider.getPosters(program)
+            posters = self.cachePosters(httpPosters)
+        return posters
+
+    def cachePosters(self, httpPosters):
+        '''Immediately retrieve the first URL and add the remaining to the 
+        work queue so we can return *something* very quickly.
+        '''
+        results = []
+        
+        if httpPosters:
+            first = self.tryToCache(httpPosters[0])
+            if first:
+                results.append(first)                    
+            for nextUrl in httpPosters[1:]:
+                self.workQueue.put({'results' : results, 'httpUrl' : nextUrl })
+        
+        return results
+    
+    def tryToCache(self, poster):
+        if poster and poster[:4] == 'http':
+            try:
+                poster = self.httpCache.get(poster)
+            except Exception, ioe:
+                log.exception(ioe)
+                return None
+        return poster
+    
+    def clear(self):
+        super(HttpCachingFanartProvider, self).clear()
+        self.httpCache.clear()
+        
+    def close(self):
+        self.closeRequested = True
+        super(HttpCachingFanartProvider, self).close()
+        self.workThread.join()
         
 # =============================================================================
 class ImdbFanartProvider(BaseFanartProvider):
@@ -440,6 +511,9 @@ class FanArt(object):
     def clear(self):
         self.provider.clear() 
 
+    def shutdown(self):
+        self.provider.close()
+        
     def configure(self, settings):
         self.provider.close()
         p = None
@@ -448,7 +522,8 @@ class FanArt(object):
         if settings.getBoolean('fanart_tmdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, TheMovieDbFanartProvider(), p)        
         if settings.getBoolean('fanart_tvdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, TvdbFanartProvider(self.platform), p)
                         
-        p = CachingFanartProvider(self.httpCache, p)
+        #p = CachingFanartProvider(self.httpCache, p)
+        p = HttpCachingFanartProvider(self.httpCache, p)
         p = SuperFastFanartProvider(self.platform, p)
         p = SpamSkippingFanartProvider(p)
         self.provider = p

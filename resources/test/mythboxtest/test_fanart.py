@@ -21,14 +21,17 @@ import logging
 import shutil
 import tempfile
 import unittest
+import time
 
 from mockito import Mock, when, verify, any, verifyZeroInteractions
 from mythbox.fanart import chain, ImdbFanartProvider, TvdbFanartProvider, \
     TheMovieDbFanartProvider, GoogleImageSearchProvider, CachingFanartProvider, \
     SuperFastFanartProvider, OneStrikeAndYoureOutFanartProvider ,\
-    SpamSkippingFanartProvider
+    SpamSkippingFanartProvider, HttpCachingFanartProvider
 from mythbox.mythtv.domain import TVProgram, Program
 from mythbox.util import run_async
+from mythbox.filecache import FileCache
+from mythbox.filecache import HttpResolver
 
 log = logging.getLogger('mythbox.unittest')
 
@@ -551,6 +554,67 @@ class CachingFanartProviderTest(unittest.TestCase):
         
         # Verify
         self.assertTrue(len(posters) == 0)
+
+# =============================================================================
+class HttpCachingFanartProviderTest(unittest.TestCase):
+
+    def setUp(self):
+        self.nextProvider = Mock()
+        self.dir = tempfile.mkdtemp()
+        self.httpCache = FileCache(self.dir, HttpResolver())
+        self.program = TVProgram({'title': 'Not Important', 'category_type':'series'}, translator=Mock())
+        self.provider = HttpCachingFanartProvider(self.httpCache, self.nextProvider)
+
+    def tearDown(self):
+        shutil.rmtree(self.dir, ignore_errors=True)
+        
+    def test_getPosters_When_next_provider_returns_posters_Then_cache_and_return_first_poster_and_add_remaining_to_work_queue(self):
+        httpUrls = [
+            'http://www.gstatic.com/hostedimg/1f4337d461f1431c_large',
+            'http://www.gstatic.com/hostedimg/50edad09a73fa0ed_large',
+            'http://www.gstatic.com/hostedimg/d915322b880dcaf2_large',
+            'http://www.gstatic.com/hostedimg/998ad397414e3727_large',
+            'http://www.gstatic.com/hostedimg/ba55ddda30df5f96_large',
+            'http://www.gstatic.com/hostedimg/7f0a19596a92fad1_large',
+            'http://www.gstatic.com/hostedimg/8edb2dfe5ba34685_large',
+            'http://www.gstatic.com/hostedimg/ffdb442e9f46a3c3_large']
+             
+        when(self.nextProvider).getPosters(any(Program)).thenReturn(httpUrls)
+        
+        # Test
+        posters = self.provider.getPosters(self.program)
+        
+        # Verify
+        log.debug('Posters= %s' % posters)
+        self.assertEquals(1, len(posters))
+        
+        while len(posters) < len(httpUrls):
+            time.sleep(1)
+            log.debug('Images downloaded: %d' % len(posters))
+        
+        self.provider.close()
+        
+#    def test_getPosters_When_next_link_in_chain_returns_posters_Then_cache_locally_on_filesystem(self):
+#        # Setup
+#        when(self.nextProvider).getPosters(any(Program)).thenReturn(['http://www.google.com/intl/en_ALL/images/logo.gif'])
+#        when(self.httpCache).get(any(str)).thenReturn('logo.gif')
+#        
+#        # Test
+#        posters = self.provider.getPosters(self.program)
+#        
+#        # Verify
+#        log.debug('Posters= %s' % posters)
+#        self.assertEquals('logo.gif', posters[0])
+#
+#    def test_getPosters_When_next_link_in_chain_doesnt_find_posters_Then_dont_cache_anything(self):
+#        # Setup
+#        when(self.nextProvider).getPosters(any(Program)).thenReturn([])
+#        
+#        # Test
+#        posters = self.provider.getPosters(self.program)
+#        
+#        # Verify
+#        self.assertTrue(len(posters) == 0)
 
 # =============================================================================
 class SuperFastFanartProviderTest(unittest.TestCase):

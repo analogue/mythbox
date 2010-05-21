@@ -181,6 +181,8 @@ class HomeWindow(BaseWindow):
             self.settings.save()
         except:
             log.exception('Saving settings on exit')
+
+        self.fanArt.shutdown()
             
         try:
             if hasPendingWorkers():
