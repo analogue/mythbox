@@ -1,4 +1,4 @@
-XX/XX/2010 - Mythbox SVN XXXX
+XX/XX/2010 - Mythbox HG XXXX
 =============================
  - update  : Protocol version 56 support addec - MythTV 0.23
  - new     : PageUp/PageDn (Channel Up/Channel Down on the remote) in the Recording Details screen now navigates
@@ -26,6 +26,7 @@ XX/XX/2010 - Mythbox SVN XXXX
  - update  : Faster fanart lookup on all screens + wait indicators
  - new     : Selecting a recording in the Upcoming Recordings screen launches the Recording Schedule editor
  - updated : tvdb_api updated to 1.5 
+ - new     : Added selected position and total number of recordings to the Recordings screen
  
 01/17/2010 - MythBox SVN 1797
 =============================
