@@ -571,5 +571,20 @@
         <animation effect="fade" time="250">VisibleChange</animation>    
     </control>
         
+<!-- Footer -->        
+
+    <control type="label">
+        <posx>20r</posx>
+        <posy>50r</posy>
+        <!--<width>200</width>-->
+        <height>35</height>
+        <align>right</align>
+        <aligny>center</aligny>
+        <font>font12</font>
+        <textcolor>ffffffff</textcolor>
+        <label>Upcoming $INFO[Window.Property(currentItem)] of $INFO[Container(600).NumItems]</label>
+        <visible>!substring(Window.Property(busy),true)</visible>
+    </control>
+        
   </controls>
 </window>

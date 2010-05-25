@@ -104,6 +104,8 @@ class UpcomingRecordingsWindow(BaseWindow):
         if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
             self.closed = True
             self.close()
+        else:
+            self.renderFooter()
 
     @inject_db
     def cacheChannels(self):
@@ -164,9 +166,16 @@ class UpcomingRecordingsWindow(BaseWindow):
         buildListItems()
         self.programsListBox.reset()
         self.programsListBox.addItems(listItems)
+        self.renderFooter()
         self.renderChannelIcons()
         self.renderPosters()        
 
+    def renderFooter(self):
+        try:
+            self.setWindowProperty('currentItem', '%s' % (self.programsListBox.getSelectedPosition()+1))
+        except:
+            pass
+        
     @run_async
     @timed
     @catchall

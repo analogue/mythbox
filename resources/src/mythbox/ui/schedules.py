@@ -81,7 +81,9 @@ class SchedulesWindow(BaseWindow):
             self.closed = True
             self.settings.put('schedules_last_selected', '%d'%self.schedulesListBox.getSelectedPosition())
             self.close()
-
+        else:
+            self.renderFooter()
+            
     def goEditSchedule(self):
         self.lastSelected = self.schedulesListBox.getSelectedPosition()
         editScheduleDialog = ScheduleDialog(
@@ -148,7 +150,14 @@ class SchedulesWindow(BaseWindow):
         self.schedulesListBox.reset()
         self.schedulesListBox.addItems(listItems)
         self.schedulesListBox.selectItem(self.lastSelected)
+        self.renderFooter()
         self.renderPosters()
+
+    def renderFooter(self):
+        try:
+            self.setWindowProperty('currentItem', '%s' % (self.schedulesListBox.getSelectedPosition()+1))
+        except:
+            pass
 
     @run_async
     @catchall
