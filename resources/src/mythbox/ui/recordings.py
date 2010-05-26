@@ -100,15 +100,7 @@ class RecordingsWindow(BaseWindow):
             self.settings.put('recordings_sort_ascending', '%s' % self.sortAscending)
             self.settings.put('recordings_recording_group', self.group)
             self.close()
-        else:
-            self.renderSelectedIndex()
             
-    def renderSelectedIndex(self):
-        try:
-            self.setWindowProperty('currentItem', '%s' % (self.programsListBox.getSelectedPosition()+1))
-        except:
-            pass
-                
     @run_async
     @coalesce
     def preCacheThumbnails(self):
@@ -148,7 +140,6 @@ class RecordingsWindow(BaseWindow):
         log.debug('Rendering....')
         self.renderNav()
         self.renderPrograms()
-        self.renderSelectedIndex()
         self.renderPosters()
         
     def renderNav(self):
@@ -175,6 +166,7 @@ class RecordingsWindow(BaseWindow):
                 self.setListItemProperty(listItem, 'title', p.fullTitle())
                 self.setListItemProperty(listItem, 'date', p.formattedAirDate())
                 self.setListItemProperty(listItem, 'time', p.formattedStartTime())
+                self.setListItemProperty(listItem, 'index', str(i+1))
                 if self.fanArt.hasPosters(p):
                     p.needsPoster = False
                     self.lookupPoster(listItem, p)
@@ -208,7 +200,8 @@ class RecordingsWindow(BaseWindow):
         self.programsListBox.reset()
         self.programsListBox.addItems(self.listItems)
         self.programsListBox.selectItem(selectionIndex)
-        self.renderSelectedIndex()
+        for i, listItem in enumerate(self.listItems[selectionIndex:]):
+            self.setListItemProperty(listItem, 'index', str(i + selectionIndex + 1))
         
     @run_async
     @timed
@@ -247,7 +240,6 @@ class RecordingsWindow(BaseWindow):
             self.renderProgramDeleted(programIterator.current(), programIterator.index())
         elif programIterator.index() != self.lastSelected:
             self.programsListBox.selectItem(programIterator.index())
-            self.renderSelectedIndex()
                 
         del win
         

@@ -27,7 +27,7 @@ from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.domain import RecordingSchedule
 from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, EpisodeFilter, ScheduleType
 from mythbox.ui.toolkit import BaseDialog, BaseWindow, window_busy, Action 
-from mythbox.util import catchall_ui, lirc_hack, catchall, run_async, ui_locked, slice, coalesce, ui_locked2
+from mythbox.util import catchall_ui, lirc_hack, catchall, run_async, ui_locked, coalesce, ui_locked2
 
 log = logging.getLogger('mythbox.ui')
 
@@ -81,8 +81,6 @@ class SchedulesWindow(BaseWindow):
             self.closed = True
             self.settings.put('schedules_last_selected', '%d'%self.schedulesListBox.getSelectedPosition())
             self.close()
-        else:
-            self.renderFooter()
             
     def goEditSchedule(self):
         self.lastSelected = self.schedulesListBox.getSelectedPosition()
@@ -129,6 +127,7 @@ class SchedulesWindow(BaseWindow):
                 self.setListItemProperty(listItem, 'priority', '%s' % s.getPriority())
                 self.setListItemProperty(listItem, 'channelName', s.getChannelName())
                 self.setListItemProperty(listItem, 'poster', 'loading.gif')
+                self.setListItemProperty(listItem, 'index', str(i+1))
                 #self.setListItemProperty(listItem, 'description', s.formattedDescription())
                 #self.setListItemProperty(listItem, 'airDate', s.formattedAirDateTime())
                 #self.setListItemProperty(listItem, 'originalAirDate', s.formattedOriginalAirDate())
@@ -150,14 +149,7 @@ class SchedulesWindow(BaseWindow):
         self.schedulesListBox.reset()
         self.schedulesListBox.addItems(listItems)
         self.schedulesListBox.selectItem(self.lastSelected)
-        self.renderFooter()
         self.renderPosters()
-
-    def renderFooter(self):
-        try:
-            self.setWindowProperty('currentItem', '%s' % (self.schedulesListBox.getSelectedPosition()+1))
-        except:
-            pass
 
     @run_async
     @catchall

@@ -104,8 +104,6 @@ class UpcomingRecordingsWindow(BaseWindow):
         if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
             self.closed = True
             self.close()
-        else:
-            self.renderFooter()
 
     @inject_db
     def cacheChannels(self):
@@ -154,6 +152,7 @@ class UpcomingRecordingsWindow(BaseWindow):
                 self.setListItemProperty(listItem, 'channelNumber', program.getChannelNumber())
                 self.setListItemProperty(listItem, 'callSign', program.getCallSign())
                 self.setListItemProperty(listItem, 'poster', 'loading.gif')
+                self.setListItemProperty(listItem, 'index', str(i + 1))
                 
                 tuner = self.tunersById[program.getTunerId()]
                 self.setListItemProperty(listItem, 'tuner', '%s %s' % (tuner.tunerType, tuner.tunerId))
@@ -166,15 +165,8 @@ class UpcomingRecordingsWindow(BaseWindow):
         buildListItems()
         self.programsListBox.reset()
         self.programsListBox.addItems(listItems)
-        self.renderFooter()
         self.renderChannelIcons()
         self.renderPosters()        
-
-    def renderFooter(self):
-        try:
-            self.setWindowProperty('currentItem', '%s' % (self.programsListBox.getSelectedPosition()+1))
-        except:
-            pass
         
     @run_async
     @timed

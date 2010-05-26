@@ -376,8 +376,10 @@
         <aligny>center</aligny>
         <font>font12</font>
         <textcolor>ffffffff</textcolor>
-        <label>Schedule $INFO[Window.Property(currentItem)] of $INFO[Container(600).NumItems]</label>
+        <label>Schedule $INFO[Container(600).ListItem.Property(index)] of $INFO[Container(600).NumItems]</label>
         <visible>!substring(Window.Property(busy),true)</visible>
+        <animation effect="fade" time="200">WindowOpen</animation>
+        <animation effect="fade" time="200">WindowClose</animation>
     </control>
 
 <!-- Left nav panel -->
