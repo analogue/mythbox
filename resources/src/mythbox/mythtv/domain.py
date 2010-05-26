@@ -950,20 +950,6 @@ class RecordedProgram(Program):
         @rtype: string
         """
         return self.getFilename() + '.png'
-    
-    def getLocalThumbnailPath(self):
-        """
-        @rtype: string
-        """
-        return self.getLocalPath() + '.png'
-
-    def hasLocalThumbnail(self):
-        """
-        @return: True if the mythbacked has generated a thumbnail file and 
-                 the thumbnail is accessible via the local filesystem, 
-                 False otherwise
-        """
-        return os.path.exists(self.getLocalThumbnailPath())
 
     @timed
     def getFrameRate(self):

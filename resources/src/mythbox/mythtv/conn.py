@@ -1053,34 +1053,40 @@ class Connection(object):
         filesize = decodeLongLong(reply[2], reply[1])
         log.debug('file = %s reply[0] = %s filesize = %s' % (backendPath, reply[0], filesize))
         
-        maxBlockSize = 2000000 # 2MB
-        remainingBytes = filesize
-        fh = file(destPath, 'w+b')
-        maxReceived = 0
-        
-        while remainingBytes > 0:
-            blockSize = min(remainingBytes, maxBlockSize)
-            requestBlockMsg = ['QUERY_FILETRANSFER ' + reply[0], 'REQUEST_BLOCK', '%s' % blockSize]
-            self._sendMsg(commandSocket, requestBlockMsg)
+        if filesize == 0:
+            rc = -1
+        else:
+            maxBlockSize = 2000000 # 2MB
+            remainingBytes = filesize
+            fh = file(destPath, 'w+b')
+            maxReceived = 0
             
-            blockTransferred = 0
-            while blockTransferred < blockSize:
-                expectedBytes = blockSize - blockTransferred
-                wirelog.debug('waiting for %d bytes' % expectedBytes)
-                data = dataSocket.recv(expectedBytes)
-                actualBytes = len(data)
-                maxReceived = max(maxReceived, actualBytes)
-                wirelog.debug('received %d bytes' % actualBytes)
-                blockTransferred += actualBytes
-                if actualBytes > 0:
-                    fh.write(data)
-                    wirelog.debug('wrote %d bytes' % actualBytes)
-            
-            reply = self._readMsg(commandSocket)
-            wirelog.debug('reply = %s'%reply)
-            remainingBytes = remainingBytes - blockSize
-            
-        fh.close()
+            while remainingBytes > 0:
+                blockSize = min(remainingBytes, maxBlockSize)
+                requestBlockMsg = ['QUERY_FILETRANSFER ' + reply[0], 'REQUEST_BLOCK', '%s' % blockSize]
+                self._sendMsg(commandSocket, requestBlockMsg)
+                
+                blockTransferred = 0
+                while blockTransferred < blockSize:
+                    expectedBytes = blockSize - blockTransferred
+                    wirelog.debug('waiting for %d bytes' % expectedBytes)
+                    data = dataSocket.recv(expectedBytes)
+                    actualBytes = len(data)
+                    maxReceived = max(maxReceived, actualBytes)
+                    wirelog.debug('received %d bytes' % actualBytes)
+                    blockTransferred += actualBytes
+                    if actualBytes > 0:
+                        fh.write(data)
+                        wirelog.debug('wrote %d bytes' % actualBytes)
+                
+                reply = self._readMsg(commandSocket)
+                wirelog.debug('reply = %s'%reply)
+                remainingBytes = remainingBytes - blockSize
+
+            fh.close()
+            wirelog.debug('transferFile rc = %d' % rc)
+            wirelog.debug('max rcz size = %d' % maxReceived)
+
         dataSocket.shutdown(socket.SHUT_RDWR)
         dataSocket.close()
         
@@ -1088,8 +1094,6 @@ class Connection(object):
             commandSocket.shutdown(socket.SHUT_RDWR)
             commandSocket.close()
         
-        wirelog.debug('transferFile rc = %d' % rc)
-        wirelog.debug('max rcz size = %d' % maxReceived)
         return rc
 
     def _buildMsg(self, msg):

@@ -89,7 +89,7 @@ class MythPlayerTest(unittest.TestCase):
         pass
     
 #        # Setup
-#        player = MythPlayer()
+#        player = MythPlayer(mythThumbnailCache=Mock())
 #        program = Mock()
 #        conn = Mock()
 #        

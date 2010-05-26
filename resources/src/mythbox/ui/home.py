@@ -219,7 +219,7 @@ class HomeWindow(BaseWindow):
 
     @window_busy
     def goPlayRecording(self):
-        p = MythPlayer()
+        p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache)
         program=self.recordings[self.coverFlow.getSelectedPosition()]
         p.playRecording(program, TrackingCommercialSkipper(p, program))
         del p 

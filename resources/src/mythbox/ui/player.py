@@ -41,9 +41,10 @@ class MythPlayer(xbmc.Player):
     Plays mythtv recordings with support for bookmarks, commercial skipping, etc 
     """
     
-    def __init__(self):
-        xbmc.Player.__init__(self)    
+    def __init__(self, *args, **kwargs):
+        xbmc.Player.__init__(self, *args, **kwargs)    
         self._active = True
+        self.mythThumbnailCache = kwargs['mythThumbnailCache']
     
     def __del__(self):
         log.warn("\n\n\n\n\t\tGC'ing player\n\n\n")
@@ -154,8 +155,8 @@ class MythPlayer(xbmc.Player):
                 
         playlistItem.setInfo("video", {"Genre" : self._program.category(), "Studio" : self._program.formattedChannel(), "Title": title, "Plot": self._program.formattedDescription()} )
         #playlistItem.setProperty('AspectRatio', '1.85 : 1')
-        playlistItem.setIconImage(self._program.getLocalThumbnailPath())
-        playlistItem.setThumbnailImage(self._program.getLocalThumbnailPath())
+        playlistItem.setIconImage(self.mythThumbnailCache.get(self._program))
+        playlistItem.setThumbnailImage(self.mythThumbnailCache.get(self._program))
             
         mlog.debug("< _buildPlayList")
         return playlistItem

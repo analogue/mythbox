@@ -383,53 +383,25 @@ class ConnectionTest(unittest.TestCase):
         
         # Test
         try:
-            log.debug('Transferring file %s to %s with size %s' % (backendPath, destPath, os.path.getsize(recording.getLocalThumbnailPath())))
+            log.debug('Transferring file %s to %s' % (backendPath, destPath))
             result = self.conn.transferFile(backendPath, destPath, recording.hostname())
             
             # Verify
             self.assertEquals(0, result)
             self.assertTrue(os.path.exists(destPath))
             self.assertTrue(os.path.isfile(destPath))
-            self.assertEquals(os.path.getsize(recording.getLocalThumbnailPath()), os.path.getsize(destPath))
             
         finally:
             # Cleanup
             try: os.remove(destPath); 
             except: pass
     
-    def test_transferFile_FileDoesNotExistOnBackend(self):
-        
-        # Setup
-#        recordings = self.conn.getRecordings()
-#        self.assertTrue(len(recordings) > 0, 'Recordings required to run this test')
-#        recording = recordings[-1]
-#        
-#        if not self.conn.getThumbnailCreationTime(recording, recording.hostname()): # generate thumbnail if necessary
-#            log.debug('Generating thumbnail...')
-#            self.conn.generateThumbnail(recording, recording.hostname())
-#            recording = self.conn.getRecording(recording.getChannelId(), recording.getStartTime())
-#            
-#        backendPath = recording.getRemoteThumbnailPath()
-#        destPath = os.path.join(tempfile.gettempdir(), recording.getBareFilename() + ".png")
-        
-        # Test
-        try:
-            #log.debug('Transferring file %s to %s with size %s' % (backendPath, destPath, os.path.getsize(recording.getLocalThumbnailPath())))
-            result = self.conn.transferFile(
-                "myth://" + self.settings.getMythTvHost() + ":" + str(self.settings.getMythTvPort()) + "/bogusfile.mpg", 
-                os.path.join(tempfile.mkdtemp(), 'bogusfile.mpg'), 
-                self.settings.getMythTvHost())
-            
-            log.debug('Result = %s' % result)
-            
-            # Verify
-#            self.assertEquals(0, result)
-#            self.assertTrue(os.path.exists(destPath))
-#            self.assertTrue(os.path.isfile(destPath))
-#            self.assertEquals(os.path.getsize(recording.getLocalThumbnailPath()), os.path.getsize(destPath))
-            
-        finally:
-            pass
+    def test_transferFile_When_file_does_not_exist_on_backend_Then_transfer_aborted(self):
+        dest = tempfile.mktemp('bogusfile.mpg')
+        backendPath = "myth://" + self.settings.getMythTvHost() + ":" + str(self.settings.getMythTvPort()) + "/bogusfile.mpg"
+        result = self.conn.transferFile(backendPath, dest, self.settings.getMythTvHost())
+        self.assertFalse(os.path.exists(dest))
+        self.assertEquals(-1, result)
 
 # =============================================================================    
 if __name__ == '__main__':
