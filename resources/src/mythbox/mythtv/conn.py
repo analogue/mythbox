@@ -570,7 +570,8 @@ class Connection(object):
         timeLow, timeHigh = encodeLongLong(180)
         msg.append('%d' % timeHigh)
         msg.append('%d' % timeLow)
-        msg.append('<EMPTY>')
+        #msg.append('<EMPTY>')
+        msg.append(program.getBareFilename() + '.640x360.png')
         msg.append('%d' % 640)
         msg.append('%d' % 360)
         

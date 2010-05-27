@@ -41,9 +41,13 @@ class MythThumbnailResolver(FileResolver):
         @type program : RecordedProgram  
         @param dest: file to save downloaded program thumbnail to
         """
-        if self.conn().getThumbnailCreationTime(program, program.hostname()) is None:
-            self.conn().generateThumbnail(program, program.hostname())
-        self.conn().transferFile(program.getRemoteThumbnailPath(), dest, program.hostname())
+        self.conn().generateThumbnail(program, program.hostname())
+        result = self.conn().transferFile(program.getBareFilename() + '.640x360.png', dest, program.hostname())
+        if result == -1:
+            # no recourse
+            fp = open(dest, 'w')
+            fp.write(dest, '')
+            fp.close()
             
     def hash(self, program):
         return md5.new(safe_str(program.getRemoteThumbnailPath())).hexdigest()
