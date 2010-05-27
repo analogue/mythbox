@@ -378,7 +378,7 @@ class ConnectionTest(unittest.TestCase):
             self.conn.generateThumbnail(recording, recording.hostname())
             recording = self.conn.getRecording(recording.getChannelId(), recording.starttimeAsTime())
             
-        backendPath = recording.getRemoteThumbnailPath()
+        backendPath = recording.getBareFilename() + '.640x360.png'
         destPath = os.path.join(tempfile.gettempdir(), recording.getBareFilename() + ".png")
         
         # Test
