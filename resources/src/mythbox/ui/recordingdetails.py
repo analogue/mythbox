@@ -223,7 +223,10 @@ class RecordingDetailsWindow(BaseWindow):
         self.setWindowProperty('fileSize', s.formattedFileSize())
         self.setWindowProperty('autoExpire', (('No', 'Yes')[s.isAutoExpire()]))
         self.setWindowProperty('commBreaks', 'Loading...')       
-    
+        self.setWindowProperty('index', str(self.programIterator.index() + 1))
+        self.setWindowProperty('numRecordings', str(self.programIterator.size()))
+        
+        
     @run_async
     @catchall
     @inject_db

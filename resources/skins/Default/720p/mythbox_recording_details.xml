@@ -346,6 +346,20 @@
         <visible>substring(Window.Property(busy),true)</visible>
         <animation effect="fade" time="250">VisibleChange</animation>    
     </control>
+
+    <control type="label">
+        <posx>20r</posx>
+        <posy>50r</posy>
+        <!--<width>200</width>-->
+        <height>35</height>
+        <align>right</align>
+        <aligny>center</aligny>
+        <font>font12</font>
+        <textcolor>ffffffff</textcolor>
+        <label>Recording $INFO[Window.Property(index)] of $INFO[Window.Property(numRecordings)]</label>
+        <animation effect="fade" time="200">WindowOpen</animation>
+        <animation effect="fade" time="200">WindowClose</animation>
+    </control>
     
   </controls>
 </window>

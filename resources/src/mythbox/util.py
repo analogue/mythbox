@@ -699,6 +699,9 @@ class BidiIterator(object):
         else:
             raise StopIteration
 
+    def size(self):
+        return len(self.items)
+    
 # =============================================================================
 class CyclingBidiIterator(BidiIterator):
     """Adds some cycle(...) goodness to our bidirectional iterator"""
