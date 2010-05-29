@@ -63,7 +63,7 @@ class MythThumbnailResolver(FileResolver):
     def writeStub(self, dest):
         # TODO: Replace with something else
         fp = open(dest, 'w')
-        fp.write(dest, '')
+        fp.write('')
         fp.close()
         
 # =============================================================================
