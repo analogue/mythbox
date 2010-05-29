@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -41,16 +41,30 @@ class MythThumbnailResolver(FileResolver):
         @type program : RecordedProgram  
         @param dest: file to save downloaded program thumbnail to
         """
-        self.conn().generateThumbnail(program, program.hostname())
-        result = self.conn().transferFile(program.getBareFilename() + '.640x360.png', dest, program.hostname())
+        key = self.getKey(program)
+        result = self.conn().transferFile(key, dest, program.hostname())
         if result == -1:
-            # no recourse
-            fp = open(dest, 'w')
-            fp.write(dest, '')
-            fp.close()
+            # thumb not generated -- generate thumb and retry
+            if self.conn().generateThumbnail(program, program.hostname()):
+                result = self.conn().transferFile(key, dest, program.hostname())
+                if result == -1:
+                    # transfer failed
+                    self.writeStub(dest)
+            else:
+                # remote thumb generation failed
+                self.writeStub(dest)
             
     def hash(self, program):
-        return md5.new(safe_str(program.getRemoteThumbnailPath())).hexdigest()
+        return md5.new(safe_str(self.getKey(program))).hexdigest()
+        
+    def getKey(self, program):
+        return program.getFilename() + '.640x360.png'
+
+    def writeStub(self, dest):
+        # TODO: Replace with something else
+        fp = open(dest, 'w')
+        fp.write(dest, '')
+        fp.close()
         
 # =============================================================================
 class MythChannelIconResolver(FileResolver):
