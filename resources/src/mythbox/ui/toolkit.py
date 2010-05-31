@@ -27,6 +27,12 @@ log = logging.getLogger('mythbox.ui')
 elog = logging.getLogger('mythbox.event')
 
 # =============================================================================
+class AspectRatio(object):
+    STRETCH = 0       
+    SCALE_UP = 1     # crops
+    SCALE_DOWN = 2   # black bars
+    
+# =============================================================================
 class Action(object):
     LEFT                    = 1
     RIGHT                   = 2

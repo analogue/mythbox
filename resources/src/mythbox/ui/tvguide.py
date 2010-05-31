@@ -33,7 +33,7 @@ from mythbox.mythtv.conn import inject_conn
 from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.domain import ScheduleFromProgram, Channel
 from mythbox.ui.schedules import ScheduleDialog
-from mythbox.ui.toolkit import Action, Align, window_busy
+from mythbox.ui.toolkit import Action, Align, AspectRatio, window_busy
 from mythbox.util import catchall_ui, timed, lirc_hack, catchall, ui_locked2
 
 log = logging.getLogger('mythbox.ui')
@@ -701,8 +701,8 @@ class TvGuideWindow(ui.BaseWindow):
             #self.addControl(c.shade)
 
             # create label control
-            labelText = "%s %s" % (self.channels[i].getChannelNumber(), '') # self.channels[i].getCallSign())
-            label2Text = "%s" % self.channels[i].getCallSign()
+            labelText = '%s %s' % (self.channels[i].getChannelNumber(), '') # self.channels[i].getCallSign())
+            label2Text = '%s' % self.channels[i].getCallSign()
             #label2Text = "%s" % self.channels[i].getChannelName()
             
             c.label = xbmcgui.ControlButton(
@@ -718,25 +718,20 @@ class TvGuideWindow(ui.BaseWindow):
                 alignment=Align.CENTER_Y|Align.TRUNCATED)
             
             c.label.setLabel(label=labelText, label2=label2Text)
-            
-#            c.label = xbmcgui.ControlLabel(
-#                x + iconW + self.channel_dx, 
-#                y, 
-#                labelW, 
-#                h,
-#                labelText, 
-#                'font12',
-#                alignment=Align.CENTER_Y)
-            
             self.addControl(c.label)
 
             # create channel icon image if icon exists
-#            if self.channels[i].getIconPath():
-#                iconFile = self.mythChannelIconCache.get(self.channels[i])
-#                if iconFile:
-#                    c.icon = xbmcgui.ControlImage(x + 5, y, iconW, h, iconFile)
-#                    self.addControl(c.icon)
-
+            try:
+                if self.channels[i].getIconPath():
+                    iconFile = self.mythChannelIconCache.get(self.channels[i])
+                    if iconFile:
+                        hackW = iconW * 2
+                        c.icon = xbmcgui.ControlImage(x + self.channel_w - hackW - 15, y, hackW, h, iconFile, AspectRatio.SCALE_DOWN)
+                        c.label.setLabel(label=labelText, label2='')
+                        self.addControl(c.icon)
+            except:
+                log.exception('channel = %s' % self.channels[i])
+            
             self.channelCells.append(c)
             y += h + self.guide_dy
     

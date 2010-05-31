@@ -605,9 +605,22 @@ class ControlList(Control):
 # =============================================================================
 class ControlImage(Control):
 
-    def __init__(self, x, y, w, h, tx):
+    def __init__(self, x, y, width, height, filename, aspectRatio, colorDiffuse):
+        """
+        x              : integer - x coordinate of control.
+        y              : integer - y coordinate of control.
+        width          : integer - width of control.
+        height         : integer - height of control.
+        filename       : string - image filename.
+        colorKey       : [opt] hexString - (example, '0xFFFF3300')
+        aspectRatio    : [opt] integer - (values 0 = stretch (default), 1 = scale up (crops), 2 = scale down (black bars)
+        colorDiffuse   : hexString - (example, '0xC0FF0000' (red tint))
+        
+        example:\n"
+          - self.image = xbmcgui.ControlImage(100, 250, 125, 75, aspectRatio=2)\n");
+        """
         pass
-
+    
     def setColorDiffuse(self, colorDiffuse):
         """
         Changes the images color.
