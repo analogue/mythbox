@@ -156,16 +156,22 @@ class SchedulesWindow(BaseWindow):
     @coalesce
     def renderPosters(self):
         for schedule in self.listItemsBySchedule.keys():
-            if self.closed: return
-            posterPath = self.fanArt.getRandomPoster(schedule)
+            if self.closed: 
+                return
             listItem = self.listItemsBySchedule[schedule]
-            if posterPath:
+            try:
+                try:
+                    posterPath = self.fanArt.getRandomPoster(schedule)
+                    if not posterPath:
+                        channel =  self.channelsById[schedule.getChannelId()]
+                        if channel.getIconPath():
+                            posterPath = self.mythChannelIconCache.get(channel)
+                except:
+                    posterPath = self.platform.getMediaPath('mythbox.png')
+                    log.exception('Schedule = %s' % schedule)
+            finally:
                 self.setListItemProperty(listItem, 'poster', posterPath)
-            else:
-                channel =  self.channelsById[schedule.getChannelId()]
-                if channel.getIconPath():
-                    self.setListItemProperty(listItem, 'poster', self.mythChannelIconCache.get(channel))
-
+                
 # =============================================================================            
 class ScheduleDialog(BaseDialog):
     """
