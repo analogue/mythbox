@@ -408,12 +408,14 @@ class LiveTvWindow(BaseWindow):
     
     def lookupPoster(self, listItem, channel):
         posterPath = self.fanArt.getRandomPoster(channel.currentProgram)
-        if posterPath:
-            self.setListItemProperty(listItem, 'poster', posterPath)
-        elif channel.getIconPath():
-            self.setListItemProperty(listItem, 'poster', self.mythChannelIconCache.get(channel))
-        else:
-            self.setListItemProperty(listItem, 'poster', 'mythbox.png')
+        if not posterPath:
+            if channel.getIconPath():
+                posterPath = self.mythChannelIconCache.get(channel)
+                if not posterPath:
+                    posterPath =  'mythbox-logo.png'
+            else:
+                posterPath = 'mythbox-logo.png'
+        self.setListItemProperty(listItem, 'poster', posterPath)
         
     @run_async
     @catchall
@@ -422,7 +424,9 @@ class LiveTvWindow(BaseWindow):
         for channel in self.listItemsByChannel.keys():
             if self.closed: 
                 return
-            if channel.currentProgram and channel.needsPoster:
-                listItem = self.listItemsByChannel[channel]
-                self.lookupPoster(listItem, channel)
-            
+            try:
+                if channel.currentProgram and channel.needsPoster:
+                    listItem = self.listItemsByChannel[channel]
+                    self.lookupPoster(listItem, channel)
+            except:
+                log.exception('channel = %s' % channel)

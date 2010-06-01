@@ -162,18 +162,21 @@ class RecordingsWindow(BaseWindow):
         @ui_locked2
         def propertyTime(): 
             for i, p in enumerate(self.programs):
-                listItem = self.listItems[i]
-                self.setListItemProperty(listItem, 'title', p.fullTitle())
-                self.setListItemProperty(listItem, 'date', p.formattedAirDate())
-                self.setListItemProperty(listItem, 'time', p.formattedStartTime())
-                self.setListItemProperty(listItem, 'index', str(i+1))
-                if self.fanArt.hasPosters(p):
-                    p.needsPoster = False
-                    self.lookupPoster(listItem, p)
-                else:
-                    p.needsPoster = True
-                    self.setListItemProperty(listItem, 'poster', 'loading.gif')
-
+                try:
+                    listItem = self.listItems[i]
+                    self.setListItemProperty(listItem, 'title', p.fullTitle())
+                    self.setListItemProperty(listItem, 'date', p.formattedAirDate())
+                    self.setListItemProperty(listItem, 'time', p.formattedStartTime())
+                    self.setListItemProperty(listItem, 'index', str(i+1))
+                    if self.fanArt.hasPosters(p):
+                        p.needsPoster = False
+                        self.lookupPoster(listItem, p)
+                    else:
+                        p.needsPoster = True
+                        self.setListItemProperty(listItem, 'poster', 'loading.gif')
+                except:
+                    log.exception('Program = %s' % p)
+        
         @timed
         def othertime():
             self.programsListBox.reset()
@@ -186,11 +189,12 @@ class RecordingsWindow(BaseWindow):
 
     def lookupPoster(self, listItem, p):
         posterPath = self.fanArt.getRandomPoster(p)
-        if posterPath:
-            self.setListItemProperty(listItem, 'poster', posterPath)
-        else:
-            self.setListItemProperty(listItem, 'poster', self.mythThumbnailCache.get(p))
-
+        if not posterPath:
+            posterPath = self.mythThumbnailCache.get(p)
+            if not posterPath:
+                posterPath = 'mythbox-logo.png'
+        self.setListItemProperty(listItem, 'poster', posterPath)
+                
     def renderProgramDeleted(self, deletedProgram, selectionIndex):
         # straight render() takes too long..shortcut for removal
         self.programs.remove(deletedProgram)
@@ -211,8 +215,11 @@ class RecordingsWindow(BaseWindow):
         for (listItem, program) in self.programsByListItem.items()[:]:
             if self.closed: 
                 return
-            self.lookupPoster(listItem, program)
-
+            try:
+                self.lookupPoster(listItem, program)
+            except:
+                log.exception('Program = %s' % program)
+                
     def goRecordingDetails(self):
         self.lastSelected = self.programsListBox.getSelectedPosition()
         selectedItem = self.programsListBox.getSelectedItem()

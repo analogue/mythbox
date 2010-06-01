@@ -319,6 +319,8 @@ class HomeWindow(BaseWindow):
             cover = self.fanArt.getRandomPoster(r)
             if not cover:
                 cover = self.mythThumbnailCache.get(r)
+                if not cover:
+                    cover = 'mythbox-logo.png'
             self.setListItemProperty(listItem, 'thumb', cover)
         log.debug('<<< renderCoverFlow end')
         
