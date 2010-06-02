@@ -1033,9 +1033,9 @@ class Connection(object):
         @param backendPath: myth url to file. Ex: myth://<host>:<port>/<path>
         @param destPath: path of destination file on the local filesystem. Ex: /tmp/somefile.mpg
         @param backendHost: The backend that recorded the file. When None, defaults to master backend
-        @return:  0 on success, -1 on failure
+        @rtype: bool
         """
-        rc = 0
+        rc = True
         closeCommandSocket = False
         
         if backendHost ==  None:
@@ -1055,7 +1055,7 @@ class Connection(object):
         log.debug('file = %s reply[0] = %s filesize = %s' % (backendPath, reply[0], filesize))
         
         if filesize == 0:
-            rc = -1
+            rc = False
         else:
             maxBlockSize = 2000000 # 2MB
             remainingBytes = filesize

@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -70,7 +70,7 @@ class MythChannelIconResolverTest(unittest.TestCase):
         # Test - download icons for first 5 channels
         for channel in channels[:min(5, len(channels))]:
             if channel.getIconPath():
-                log.debug('%s' % channel)
+                log.debug('%s' % channel.getChannelName())
                 dest = os.path.sep.join([tempfile.gettempdir(), str(channel.getChannelId()) + channel.getCallSign() + str(time.time()) + ".png"])
                 downloader.store(channel, dest)
         
@@ -85,7 +85,7 @@ class MythChannelIconResolverTest(unittest.TestCase):
     
     def test_store_When_channel_has_no_icon_Then_do_nothing(self):
         # Setup
-        channel = Channel({'name':'Bogus Channel', 'icon':None})
+        channel = Channel({'name':'Bogus Channel', 'icon':None, 'chanid': '9', 'callsign': 'WXYZ'})
         conn = Mock()
         downloader = MythChannelIconResolver(conn)
          
@@ -95,8 +95,17 @@ class MythChannelIconResolverTest(unittest.TestCase):
         # Verify
         verifyZeroInteractions(conn)
 
-    def test_store_When_channel_has_icon_but_icon_not_accessible_Then_do_nothing(self):
-        pass
+    def test_store_When_channel_has_iconpath_but_filename_misspelled_Then_do_nothing(self):
+        # Setup
+        channel = Channel({'name':'Bogus Channel', 'icon': 'bogusIcon.png', 'chanid': '9', 'callsign': 'WXYZ'})
+        downloader = MythChannelIconResolver(self.conn)
+         
+        # Test - download icons for first 5 channels
+        dest = os.path.sep.join([tempfile.gettempdir(), str(channel.getChannelId()) + channel.getCallSign() + str(time.time()) + ".png"])
+        downloader.store(channel, dest)
+
+        # Verify
+        self.assertFalse(os.path.exists(dest))
 
 # =============================================================================
 if __name__ == '__main__':

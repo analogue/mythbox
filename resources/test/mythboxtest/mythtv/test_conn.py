@@ -305,7 +305,7 @@ class ConnectionTest(unittest.TestCase):
         self.assertRaises(ServerException, self.conn.setBookmark, p, 500)
         
     def test_getCommercialBreaks(self):
-        recordings = self.conn.getAllRecordings()
+        recordings = reversed(self.conn.getAllRecordings())
         foundRecordingWithCommBreaks = False
         for r in recordings:
             if r.hasCommercials():
@@ -367,7 +367,6 @@ class ConnectionTest(unittest.TestCase):
         pass
     
     def test_transferFile_FileExistsOnBackend_Success(self):
-
         # Setup
         recordings = self.conn.getRecordings()
         self.assertTrue(len(recordings) > 0, 'Recordings required to run this test')
@@ -387,7 +386,7 @@ class ConnectionTest(unittest.TestCase):
             result = self.conn.transferFile(backendPath, destPath, recording.hostname())
             
             # Verify
-            self.assertEquals(0, result)
+            self.assertTrue(result)
             self.assertTrue(os.path.exists(destPath))
             self.assertTrue(os.path.isfile(destPath))
             
@@ -401,7 +400,7 @@ class ConnectionTest(unittest.TestCase):
         backendPath = "myth://" + self.settings.getMythTvHost() + ":" + str(self.settings.getMythTvPort()) + "/bogusfile.mpg"
         result = self.conn.transferFile(backendPath, dest, self.settings.getMythTvHost())
         self.assertFalse(os.path.exists(dest))
-        self.assertEquals(-1, result)
+        self.assertFalse(result)
 
 # =============================================================================    
 if __name__ == '__main__':

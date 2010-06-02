@@ -31,7 +31,7 @@ class MythThumbnailResolver(FileResolver):
     
     def __init__(self, conn=None):
         self._conn = conn
-            
+          
     def conn(self):
         return self._conn
     
@@ -43,16 +43,18 @@ class MythThumbnailResolver(FileResolver):
         """
         key = self.getKey(program)
         result = self.conn().transferFile(key, dest, program.hostname())
-        if result == -1:
+        if not result:
             # thumb not generated -- generate thumb and retry
             if self.conn().generateThumbnail(program, program.hostname()):
                 result = self.conn().transferFile(key, dest, program.hostname())
-                if result == -1:
+                if not result:
                     # transfer failed
-                    self.writeStub(dest)
+                    #self.writeStub(dest)
+                    pass
             else:
                 # remote thumb generation failed
-                self.writeStub(dest)
+                #self.writeStub(dest)
+                pass
             
     def hash(self, program):
         return md5.new(safe_str(self.getKey(program))).hexdigest()
@@ -60,18 +62,18 @@ class MythThumbnailResolver(FileResolver):
     def getKey(self, program):
         return program.getFilename() + '.640x360.png'
 
-    def writeStub(self, dest):
-        # TODO: Replace with something else
-        fp = open(dest, 'w')
-        fp.write('')
-        fp.close()
+#    def writeStub(self, dest):
+#        # TODO: Replace with something else
+#        fp = open(dest, 'w')
+#        fp.write('')
+#        fp.close()
         
 # =============================================================================
 class MythChannelIconResolver(FileResolver):
     
     def __init__(self, conn=None):
         self._conn = conn
-            
+        
     def conn(self):
         return self._conn
     
@@ -84,7 +86,9 @@ class MythChannelIconResolver(FileResolver):
         if channel.getIconPath():
             # TODO: Can channel icons be requested from slave backend? Replace None with backend hostname 
             #       if this turns out to be true.
-            self.conn().transferFile(channel.getIconPath(), dest, None)
+            rc = self.conn().transferFile(channel.getIconPath(), dest, None)
+            if not rc:
+                log.error('Transfer of icon %s for channel %s failed.' % (channel.getIconPath(), channel.getChannelName()))
         else:
             log.debug('Channel %s has no icon' % channel.getChannelName())
             
