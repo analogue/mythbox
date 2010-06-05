@@ -94,6 +94,10 @@ class FileCache(object):
                 self.unlockResource(fileUrl)
             
             # Don't cache zero byte files
+            if not os.path.exists(filepath):
+                log.warn('File could not be resolved: %s ' % safe_str(fileUrl))
+                return None
+            
             if os.path.getsize(filepath) == 0:
                 log.warn('file %s resulted in zero byte file...removing...' % safe_str(fileUrl))
                 self.remove(fileUrl)

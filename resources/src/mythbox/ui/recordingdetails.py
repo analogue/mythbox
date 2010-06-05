@@ -27,7 +27,7 @@ from mythbox.mythtv.enums import JobType, JobStatus
 from mythbox.ui.player import MythPlayer, NoOpCommercialSkipper, TrackingCommercialSkipper
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import *
-from mythbox.util import catchall, catchall_ui, run_async, lirc_hack, coalesce, CyclingBidiIterator
+from mythbox.util import safe_str, catchall, catchall_ui, run_async, lirc_hack, coalesce, CyclingBidiIterator
 
 log = logging.getLogger('mythbox.ui')
 
@@ -263,8 +263,9 @@ class RecordingDetailsWindow(BaseWindow):
         
     def renderThumbnail(self):
         thumbFile = self.mythThumbnailCache.get(self.program)
+        self.setWindowProperty('thumbnailShadow', 'mb-DialogBack.png')
         if thumbFile:
-            self.setWindowProperty('thumbnailShadow', 'mb-DialogBack.png')
             self.setWindowProperty('thumbnail', thumbFile)
         else:
-            log.error('Recording thumbnail preview image not found: %s' % self.program.title())
+            self.setWindowProperty('thumbnail', 'mythbox-logo.png')
+            log.error('Recording thumbnail preview image not found: %s' % safe_str(self.program.title()))
