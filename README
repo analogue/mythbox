@@ -5,12 +5,12 @@ MythBox is a MythTV frontend for XBMC.
 Features:
   - Watch recordings with commercial skipping
   - Watch Live TV
-  - Create new and edit existing recording schedules
-  - View the schedule of upcoming recordings 
+  - Create and update recording schedules
+  - View upcoming recordings 
   - Enhanced program guide
   - TV show and movie fanart downloaded from tvdb, tmdb, imdb, and google image search
   - View MythTV stats (tuners, jobs, loadavg, etc)
-  - Compatible with MythTV 0.22 and 0.23
+  - Compatible with MythTV 0.21, 0.22, and 0.23
   - Add your own Twitter feeds
 
 Requirements
@@ -19,7 +19,7 @@ Requirements
   All Platforms
     - A working MythTV backend
     - MythTV recordings directory(s) and/or storage groups accessible via the local 
-      filesystem (the machine running XBMC) pre-mounted using nfs, samba, afp, etc)  
+      filesystem (the machine running XBMC) pre-mounted using nfs, samba, afp, etc.   
 
   Linux
     - XBMC Camelot 9.11 running a recent 32-bit or 64-bit distro (Ubuntu, Debian, Fedora, Gentoo, Arch, OpenSuse, etc) 
@@ -29,9 +29,9 @@ Requirements
     - XBMC Camelot 9.11 running on Mac OSX 10.5 (Leopard) - Intel only 
 
   Windows
-    - XBMC Camelot 9.11 running on Windows XP or Vista (32-bit or 64-bit)
+    - XBMC Camelot 9.11 running on Windows XP, Vista, or Windows 7 (32-bit or 64-bit)
   
-  Sorry, MythBox does not work on the XBox.
+  MythBox does *not* work on the XBox.
   
   
 Installation
@@ -56,12 +56,13 @@ Installation
   6. Exit the Settings screen & enjoy!
 
 
-Keybindings and MCE Remote actions that may not be that obvious
+Keybindings/Remote Control
 ============================================================================
 Context         Keyboard       MCE Remote     Action
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Navigation      Backspace        <-           Go back to previous screen 
-                M              Win Button     Go back to main menu
+Navigation      Esc            -              Go back to the previous screen
+                Backspace      Back/Previous  Go back to the previous screen 
+                M              Win Button     Go back to the main menu
                 
 ----------------------------------------------------------------------------                   
 Playing Video   X              Stop           Stop video
@@ -74,7 +75,8 @@ Playing Video   X              Stop           Stop video
                 \              N/A            Toggle fullscreen  
 ----------------------------------------------------------------------------
 Home Window    Context Menu    TV Guide Btn   Activate popup menu to delete
-Coverflow                                     recording
+Coverflow                                     or re-record the selected
+                                              recording
 ----------------------------------------------------------------------------
 Recording      PgUp           Channel Up      Show previous recording
 Details Window PgDown         Channel Dn      Show next recording

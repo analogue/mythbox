@@ -24,12 +24,12 @@ __author__       = "analogue@yahoo.com"
 __url__          = "http://mythbox.googlecode.com"
 __hg_url__       = "https://mythbox.googlecode.com/hg/"
 __credits__      = "bunch of ppl"
-__svn_revision__ = 1835
-__version__      = "[Beta SVN %d]" % __svn_revision__
+__version__      = "RC1"
 
 if __name__ == '__main__':
     print '%s %s' % (__scriptname__, __version__)
     
+    # WinPDB debugger
     #import rpdb2 
     #rpdb2.start_embedded_debugger('xxx')
     
