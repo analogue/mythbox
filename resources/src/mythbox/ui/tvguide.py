@@ -34,10 +34,9 @@ from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.domain import ScheduleFromProgram, Channel
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import Action, Align, AspectRatio, window_busy
-from mythbox.util import catchall_ui, timed, lirc_hack, catchall, ui_locked2
+from mythbox.util import catchall_ui, timed, lirc_hack, catchall, ui_locked2, safe_str
 
 log = logging.getLogger('mythbox.ui')
-elog = logging.getLogger('mythbox.event')
 
 # =============================================================================
 class ProgramCell(object):
@@ -289,7 +288,7 @@ class TvGuideWindow(ui.BaseWindow):
     @ui_locked2
     def renderProgramInfo(self, program):
         if program:
-            log.debug('Show info for ' + program.title())
+            log.debug('Show info for ' + safe_str(program.title()))
             self.setWindowProperty('title', program.fullTitle())
             self.setWindowProperty('category', program.category())
             self.setWindowProperty('description', program.description())
@@ -321,7 +320,7 @@ class TvGuideWindow(ui.BaseWindow):
     @lirc_hack
     def onControlHook(self, control):
         """Method called when a control is selected/clicked."""
-        log.debug("onControlHook()")
+        log.debug('onControlHook()')
 
         actionConsumed = True
         
@@ -337,10 +336,10 @@ class TvGuideWindow(ui.BaseWindow):
                 log.debug('launching livetv')
                 self.watchLiveTv(program)
             else:
-                log.debug( "launching schedule details window" )
+                log.debug('launching schedule details window')
                 schedule = ScheduleFromProgram(program, self.translator)
                 createScheduleDialog = ScheduleDialog(
-                    "mythbox_schedule_dialog.xml",
+                    'mythbox_schedule_dialog.xml',
                     os.getcwd(),
                     forceFallback=True,
                     schedule=schedule,
