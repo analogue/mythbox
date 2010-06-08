@@ -383,7 +383,7 @@ class Program(object):
         et = self.endtimeAsTime()
         eh = et.strftime('%I').lstrip('0')
         if short:
-            em = [et.strftime(':%M'), ''][st.minute == 0] + et.strftime('%p')
+            em = [et.strftime(':%M'), ''][et.minute == 0] + et.strftime('%p')
         else:
             em = et.strftime(':%M') + et.strftime('%p')    
         

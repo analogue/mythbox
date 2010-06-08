@@ -274,11 +274,12 @@ class RecordedProgramTest(unittest.TestCase):
         self.assertNotEquals(p2, p1)
 
     def test_formattedAirTime(self):
-        self.data[11] = self.socketTime(18, 30, 0) # 6:30pm
-        self.data[12] = self.socketTime(20, 0, 0)  # 8:00pm
-        s = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn).formattedAirTime()
-        log.debug('Formatted airtime = %s' % s)
-        self.assertEquals('6:30 - 8:00PM', s)
+        self.data[11] = self.socketTime(21, 0, 0)   # 9:00pm
+        self.data[12] = self.socketTime(21, 30, 0)  # 9:30pm
+        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+        self.assertEquals('9:00 - 9:30PM', p.formattedAirTime(short=False))
+        self.assertEquals('9 - 9:30PM', p.formattedAirTime(short=True))
+        self.assertEquals('9 - 9:30PM', p.formattedAirTime())
         
     def test_getDuration_When_duration_is_half_hour_Then_return_30mins(self):
         self.data[11] = self.socketTime(18, 30, 0)  # starttime = 6:30pm
