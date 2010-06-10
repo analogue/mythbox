@@ -176,6 +176,7 @@ class HomeWindow(BaseWindow):
         return self.settingsOK
     
     def shutdown(self):
+        self.setBusy(True)
         self.bus.deregister(self)
         try:
             self.settings.save()

@@ -332,6 +332,9 @@ class TvGuideWindow(ui.BaseWindow):
                 break
         
         if program:
+            #import xbmcgui
+            #xbmcgui.Dialog().ok('debug', '%s' % program.isShowing(), '%s' % program.starttimeAsTime(), '%s' % program.endtimeAsTime())
+            
             if program.isShowing():
                 log.debug('launching livetv')
                 self.watchLiveTv(program)

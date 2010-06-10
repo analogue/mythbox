@@ -29,7 +29,7 @@ from mythbox.fanart import chain, ImdbFanartProvider, TvdbFanartProvider, \
     SuperFastFanartProvider, OneStrikeAndYoureOutFanartProvider ,\
     SpamSkippingFanartProvider, HttpCachingFanartProvider
 from mythbox.mythtv.domain import TVProgram, Program
-from mythbox.util import run_async
+from mythbox.util import run_async, safe_str
 from mythbox.filecache import FileCache
 from mythbox.filecache import HttpResolver
 
@@ -134,7 +134,7 @@ class BaseFanartProviderTestCase(unittest.TestCase):
         u'House',
         u'Desperate Housewives',
         u'30 Rock',
-        u'The Office',
+        u'60 Minutes',
         u'The Mentalist',
         u'Parks and Recreation',
         u'Smallville',
@@ -170,9 +170,10 @@ class BaseFanartProviderTestCase(unittest.TestCase):
         def work(p):
             posters = provider.getPosters(p)
             if not posters:
+                log.debug('Failed on %s' % safe_str(p.title()))
                 self.fail = True
             for poster in posters:
-                log.debug('%s - %s' % (p.title(), poster))
+                log.debug('%s - %s' % (safe_str(p.title()), poster))
 
         self.fail = False
         threads = [] 
