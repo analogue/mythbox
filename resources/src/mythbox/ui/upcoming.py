@@ -95,7 +95,8 @@ class UpcomingRecordingsWindow(BaseWindow):
             schedule=schedules[0], 
             translator=self.translator,
             platform=self.platform,
-            settings=self.settings).doModal()
+            settings=self.settings,
+            mythChannelIconCache=self.mythChannelIconCache).doModal()
             
     @catchall_ui
     @lirc_hack            

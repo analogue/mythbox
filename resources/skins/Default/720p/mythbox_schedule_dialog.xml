@@ -371,6 +371,21 @@
                 <texturefocus border="5">button-focus2.png</texturefocus>
             </control>
             
+            <control type="image">
+                <description>empty spacer</description>
+                <width>120</width>
+                <height>40</height>
+            </control>
+	        
+	        <control type="image">
+	            <width>120</width>
+	            <height>120</height>
+	            <texture background="false">-</texture>
+	            <info>Window.Property(channel_logo)</info>
+                <aspectratio>keep</aspectratio>	            
+	            <fadetime>400</fadetime>
+	        </control>
+            
         </control>
     </controls>
 </window>

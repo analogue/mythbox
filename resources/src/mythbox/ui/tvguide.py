@@ -348,7 +348,8 @@ class TvGuideWindow(ui.BaseWindow):
                     schedule=schedule,
                     translator=self.translator,
                     platform=self.platform,
-                    settings=self.settings)
+                    settings=self.settings,
+                    mythChannelIconCache=self.mythChannelIconCache)
                 createScheduleDialog.doModal()
                 
                 if createScheduleDialog.shouldRefresh:

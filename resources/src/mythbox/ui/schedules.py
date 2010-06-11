@@ -91,7 +91,8 @@ class SchedulesWindow(BaseWindow):
             schedule=self.schedules[self.schedulesListBox.getSelectedPosition()], 
             translator=self.translator,
             platform=self.platform,
-            settings=self.settings)
+            settings=self.settings,
+            mythChannelIconCache=self.mythChannelIconCache)
         editScheduleDialog.doModal()
         if editScheduleDialog.shouldRefresh:
             self.refresh()
@@ -186,6 +187,7 @@ class ScheduleDialog(BaseDialog):
         self.translator = kwargs['translator']
         self.platform = kwargs['platform']
         self.settings = kwargs['settings']
+        self.mythChannelIconCache = kwargs['mythChannelIconCache']
         self.shouldRefresh = False
         
     @catchall
@@ -288,6 +290,14 @@ class ScheduleDialog(BaseDialog):
             self.deleteButton.setEnabled(False)
         else:
             self.setWindowProperty('heading', 'Edit Recording Schedule')
+
+        logo = 'mythbox-logo.png'    
+        try:
+            if s.getIconPath() and self.mythChannelIconCache.get(s):
+                logo = self.mythChannelIconCache.get(s)
+        except:
+            log.exception('setting channel logo in schedules dialog box')
+        self.setWindowProperty('channel_logo', logo)
         
         self.setWindowProperty('channel', s.getChannelNumber())
         self.setWindowProperty('station', s.station())    
@@ -321,7 +331,7 @@ class ScheduleDialog(BaseDialog):
         self.setWindowProperty('maxEpisodes', ('%d Episode(s)' % s.getMaxEpisodes(), 'All Episodes')[s.getMaxEpisodes() == 0])
         self.setWindowProperty('startEarly', ('%d minute(s) early' % s.getStartOffset(), 'On time')[s.getStartOffset() == 0])
         self.setWindowProperty('endLate', ("%d minute(s) late" % s.getEndOffset(), 'On time')[s.getEndOffset() == 0])
-
+            
     def _chooseFromList(self, translations, title, property, setter):
         """
         Boiler plate code that presents the user with a dialog box to select a value from a list.
