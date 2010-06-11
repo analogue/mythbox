@@ -240,7 +240,8 @@ class RecordingsWindow(BaseWindow):
             settings=self.settings,
             translator=self.translator,
             platform=self.platform,
-            mythThumbnailCache=self.mythThumbnailCache)
+            mythThumbnailCache=self.mythThumbnailCache,
+            mythChannelIconCache=self.mythChannelIconCache)
         win.doModal()
 
         if win.isDeleted:

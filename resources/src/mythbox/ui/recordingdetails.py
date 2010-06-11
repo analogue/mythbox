@@ -35,12 +35,6 @@ log = logging.getLogger('mythbox.ui')
 class RecordingDetailsWindow(BaseWindow):
     
     def __init__(self, *args, **kwargs):
-        """
-        @keyword program: RecordedProgram
-        @keyword settings: MythSettings
-        @keyword translator: Translator
-        @keyword mythThumbnailCache: FileCache
-        """
         BaseWindow.__init__(self, *args, **kwargs)
         self.programIterator = kwargs['programIterator']
         self.program = self.programIterator.current() 
@@ -48,6 +42,7 @@ class RecordingDetailsWindow(BaseWindow):
         self.translator = kwargs['translator']
         self.platform = kwargs['platform']
         self.mythThumbnailCache = kwargs['mythThumbnailCache']
+        self.mythChannelIconCache = kwargs['mythChannelIconCache']
         self.isDeleted = False
         self.initialized = False
         self.win = None
@@ -156,7 +151,8 @@ class RecordingDetailsWindow(BaseWindow):
             schedule=schedules[0], 
             translator=self.translator,
             platform=self.platform,
-            settings=self.settings)
+            settings=self.settings,
+            mythChannelIconCache=self.mythChannelIconCache)
         editScheduleDialog.doModal()
         if editScheduleDialog.shouldRefresh:
             self.render()
