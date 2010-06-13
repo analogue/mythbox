@@ -982,6 +982,54 @@ class RecordedProgram(Program):
                 showPopup('Error', 'FFMpeg could not determine framerate. Comm skip may be inaccurate')
         return self._fps
 
+    @timed
+    @inject_conn
+    def getFrameRate2(self):
+        """
+        Get framerate without the recording being accessible via the filesystem.
+        @rtype: float
+        @note: cached 
+        @note: most recordings are either 29.97 or 59.97
+        """
+        
+        #
+        # TODO: Integrate
+        #
+        if not self._fps:
+            ffmpegParser = FFMPEG(
+                ffmpeg=self.settings.get('paths_ffmpeg'),
+                closeFDs=(type(self._platform) != WindowsPlatform),
+                windows=(type(self._platform) == WindowsPlatform))  
+                # WORKAROUND: close_fds borked on windows
+
+                        
+            import tempfile
+            fileSink = tempfile.mktemp('.mpg', 'mythbox')
+            log.debug('Saving recording fragment to: %s' % fileSink)
+            transferred = self.conn().transferFile(self.getFilename(), fileSink, self.hostname(), max=5000000)
+
+            if not transferred:
+                showPopup('Error', 'Transfer fragment failed')
+                self._fps = 29.97
+                return self._fps
+            
+            try:
+                metadata = ffmpegParser.get_metadata(fileSink)
+            except:
+                log.exception('ffmpeg parsing failed')
+                metadata = None
+                
+            log.debug('ffmpeg metadata for %s = %s' % (fileSink, metadata))
+            if metadata:
+                self._fps = float(metadata.frame_rate)
+            else:
+                self._fps = 29.97
+                log.error("""Could not determine FPS for file %s so defaulting to %s FPS.
+                             Make sure you have the ffmpeg executable in your path. 
+                             Commercial skipping may be inaccurate""" % (self._fps, self.getLocalPath()))
+                showPopup('Error', 'FFMpeg could not determine framerate. Comm skip may be inaccurate')
+        return self._fps
+
     def formattedFileSize(self):
         """
         @return: filesize with MB or GB suffix

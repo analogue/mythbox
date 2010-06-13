@@ -1025,7 +1025,7 @@ class Connection(object):
         if int(reply[0]) < 0:
             raise ServerException, 'Reschedule notify failed: %s' % reply
 
-    def transferFile(self, backendPath, destPath, backendHost):
+    def transferFile(self, backendPath, destPath, backendHost, numBytes=None):
         """
         Copy a file from the remote myththv backend to destPath on the local filesystem. 
         Valid files include recordings, thumbnails, and channel icons. 
@@ -1033,6 +1033,7 @@ class Connection(object):
         @param backendPath: myth url to file. Ex: myth://<host>:<port>/<path>
         @param destPath: path of destination file on the local filesystem. Ex: /tmp/somefile.mpg
         @param backendHost: The backend that recorded the file. When None, defaults to master backend
+        @param max: Max number of bytes to transfer. None == unlimited
         @rtype: bool
         """
         rc = True
@@ -1057,6 +1058,9 @@ class Connection(object):
         if filesize == 0:
             rc = False
         else:
+            if numBytes:
+                filesize = min(numBytes, filesize)
+            
             maxBlockSize = 2000000 # 2MB
             remainingBytes = filesize
             fh = file(destPath, 'w+b')

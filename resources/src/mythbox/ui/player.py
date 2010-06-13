@@ -46,18 +46,18 @@ class MythPlayer(xbmc.Player):
         self._active = True
         self.mythThumbnailCache = kwargs['mythThumbnailCache']
     
-    def __del__(self):
-        log.warn("\n\n\n\n\t\tGC'ing player\n\n\n")
-        try:
-            xbmc.Player.__del__(self)
-        except:
-            log.exception('MythPlayer finalizer')
+#    def __del__(self):
+#        log.warn("\n\n\n\n\t\tGC'ing player\n\n\n")
+#        try:
+#            xbmc.Player.__del__(self)
+#        except:
+#            log.exception('MythPlayer finalizer')
             
     # Public ------------------------------------------------------------------
       
     def getFileUrl(self):
         return self._program.getLocalPath()
-        
+    
     def playRecording(self, program, commSkipper):
         """
         Plays the given program. Blocks until playback is stopped or until the 
@@ -160,8 +160,29 @@ class MythPlayer(xbmc.Player):
             
         mlog.debug("< _buildPlayList")
         return playlistItem
+
+#
+#  TODO: Integrate
+#
+class MythStreamingPlayer(MythPlayer):
+    """Use xbmcs built in myth support to stream the recording over the network."""
+
+    def __init__(self, *args, **kwargs):
+        MythPlayer.__init__(self, *args, **kwargs)    
+        self.settings = kwargs['settings']
         
-# =============================================================================
+    def getFileUrl(self):
+        # myth://dbname:dbpassword@hostname:port/recordings/filename.mpg
+        url = 'myth://%s:%s@%s:%s/recordings/%s' % (
+            self.settings.get('mysql_database'),
+            self.settings.get('mysql_password'),
+            self.getProgram().hostname(),
+            self.settings.get('mythtv_port'),
+            self.getProgram().getBareFilename())
+        log.debug('XBMC recording url: %s' % url)
+        return url
+    
+
 class Bookmarker(object):
     """Mimics XBMC video player's builtin auto resume functionality"""
     
