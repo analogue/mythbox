@@ -60,27 +60,27 @@ Keybindings/Remote Control
 ============================================================================
 Context         Keyboard       MCE Remote     Action
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Global          \              N/A            Toggle fullscreen/windowed mode  
+
 Navigation      Esc            -              Go back to the previous screen
                 Backspace      Back/Previous  Go back to the previous screen 
                 M              Win Button     Go back to the main menu
-                
-----------------------------------------------------------------------------                   
+
 Playing Video   X              Stop           Stop video
                 Space          Pause          Pause video
                 PrtScrn        Record         Take screenshot
                 I              Info           Show program info                               
                 O              Guide          Show audio/video/fps stats
                 Z              OK             Toggle zoom modes
-                Tab            N/A            Toggle video mode
-                \              N/A            Toggle fullscreen  
-----------------------------------------------------------------------------
+                Tab            N/A            Toggle fullscreen/embedded player mode
+
 Home Window    Context Menu    TV Guide Btn   Activate popup menu to delete
 Coverflow                                     or re-record the selected
                                               recording
-----------------------------------------------------------------------------
+
 Recording      PgUp           Channel Up      Show previous recording
 Details Window PgDown         Channel Dn      Show next recording
-----------------------------------------------------------------------------
+
 TV Guide       PgUp           Channel Up      Scroll TV guide up one page
                PgDown         Channel Dn      Scroll TV guide down one page
                R              FastRewind      Scroll TV guide left one page
