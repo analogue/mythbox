@@ -46,13 +46,16 @@ class MythSettings(object):
         self.translator = translator
         self.settingsFilename = filename
         self.settingsPath = os.path.join(self.platform.getScriptDataDir(), self.settingsFilename)
+        
+        #
+        # Hack alert: defer event publishing until after initial load
+        #
         self.bus = None
-        self.listeners = []
         try:
             self.load()
         except SettingsException:
             pass
-        self.bus = bus # defer event publishing until after initial load
+        self.bus = bus
 
     def getFFMpegPath(self): return self.get('paths_ffmpeg')
     def setFFMpegPath(self, ffmpegPath): self.put('paths_ffmpeg', ffmpegPath)
@@ -87,9 +90,6 @@ class MythSettings(object):
     def getMythTvPort(self): return int(self.get('mythtv_port'))
     def setMythTvPort(self, port): self.put('mythtv_port', '%s' % port)
 
-    def addListener(self, listener):
-        self.listeners.append(listener)
-        
     def setRecordingDirs(self, dirs):
         """
         @type dirs: str  - one or more separated by os.pathsep      
@@ -123,9 +123,6 @@ class MythSettings(object):
         
         # Only notify of changes if the new value is different
         if old is not None and old != value:
-            # TODO: Listener support deprecated in favor of event bus
-            for listener in self.listeners:
-                listener.settingChanged(tag, old, value)
             if self.bus:
                 self.bus.publish({'id': Event.SETTING_CHANGED, 'tag': tag, 'old': old, 'new': value})
                 

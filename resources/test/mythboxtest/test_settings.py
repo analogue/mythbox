@@ -294,45 +294,6 @@ class MythSettingsTest(unittest.TestCase):
                 self.fail('should have throws SettingsException')
             except SettingsException, se:
                 log.debug('PASS: %s %s' % (b, se))
-                
-    def test_When_existing_setting_changed_to_different_value_Then_listeners_notified(self):
-        # Setup
-        when(self.platform).getScriptDataDir().thenReturn(tempfile.gettempdir())
-        s = MythSettings(self.platform, self.translator)
-        listener = Mock()
-        s.addListener(listener)
-        
-        # Test
-        s.setConfirmOnDelete(False)
-
-        # Verify
-        verify(listener, 1).settingChanged('confirm_on_delete', 'True', 'False')
-    
-    def test_When_existing_setting_changed_to_same_value_Then_listeners_not_notified(self):
-        # Setup
-        when(self.platform).getScriptDataDir().thenReturn(tempfile.gettempdir())
-        s = MythSettings(self.platform, self.translator)
-        listener = Mock()
-        s.addListener(listener)
-        
-        # Test
-        s.setConfirmOnDelete(True)
-
-        # Verify
-        verifyZeroInteractions(listener)
-    
-    def test_When_new_setting_created_Then_listeners_not_notified(self):
-        # Setup
-        when(self.platform).getScriptDataDir().thenReturn(tempfile.gettempdir())
-        s = MythSettings(self.platform, self.translator)
-        listener = Mock()
-        s.addListener(listener)
-        
-        # Test
-        s.put('foo', 'bar')
-
-        # Verify
-        verifyZeroInteractions(listener)
 
     def test_When_existing_setting_changed_to_different_value_Then_event_published_to_bus(self):
         # Setup

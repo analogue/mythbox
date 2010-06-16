@@ -174,30 +174,13 @@ class ConnectionTest(unittest.TestCase):
         self.assertTrue(len(recordings) > 0)
 
     def test_getRecording_Found(self):
-        # Setup
-        recordings = self.conn.getRecordings()
-        if len(recordings) == 0:
-            log.warn('SKIPPED: No recordings available to use as test data')
-        expected = recordings.pop()
-        
-        # Test
+        expected = self.getRecordings().pop()
         actual = self.conn.getRecording(expected.getChannelId(), expected.starttime())
-        
-        # Verify
-        log.debug('recording = %s' % actual)
         self.assertEquals(expected, actual)
         
     def test_getRecording_NotFound(self):
-        # Setup
-        recordings = self.conn.getRecordings()
-        if len(recordings) == 0:
-            log.warn('SKIPPED: No recordings available to use as test data')
-        expected = recordings.pop()
-        
-        # Test
-        actual = self.conn.getRecording(32, expected.starttime())
-        
-        # Verify
+        recording = self.getRecordings().pop()
+        actual = self.conn.getRecording(32, recording.starttime())
         self.assertTrue(actual is None)
     
     def test_getUpcomingRecordings_When_no_args_Then_returns_only_programs_that_will_be_recorded(self):
@@ -281,25 +264,20 @@ class ConnectionTest(unittest.TestCase):
         
     def test_getBookmark_Success(self):
         # TODO: only check bookmarked recordings
-        programs = self.conn.getRecordings()
-        self.assertTrue(len(programs) > 0, 'Cannot run test because no programs returned')
-        log.debug('Getting bookmark for %s' % programs[0])
-        bookmark = self.conn.getBookmark(programs[0])
+        recording = self.getRecordings()[0]
+        log.debug('Getting bookmark for %s' % recording)
+        bookmark = self.conn.getBookmark(recording)
         log.debug('bookmark = %s seconds' % bookmark)
         self.assertTrue(bookmark >= 0)
     
     def test_setBookmark_Success(self):
-        programs = self.conn.getRecordings()
-        self.assertTrue(len(programs) > 0, 'Cannot run test because no programs returned')
-        p = programs.pop()
+        p = self.getRecordings().pop()
         log.debug('Setting bookmark for %s' % p)
         self.conn.setBookmark(p, 1000)
         self.assertEquals(1000, self.conn.getBookmark(p))
 
     def test_setBookmark_ChannelIdInvalid(self):
-        programs = self.conn.getRecordings()
-        self.assertTrue(len(programs) > 0, 'Cannot run test because no programs returned')
-        p = programs.pop()
+        p = self.getRecordings().pop()
         p.setChannelId(999)
         self.assertEquals(999, p.getChannelId())
         self.assertRaises(ServerException, self.conn.setBookmark, p, 500)
@@ -330,25 +308,22 @@ class ConnectionTest(unittest.TestCase):
             self.assertTrue(t.conn != None)
        
     def test_generateThumbnail_ReturnsTrue(self):
-        programs = self.conn.getRecordings()
-        self.assertTrue(len(programs) > 0, 'Cannot run test; No programs in db to play with')
-        log.debug('Generating thumbnail for program: %s' % programs[0])
-        result = self.conn.generateThumbnail(programs[0], self.settings.getMythTvHost())
+        recording = self.getRecordings()[-1]
+        log.debug('Generating thumbnail for program: %s' % recording)
+        result = self.conn.generateThumbnail(recording, self.settings.getMythTvHost())
         self.assertTrue(result)
 
     def test_generateThumbnail_WithSpecificSize(self):
-        programs = self.conn.getRecordings()
-        self.assertTrue(len(programs) > 0, 'Cannot run test; No programs in db to play with')
-        log.debug('Generating thumbnail for program: %s' % programs[-1])
-        result = self.conn.generateThumbnail(programs[-1], self.settings.getMythTvHost(), 1280/4, 720/4)
+        recording = self.getRecordings()[-1]
+        log.debug('Generating thumbnail for program: %s' % recording.title())
+        result = self.conn.generateThumbnail(recording, self.settings.getMythTvHost(), 1280/4, 720/4)
         log.debug(result)
         self.assertTrue(result)
          
     def test_getThumbnailCreationTime_ThumbnailExists(self):
-        programs = self.conn.getRecordings()
-        self.assertTrue(len(programs) > 0, 'Cannot run test; No programs in db to play with')
-        log.debug('Getting thumbnail creation time for: %s' % programs[0])
-        dt = self.conn.getThumbnailCreationTime(programs[0], self.settings.getMythTvHost())
+        recording = self.getRecordings()[0]
+        log.debug('Getting thumbnail creation time for: %s' % recording.title())
+        dt = self.conn.getThumbnailCreationTime(recording, self.settings.getMythTvHost())
         log.debug('datetime = %s' % dt)
         
     def test_getThumbNailCreationTime_ThumbnailDoesNotExist(self):
@@ -368,9 +343,7 @@ class ConnectionTest(unittest.TestCase):
     
     def test_transferFile_FileExistsOnBackend_Success(self):
         # Setup
-        recordings = self.conn.getRecordings()
-        self.assertTrue(len(recordings) > 0, 'Recordings required to run this test')
-        recording = recordings[-1]
+        recording = self.getRecordings()[-1]
         
         if not self.conn.getThumbnailCreationTime(recording, recording.hostname()): # generate thumbnail if necessary
             log.debug('Generating thumbnail...')
@@ -391,7 +364,6 @@ class ConnectionTest(unittest.TestCase):
             self.assertTrue(os.path.isfile(destPath))
             
         finally:
-            # Cleanup
             try: os.remove(destPath); 
             except: pass
     
@@ -402,6 +374,29 @@ class ConnectionTest(unittest.TestCase):
         self.assertFalse(os.path.exists(dest))
         self.assertFalse(result)
 
+    def test_transferFile_When_partial_transfer_requested_Then_only_send_part_of_file(self):
+        # Setup
+        recording = self.getRecordings()[-1]
+        dest = tempfile.mktemp('.mpg', 'test_partial_transfer_')
+        print dest
+        
+        try:
+            # Test
+            result = self.conn.transferFile(recording.getFilename(), dest, recording.hostname(), 1024 * 1000)
+            
+            # Verify
+            self.assertTrue(result)
+            self.assertTrue(os.path.exists(dest))
+            self.assertEquals(1024*1000, os.path.getsize(dest))
+        finally:
+            try: os.remove(dest)
+            except: pass
+
+    def getRecordings(self):
+        recordings = self.conn.getRecordings()
+        self.assertTrue(recordings, 'Recordings required to run this test')
+        return recordings
+    
 # =============================================================================    
 if __name__ == '__main__':
     import logging.config

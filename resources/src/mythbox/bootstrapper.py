@@ -107,15 +107,16 @@ class BootStrapper(object):
         from mythbox.settings import MythSettings
         self.settings = MythSettings(self.platform, self.translator, 'settings.xml', self.bus)
         self.log.debug('Settings = \n %s' % self.settings)
-        self.fanArt = FanArt(self.platform, self.httpCache, self.settings)
+        self.fanArt = FanArt(self.platform, self.httpCache, self.settings, self.bus)
         
         import socket
         socket.setdefaulttimeout(20)
         
-        # eww...messy
-        logSettingsListener = LogSettingsListener()
-        self.settings.addListener(logSettingsListener)
-        logSettingsListener.settingChanged('logging_enabled', 'DontCare', self.settings.get('logging_enabled'))
+        self.bus.register(self)
+        
+        # Generate fake event to reflect value in settings.xml instead of mythbox_log.ini
+        from bus import Event
+        self.onEvent({'id': Event.SETTING_CHANGED, 'old':'DontCare', 'new':self.settings.get('logging_enabled')})
         
     def bootstrapUpdater(self):
         self.stage = 'Initializing Updater'
@@ -139,37 +140,27 @@ class BootStrapper(object):
             bus=self.bus,
             feedHose=self.feedHose).doModal()
 
-# =============================================================================            
-class LogSettingsListener(object):
-    
-    loggerNames = ['unittest', 
-               'mysql' , 
-               'core' , 
-               'method' , 
-               'skin' , 
-               'wire' , 
-               'ui' , 
-               'perf' , 
-               'fanart',
-               'settings',
-               'cache',
-               'event',
-               'inject']
-
-    def settingChanged(self, tag, old, new):
-        if tag == 'logging_enabled':
+    def onEvent(self, event):
+        from bus import Event
+        
+        #
+        # Apply changes to logger when user turns debug logging on/off
+        #
+        if event['id'] == Event.SETTING_CHANGED and event['tag'] == 'logging_enabled':
             import logging
-            logging.root.debug('Setting changed: %s %s %s' % (tag, old, new))
+            logging.root.debug('Setting changed: %s %s %s' % (event['tag'], event['old'], event['new']))
 
-            if new == 'True': 
+            if event['new'] == 'True': 
                 level = logging.DEBUG
             else: 
                 level = logging.WARN
                 
-            for name in self.loggerNames:
+            loggerNames = 'unittest mysql core method skin wire ui perf fanart settings cache event inject'.split()
+                
+            for name in loggerNames:
                 logger = logging.getLogger('mythbox.%s' %  name)
                 logger.setLevel(level)
-            
+
             # TODO: Adjust xbmc loglevel 
             #savedXbmcLogLevel = xbmc.executehttpapi("GetLogLevel").replace("<li>", "")
             #xbmc.executehttpapi('SetLogLevel(3)')

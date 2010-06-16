@@ -171,8 +171,7 @@ class HomeWindow(BaseWindow):
             # init pools for @inject_db and @inject_conn
             pool.pools['dbPool'] = pool.Pool(MythDatabaseFactory(settings=self.settings, translator=self.translator))
             pool.pools['connPool'] = pool.Pool(ConnectionFactory(settings=self.settings, translator=self.translator, platform=self.platform, bus=self.bus))
-            self.settings.addListener(DatabaseSettingsListener())
-        
+         
         return self.settingsOK
     
     def shutdown(self):
@@ -446,12 +445,4 @@ class HomeWindow(BaseWindow):
             self.renderCoverFlow(exclude=event['program'])
         elif event['id'] == Event.SETTING_CHANGED and event['tag'] == 'feeds_twitter':
             self.renderNewsFeed()
-
-# =============================================================================            
-class DatabaseSettingsListener(object):
-    
-    def settingChanged(self, tag, old, new):
-        if tag in ('mysql_host', 'mysql_port', 'mysql_database', 'mysql_user', 'mysql_password'):
-            logging.root.debug('Setting changed: %s %s %s' % (tag, old, new))
-            # TODO: reset db pools?
                             

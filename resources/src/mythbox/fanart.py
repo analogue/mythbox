@@ -33,6 +33,7 @@ import Queue
 
 from decorator import decorator
 from mythbox.util import synchronized, safe_str, run_async, max_threads, timed
+from mythbox.bus import Event
 from tvdb_api import Tvdb
 
 log = logging.getLogger('mythbox.fanart')
@@ -299,7 +300,7 @@ class HttpCachingFanartProvider(BaseFanartProvider):
         if httpPosters:
             first = self.tryToCache(httpPosters[0])
             if first:
-                results.append(first)                    
+                results.append(first)                  
             for nextUrl in httpPosters[1:]:
                 self.workQueue.put({'results' : results, 'httpUrl' : nextUrl })
         
@@ -485,13 +486,13 @@ class GoogleImageSearchProvider(BaseFanartProvider):
 class FanArt(object):
     """One stop shop for fanart"""
     
-    def __init__(self, platform, httpCache, settings):
+    def __init__(self, platform, httpCache, settings, bus):
         self.platform = platform
         self.httpCache = httpCache
         self.settings = settings
         self.provider = NoOpFanartProvider()
         self.configure(self.settings)
-        self.settings.addListener(self)
+        bus.register(self)
         
     def getRandomPoster(self, program):
         """
@@ -528,7 +529,8 @@ class FanArt(object):
         p = SpamSkippingFanartProvider(p)
         self.provider = p
     
-    def settingChanged(self, tag, old, new):
-        if tag in ('fanart_tvdb', 'fanart_tmdb', 'fanart_imdb', 'fanart_google'):
-            log.debug('Applying %s change to fanart provider' % tag)
-            self.configure(self.settings)
+    def onEvent(self, event):
+        if event['id'] == Event.SETTING_CHANGED:
+            if event['tag'] in ('fanart_tvdb', 'fanart_tmdb', 'fanart_imdb', 'fanart_google',):
+                self.configure(self.settings)
+                
