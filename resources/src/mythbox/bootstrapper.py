@@ -116,7 +116,7 @@ class BootStrapper(object):
         
         # Generate fake event to reflect value in settings.xml instead of mythbox_log.ini
         from bus import Event
-        self.onEvent({'id': Event.SETTING_CHANGED, 'old':'DontCare', 'new':self.settings.get('logging_enabled')})
+        self.onEvent({'id': Event.SETTING_CHANGED, 'tag':'logging_enabled', 'old':'DontCare', 'new':self.settings.get('logging_enabled')})
         
     def bootstrapUpdater(self):
         self.stage = 'Initializing Updater'
