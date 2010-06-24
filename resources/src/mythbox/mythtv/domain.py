@@ -2137,3 +2137,12 @@ class Backend(object):
         self.port = port
         self.master = master
         self.slave = not self.master
+        
+    def __repr__(self):
+        return '%s {ip = %s, hostname = %s, port = %s, master = %s}' % (
+            type(self).__name__,
+            self.ipAddress,
+            self.hostname,
+            self.port,
+            self.master)
+        

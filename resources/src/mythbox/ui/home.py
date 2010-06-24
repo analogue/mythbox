@@ -171,9 +171,20 @@ class HomeWindow(BaseWindow):
             # init pools for @inject_db and @inject_conn
             pool.pools['dbPool'] = pool.Pool(MythDatabaseFactory(settings=self.settings, translator=self.translator))
             pool.pools['connPool'] = pool.Pool(ConnectionFactory(settings=self.settings, translator=self.translator, platform=self.platform, bus=self.bus))
-         
+        
+        if self.settingsOK:
+            self.dumpBackendInfo()
+             
         return self.settingsOK
     
+    @inject_db
+    def dumpBackendInfo(self):
+        backends = [self.db().getMasterBackend()]
+        backends.extend(self.db().getSlaveBackends())
+        log.warn('Backend info')
+        for b in backends:
+            log.warn('\t' + str(b))
+            
     def shutdown(self):
         self.setBusy(True)
         self.bus.deregister(self)

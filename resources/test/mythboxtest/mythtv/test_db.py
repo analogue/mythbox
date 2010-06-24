@@ -57,7 +57,7 @@ class MythDatabaseTest(unittest.TestCase):
 
     def test_getMasterBackend(self):
         mbe = self.db.getMasterBackend()
-        log.debug(mbe.hostname + ' ' + mbe.ipAddress + ':' + mbe.port)        
+        log.debug(mbe)        
         self.assertTrue(mbe.hostname)
         self.assertTrue(mbe.ipAddress)
         self.assertTrue(mbe.port)
@@ -67,7 +67,7 @@ class MythDatabaseTest(unittest.TestCase):
     def test_getSlaveBackends(self):
         slaves = self.db.getSlaveBackends()
         for slave in slaves:
-            log.debug(slave.hostname + ' ' + slave.ipAddress + ':' + slave.port)
+            log.debug(slave)
             self.assertFalse(slave.master)
             self.assertTrue(slave.slave)
         
