@@ -226,6 +226,57 @@ class MythDatabase(object):
             self.conn.close()
             del self.conn
 
+    @inject_cursor
+    def getMasterBackend(self):
+        sql = """
+            select 
+                a.data as ipaddr,
+                b.data as port,
+                c.hostname as hostname
+            from 
+                settings a, 
+                settings b,
+                settings c
+            where 
+                a.value = 'MasterServerIP' and
+                b.value = 'MasterServerPort' and
+                c.value = 'BackendServerIP' and
+                c.data  = a.data
+            """
+                
+        self.cursor.execute(sql)
+        rows = map(lambda r: self.toDict(self.cursor, r), self.cursor.fetchall())
+        from mythbox.mythtv.domain import Backend
+        for row in rows:
+            mbe = Backend(row['hostname'], row['ipaddr'], row['port'],  True)
+            return mbe
+
+    @inject_cursor
+    def getSlaveBackends(self):
+        sql = """
+            select  
+                a.data as ipaddr,  
+                a.hostname as hostname,
+                b.data as port
+            from 
+                settings a,
+                settings b,
+                settings c
+            where 
+                a.value = 'BackendServerIP' and
+                b.value = 'BackendServerPort' and
+                a.hostname = b.hostname and
+                c.data != a.data and
+                c.value = 'MasterServerIP'        
+            """
+        self.cursor.execute(sql)
+        rows = map(lambda r: self.toDict(self.cursor, r), self.cursor.fetchall())
+        from mythbox.mythtv.domain import Backend
+        slaves = []
+        for row in rows:
+            slaves.append(Backend(row['hostname'], row['ipaddr'], row['port'],  False))
+        return slaves
+            
     @timed
     @inject_cursor
     def getChannels(self):

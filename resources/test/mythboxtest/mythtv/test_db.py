@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -55,6 +55,22 @@ class MythDatabaseTest(unittest.TestCase):
     def test_constructor(self):
         self.assertTrue(self.db)
 
+    def test_getMasterBackend(self):
+        mbe = self.db.getMasterBackend()
+        log.debug(mbe.hostname + ' ' + mbe.ipAddress + ':' + mbe.port)        
+        self.assertTrue(mbe.hostname)
+        self.assertTrue(mbe.ipAddress)
+        self.assertTrue(mbe.port)
+        self.assertTrue(mbe.master)
+        self.assertFalse(mbe.slave)
+    
+    def test_getSlaveBackends(self):
+        slaves = self.db.getSlaveBackends()
+        for slave in slaves:
+            log.debug(slave.hostname + ' ' + slave.ipAddress + ':' + slave.port)
+            self.assertFalse(slave.master)
+            self.assertTrue(slave.slave)
+        
     def test_getChannels(self):
         channels = self.db.getChannels()
         for i, channel in enumerate(channels):

@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -155,8 +155,6 @@ class SettingsWindow(BaseWindow):
             # MythTV Settings
             self.register(Setting(self.settings, 'mythtv_host', str, ExternalizedSettingValidator(MythSettings.verifyMythTVHost), self.getControl(201)))
             self.register(Setting(self.settings, 'mythtv_port', int, ExternalizedSettingValidator(MythSettings.verifyMythTVPort), self.getControl(202)))
-            #self.register(Setting(self.settings, 'mythtv_minlivebufsize', int, ExternalizedSettingValidator(MythSettings.verifyLiveTVBufferSize), self.getControl(203)))
-            #self.register(Setting(self.settings, 'mythtv_tunewait', int, ExternalizedSettingValidator(MythSettings.verifyLiveTVTimeout), self.getControl(204)))
             self.register(Setting(self.settings, 'paths_recordedprefix', str, ExternalizedSettingValidator(MythSettings.verifyRecordingDirs), self.getControl(205)))
             self.register(Setting(self.settings, 'paths_ffmpeg', str, ExternalizedSettingValidator(MythSettings.verifyFFMpeg, self.platform), self.getControl(209)))
             self.register(Setting(self.settings, 'confirm_on_delete', bool, None, self.getControl(206)))
@@ -204,6 +202,7 @@ class SettingsWindow(BaseWindow):
         if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
             self.close()
 
+    @window_busy
     def render(self):
         for setting in self.settingsMap.values():
             log.debug('Rendering %s' % setting.key)

@@ -2093,9 +2093,9 @@ class Job(object):
             self.formattedJobType(),
             self.formattedJobStatus(),
             self.scheduledRunTime)
-        
-# =============================================================================
-class MythUrl:
+
+
+class MythUrl(object):
     
     pattern = re.compile('myth://([A-Za-z0-9\.]*):([0-9]*)(.*)')
      
@@ -2127,3 +2127,13 @@ class MythUrl:
             self.match()
         if self.matches:
             return self.matches.group(3)
+        
+                
+class Backend(object):
+    
+    def __init__(self, hostname, ipAddress, port, master):
+        self.ipAddress = ipAddress
+        self.hostname = hostname
+        self.port = port
+        self.master = master
+        self.slave = not self.master
