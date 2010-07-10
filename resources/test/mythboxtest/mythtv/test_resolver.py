@@ -48,8 +48,6 @@ class MythChannelIconResolverTest(unittest.TestCase):
         self.settings.setMySqlDatabase(privateConfig.get('mysql_database'))
         self.settings.setMySqlUser(privateConfig.get('mysql_user'))  
         self.settings.setMySqlPassword(privateConfig.get('mysql_password'))
-        self.settings.setMythTvHost(privateConfig.get('mythtv_host'))
-        self.settings.setMythTvPort(int(privateConfig.get('mythtv_port')))
         self.settings.setRecordingDirs(privateConfig.get('paths_recordedprefix'))
         
         log.debug('%s' % self.settings)

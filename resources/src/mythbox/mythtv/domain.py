@@ -2134,7 +2134,7 @@ class Backend(object):
     def __init__(self, hostname, ipAddress, port, master):
         self.ipAddress = ipAddress
         self.hostname = hostname
-        self.port = port
+        self.port = int(port)
         self.master = master
         self.slave = not self.master
         

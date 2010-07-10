@@ -92,17 +92,20 @@ class MythLiveTvPlayer(xbmc.Player):
     def __init__(self):
         xbmc.Player.__init__(self)    
         self._active = True
-    
+
+    @inject_db    
     def watchChannel(self, settings, channel):
         # This player doesn't care about on* callbacks, so no need to wait for playback
         # completion. 
 
+        master = self.db().getMasterBackend()
+        
         # url must not be unicode!
         url = 'myth://%s:%s@%s:%s/channels/%s.ts' % (
             str(settings.get('mysql_user')),
             str(settings.get('mysql_password')),
-            str(settings.get('mythtv_host')),
-            str(settings.get('mythtv_port')),
+            str(master.ipAddress),
+            str(master.port),
             str(channel.getChannelNumber()))
         self.play(url)
 

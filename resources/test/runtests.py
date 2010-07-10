@@ -65,12 +65,12 @@ if __name__ == '__main__':
     logging.config.fileConfig('mythbox_log.ini')
     testSuite = suite()
 
-    rc = unittest.TextTestRunner(verbosity = 3).run(testSuite)
+    #rc = unittest.TextTestRunner(verbosity = 3).run(testSuite)
     
-    #import HTMLTestRunner 
-    #fp = file('mythbox_report.html', 'wb')
-    #runner = HTMLTestRunner.HTMLTestRunner(stream=fp, title='MythBox Unit Test Results')
-    #rc = runner.run(testSuite)
+    import HTMLTestRunner 
+    fp = file('mythbox_report.html', 'wb')
+    runner = HTMLTestRunner.HTMLTestRunner(stream=fp, title='MythBox Unit Test Results')
+    rc = runner.run(testSuite)
     
     print('runtests rc = %s' % rc.wasSuccessful())
     import sys

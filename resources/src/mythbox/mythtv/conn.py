@@ -134,12 +134,11 @@ class ServerException(Exception):
     """Thrown in response to error conditions from the mythtv backend"""
     pass
 
-# =============================================================================
+
 class Connection(object):
     """
     Connection to MythTV Backend.
-    
-    TODO: Update to support multiple storage groups - getDiskUsage()
+    TODO: Fix quirkiness -- establishes new conn to slave if target backend isn't the master
     """
     
     def __init__(self, settings, translator, platform, bus, db=None):
@@ -151,13 +150,15 @@ class Connection(object):
         self.platform = platform
         self.bus = bus
         self._db = db
-        
-        self.host = self.settings.getMythTvHost()
-        self.port = self.settings.getMythTvPort()
-        self.cmdSock = self.connect()
-        
+        self.db_init()
+
     def db(self):
         return self._db
+    
+    @inject_db    
+    def db_init(self):
+        self.master = self.db().getMasterBackend()
+        self.cmdSock = self.connect()
 
     def connect(self, announce='Playback', slaveBackend=None):
         """
@@ -169,8 +170,8 @@ class Connection(object):
         """
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if slaveBackend == None:
-            slaveBackend = self.host
-        s.connect((slaveBackend, self.port))
+            slaveBackend = self.master.ipAddress
+        s.connect((slaveBackend, self.master.port))
         
         if not protocol.serverVersion:
             protocol.serverVersion = self.getServerVersion()
@@ -195,7 +196,7 @@ class Connection(object):
         # TODO: Optimize to static method proteced by a class level lock so only done once
         #       and not multiple times on a flurry of new connection instances on startup
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((self.settings.getMythTvHost() , self.settings.getMythTvPort()))
+        sock.connect((self.master.ipAddress, self.master.port))
         try:
             # induce reject
             reply = self._sendRequest(sock, ['MYTH_PROTO_VERSION %d' % protocol.initVersion])
@@ -449,7 +450,7 @@ class Connection(object):
     
     def isTunerRecording(self, tuner):
         command = ['QUERY_RECORDER %d' % tuner.tunerId, 'IS_RECORDING']
-        if tuner.hostname == self.host:
+        if tuner.hostname == self.master.hostname:
             reply = self._sendRequest(self.cmdSock, command)
             return reply[0] == '1'
         else:
@@ -576,7 +577,7 @@ class Connection(object):
         msg.append('%d' % 360)
         
         # if a slave backend, establish a new connection otherwise reuse existing connection to master backend.        
-        if backendHost != self.settings.getMythTvHost():
+        if backendHost != self.master.hostname:
             s = self.connect(slaveBackend=backendHost)
             reply = self._sendRequest(s, msg)
             result = self._isOk(reply)
@@ -648,7 +649,7 @@ class Connection(object):
         msg.append('')  # trailing separator
         msg.insert(0, 'QUERY_PIXMAP_LASTMODIFIED')
 
-        if backendHost == self.settings.getMythTvHost():
+        if backendHost == self.master.hostname:
             reply = self._sendRequest(self.cmdSock, msg)
         else: 
             s = self.connect(slaveBackend=backendHost)
@@ -1040,11 +1041,11 @@ class Connection(object):
         closeCommandSocket = False
         
         if backendHost ==  None:
-            backendHost = self.settings.getMythTvHost()
+            backendHost = self.master.ipAddress
             log.debug('Backend null, so requesting file from: %s' % backendHost)    
         
         # Don't reuse cmd sock if we're requesting a file from a slave backend
-        if backendHost != self.settings.getMythTvHost():
+        if not backendHost in (self.master.hostname, self.master.ipAddress, ):
             log.debug('Requesting file from slave backend: %s' % backendHost)
             commandSocket = self.connect(announce='Playback', slaveBackend=backendHost)
             closeCommandSocket = True 
@@ -1108,7 +1109,6 @@ class Connection(object):
     def _readMsg(self, s):
         retMsg = ''
         try:
-            #retMsg = s.recv(8, socket.MSG_WAITALL)
             retMsg = self.recv_all(s, 8)
             #wirelog.debug("REPLY: %s"%retMsg)
             reply = ''
@@ -1120,7 +1120,6 @@ class Connection(object):
             i = 0
             while i < n:
                 wirelog.debug (" i=%d n=%d " % (i,n))
-                #reply += s.recv(n - i) # , socket.MSG_WAITALL)
                 reply += self.recv_all(s, n - i)
                 i = len(reply)
                 wirelog.debug("total read = %d" % i)

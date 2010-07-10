@@ -70,7 +70,8 @@
                 <texturenofocus>-</texturenofocus>
                 <textcolor>88FFFFFF</textcolor>
                 <focusedcolor>ffffffff</focusedcolor>
-                <label2></label2>
+                <label2>$INFO[Window.Property(MasterBackendHostname)]</label2>
+                <enable>false</enable>
             </control>
 
             <control type="button" id="202">
@@ -84,7 +85,8 @@
                 <texturenofocus>-</texturenofocus>
                 <textcolor>88FFFFFF</textcolor>
                 <focusedcolor>ffffffff</focusedcolor>
-                <label2></label2>
+                <label2>$INFO[Window.Property(MasterBackendPort)]</label2>
+                <enable>false</enable>
             </control>
             
             <control type="image" id="207">
@@ -133,7 +135,7 @@
 -->
 
             <control type="button" id="205">
-                <label>Recording Directory(s)</label>
+                <label>Local Recording Directory(s)</label>
                 <width>950</width>
                 <height>35</height>
                 <align>left</align>

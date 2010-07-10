@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -34,7 +34,6 @@ from mythbox.platform import Platform
 
 log = logging.getLogger('mythbox.unittest')
 
-# =============================================================================
 class ModuleFunctionsTest(unittest.TestCase):
     
     def test_ctime2MythTime_MinDateStringReturnsMinDate(self):
@@ -87,13 +86,13 @@ class ModuleFunctionsTest(unittest.TestCase):
         log.debug('3336669.97 seconds @ 29.97fps = %s frames' % s)
         self.assertEquals(99999999L, s)
 
-# =============================================================================
+
 class CheckForDupesUsingTest(unittest.TestCase):
     
     def test_access_to_static_constants_works(self):
         self.assertEquals(145, CheckForDupesUsing.translations[CheckForDupesUsing.NONE])
         
-# =============================================================================
+
 class ProgramTest(unittest.TestCase):
 
     def setUp(self):
@@ -103,7 +102,7 @@ class ProgramTest(unittest.TestCase):
         p = Program(self.translator)
         self.assertFalse(p is None)
 
-# =============================================================================
+
 class ChannelTest(unittest.TestCase):
     
     def test_constructor(self):
@@ -136,7 +135,7 @@ class ChannelTest(unittest.TestCase):
         log.debug('Sortable channel number = %s' % number)
         self.assertEquals(9, number)
 
-# =============================================================================
+
 class TVProgramTest(unittest.TestCase):
 
     def setUp(self):
@@ -168,7 +167,7 @@ class TVProgramTest(unittest.TestCase):
         p = TVProgram({'starttime': datetime.datetime(2008, 11, 21, 14)}, self.translator)
         self.assertEquals('20081121140000', p.starttime())
 
-# =============================================================================
+
 class RecordedProgramTest(unittest.TestCase):
 
     def setUp(self):
@@ -229,7 +228,6 @@ class RecordedProgramTest(unittest.TestCase):
         self.data[8] = "myth://192.168.1.11:6543/movie_29.97_fps.mpg" # filename 
         self.data[16] = "localhost" # hostname
         when(self.settings).getRecordingDirs().thenReturn([os.path.join(os.getcwd(), 'resources', 'test')])
-        when(self.settings).getMythTvHost().thenReturn('localhost')
         when(self.platform).getFFMpegExecutableName().thenReturn('ffmpeg')
         p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
         fps = p.getFrameRate()
@@ -333,7 +331,7 @@ class RecordedProgramTest(unittest.TestCase):
     def socketDateTime(self, year, month, day, h, m, s):
         return time.mktime(datetime.datetime.combine(datetime.date(year, month, day), datetime.time(h,m,s)).timetuple())
         
-# =============================================================================    
+
 class TunerTest(unittest.TestCase):
 
     def setUp(self):
@@ -416,7 +414,7 @@ class TunerTest(unittest.TestCase):
     def test_getNextScheduledRecording(self):
         pass # TODO
     
-# =============================================================================    
+
 class CommercialBreakTest(unittest.TestCase):
     
     def test_constructor(self):
@@ -441,7 +439,7 @@ class CommercialBreakTest(unittest.TestCase):
         commercial = CommercialBreak(100, 200)
         self.assertFalse(commercial.isDuring(350))
 
-# =============================================================================
+
 class RecordingScheduleTest(unittest.TestCase):
     
     def test_starttime_DataFromNativeMySQL(self):
@@ -481,7 +479,7 @@ class RecordingScheduleTest(unittest.TestCase):
         self.assertEquals(EpisodeFilter.NONE, schedule.getEpisodeFilter())
         self.assertEquals(CheckForDupesIn.PREVIOUS_RECORDINGS, schedule.getCheckForDupesIn())
 
-# =============================================================================
+
 class JobTest(unittest.TestCase):
 
     def setUp(self):
@@ -758,7 +756,6 @@ class JobTest(unittest.TestCase):
             db=db)        
 
 
-# =============================================================================
 class MythUrlTest(unittest.TestCase):
 
     def test_When_url_has_hostname_Then_parse_successful(self):
@@ -779,7 +776,7 @@ class MythUrlTest(unittest.TestCase):
         self.assertTrue(url.path() is None)
         self.assertTrue(url.port() is None)
         
-# =============================================================================    
+
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')

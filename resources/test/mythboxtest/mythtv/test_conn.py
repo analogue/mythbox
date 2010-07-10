@@ -34,7 +34,6 @@ from mythbox.util import OnDemandConfig
 
 log = logging.getLogger('mythbox.unittest')
 
-# =============================================================================
 class FunctionsTest(unittest.TestCase):
     
     def test_createChainId(self):
@@ -71,7 +70,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertEquals(0xffffffff, lowWord)
         self.assertEquals(0xffffffff, highWord)
 
-# =============================================================================
+
 class ConnectionTest(unittest.TestCase):
 
     def setUp(self):
@@ -85,8 +84,6 @@ class ConnectionTest(unittest.TestCase):
         self.settings.setMySqlDatabase(privateConfig.get('mysql_database'))
         self.settings.setMySqlUser(privateConfig.get('mysql_user'))  
         self.settings.put('mysql_password', privateConfig.get('mysql_password'))
-        self.settings.setMythTvHost(privateConfig.get('mythtv_host'))
-        self.settings.setMythTvPort(int(privateConfig.get('mythtv_port')))
         self.settings.put('paths_recordedprefix', privateConfig.get('paths_recordedprefix'))
         
         self.db = MythDatabase(self.settings, self.translator)
@@ -310,20 +307,20 @@ class ConnectionTest(unittest.TestCase):
     def test_generateThumbnail_ReturnsTrue(self):
         recording = self.getRecordings()[-1]
         log.debug('Generating thumbnail for program: %s' % recording)
-        result = self.conn.generateThumbnail(recording, self.settings.getMythTvHost())
+        result = self.conn.generateThumbnail(recording, self.db.getMasterBackend().ipAddress)
         self.assertTrue(result)
 
     def test_generateThumbnail_WithSpecificSize(self):
         recording = self.getRecordings()[-1]
         log.debug('Generating thumbnail for program: %s' % recording.title())
-        result = self.conn.generateThumbnail(recording, self.settings.getMythTvHost(), 1280/4, 720/4)
+        result = self.conn.generateThumbnail(recording, self.db.getMasterBackend().ipAddress, 1280/4, 720/4)
         log.debug(result)
         self.assertTrue(result)
          
     def test_getThumbnailCreationTime_ThumbnailExists(self):
         recording = self.getRecordings()[0]
         log.debug('Getting thumbnail creation time for: %s' % recording.title())
-        dt = self.conn.getThumbnailCreationTime(recording, self.settings.getMythTvHost())
+        dt = self.conn.getThumbnailCreationTime(recording, self.db.getMasterBackend().ipAddress)
         log.debug('datetime = %s' % dt)
         
     def test_getThumbNailCreationTime_ThumbnailDoesNotExist(self):
@@ -369,8 +366,8 @@ class ConnectionTest(unittest.TestCase):
     
     def test_transferFile_When_file_does_not_exist_on_backend_Then_transfer_aborted(self):
         dest = tempfile.mktemp('bogusfile.mpg')
-        backendPath = "myth://" + self.settings.getMythTvHost() + ":" + str(self.settings.getMythTvPort()) + "/bogusfile.mpg"
-        result = self.conn.transferFile(backendPath, dest, self.settings.getMythTvHost())
+        backendPath = "myth://" + self.db.getMasterBackend().ipAddress + ":" + str(self.db.getMasterBackend().port) + "/bogusfile.mpg"
+        result = self.conn.transferFile(backendPath, dest, self.db.getMasterBackend().ipAddress)
         self.assertFalse(os.path.exists(dest))
         self.assertFalse(result)
 
@@ -397,7 +394,7 @@ class ConnectionTest(unittest.TestCase):
         self.assertTrue(recordings, 'Recordings required to run this test')
         return recordings
     
-# =============================================================================    
+
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')

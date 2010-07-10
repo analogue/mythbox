@@ -169,8 +169,11 @@ class HomeWindow(BaseWindow):
             
         if self.settingsOK:      
             # init pools for @inject_db and @inject_conn
-            pool.pools['dbPool'] = pool.Pool(MythDatabaseFactory(settings=self.settings, translator=self.translator))
-            pool.pools['connPool'] = pool.Pool(ConnectionFactory(settings=self.settings, translator=self.translator, platform=self.platform, bus=self.bus))
+            pool.pools['dbPool'] = pool.EvictingPool(MythDatabaseFactory(settings=self.settings, translator=self.translator), maxAgeSecs=10*60, reapEverySecs=10)
+            pool.pools['connPool'] = pool.EvictingPool(ConnectionFactory(settings=self.settings, translator=self.translator, platform=self.platform, bus=self.bus), maxAgeSecs=10*60, reapEverySecs=10)
+
+            #pool.pools['dbPool'] = pool.Pool(MythDatabaseFactory(settings=self.settings, translator=self.translator))
+            #pool.pools['connPool'] = pool.Pool(ConnectionFactory(settings=self.settings, translator=self.translator, platform=self.platform, bus=self.bus))
         
         if self.settingsOK:
             self.dumpBackendInfo()
@@ -194,8 +197,22 @@ class HomeWindow(BaseWindow):
             log.exception('Saving settings on exit')
 
         self.fanArt.shutdown()
-            
+
         try:
+            # HACK ALERT:
+            #   Pool reaper thread is @run_async so we need to 
+            #   allow it to die before we start waiting for the 
+            #   worker threads to exit in waitForWorkersToDie(). 
+            #   pool.shutdown() is the normal way to do it but we can't shut
+            #   down the pools until theads (which may have 
+            #   refs to pooled resources) have all exited.
+            #   
+            # TODO: 
+            #   Fix is to refactor EvictingPool to not use
+            #   the @run_async decorator
+            for (poolName, poolInstance) in pool.pools.items():
+                poolInstance.stopReaping = True
+            
             if hasPendingWorkers():
                 showPopup('Please wait', 'Closing connections...', 3000)
                 waitForWorkersToDie(30.0) # in seconds

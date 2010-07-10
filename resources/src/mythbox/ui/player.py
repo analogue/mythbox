@@ -25,6 +25,7 @@ import xbmcgui
 
 from mythbox.ui.toolkit import showPopup
 from mythbox.util import formatSeconds, BoundedEvictingQueue
+from mythbox.mythtv.db import inject_db
 
 log = logging.getLogger('mythbox.ui')
 mlog = logging.getLogger('mythbox.method')
@@ -171,13 +172,14 @@ class MythStreamingPlayer(MythPlayer):
         MythPlayer.__init__(self, *args, **kwargs)    
         self.settings = kwargs['settings']
         
+    @inject_db        
     def getFileUrl(self):
-        # myth://dbname:dbpassword@hostname:port/recordings/filename.mpg
+        # myth://dbuser:dbpassword@mythbackend_hostname:mythbackend_port/recordings/filename.mpg
         url = 'myth://%s:%s@%s:%s/recordings/%s' % (
             self.settings.get('mysql_database'),
             self.settings.get('mysql_password'),
-            self.getProgram().hostname(),
-            self.settings.get('mythtv_port'),
+            self.getProgram().hostname(),  # TODO: reconcile with master/slaves and use ip address instead
+            self.db().getMasterBackend().port,
             self.getProgram().getBareFilename())
         log.debug('XBMC recording url: %s' % url)
         return url

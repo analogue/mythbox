@@ -28,12 +28,12 @@ from xml.dom import minidom
 
 slog = logging.getLogger('mythbox.settings')
 
-# =============================================================================
+
 class SettingsException(Exception):
     """Thrown when a setting fails validation in MythSettings""" 
     pass
 
-# =============================================================================
+
 class MythSettings(object):
     """
     Settings reside in $HOME/.xbmc/userdata/script_data/MythBox/settings.xml
@@ -84,12 +84,6 @@ class MythSettings(object):
     def getMySqlPassword(self): return self.get('mysql_password')
     def setMySqlPassword(self, password): self.put('mysql_password', password)
 
-    def getMythTvHost(self): return self.get('mythtv_host')
-    def setMythTvHost(self, host): self.put('mythtv_host', host)
-    
-    def getMythTvPort(self): return int(self.get('mythtv_port'))
-    def setMythTvPort(self, port): self.put('mythtv_port', '%s' % port)
-
     def setRecordingDirs(self, dirs):
         """
         @type dirs: str  - one or more separated by os.pathsep      
@@ -134,8 +128,6 @@ class MythSettings(object):
 
     def initDefaults(self):
         self.defaults = {
-            'mythtv_host'             : 'localhost',
-            'mythtv_port'             : '6543',
             'mysql_host'              : 'localhost',
             'mysql_port'              : '3306',
             'mysql_database'          : 'mythconverg',
@@ -213,8 +205,6 @@ class MythSettings(object):
             if self.get(tag) is None:
                 raise SettingsException('%s %s' % (self.translator.get(34), tag))
         
-        MythSettings.verifyMythTVHost(self.getMythTvHost())
-        MythSettings.verifyMythTVPort(self.get('mythtv_port'))
         MythSettings.verifyMySQLHost(self.get('mysql_host'))
         MythSettings.verifyMySQLPort(self.get('mysql_port'))
         MythSettings.verifyMySQLDatabase(self.get('mysql_database'))
@@ -227,13 +217,16 @@ class MythSettings(object):
         slog.debug('verified settings')
 
     def verifyMythTVConnectivity(self):
+        db = MythDatabase(self, self.translator)
+        self.master = db.getMasterBackend()
+        
         try:
             from mythbox.mythtv.conn import Connection
-            session = Connection(self, translator=self.translator, platform=self.platform, bus=EventBus(), db=None)
+            session = Connection(self, translator=self.translator, platform=self.platform, bus=EventBus(), db=db)
             session.close()
         except Exception, ex:
             slog.exception(ex)
-            raise SettingsException('Connection to MythTV failed: %s' % ex)
+            raise SettingsException('Connection to MythTV host %s failed: %s' % (db.getMasterBackend().ipAddress, ex))
     
     def verifyMySQLConnectivity(self):
         try:
@@ -276,17 +269,6 @@ class MythSettings(object):
                 raise SettingsException("Recording directory '%s' does not exist." % dir)
             if not os.path.isdir(dir):
                 raise SettingsException("Recording directory '%s' is not a directory." % dir)
-    
-    @staticmethod        
-    def verifyMythTVHost(host):
-        MythSettings.verifyString(host, 'Enter MythTV master backend hostname or IP address')
-        MythSettings.verifyHostnameOrIPAddress(host, "Hostname '%s' cannot be resolved to an IP address."%host)
-    
-    @staticmethod
-    def verifyMythTVPort(port):
-        errMsg = 'Enter MythTV master backend port. Hint: 6543 is the MythTV default'
-        MythSettings.verifyString(port, errMsg)
-        MythSettings.verifyNumberBetween(port, 1, 65536, errMsg)
         
     @staticmethod    
     def verifyMySQLHost(host):

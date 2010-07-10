@@ -17,10 +17,11 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
+import datetime
 import logging
-import threading
+import time
 
-from mythbox.util import sync_instance
+from mythbox.util import sync_instance, run_async
 
 log = logging.getLogger('mythbox.inject')
 
@@ -29,7 +30,7 @@ log = logging.getLogger('mythbox.inject')
 #    value = Pool instance
 pools = {}
           
-# =============================================================================
+
 class PoolableFactory(object):
     """
     Any resource which is pooled needs a factory to create concrete instances.
@@ -40,7 +41,7 @@ class PoolableFactory(object):
     def destroy(self, resource):
         raise Exception, "Abstract method"
 
-# =============================================================================
+
 class Pool(object):
     """
     Simple no frills unbounded resource pool
@@ -54,7 +55,6 @@ class Pool(object):
         self.isShutdown = False
         self.inn = []
         self.out = []
-        self.lock = threading.RLock()
 
     @sync_instance
     def checkout(self):
@@ -111,3 +111,74 @@ class Pool(object):
             for i in range(delta):
                 r = self.factory.create()
                 self.inn.append(r)
+                
+                
+class EvictingPool(Pool):
+    """Evicts resources asynchronously based on a configurable maximum age. Surprisingly, I came up empty finding 
+       an existing FOSS implementation where evictions were async."""
+       
+    def __init__(self, factory, maxAgeSecs, reapEverySecs):
+        Pool.__init__(self, factory)
+        self.maxAgeSecs = maxAgeSecs
+        self.reapEverySecs = reapEverySecs
+        self.evictorThread = self.evictor()  # TODO: Don't start evictor until something is actually in the pool
+        self.dobs = {}
+        self.stopReaping = False
+        self.numEvictions = 0
+        log.debug('Evictor thread = %s' % self.evictorThread)
+        
+    @run_async
+    def evictor(self):
+        log.debug('Evictor started')
+        cnt = 1
+        while not self.isShutdown and not self.stopReaping:
+            time.sleep(self.reapEverySecs)
+            self.reap(cnt)
+            cnt+=1
+        log.debug('Evictor exiting')
+
+    @sync_instance
+    def reap(self, cnt):
+        now = datetime.datetime.now()
+        for r in self.inn:
+            dob = self.dobs[r]
+            evictAfter = dob + datetime.timedelta(seconds=self.maxAgeSecs)
+            
+            #log.debug('Reaper check:')
+            #log.debug('  dob        = %s' % dob)
+            #log.debug('  evictAfter = %s' % evictAfter)
+            #log.debug('  now        = %s' % now)
+            
+            if now > evictAfter:
+                try:
+                    log.debug('Evicting resource %s in sweep %d' % (r, cnt))
+                    self.inn.remove(r)
+                    self.factory.destroy(r)
+                    del self.dobs[r]
+                    self.numEvictions += 1
+                except:
+                    log.exception('while reaping')
+            
+    @sync_instance
+    def checkin(self, resource):
+        super(EvictingPool, self).checkin(resource)
+        self.dobs[resource] = datetime.datetime.now()
+
+    @sync_instance
+    def grow(self, size):
+        super(EvictingPool, self).grow(size)
+        now = datetime.datetime.now()
+        for r in self.inn:
+            if not r in self.dobs:
+                self.dobs[r] = now
+                
+    # SYNC ALERT:
+    #   It is very important that call is not synchronized since we join() on the reaper thread
+    #   which may itself be in synchronized call to reap()
+    def shutdown(self):
+        self.isShutdown = True
+        if self.evictorThread.isAlive():
+            log.debug('joining evictor')
+            self.evictorThread.join(self.reapEverySecs * 2) # 2x == fudge factor
+        super(EvictingPool, self).shutdown()
+        log.debug('Total num evictions = %d' % self.numEvictions)

@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -28,7 +28,7 @@ from mythbox.util import OnDemandConfig
 
 log = logging.getLogger('mythbox.unittest')
 
-# =============================================================================
+
 class MythSettingsTest(unittest.TestCase):
 
     def setUp(self):
@@ -103,72 +103,6 @@ class MythSettingsTest(unittest.TestCase):
         dirs = settings.getRecordingDirs()
         self.assertEquals(3, len(dirs))
         self.assertEquals(['a','b','c'], dirs)
-        
-    def test_verifyMythTVHost_ValidHostname(self):
-        MythSettings.verifyMythTVHost('localhost')
-
-    def test_verifyMythTVHost_ValidIPAddress(self):
-        MythSettings.verifyMythTVHost('127.0.0.1')
-
-    def test_verifyMythTVHost_InvalidHostname(self):
-        try:
-            MythSettings.verifyMythTVHost('bogus host name')
-            self.fail('expected failure')
-        except SettingsException, se:
-            log.debug('PASS: %s' % se)
-
-    def test_verifyMythTVHost_InvalidIPAddress(self):
-        try:
-            MythSettings.verifyMythTVHost('324.23.12.23')
-            self.fail('expected failure')
-        except SettingsException, se:
-            log.debug('PASS: %s' % se)
-            
-    def test_verifyMythTVHost_EmptyHostname(self):
-        try:
-            MythSettings.verifyMythTVHost('')
-            self.fail('expected failure')
-        except SettingsException, se:
-            log.debug('PASS: %s' % se)
-
-    def test_verifyMythTVHost_BlankHostname(self):
-        try:
-            MythSettings.verifyMythTVHost('      ')
-            self.fail('expected failure')
-        except SettingsException, se:
-            log.debug('Error = %s' % se)
-            
-    def test_verifyMythTVPort_ValidPort(self):
-        MythSettings.verifyMythTVPort('1001')
-            
-    def test_verifyMythTVPort_PortLessThanZeroRaisesSettingsException(self):
-        try:
-            MythSettings.verifyMythTVPort('-34')
-            self.fail('expected failure')
-        except SettingsException, se:
-            log.debug('PASS: %s' % se)
-            
-
-    def test_verifyMythTVPort_PortGreaterThanMaxPortNumberRaisesSettingsException(self):
-        try:
-            MythSettings.verifyMythTVPort('101234')
-            self.fail('expected failure')
-        except SettingsException, se:
-            log.debug('PASS: %s' % se)
-
-    def test_verifyMythTVPort_NonNumericPortRaisesSettingsException(self):
-        try:
-            MythSettings.verifyMythTVPort('abc')
-            self.fail('expected failure')
-        except SettingsException, se:
-            log.debug('PASS: %s' % se)
-
-    def test_verifyMythTVPort_EmptyPortRaisesSettingsException(self):
-        try:
-            MythSettings.verifyMythTVPort('')
-            self.fail('expected failure')
-        except SettingsException, se:
-            log.debug('PASS: %s' % se)
 
     def test_verifyMySQLConnectivity_OK(self):
         when(self.platform).getScriptDataDir().thenReturn(tempfile.gettempdir())
@@ -201,23 +135,11 @@ class MythSettingsTest(unittest.TestCase):
         when(self.platform).getScriptDataDir().thenReturn(tempfile.gettempdir())
         settings = MythSettings(self.platform, self.translator)
         privateConfig = OnDemandConfig()
-        settings.setMythTvHost(privateConfig.get('mythtv_host'))
-        settings.setMythTvPort(int(privateConfig.get('mythtv_port')))
+        settings.put('mysql_host', privateConfig.get('mysql_host'))
+        settings.put('mysql_database', privateConfig.get('mysql_database'))
+        settings.put('mysql_user', privateConfig.get('mysql_user'))
+        settings.put('mysql_password', privateConfig.get('mysql_password'))
         settings.verifyMythTVConnectivity()
-
-    def test_verifyMythTVConnectivity_InvalidPortThrowsSettingsException(self):
-        when(self.platform).getScriptDataDir().thenReturn(tempfile.gettempdir())
-        settings = MythSettings(self.platform, self.translator)
-        privateConfig = OnDemandConfig()
-        settings.setMythTvHost(privateConfig.get('mythtv_host'))
-        settings.setMythTvPort(50000)
-        try:
-            settings.verifyMythTVConnectivity()
-            self.fail('expected failure on invalid port')
-        except SettingsException, se:
-            log.debug("PASS: %s" % se)
-        except Exception, ex:
-            self.fail('Unexpected ex type: %s' % ex)
         
     def test_verifyRecordingDirs_EmptyStringThrowsSettingsException(self):
         try:
@@ -307,7 +229,7 @@ class MythSettingsTest(unittest.TestCase):
         # Verify
         verify(self.bus, 1).publish(any(dict))
         
-# =============================================================================    
+
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')

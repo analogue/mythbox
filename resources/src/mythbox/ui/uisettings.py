@@ -21,7 +21,7 @@ import xbmcgui
 
 from mythbox.settings import MythSettings, SettingsException
 from mythbox.ui.toolkit import window_busy, BaseWindow, enterNumeric, enterText, Action
-from mythbox.util import catchall, lirc_hack
+from mythbox.util import catchall, lirc_hack, timed
 
 log = logging.getLogger('mythbox.ui')
 
@@ -127,10 +127,6 @@ class SettingsWindow(BaseWindow):
     
     def __init__(self, *args, **kwargs):
         """
-        @keyword settings: MythSettings
-        @keyword translator: Translator
-        @keyword platform: Platform
-        @keyword fanArt: FanArt
         @keyword cachesByName: dict(str:FileCache)
         """
         BaseWindow.__init__(self, *args, **kwargs)
@@ -143,9 +139,11 @@ class SettingsWindow(BaseWindow):
         
     def register(self, setting):
         self.settingsMap[setting.widget.getId()] = setting
-        
+    
+    @timed   
     def onInit(self):
         if not self.win:
+            log.debug('onInit')
             self.win = xbmcgui.Window(xbmcgui.getCurrentWindowId())
             
             # Nav Buttons
@@ -153,8 +151,10 @@ class SettingsWindow(BaseWindow):
             self.clearCacheButton = self.getControl(405)
             
             # MythTV Settings
-            self.register(Setting(self.settings, 'mythtv_host', str, ExternalizedSettingValidator(MythSettings.verifyMythTVHost), self.getControl(201)))
-            self.register(Setting(self.settings, 'mythtv_port', int, ExternalizedSettingValidator(MythSettings.verifyMythTVPort), self.getControl(202)))
+            if hasattr(self.settings, 'master') and self.settings.master:
+                self.setWindowProperty('MasterBackendHostname', '%s / %s' % (self.settings.master.hostname, self.settings.master.ipAddress))
+                self.setWindowProperty('MasterBackendPort', str(self.settings.master.port))
+                
             self.register(Setting(self.settings, 'paths_recordedprefix', str, ExternalizedSettingValidator(MythSettings.verifyRecordingDirs), self.getControl(205)))
             self.register(Setting(self.settings, 'paths_ffmpeg', str, ExternalizedSettingValidator(MythSettings.verifyFFMpeg, self.platform), self.getControl(209)))
             self.register(Setting(self.settings, 'confirm_on_delete', bool, None, self.getControl(206)))
@@ -180,6 +180,7 @@ class SettingsWindow(BaseWindow):
             self.render()
         
     @catchall    
+    @window_busy
     def onClick(self, controlId):
         log.debug('onClick %s ' % controlId)
         source = self.getControl(controlId)
@@ -219,7 +220,12 @@ class SettingsWindow(BaseWindow):
         try:
             self.settings.verify()
             xbmcgui.Dialog().ok('Info', '', 'Settings OK')
+            self.setWindowProperty('MasterBackendHostname', '%s / %s' % (self.settings.master.hostname, self.settings.master.ipAddress))
+            self.setWindowProperty('MasterBackendPort', str(self.settings.master.port))
         except SettingsException, ex:
+            self.settings.master = None
+            self.setWindowProperty('MasterBackendHostname', '')
+            self.setWindowProperty('MasterBackendPort', '')
             xbmcgui.Dialog().ok('Error', '', str(ex))
             
     @window_busy    

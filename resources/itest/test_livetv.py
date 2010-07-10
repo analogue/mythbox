@@ -41,7 +41,6 @@ class LiveTVBrainTest(unittest.TestCase):
         settings.put('mysql_host', privateConfig.get('mysql_host'))
         settings.put('mysql_password', privateConfig.get('mysql_password'))
         settings.put('mysql_database', privateConfig.get('mysql_database'))
-        settings.setMythTvHost(privateConfig.get('mythtv_host'))
         self.db = MythDatabase(settings, translator)
         self.session = Connection(settings, translator, platform, bus, self.db)
         self.brain = FileLiveTvBrain(self.session, self.db)
