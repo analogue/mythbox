@@ -32,12 +32,11 @@ from mythbox.util import OnDemandConfig
 
 log = logging.getLogger('mythbox.unittest')
 
-# =============================================================================
+
 class MythDatabaseTest(unittest.TestCase):
 
     def setUp(self):
         self.platform = Platform()
-        #self.platform = mockito.Mock()
         self.langInfo = util_mock.XBMCLangInfo(self.platform)
         self.translator = util_mock.Translator(self.platform, self.langInfo)
         self.settings = MythSettings(self.platform, self.translator)
@@ -55,6 +54,16 @@ class MythDatabaseTest(unittest.TestCase):
     def test_constructor(self):
         self.assertTrue(self.db)
 
+    def test_toBackend(self):
+        master = self.db.getMasterBackend()
+        self.assertEquals(master, self.db.toBackend(master.hostname))
+        self.assertEquals(master, self.db.toBackend(master.ipAddress))
+        self.assertTrue(self.db.toBackend('bogus') is None)
+        
+    def test_getBackends(self):
+        bes = self.db.getBackends()
+        self.assertTrue(len(bes) >= 1)
+        
     def test_getMasterBackend(self):
         mbe = self.db.getMasterBackend()
         log.debug(mbe)        
@@ -240,7 +249,6 @@ class MythDatabaseTest(unittest.TestCase):
             log.debug(p)
         
         
-# =============================================================================
 class CustomMySQLConverterTest(unittest.TestCase):
     
     def test_DATE_to_python_When_date_invalid_Then_return_none(self):
@@ -251,7 +259,7 @@ class CustomMySQLConverterTest(unittest.TestCase):
         converter = CustomMySQLConverter()
         self.assertFalse(converter._DATE_to_python('2009-10-29', dsc=None) is None)
         
-# =============================================================================
+
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')

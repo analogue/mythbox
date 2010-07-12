@@ -219,6 +219,17 @@ class MythDatabase(object):
             self.conn.close()
             del self.conn
 
+    def getBackends(self):
+        backends = [self.getMasterBackend()]
+        backends.extend(self.getSlaveBackends())
+        return backends
+    
+    def toBackend(self, hostnameOrIpAddress):
+        for b in self.getBackends():
+            if hostnameOrIpAddress in (b.hostname, b.ipAddress,):
+                return b
+        return None 
+            
     @inject_cursor
     def getMasterBackend(self):
         if not self._master:
@@ -374,7 +385,7 @@ class MythDatabase(object):
     def getTuners(self):
         """
         @rtype: Tuner[] 
-        @return: Cached tuners ordered by cardid 
+        @return: Cached tuners ordered by cardid
         """
         if not self._tuners:
             sql = """
@@ -401,7 +412,9 @@ class MythDatabase(object):
                     row['hostname'],
                     int(row['signal_timeout']),
                     int(row['channel_timeout']),
-                    row['cardtype']))
+                    row['cardtype'],
+                    conn=None,
+                    db=self))  # TODO: Should be None. self is for unit tests
         return self._tuners
 
     @timed

@@ -38,7 +38,7 @@ log     = logging.getLogger('mythbox.core')     # mythtv core logger
 wirelog = logging.getLogger('mythbox.wire')     # wire level protocol logger
 ilog    = logging.getLogger('mythbox.inject')   # dependency injection via decorators
 
-# =============================================================================
+
 def createChainId():
     """
     @return: chainId as a string suitable for spawning livetv
@@ -47,6 +47,7 @@ def createChainId():
     Match format: live-zeus-2008-12-04T11:41:52
     """
     return "live-%s-%s" % (socket.gethostname(), time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime()))
+
 
 def decodeLongLong(low32Bits, high32Bits):
     """
@@ -61,12 +62,14 @@ def decodeLongLong(low32Bits, high32Bits):
         high32Bits = long(high32Bits)
     return low32Bits & 0xffffffffL | (high32Bits << 32)
 
+
 def encodeLongLong(long64Bits):
     """
     @rtype: (low32Bits, high32Bits)
     @return: Encodes 64bit long into pair of 32 bit ints
     """
     return long64Bits & 0xffffffffL, long64Bits >> 32
+
 
 @decorator
 def inject_conn(func, *args, **kwargs):
@@ -124,22 +127,20 @@ def inject_conn(func, *args, **kwargs):
             threadlocals[tlsKey].conn = None
     return result
 
-# =============================================================================
+
 class ClientException(Exception): 
     """Thrown when the mythtv client behaves inappropriately"""
     pass
 
-# =============================================================================
+
 class ServerException(Exception): 
     """Thrown in response to error conditions from the mythtv backend"""
     pass
 
 
 class Connection(object):
-    """
-    Connection to MythTV Backend.
-    TODO: Fix quirkiness -- establishes new conn to slave if target backend isn't the master
-    """
+    """Connection to MythTV Backend.
+    TODO: Fix quirkiness -- establishes new conn to slave if target backend isn't the master"""
     
     def __init__(self, settings, translator, platform, bus, db=None):
         """
@@ -160,6 +161,7 @@ class Connection(object):
         self.master = self.db().getMasterBackend()
         self.cmdSock = self.connect()
 
+    @inject_db
     def connect(self, announce='Playback', slaveBackend=None):
         """
         Monitor connections allow backend to shutdown.
@@ -170,8 +172,11 @@ class Connection(object):
         """
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if slaveBackend == None:
-            slaveBackend = self.master.ipAddress
-        s.connect((slaveBackend, self.master.port))
+            backend = self.master
+        else:
+            backend = self.db().toBackend(slaveBackend)
+            
+        s.connect((backend.ipAddress, backend.port))
         
         if not protocol.serverVersion:
             protocol.serverVersion = self.getServerVersion()
@@ -248,6 +253,7 @@ class Connection(object):
             raise ServerException, 'Backend monitor refused: %s' % reply
 
     @timed
+    @inject_db
     def annFileTransfer(self, backendHost, filePath):
         """
         Announce file transfer to backend.
@@ -256,7 +262,8 @@ class Connection(object):
         @param filePath    : Myth style URL of file to tranfer. Ex: myth://somehost:port/blah.mpg
         @return            : list[reply[], socket] 
         """
-        s = self.connect(announce=None, slaveBackend=backendHost)
+        backend = self.db().toBackend(backendHost)
+        s = self.connect(announce=None, slaveBackend=backend.ipAddress)
         self._sendMsg(s, self.protocol.buildAnnounceFileTransferCommand(self.platform.getHostname(),  filePath))
         reply = self._readMsg(s)
         if not self._isOk(reply):
@@ -450,13 +457,12 @@ class Connection(object):
     
     def isTunerRecording(self, tuner):
         command = ['QUERY_RECORDER %d' % tuner.tunerId, 'IS_RECORDING']
-        if tuner.hostname == self.master.hostname:
+        if tuner.getBackend() == self.master:
             reply = self._sendRequest(self.cmdSock, command)
             return reply[0] == '1'
         else:
-            # TODO: Refactor on-demand connections to slave backend for all commands that are local only on master be
-            log.debug('backend is a slave..creating new connection')
-            bs = self.connect(slaveBackend=tuner.hostname)
+            log.debug('Tuner is on a slave..creating new connection')
+            bs = self.connect(slaveBackend=tuner.getBackend().ipAddress)
             reply = self._sendRequest(bs, command)
             self._sendMsg(bs, ['DONE'])
             bs.shutdown(socket.SHUT_RDWR)
@@ -503,6 +509,7 @@ class Connection(object):
         return rc1
 
     @timed
+    @inject_db
     def generateThumbnail(self, program, backendHost, width=None, height=None):
         """
         Request the backend generate a thumbnail for a program. The backend generates 
@@ -576,20 +583,26 @@ class Connection(object):
         msg.append('%d' % 640)
         msg.append('%d' % 360)
         
-        # if a slave backend, establish a new connection otherwise reuse existing connection to master backend.        
-        if backendHost != self.master.hostname:
-            s = self.connect(slaveBackend=backendHost)
+        # if a slave backend, establish a new connection otherwise reuse existing connection to master backend.
+        backend = self.db().toBackend(backendHost)
+        
+        if backend is None:
+            raise Exception('Backend hostname %s does not match any in db: %s' % (backendHost, self.db().getBackends()))
+        elif backend == self.master:
+            reply = self._sendRequest(self.cmdSock, msg)
+            result = self._isOk(reply)
+        else:
+            s = self.connect(slaveBackend=backend.ipAddress)
             reply = self._sendRequest(s, msg)
             result = self._isOk(reply)
             s.shutdown(socket.SHUT_RDWR)
             s.close()
-        else:
-            reply = self._sendRequest(self.cmdSock, msg)
-            result = self._isOk(reply)
+
         log.debug('genpixmap reply = %s' % reply)
         return result
 
     @timed
+    @inject_db
     def getThumbnailCreationTime(self, program, backendHost):
         """
         Get the time at which the thumbnail for a program was generated.
@@ -649,10 +662,15 @@ class Connection(object):
         msg.append('')  # trailing separator
         msg.insert(0, 'QUERY_PIXMAP_LASTMODIFIED')
 
-        if backendHost == self.master.hostname:
+        # if a slave backend, establish a new connection otherwise reuse existing connection to master backend.
+        backend = self.db().toBackend(backendHost)
+
+        if backend is None:
+            raise Exception('Backend hostname %s does not match any in db: %s' % (backendHost, self.db().getBackends()))
+        elif backend == self.master:
             reply = self._sendRequest(self.cmdSock, msg)
         else: 
-            s = self.connect(slaveBackend=backendHost)
+            s = self.connect(slaveBackend=backend.ipAddress)
             reply = self._sendRequest(s, msg)
             s.shutdown(socket.SHUT_RDWR)
             s.close()
@@ -1026,6 +1044,7 @@ class Connection(object):
         if int(reply[0]) < 0:
             raise ServerException, 'Reschedule notify failed: %s' % reply
 
+    @inject_db
     def transferFile(self, backendPath, destPath, backendHost, numBytes=None):
         """
         Copy a file from the remote myththv backend to destPath on the local filesystem. 
@@ -1042,17 +1061,21 @@ class Connection(object):
         
         if backendHost ==  None:
             backendHost = self.master.ipAddress
-            log.debug('Backend null, so requesting file from: %s' % backendHost)    
+            log.debug('Backend null, so requesting file from master backend: %s' % backendHost)    
+        
+        backend = self.db().toBackend(backendHost)
         
         # Don't reuse cmd sock if we're requesting a file from a slave backend
-        if not backendHost in (self.master.hostname, self.master.ipAddress, ):
-            log.debug('Requesting file from slave backend: %s' % backendHost)
-            commandSocket = self.connect(announce='Playback', slaveBackend=backendHost)
-            closeCommandSocket = True 
-        else:
+        if backend is None:
+            raise Exception, 'Cannot map backendHost %s to backends in db: %s' % (backendHost, self.db().getBackends())
+        elif backend == self.master:
             commandSocket = self.cmdSock
+        else:
+            log.debug('Requesting file from slave backend: %s' % backend.ipAddress)
+            commandSocket = self.connect(announce='Playback', slaveBackend=backend.ipAddress)
+            closeCommandSocket = True 
          
-        reply,dataSocket = self.annFileTransfer(backendHost, backendPath)
+        reply,dataSocket = self.annFileTransfer(backend.hostname, backendPath)
         filesize = decodeLongLong(reply[2], reply[1])
         log.debug('file = %s reply[0] = %s filesize = %s' % (backendPath, reply[0], filesize))
         

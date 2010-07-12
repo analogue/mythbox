@@ -25,11 +25,14 @@ import unittest
 from mockito import Mock, when, verify, any
 from mythbox.settings import MythSettings
 from mythbox.mythtv import protocol
-from mythbox.mythtv.domain import ctime2MythTime, dbTime2MythTime, Channel, CommercialBreak, Job, TVProgram, \
-    Program, RecordedProgram, RecordingSchedule, Tuner, MythUrl, StatusException, frames2seconds, \
-    seconds2frames
-from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, FlagMask, EpisodeFilter, JobStatus, \
-    JobType, TVState
+
+from mythbox.mythtv.domain import ctime2MythTime, dbTime2MythTime, Backend, \
+     Channel, CommercialBreak, Job, TVProgram, Program, RecordedProgram, \
+     RecordingSchedule, Tuner, MythUrl, StatusException, frames2seconds, seconds2frames
+
+from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, FlagMask, \
+     EpisodeFilter, JobStatus, JobType, TVState
+
 from mythbox.platform import Platform
 
 log = logging.getLogger('mythbox.unittest')
@@ -335,8 +338,9 @@ class RecordedProgramTest(unittest.TestCase):
 class TunerTest(unittest.TestCase):
 
     def setUp(self):
+        self.db = Mock()
         self.conn = Mock()
-        self.tuner = Tuner(4, 'mrbun', 1000, 6000, 'HDHOMERUN', self.conn)
+        self.tuner = Tuner(4, 'mrbun', 1000, 6000, 'HDHOMERUN', self.conn, self.db)
         
     def test_toString(self):
         log.debug('tuner = %s'%self.tuner)
@@ -414,6 +418,36 @@ class TunerTest(unittest.TestCase):
     def test_getNextScheduledRecording(self):
         pass # TODO
     
+#    def test_getBackend_When_matches_by_hostname_Then_successful(self):
+#        be = Backend('mrbun', '127.0.0.1', '6543', True)
+#        when(self.db).getBackends().thenReturn([be])
+#        self.assertEquals(be, self.tuner.getBackend())
+#
+#    def test_getBackend_When_matches_by_ipaddress_Then_successful(self):
+#        self.tuner.hostname = '127.0.0.1'
+#        be = Backend('not_mrbun', '127.0.0.1', '6543', True)
+#        when(self.db).getBackends().thenReturn([be])
+#        self.assertEquals(be, self.tuner.getBackend())
+#
+#    def test_getBackend_When_nomatch_by_hostname_Then_raise_exception(self):
+#        be = Backend('not_mrbun', '127.0.0.1', '6543', True)
+#        when(self.db).getBackends().thenReturn([be])
+#        try:
+#            self.tuner.getBackend()
+#            self.fail('Expected error')
+#        except Exception:
+#            pass # SUCCESS
+#
+#    def test_getBackend_When_nomatch_by_ipaddress_Then_raise_exception(self):
+#        self.tuner.hostname = '127.0.0.2'
+#        be = Backend('mrbun', '127.0.0.1', '6543', True)
+#        when(self.db).getBackends().thenReturn([be])
+#        try:
+#            self.tuner.getBackend()
+#            self.fail('Expected error')
+#        except Exception:
+#            pass # SUCCESS
+
 
 class CommercialBreakTest(unittest.TestCase):
     
@@ -775,7 +809,32 @@ class MythUrlTest(unittest.TestCase):
         self.assertTrue(url.hostname() is None)
         self.assertTrue(url.path() is None)
         self.assertTrue(url.port() is None)
+
         
+class BackendTest(unittest.TestCase):
+
+    def test_eq_True_by_reference(self):
+        be = Backend('htpc', '127.0.0.1', '6543', True)
+        self.assertTrue(be == be)
+    
+    def test_eq_by_value(self):
+        bes = [Backend('htpc', '127.0.0.1', '6543', True),
+               Backend('htpc', '127.0.0.1', '6543', False),
+               Backend('htpc', '127.0.0.1', '8888', True),
+               Backend('htpc', '127.0.0.2', '6543', True),
+               Backend('slave', '127.0.0.1', '6543', True)]
+        
+        for i, be1 in enumerate(bes):
+            for j, be2 in enumerate(bes):
+                if i == j:
+                    self.assertTrue(be1 == be2)
+                else:
+                    self.assertFalse(be1 == be2)
+    
+    def test_eq_False_by_type(self):
+        self.assertFalse(Backend('slave', '127.0.0.1', '6543', True) == 'a string')
+        self.assertFalse(Backend('slave', '127.0.0.1', '6543', True) == None)
+
 
 if __name__ == '__main__':
     import logging.config

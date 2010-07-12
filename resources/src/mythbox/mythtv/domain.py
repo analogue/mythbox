@@ -33,7 +33,6 @@ from mythbox.ui.toolkit import showPopup
 from mythbox.util import timed, formatSeconds, formatSize 
 from odict import odict
 
-
 log = logging.getLogger('mythbox.core')
 
 # =============================================================================
@@ -1729,21 +1728,18 @@ class ScheduleFromProgram(RecordingSchedule):
         self.data()['inactive']      = 0
         self.data()['parentid']      = '0'
 
-# =============================================================================
-class Tuner(object):
-    """
-    MythTV Tuner (aka encoder, recorder, card)
-    Maps to the mythtv capturecard database table.
-    """
 
-    def __init__(self, tunerId, hostname, signalTimeout, channelTimeout, tunerType = '', conn = None):
+class Tuner(object):
+    """MythTV Tuner (aka encoder, recorder, card). Maps to the mythtv capturecard 
+    database table."""
+
+    def __init__(self, tunerId, hostname, signalTimeout, channelTimeout, tunerType='', conn=None, db=None):
         """
         @param tunerId: unique tunerid as int
         @param hostname: physical hostname where tuner is located as string
         @param signalTimeout: timeout in millis as int
         @param channelTimeout: channel timeout in millis as int
         @param tunerType: HDHOMERUN for example as string
-        @type conn: Connection
         """
         self.tunerId = tunerId
         self.hostname = hostname
@@ -1751,12 +1747,17 @@ class Tuner(object):
         self.channelTimeout = channelTimeout
         self.tunerType = tunerType  # HDHOMERUN, HDPVR, etc
         self._conn = conn
+        self._db = db
+        
         self._channels = None
+        self._backend = None
         
     def conn(self):
-        print type(self._conn)
         return self._conn
-    
+
+    def db(self):
+        return self._db
+        
     def __repr__(self):
         return '%s {tunerId = %s, hostname = %s, signalTimeout = %s, channelTimeout = %s, tunerType = %s}' % (
             type(self).__name__,
@@ -1942,7 +1943,14 @@ class Tuner(object):
         else:
             return None
  
-# =============================================================================
+    @inject_db
+    def getBackend(self):
+        backend = self.db().toBackend(self.hostname)
+        if backend is None:
+            raise Exception, 'Could not match tuner to backend: hostname: %s  backends: %s' % (self.hostname, self.db().getBackends())
+        else:
+            return backend
+
 class Job(object):
     """Represents a scheduled commercial flagging, transcoding, or user defined job."""
 
@@ -2078,9 +2086,7 @@ class Job(object):
             self.db().updateJobScheduledRunTime(job)
              
     def __eq__(self, rhs):
-        """
-        Equality based on job id only
-        """
+        """Equality based on job id only"""
         return isinstance(rhs, Job) and self.id == rhs.id
 
     def __repr__(self):
@@ -2146,3 +2152,9 @@ class Backend(object):
             self.port,
             self.master)
         
+    def __eq__(self, rhs):
+        return isinstance(rhs, Backend) and \
+            self.ipAddress == rhs.ipAddress and \
+            self.hostname == rhs.hostname and \
+            self.port == rhs.port and \
+            self.master == rhs.master
