@@ -39,28 +39,24 @@ from mythbox.util import timed, threadlocals
 log = logging.getLogger('mythbox.core')
 ilog = logging.getLogger('mythbox.inject')
 
-# =============================================================================
+
 def mythtime2dbtime(mythtime):
-    """
-    Turn 001122 -> 00:11:22
-    """
+    """Turn 001122 -> 00:11:22"""
     return mythtime[0:2] + ':' + mythtime[2:4] + ':' + mythtime[4:6]
 
-# =============================================================================
+
 def mythdate2dbdate(mythdate):
-    """
-    Turn 20080102 -> 2008-01-02
-    """
+    """Turn 20080102 -> 2008-01-02"""
     return mythdate[0:4] + '-' + mythdate[4:6] + '-' + mythdate[6:8]
 
-# =============================================================================
+
 def quote(someValue):
     if someValue is None:
         return 'None'
     else:
         return "'" + str(someValue) + "'"
 
-# =============================================================================
+
 class MythDatabaseFactory(PoolableFactory):
     
     def __init__(self, *args, **kwargs):
@@ -75,17 +71,15 @@ class MythDatabaseFactory(PoolableFactory):
         db.close()
         del db
 
-# =============================================================================
+
 @decorator
 def inject_db(func, *args, **kwargs):
-    """
-        Decorator to inject a thread-safe MythDatabase object into the context 
-        of a method invocation.
-        
-        To use:
+    """Decorator to inject a thread-safe MythDatabase object into the context 
+    of a method invocation.
+
+    To use:
           1. Decorate method with @inject_db
-          2. Within method, use self.db() to obtain a reference to the database.
-    """
+          2. Within method, use self.db() to obtain a reference to the database."""
     self = args[0]
 
     # bypass injection if dependency passed in via constructor
@@ -149,12 +143,10 @@ def inject_db(func, *args, **kwargs):
             threadlocals[tlsKey].db = None
     return result
 
-# =============================================================================
+
 @decorator
 def inject_cursor(func, *args, **kwargs):
-    """
-    Cursor management via a decorator for simple cases. 
-    """
+    """Cursor management via a decorator for simple cases."""
     db = args[0]
     db.cursor = db.conn.cursor(*cursorArgs)
     try:
@@ -164,12 +156,15 @@ def inject_cursor(func, *args, **kwargs):
         db.cursor = None
     return result
 
-# =============================================================================
+
 class MythDatabase(object):
     
     def __init__(self, *args, **kwargs):
-        self._channels = None  # Cache since they don't change too often
-        self._tuners = None    # Cache since they don't change too often
+        # Static data cached on demand
+        self._channels = None
+        self._tuners = None
+        self._master = None
+        self._slaves = None
         
         if len(args) == 2:
             self.initWithSettings(args[0], args[1])
@@ -195,18 +190,16 @@ class MythDatabase(object):
 
         log.debug("Initializing myth database connection")
         self.conn = MySQLdb.connect(
-            host = self.settings.get("mysql_host").encode('utf-8'), 
-            db = self.settings.get("mysql_database").encode('utf-8'),
-            user = self.settings.get("mysql_user").encode('utf-8'),
-            password = self.settings.get("mysql_password").encode('utf-8'),
-            port = int(self.settings.get("mysql_port")),
+            host = self.settings.get('mysql_host').encode('utf-8'), 
+            db = self.settings.get('mysql_database').encode('utf-8'),
+            user = self.settings.get('mysql_user').encode('utf-8'),
+            password = self.settings.get('mysql_password').encode('utf-8'),
+            port = int(self.settings.get('mysql_port')),
             connection_timeout = 60)
     
     @staticmethod
     def toDict(cursor, row):
-        """
-        Compensate for myconnpy's lack of a dict based cursor
-        """
+        """Compensate for myconnpy's lack of a dict based cursor"""
         if isinstance(row, dict):
             return row
         elif isinstance(row, list) or isinstance(row, tuple):
@@ -228,55 +221,57 @@ class MythDatabase(object):
 
     @inject_cursor
     def getMasterBackend(self):
-        sql = """
-            select 
-                a.data as ipaddr,
-                b.data as port,
-                c.hostname as hostname
-            from 
-                settings a, 
-                settings b,
-                settings c
-            where 
-                a.value = 'MasterServerIP' and
-                b.value = 'MasterServerPort' and
-                c.value = 'BackendServerIP' and
-                c.data  = a.data
-            """
-                
-        self.cursor.execute(sql)
-        rows = map(lambda r: self.toDict(self.cursor, r), self.cursor.fetchall())
-        from mythbox.mythtv.domain import Backend
-        for row in rows:
-            mbe = Backend(row['hostname'], row['ipaddr'], row['port'],  True)
-            return mbe
-
+        if not self._master:
+            sql = """
+                select 
+                    a.data as ipaddr,
+                    b.data as port,
+                    c.hostname as hostname
+                from 
+                    settings a, 
+                    settings b,
+                    settings c
+                where 
+                    a.value = 'MasterServerIP' and
+                    b.value = 'MasterServerPort' and
+                    c.value = 'BackendServerIP' and
+                    c.data  = a.data
+                """
+                    
+            self.cursor.execute(sql)
+            rows = map(lambda r: self.toDict(self.cursor, r), self.cursor.fetchall())
+            from mythbox.mythtv.domain import Backend
+            for row in rows:
+                self._master = Backend(row['hostname'], row['ipaddr'], row['port'],  True)
+        return self._master
+    
     @inject_cursor
     def getSlaveBackends(self):
-        sql = """
-            select  
-                a.data as ipaddr,  
-                a.hostname as hostname,
-                b.data as port
-            from 
-                settings a,
-                settings b,
-                settings c
-            where 
-                a.value = 'BackendServerIP' and
-                b.value = 'BackendServerPort' and
-                a.hostname = b.hostname and
-                c.data != a.data and
-                c.value = 'MasterServerIP'        
-            """
-        self.cursor.execute(sql)
-        rows = map(lambda r: self.toDict(self.cursor, r), self.cursor.fetchall())
-        from mythbox.mythtv.domain import Backend
-        slaves = []
-        for row in rows:
-            slaves.append(Backend(row['hostname'], row['ipaddr'], row['port'],  False))
-        return slaves
-            
+        if self._slaves is None:
+            sql = """
+                select  
+                    a.data as ipaddr,  
+                    a.hostname as hostname,
+                    b.data as port
+                from 
+                    settings a,
+                    settings b,
+                    settings c
+                where 
+                    a.value = 'BackendServerIP' and
+                    b.value = 'BackendServerPort' and
+                    a.hostname = b.hostname and
+                    c.data != a.data and
+                    c.value = 'MasterServerIP'        
+                """
+            self.cursor.execute(sql)
+            rows = map(lambda r: self.toDict(self.cursor, r), self.cursor.fetchall())
+            from mythbox.mythtv.domain import Backend
+            self._slaves = []
+            for row in rows:
+                self._slaves.append(Backend(row['hostname'], row['ipaddr'], row['port'],  False))
+        return self._slaves
+        
     @timed
     @inject_cursor
     def getChannels(self):
