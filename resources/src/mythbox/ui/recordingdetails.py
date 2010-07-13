@@ -204,8 +204,8 @@ class RecordingDetailsWindow(BaseWindow):
 
     @window_busy
     def render(self):
-        self.renderThumbnail()
         self.renderDetail()
+        self.renderThumbnail()
         self.renderCommBreaks()  # NOTE: async
         
     def renderDetail(self):

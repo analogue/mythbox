@@ -247,7 +247,7 @@ class FileLiveTvPlayer(MythPlayer):
         self._playbackCompletedLock = threading.Event()
         self._playbackCompletedLock.clear()
 
-# ==============================================================================
+
 class LiveTvWindow(BaseWindow):
     
     @timed
