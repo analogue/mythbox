@@ -4,6 +4,7 @@ XX/XX/2010 - MythBox RC2
  - fixed   : Issue 98 - IP addresses are used throughout the codebase. No more host not found errors.
  - fixed   : Issue 107 - Database connections are now closed when idle and reconnect on demand.
  - new     : Issue 106 - More responsive fanart lookup based on current list selection
+ - fixed   : Issue 108 - Focus changes to Play+Skip button in Recording Details screen after user has already switched focus to another button
  
 06/08/2010 - MythBox RC1
 =============================

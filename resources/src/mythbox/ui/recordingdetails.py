@@ -233,8 +233,9 @@ class RecordingDetailsWindow(BaseWindow):
         commBreaks = 'No'
         if self.program.isCommFlagged():
             if self.program.hasCommercials():
-                # TODO: Only set focus on first entry to screen
-                self.setFocus(self.playSkipButton)
+                # Only move focus to Skip button if user hasn't changed the initial focus
+                if self.getFocusId() == self.playButton.getId():
+                    self.setFocus(self.playSkipButton)
                 commBreaks = "%d" % len(self.program.getCommercials())
             else:
                 commBreaks = 'None'
