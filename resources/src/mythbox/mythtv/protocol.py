@@ -19,15 +19,13 @@
 
 from mythbox.mythtv.enums import TVState, TVState44 
 
-# =============================================================================    
 # MythTV Protcol Constants
-
 initVersion = 8
 clientVersion = 40
 separator = "[]:[]"
 serverVersion = None
 
-# =============================================================================
+
 class ProtocolException(Exception):
     """
     Thrown on protcol version mismatch between frontend and backend or
@@ -35,7 +33,7 @@ class ProtocolException(Exception):
     """ 
     pass
 
-# =============================================================================
+
 class BaseProtocol(object):
     
     def version(self):
@@ -53,7 +51,7 @@ class BaseProtocol(object):
     def getLiveTvBrain(self, settings):
         raise Exception, 'Abstract method'
 
-# =============================================================================
+
 class Protocol40(BaseProtocol):
     
     def version(self):
@@ -72,19 +70,19 @@ class Protocol40(BaseProtocol):
         from mythbox.ui.livetv import MythLiveTvBrain
         return MythLiveTvBrain(settings)
     
-# =============================================================================
+
 class Protocol41(Protocol40):
     
     def version(self):
         return 41
 
-# =============================================================================
+
 class Protocol42(Protocol41):
     
     def version(self):
         return 42
 
-# =============================================================================
+
 class Protocol43(Protocol42):
 
     def version(self):
@@ -93,7 +91,7 @@ class Protocol43(Protocol42):
     def recordSize(self):
         return 47
 
-# =============================================================================    
+
 class Protocol44(Protocol43):
     
     def version(self):
@@ -102,7 +100,7 @@ class Protocol44(Protocol43):
     def tvState(self):
         return TVState44
 
-# =============================================================================    
+
 class Protocol45(Protocol44):
     
     def version(self):
@@ -113,43 +111,48 @@ class Protocol45(Protocol44):
         storageGroup = ''
         return ['ANN FileTransfer %s' % hostname, filePath, storageGroup]        
 
-# =============================================================================    
+
 class Protocol46(Protocol45):
     
     def version(self):
         return 46
 
-# =============================================================================    
+
 class Protocol47(Protocol46):
     
     def version(self):
         return 47
 
-# =============================================================================    
+
 class Protocol48(Protocol47):
     
     def version(self):
         return 48
 
-# =============================================================================    
+
 class Protocol49(Protocol48):
     
     def version(self):
         return 49
 
-# =============================================================================    
+
 class Protocol50(Protocol49):
     
     def version(self):
         return 50
 
-# =============================================================================    
+
 class Protocol56(Protocol50):
     
     def version(self):
         return 56
+
+
+class Protocol23056(Protocol56):
     
-# =============================================================================
+    def version(self):
+        return 23056
+    
 
 # Current rev in mythversion.h
 protocols = {
@@ -164,5 +167,6 @@ protocols = {
     48: Protocol48(),
     49: Protocol49(),
     50: Protocol50(),  # 0.22
-    56: Protocol56()   # 0.23
+    56: Protocol56(),  # 0.23
+    23056: Protocol23056()  # mythbuntu weirdness
 }    
