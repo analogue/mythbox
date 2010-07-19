@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -24,8 +24,8 @@ from mythbox.feeds import TwitterFeed, FeedHose
 
 log = logging.getLogger('mythbox.unittest')
 
-# =============================================================================
-class FeedHostTest(unittest.TestCase):
+
+class FeedHoseTest(unittest.TestCase):
     
     def test_getLatestEntries_None(self):
         
@@ -43,7 +43,7 @@ class FeedHostTest(unittest.TestCase):
     def test_getLatestEntries_Sorted_from_newest_to_oldest(self):
         pass
 
-# =============================================================================
+
 class TwitterFeedTest(unittest.TestCase):
 
     def test_getEntries(self):
@@ -52,7 +52,7 @@ class TwitterFeedTest(unittest.TestCase):
         log.debug('feed text = %s' % s)
         self.assertTrue(s)
     
-# =============================================================================
+
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')

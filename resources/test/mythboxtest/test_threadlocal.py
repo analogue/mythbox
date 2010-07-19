@@ -30,7 +30,7 @@ from mythbox.util import run_async, OnDemandConfig
 log = logging.getLogger('mythbox.unittest')
 
 # =========================================================================
-class SafeDbClient:
+class SafeDbClient(object):
     
     def __init__(self):
         pass
@@ -61,7 +61,7 @@ class SafeDbClient:
         self.db().getJobs()
 
 # =========================================================================
-class OtherDbClient:
+class OtherDbClient(object):
     
     @inject_db
     def getRecordingGroups(self):
