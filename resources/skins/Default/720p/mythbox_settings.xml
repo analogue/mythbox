@@ -841,14 +841,13 @@
             <pulseonselect>true</pulseonselect>
             <enable>!substring(Window.Property(busy),true)</enable>
             <onup>253</onup>
-            <ondown>255</ondown>
+            <ondown>257</ondown>
             <onright>9004</onright>
             <onleft>9004</onleft>
         </control>
 
-        <control type="button" id="255">
-            <description>About</description>
-            <label>About</label>
+        <control type="button" id="257">
+            <label>XBMC Settings</label>
             <posx>0</posx>
             <posy>200</posy>
             <width>285</width>
@@ -861,6 +860,27 @@
             <pulseonselect>true</pulseonselect>
             <enable>!substring(Window.Property(busy),true)</enable>
             <onup>256</onup>
+            <ondown>255</ondown>
+            <onright>9004</onright>
+            <onleft>9004</onleft>
+            <onclick>ActivateWindow(settings)</onclick>
+        </control>
+
+        <control type="button" id="255">
+            <description>About</description>
+            <label>About</label>
+            <posx>0</posx>
+            <posy>240</posy>
+            <width>285</width>
+            <height>40</height>
+            <align>left</align>
+            <aligny>center</aligny>
+            <textoffsetx>40</textoffsetx>
+            <texturefocus>button_focus.png</texturefocus>
+            <texturenofocus>button_nofocus.png</texturenofocus>
+            <pulseonselect>true</pulseonselect>
+            <enable>!substring(Window.Property(busy),true)</enable>
+            <onup>257</onup>
             <ondown>250</ondown>
         </control>
     </control>
