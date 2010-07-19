@@ -21,6 +21,7 @@ import logging
 import threading
 import xbmcgui
 import xbmc
+import collections
 
 from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.conn import inject_conn
@@ -433,3 +434,205 @@ class LiveTvWindow(BaseWindow):
                     self.lookupPoster(listItem, channel)
             except:
                 log.exception('channel = %s' % channel)
+
+
+class LiveTvWindow2(BaseWindow):
+    
+    @timed
+    def __init__(self, *args, **kwargs):
+        BaseWindow.__init__(self, *args, **kwargs)
+        
+        self.settings = kwargs['settings']
+        self.translator = kwargs['translator']
+        self.mythChannelIconCache = kwargs['mythChannelIconCache']
+        self.platform = kwargs['platform']
+        self.fanArt = kwargs['fanArt']
+
+        self.channels = None                     # Channels sorted and merged (if multiple tuners)
+        self.channelsById = None                 # {int channelId:Channel}
+        self.programs = None                     # [TVProgram]
+        self.listItemsByChannel = odict()        # {Channel:ListItem}
+        self.closed = False
+        self.workq = None                         
+        self.lastSelected = int(self.settings.get('livetv_last_selected'))
+        
+    @catchall_ui
+    def onInit(self):
+        if not self.win:
+            self.win = xbmcgui.Window(xbmcgui.getCurrentWindowId())
+            self.channelsListBox = self.getControl(600)
+            self.refreshButton = self.getControl(250)
+        
+        if self.programs:
+            # only refresh if program data stale
+            for p in self.programs:
+                if not p.isShowing():
+                    self.refresh()
+                    break;
+        else:
+            self.refresh()
+
+    @window_busy
+    def refresh(self):
+        self.loadPrograms()
+        self.render()
+        self.renderPosters()
+    
+    @lirc_hack    
+    @catchall    
+    def onClick(self, controlId):
+        source = self.getControl(controlId)
+        if source == self.channelsListBox: 
+            self.watchSelectedChannel()
+        elif source == self.refreshButton:
+            self.refresh()
+             
+    def onFocus(self, controlId):
+        log.debug('FOCUS XXXXXXXXXXXXXXXXX: %s' % controlId)
+            
+    @catchall_ui
+    @lirc_hack            
+    def onAction(self, action):
+        
+        if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
+            self.closed = True
+            self.settings.put('livetv_last_selected', str(self.channelsListBox.getSelectedPosition()))
+            self.close()
+            
+        elif action.getId() in (Action.UP, Action.DOWN, Action.PAGE_DOWN, Action.PAGE_UP, ):
+            self.lastSelected = self.channelsListBox.getSelectedPosition()
+            listItem = self.channelsListBox.getSelectedItem()
+            channelId = int(listItem.getProperty('channelId'))
+            channel = self.channelsById[channelId]
+            if channel.currentProgram:
+                if channel.needsPoster:
+                    if self.workq is not None:
+                        log.debug("Adding channel %s to front of q" % channel)
+                        self.workq.append(channel)
+
+    @window_busy
+    @inject_conn
+    def watchSelectedChannel(self):
+        self.lastSelected = self.channelsListBox.getSelectedPosition()
+        listItem = self.channelsListBox.getSelectedItem()
+        channelId = int(listItem.getProperty('channelId'))
+        channel = self.channelsById[channelId]
+        
+        # Use myth:// based player for 0.21
+        # Use file based player for 0.22 until myth:// supports 0.22 
+        brain = self.conn().protocol.getLiveTvBrain(self.settings)
+        
+        try:
+            try:
+                brain.watchLiveTV(channel)
+            except Exception, e:
+                log.error(e)
+                xbmcgui.Dialog().ok('Error', '', str(e))
+        finally:
+            pass    
+            #del brain
+
+    @timed
+    @inject_db
+    def loadChannels(self):
+        """
+        @attention: Cached after initial invocation
+        @postcondition: self.channels contains list of channels in presentation order
+        @postcondition: self.channelsById contains channels keyed on channelId
+        """
+        if self.channels == None:
+            self.channels = Channel.mergeChannels(self.db().getChannels())
+            self.channels.sort(key=Channel.getSortableChannelNumber)
+            self.channelsById = odict()
+            for c in self.channels:
+                self.channelsById[c.getChannelId()] = c
+
+    @timed
+    @inject_db
+    def loadPrograms(self):
+        self.loadChannels()
+        now = datetime.datetime.now()
+        self.programs = self.db().getTVGuideDataFlattened(now, now, self.channels)
+        programsByChannelId = odict()
+        
+        for p in self.programs:
+            programsByChannelId[p.getChannelId()] = p
+        
+        # make TVProgram accessible as Channel.currentProgram    
+        for channelId, channel in self.channelsById.items():
+            if programsByChannelId.has_key(channelId):
+                channel.currentProgram = programsByChannelId[channelId]
+            else:
+                channel.currentProgram = None
+
+    @ui_locked
+    def render(self):
+        log.debug('Rendering....')
+        self.listItemsByChannel.clear()
+        listItems = []
+
+        @ui_locked2
+        def buildListItems():
+            for i, channel in enumerate(self.channels):
+                #log.debug('Working channel: %d' %i)
+                listItem = xbmcgui.ListItem()
+                self.setListItemProperty(listItem, 'channelId', str(channel.getChannelId()))
+                
+                if channel.getIconPath():
+                    cachedIcon = self.mythChannelIconCache.get(channel)
+                    if cachedIcon:
+                        self.setListItemProperty(listItem, 'channelIcon', cachedIcon)
+                    
+                self.setListItemProperty(listItem, 'channelName', channel.getChannelName())
+                self.setListItemProperty(listItem, 'channelNumber', channel.getChannelNumber())
+                self.setListItemProperty(listItem, 'callSign', channel.getCallSign())
+                
+                if channel.currentProgram:
+                    self.setListItemProperty(listItem, 'title', channel.currentProgram.title())
+                    self.setListItemProperty(listItem, 'description', channel.currentProgram.formattedDescription())
+                    self.setListItemProperty(listItem, 'category', channel.currentProgram.category())
+                    
+                    if self.fanArt.hasPosters(channel.currentProgram):
+                        channel.needsPoster = False
+                        self.lookupPoster(listItem, channel)
+                    else:
+                        channel.needsPoster = True
+                        self.setListItemProperty(listItem, 'poster', 'loading.gif')
+                else:
+                    self.setListItemProperty(listItem, 'title', 'No Data')
+                    
+                listItems.append(listItem)
+                self.listItemsByChannel[channel] = listItem
+        
+        buildListItems()
+        self.channelsListBox.reset()
+        self.channelsListBox.addItems(listItems)
+        self.channelsListBox.selectItem(self.lastSelected)
+        self.workq = collections.deque(reversed(self.listItemsByChannel.keys()))
+        
+    def lookupPoster(self, listItem, channel):
+        posterPath = self.fanArt.getRandomPoster(channel.currentProgram)
+        if not posterPath:
+            if channel.getIconPath():
+                posterPath = self.mythChannelIconCache.get(channel)
+                if not posterPath:
+                    posterPath =  'mythbox-logo.png'
+            else:
+                posterPath = 'mythbox-logo.png'
+        self.setListItemProperty(listItem, 'poster', posterPath)
+        
+    @run_async
+    @catchall
+    @coalesce
+    def renderPosters(self):
+        while len(self.workq) > 0:
+            if self.closed: 
+                return
+            channel  = self.workq.pop()
+            try:
+                if channel.currentProgram and channel.needsPoster:
+                    listItem = self.listItemsByChannel[channel]
+                    self.lookupPoster(listItem, channel)
+                    channel.needsPoster = False
+            except:
+                log.exception('channel = %s' % channel)                
