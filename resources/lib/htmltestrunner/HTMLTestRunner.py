@@ -33,7 +33,7 @@ HTMLTestRunner is a counterpart to unittest's TextTestRunner. E.g.
 
 
 ------------------------------------------------------------------------
-Copyright (c) 2004-2006, Wai Yip Tung
+Copyright (c) 2004-2007, Wai Yip Tung
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -65,22 +65,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # URL: http://tungwaiyip.info/software/HTMLTestRunner.html
 
 __author__ = "Wai Yip Tung"
-__version__ = "0.8.1"
+__version__ = "0.8.2"
 
 
 """
-Changes in 0.8.1
-* Thank you for Wolfgang Borgert's patch.
-* Validated XHTML.
+Change History
+
+Version 0.8.2
+* Show output inline instead of popup window (Viorel Lupu).
+
+Version in 0.8.1
+* Validated XHTML (Wolfgang Borgert).
 * Added description of test classes and test cases.
 
-Changes in 0.8.0
+Version in 0.8.0
 * Define Template_mixin class for customization.
 * Workaround a IE 6 bug that it does not treat <script> block as CDATA.
 
-Changes in 0.7.1
-* Back port to Python 2.3. Thank you Frank Horowitz.
-* Fix missing scroll bars in detail log. Thank you Podi.
+Version in 0.7.1
+* Back port to Python 2.3 (Frank Horowitz).
+* Fix missing scroll bars in detail log (Podi).
 """
 
 # TODO: color stderr
@@ -95,7 +99,7 @@ from xml.sax import saxutils
 
 
 # ------------------------------------------------------------------------
-# The redirectors below is used to capture output during testing. Output
+# The redirectors below are used to capture output during testing. Output
 # sent to sys.stdout and sys.stderr are automatically captured. However
 # in some cases sys.stdout is already cached before HTMLTestRunner is
 # invoked (e.g. calling logging.basicConfig). In order to capture those
@@ -217,6 +221,7 @@ function showCase(level) {
     }
 }
 
+
 function showClassDetail(cid, count) {
     var id_list = Array(count);
     var toHide = 1;
@@ -236,6 +241,7 @@ function showClassDetail(cid, count) {
     for (var i = 0; i < count; i++) {
         tid = id_list[i];
         if (toHide) {
+            document.getElementById('div_'+tid).style.display = 'none'
             document.getElementById(tid).className = 'hiddenRow';
         }
         else {
@@ -244,6 +250,21 @@ function showClassDetail(cid, count) {
     }
 }
 
+
+function showTestDetail(div_id){
+    var details_div = document.getElementById(div_id)
+    var displayState = details_div.style.display
+    // alert(displayState)
+    if (displayState != 'block' ) {
+        displayState = 'block'
+        details_div.style.display = 'block'
+    }
+    else {
+        details_div.style.display = 'none'
+    }
+}
+
+
 function html_escape(s) {
     s = s.replace(/&/g,'&amp;');
     s = s.replace(/</g,'&lt;');
@@ -251,6 +272,7 @@ function html_escape(s) {
     return s;
 }
 
+/* obsoleted by detail in <div>
 function showOutput(id, name) {
     var w = window.open("", //url
                     name,
@@ -263,6 +285,7 @@ function showOutput(id, name) {
     d.write("</pre>\n");
     d.close();
 }
+*/
 --></script>
 
 %(heading)s
@@ -289,6 +312,8 @@ pre         { }
 
 /* -- heading ---------------------------------------------------------------------- */
 h1 {
+	font-size: 16pt;
+	color: gray;
 }
 .heading {
     margin-top: 0ex;
@@ -305,6 +330,29 @@ h1 {
     margin-bottom: 6ex;
 }
 
+/* -- css div popup ------------------------------------------------------------------------ */
+a.popup_link {
+}
+
+a.popup_link:hover {
+    color: red;
+}
+
+.popup_window {
+    display: none;
+    position: relative;
+    left: 0px;
+    top: 0px;
+    /*border: solid #627173 1px; */
+    padding: 10px;
+    background-color: #E6E6D6;
+    font-family: "Lucida Console", "Courier New", Courier, monospace;
+    text-align: left;
+    font-size: 8pt;
+    width: 500px;
+}
+
+}
 /* -- report ------------------------------------------------------------------------ */
 #show_detail_line {
     margin-top: 3ex;
@@ -313,7 +361,7 @@ h1 {
 #result_table {
     width: 80%;
     border-collapse: collapse;
-    border: medium solid #777;
+    border: 1px solid #777;
 }
 #header_row {
     font-weight: bold;
@@ -321,7 +369,7 @@ h1 {
     background-color: #777;
 }
 #result_table td {
-    border: thin solid #777;
+    border: 1px solid #777;
     padding: 2px;
 }
 #total_row  { font-weight: bold; }
@@ -415,7 +463,24 @@ h1 {
     REPORT_TEST_WITH_OUTPUT_TMPL = r"""
 <tr id='%(tid)s' class='%(Class)s'>
     <td class='%(style)s'><div class='testcase'>%(desc)s</div></td>
-    <td colspan='5' align='center'><a href="javascript:showOutput('%(tid)s', '%(desc)s')">%(status)s</a>%(script)s</td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_%(tid)s')" >
+        %(status)s</a>
+
+    <div id='div_%(tid)s' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_%(tid)s').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        %(script)s
+        </pre>
+    </div>
+    <!--css div popup end-->
+
+    </td>
 </tr>
 """ # variables: (tid, Class, style, desc, status)
 
@@ -429,7 +494,7 @@ h1 {
 
 
     REPORT_TEST_OUTPUT_TMPL = r"""
-<script language="javascript" type="text/javascript">output_list['%(id)s'] = '%(output)s';</script>
+%(id)s: %(output)s
 """ # variables: (id, output)
 
 
@@ -441,21 +506,6 @@ h1 {
     ENDING_TMPL = """<div id='ending'>&nbsp;</div>"""
 
 # -------------------- The end of the Template class -------------------
-
-
-
-def jsEscapeString(s):
-    """ Escape s for use as a Javascript String """
-    return s.replace('\\','\\\\') \
-        .replace('\r', '\\r') \
-        .replace('\n', '\\n') \
-        .replace('"', '\\"') \
-        .replace("'", "\\'") \
-        .replace("&", '\\x26') \
-        .replace("<", '\\x3C') \
-        .replace(">", '\\x3E')
-    # Note: non-ascii unicode characters do not need to be encoded
-    # Note: previously we encode < as &lt;, etc. However IE6 fail to treat <script> block as CDATA.
 
 
 TestResult = unittest.TestResult
@@ -725,7 +775,7 @@ class HTMLTestRunner(Template_mixin):
 
         script = self.REPORT_TEST_OUTPUT_TMPL % dict(
             id = tid,
-            output = jsEscapeString(uo+ue),
+            output = saxutils.escape(uo+ue),
         )
 
         row = tmpl % dict(
