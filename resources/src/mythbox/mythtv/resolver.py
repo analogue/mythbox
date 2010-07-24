@@ -22,19 +22,27 @@ import md5
 
 from mythbox.filecache import FileResolver
 from mythbox.mythtv.conn import inject_conn
+from mythbox.mythtv.db import inject_db
 from mythbox.util import safe_str
 
 log = logging.getLogger('mythbox.cache')
 
-# =============================================================================
+
 class MythThumbnailResolver(FileResolver):
     
-    def __init__(self, conn=None):
+    def __init__(self, conn=None, db=None):
         self._conn = conn
-          
+        self._db = db
+    
+    # non-injection for unit tests
+    def db(self):
+        return self._db
+
+    # non-injection for unit tests
     def conn(self):
         return self._conn
     
+    @inject_db
     @inject_conn
     def store(self, program, dest):
         """
@@ -42,18 +50,18 @@ class MythThumbnailResolver(FileResolver):
         @param dest: file to save downloaded program thumbnail to
         """
         key = self.getKey(program)
-        result = self.conn().transferFile(key, dest, program.hostname())
+        backend = self.db().toBackend(program.hostname())
+        result = self.conn().transferFile(key, dest, backend.ipAddress)
+        
         if not result:
             # thumb not generated -- generate thumb and retry
-            if self.conn().generateThumbnail(program, program.hostname()):
-                result = self.conn().transferFile(key, dest, program.hostname())
+            if self.conn().generateThumbnail(program, backend.ipAddress):
+                result = self.conn().transferFile(key, dest, backend.ipAddress)
                 if not result:
                     # transfer failed
-                    #self.writeStub(dest)
                     pass
             else:
                 # remote thumb generation failed
-                #self.writeStub(dest)
                 pass
             
     def hash(self, program):
@@ -62,13 +70,7 @@ class MythThumbnailResolver(FileResolver):
     def getKey(self, program):
         return program.getFilename() + '.640x360.png'
 
-#    def writeStub(self, dest):
-#        # TODO: Replace with something else
-#        fp = open(dest, 'w')
-#        fp.write('')
-#        fp.close()
-        
-# =============================================================================
+
 class MythChannelIconResolver(FileResolver):
     
     def __init__(self, conn=None):

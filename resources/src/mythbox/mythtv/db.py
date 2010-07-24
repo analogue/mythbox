@@ -228,7 +228,9 @@ class MythDatabase(object):
         for b in self.getBackends():
             if hostnameOrIpAddress in (b.hostname, b.ipAddress,):
                 return b
-        return None 
+        master = self.getMasterBackend()
+        log.warn('Host %s could not be mapped to a backend. Returning master backend %s instead.' % (hostnameOrIpAddress, master.hostname))
+        return master
             
     @inject_cursor
     def getMasterBackend(self):
@@ -495,7 +497,7 @@ class MythDatabase(object):
         showsByChannel = self.getTVGuideData(startTime, endTime, channels)
         flattened = []
         for channel in showsByChannel.keys():
-                flattened.extend(showsByChannel[channel])
+            flattened.extend(showsByChannel[channel])
         return flattened
         
     @inject_cursor
@@ -876,25 +878,3 @@ class MythDatabase(object):
         # `last_delete`,    '2008-10-06 23:29:08',  
         # `storagegroup`,   'Default', 
         # `avg_delay`)      76)
-        
-# =============================================================================
-class CustomMySQLConverter(MySQLdb.conversion.MySQLConverter):
-
-    def __init__(self, charset=None, use_unicode=True):
-        MySQLdb.conversion.MySQLConverter.__init__(self, charset, use_unicode)
-
-    def _DATE_to_python(self, v, dsc=None):
-        """
-        Override default impl to gracefully handle invalid dates (ex: '0000-00-00')
-        and just pass None back instead.
-        
-        Someone's db had a program.originalairdate = 0000-00-00 which the
-        mysql-connector pure python impl choked on.
-        """
-        pv = None
-        try:
-            pv = datetime.date(*[ int(s) for s in v.split('-')])
-        except ValueError: # , ve:
-            pass #raise ValueError, "Could not convert %s to python datetime.date with error %s" % (v, ve)
-        return pv
-    

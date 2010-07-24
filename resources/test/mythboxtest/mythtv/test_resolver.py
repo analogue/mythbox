@@ -21,20 +21,21 @@ import os
 import tempfile
 import time
 import unittest
+import random
 
 from mockito import Mock, verifyZeroInteractions
 from mythbox.bus import EventBus
 from mythbox.mythtv.conn import Connection
 from mythbox.mythtv.db import MythDatabase
 from mythbox.mythtv.domain import Channel
-from mythbox.mythtv.resolver import MythChannelIconResolver
+from mythbox.mythtv.resolver import MythChannelIconResolver, MythThumbnailResolver
 from mythbox.settings import MythSettings
-from mythbox.util import OnDemandConfig
+from mythbox.util import OnDemandConfig, safe_str
 from mythbox.platform import getPlatform
 
 log = logging.getLogger('mythbox.unittest')
 
-# =============================================================================
+
 class MythChannelIconResolverTest(unittest.TestCase):
 
     def setUp(self):
@@ -48,9 +49,6 @@ class MythChannelIconResolverTest(unittest.TestCase):
         self.settings.setMySqlDatabase(privateConfig.get('mysql_database'))
         self.settings.setMySqlUser(privateConfig.get('mysql_user'))  
         self.settings.setMySqlPassword(privateConfig.get('mysql_password'))
-        self.settings.setRecordingDirs(privateConfig.get('paths_recordedprefix'))
-        
-        log.debug('%s' % self.settings)
         
         self.db = MythDatabase(self.settings, self.translator)
         self.bus = EventBus()
@@ -68,8 +66,7 @@ class MythChannelIconResolverTest(unittest.TestCase):
         # Test - download icons for first 5 channels
         for channel in channels[:min(5, len(channels))]:
             if channel.getIconPath():
-                log.debug('%s' % channel.getChannelName())
-                dest = os.path.sep.join([tempfile.gettempdir(), str(channel.getChannelId()) + channel.getCallSign() + str(time.time()) + ".png"])
+                dest = os.path.sep.join([tempfile.gettempdir(), 'channel_' + str(channel.getChannelId()) + channel.getCallSign() + str(time.time()) + '.png'])
                 downloader.store(channel, dest)
         
                 # Verify
@@ -105,7 +102,50 @@ class MythChannelIconResolverTest(unittest.TestCase):
         # Verify
         self.assertFalse(os.path.exists(dest))
 
-# =============================================================================
+
+class MythThumbnailResolverTest(unittest.TestCase):
+
+    def setUp(self):
+        self.platform = getPlatform()
+        self.translator = Mock()
+        self.settings = MythSettings(self.platform, self.translator)
+        
+        privateConfig = OnDemandConfig()
+        self.settings.setMySqlHost(privateConfig.get('mysql_host'))
+        self.settings.setMySqlPort(privateConfig.get('mysql_port'))
+        self.settings.setMySqlDatabase(privateConfig.get('mysql_database'))
+        self.settings.setMySqlUser(privateConfig.get('mysql_user'))  
+        self.settings.setMySqlPassword(privateConfig.get('mysql_password'))
+        
+        log.debug('%s' % self.settings)
+        
+        self.db = MythDatabase(self.settings, self.translator)
+        self.bus = EventBus()
+        self.conn = Connection(self.settings, self.translator, self.platform, self.bus, self.db)
+
+    def tearDown(self):
+        self.conn.close()
+
+    def test_store_download_thumbnail(self):
+        # Setup
+        recordings = self.conn.getRecordings()
+        self.assertTrue(recordings, 'Recordings needed in to run test')
+        downloader = MythThumbnailResolver(self.conn, self.db)
+        dest = os.path.sep.join([tempfile.gettempdir(), 'thumbnail_' + str(random.randint(1, 999999)) + '.png'])
+
+        # Test
+        downloader.store(recordings[-1], dest)
+         
+        # Verify
+        log.debug('Downloaded %s to %s' % (safe_str(recordings[-1].title()), dest))
+        self.assertTrue(os.path.exists(dest))
+        self.assertTrue(os.path.isfile(dest))
+        self.assertTrue(os.path.getsize(dest) > 0)
+                
+        # Cleanup
+        os.remove(dest)        
+    
+
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')
