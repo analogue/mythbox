@@ -36,7 +36,7 @@ mythPlayer = None
 # async xbmc events to take complete
 SLEEP_MILLIS = 250
 
-# ==============================================================================
+
 class MythPlayer(xbmc.Player):
     """
     Plays mythtv recordings with support for bookmarks, commercial skipping, etc 
@@ -162,8 +162,9 @@ class MythPlayer(xbmc.Player):
         mlog.debug("< _buildPlayList")
         return playlistItem
 
+
 #
-#  TODO: Integrate
+#  TODO: Integrate for Issue 111
 #
 class MythStreamingPlayer(MythPlayer):
     """Use xbmcs built in myth support to stream the recording over the network."""
@@ -175,11 +176,12 @@ class MythStreamingPlayer(MythPlayer):
     @inject_db        
     def getFileUrl(self):
         # myth://dbuser:dbpassword@mythbackend_hostname:mythbackend_port/recordings/filename.mpg
+        backend = self.db().toBackend(self.getProgram().hostname())
         url = 'myth://%s:%s@%s:%s/recordings/%s' % (
             self.settings.get('mysql_database'),
             self.settings.get('mysql_password'),
-            self.getProgram().hostname(),  # TODO: reconcile with master/slaves and use ip address instead
-            self.db().getMasterBackend().port,
+            backend.ipAddress,
+            backend.port,
             self.getProgram().getBareFilename())
         log.debug('XBMC recording url: %s' % url)
         return url
@@ -226,7 +228,7 @@ class Bookmarker(object):
         except:
             log.exception('_saveLastPositionAsBookmark catchall')
 
-# =============================================================================
+
 class PositionTracker(object):
     """
     Tracks the last position of the player. This is necessary because 
@@ -284,7 +286,7 @@ class PositionTracker(object):
         except:
             log.exception('_trackPosition catchall')
 
-# =============================================================================
+
 class TrackerSample(object):
     
     def __init__(self, time, pos):
@@ -294,7 +296,7 @@ class TrackerSample(object):
     def __repr__(self):
         return 'Sample {time = %s, pos = %s}' % (self.time, self.pos)         
             
-# =============================================================================
+
 class ICommercialSkipper(object):
     """Common interface for commercial skipping implementations."""
     
@@ -311,7 +313,7 @@ class ICommercialSkipper(object):
     def onPlayBackEnded(self):
         raise NotImplementedError, 'Abstract base class'
     
-# =============================================================================
+
 class NoOpCommercialSkipper(ICommercialSkipper):
 
     def __init__(self, player, program):
@@ -326,7 +328,7 @@ class NoOpCommercialSkipper(ICommercialSkipper):
     def onPlayBackEnded(self):
         pass
     
-# =============================================================================
+
 class EdlCommercialSkipper(ICommercialSkipper):
     """
     Creates an Mplayer compatible EDL skip file with the comm breaks 
@@ -370,7 +372,7 @@ class EdlCommercialSkipper(ICommercialSkipper):
             f.write(contents)
             f.close()
 
-# =============================================================================
+
 class TrackingCommercialSkipper(ICommercialSkipper):
     """
     Commercial skipper that monitors the position of the currently playing file

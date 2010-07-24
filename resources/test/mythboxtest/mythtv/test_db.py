@@ -24,7 +24,7 @@ import unittest
 import util_mock
 
 from mockito import Mock
-from mythbox.mythtv.db import MythDatabase, CustomMySQLConverter
+from mythbox.mythtv.db import MythDatabase
 from mythbox.mythtv.domain import RecordedProgram
 from mythbox.platform import Platform
 from mythbox.settings import MythSettings
@@ -58,7 +58,7 @@ class MythDatabaseTest(unittest.TestCase):
         master = self.db.getMasterBackend()
         self.assertEquals(master, self.db.toBackend(master.hostname))
         self.assertEquals(master, self.db.toBackend(master.ipAddress))
-        self.assertTrue(self.db.toBackend('bogus') is None)
+        self.assertTrue(master,   self.db.toBackend('bogus'))
         
     def test_getBackends(self):
         bes = self.db.getBackends()
@@ -247,17 +247,6 @@ class MythDatabaseTest(unittest.TestCase):
         
         for p in programs:
             log.debug(p)
-        
-        
-class CustomMySQLConverterTest(unittest.TestCase):
-    
-    def test_DATE_to_python_When_date_invalid_Then_return_none(self):
-        converter = CustomMySQLConverter()
-        self.assertTrue(converter._DATE_to_python('0000-00-00', dsc=None) is None)
-    
-    def test_DATE_to_python_When_date_valid_Then_return_date(self):
-        converter = CustomMySQLConverter()
-        self.assertFalse(converter._DATE_to_python('2009-10-29', dsc=None) is None)
         
 
 if __name__ == '__main__':

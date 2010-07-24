@@ -35,7 +35,7 @@ from odict import odict
 
 log = logging.getLogger('mythbox.core')
 
-# =============================================================================
+
 def dbTime2MythTime(dt):
     """
     Converts a time from the database into a format MythTV understands. 
@@ -67,6 +67,7 @@ def dbTime2MythTime(dt):
         raise Exception, 'Expected datetime, date, timedelta, or string. Actual type: %s' % type(dt)
     return s
 
+
 def ctime2MythTime(ctimeLong):
     """
     Converts a long representing a ctime into a format MythTV understands. 
@@ -76,6 +77,7 @@ def ctime2MythTime(ctimeLong):
     """
     return time.strftime("%Y%m%d%H%M%S", time.localtime(float(ctimeLong)))
 
+
 def frames2seconds(frames, fps):
     """
     Converts a number of frames (long) to number of seconds (float w/ 2 decimal precision) 
@@ -83,18 +85,19 @@ def frames2seconds(frames, fps):
     """
     return float('%.2f'%(float(long(frames) / float(fps))))
 
+
 def seconds2frames(seconds, fps):
     """
     Converts number of seconds (float) to number of frames (long) with fiven fps (float)
     """  
     return long(float(seconds) * float(fps))
 
-# =============================================================================
+
 class StatusException(Exception):
     """Thrown when various status are invalid""" 
     pass
 
-# =============================================================================
+
 class CommercialBreak(object):
     """
         Commercial break with a starting and ending position in seconds relative
@@ -135,7 +138,7 @@ class CommercialBreak(object):
             formatSeconds(self.end),
             formatSeconds(self.duration()))
 
-# =============================================================================
+
 class Channel(object):
     """
     Channel retrieved from the channel table in the MythTV database.
@@ -235,7 +238,7 @@ class Channel(object):
         channels = bucket.values()
         return channels
         
-# =============================================================================
+
 class Program(object):
     """
     Base class which represents a TV show in the MythTV system. 
@@ -458,7 +461,7 @@ class Program(object):
     def isShowing(self, at=datetime.datetime.now()):
         return at >= self.starttimeAsTime() and at <= self.endtimeAsTime()
 
-# =============================================================================
+
 class TVProgram(Program):
     """
     TV Program retrieved from the PROGRAM database table. Used in the TV Guide.
@@ -560,8 +563,9 @@ class TVProgram(Program):
         """
         return dbTime2MythTime(self._data['endtime'])        
     
-# =============================================================================
+
 from mythbox.mythtv.conn import inject_conn
+
 
 class RecordedProgram(Program):
     """
@@ -982,6 +986,7 @@ class RecordedProgram(Program):
         return self._fps
 
     @timed
+    @inject_db
     @inject_conn
     def getFrameRate2(self):
         """
@@ -992,7 +997,7 @@ class RecordedProgram(Program):
         """
         
         #
-        # TODO: Integrate
+        # TODO: Integrate for Issue 111
         #
         if not self._fps:
             ffmpegParser = FFMPEG(
@@ -1005,7 +1010,7 @@ class RecordedProgram(Program):
             import tempfile
             fileSink = tempfile.mktemp('.mpg', 'mythbox')
             log.debug('Saving recording fragment to: %s' % fileSink)
-            transferred = self.conn().transferFile(self.getFilename(), fileSink, self.hostname(), max=5000000)
+            transferred = self.conn().transferFile(self.getFilename(), fileSink, self.db().toBackend(self.hostname()).ipAddress, max=5000000)
 
             if not transferred:
                 showPopup('Error', 'Transfer fragment failed')
@@ -1059,7 +1064,7 @@ class RecordedProgram(Program):
         for i,d in enumerate(self.data()):
             log.debug('data[%d] = %s' % (i,d))
 
-# =============================================================================
+
 class Schedule(object):
     """
     Abstract base class to represent a recording schedule in the mythtv system.
@@ -1237,7 +1242,7 @@ class Schedule(object):
             fullTitle += " - " + self.subtitle()
         return fullTitle
 
-# =============================================================================
+
 class RecordingSchedule(Schedule):
     """Recording schedule as persisted in the 'record' table."""
     
@@ -1679,7 +1684,7 @@ class RecordingSchedule(Schedule):
         """
         self._data['endoffset'] = minutes
     
-# =============================================================================
+
 class ScheduleFromProgram(RecordingSchedule):
     """
     Schedule seeded from TVProgram.
@@ -1950,6 +1955,7 @@ class Tuner(object):
             raise Exception, 'Could not match tuner to backend: hostname: %s  backends: %s' % (self.hostname, self.db().getBackends())
         else:
             return backend
+
 
 class Job(object):
     """Represents a scheduled commercial flagging, transcoding, or user defined job."""
