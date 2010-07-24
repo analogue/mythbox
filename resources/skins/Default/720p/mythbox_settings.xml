@@ -1,6 +1,6 @@
 <window>
   <id>3001</id>
-  <defaultcontrol>250</defaultcontrol>
+  <defaultcontrol>251</defaultcontrol>
   <type>window</type>
   <coordinates>
     <system>1</system>
@@ -43,148 +43,6 @@
             <width>1015</width>
             <height>580</height>
             <texture border="50,0,0,45">vpanel1.png</texture>
-        </control>
-
-        <control type="grouplist" id="9000">
-            <description>MythTV Settings</description>
-            <posx>300</posx>
-            <posy>135</posy>
-            <width>1100</width>
-            <height>550</height>
-            <itemgap>4</itemgap>
-            <onleft>250</onleft>
-            <onright>250</onright>
-            <ondown>9000</ondown>
-            <onup>9000</onup>
-            <visible>Control.HasFocus(250)|ControlGroup(9000).HasFocus()</visible> 
-            <animation effect="fade" time="200">VisibleChange</animation>
-
-            <control type="button" id="201">
-                <label>Master Backend Hostname</label>
-                <width>950</width>
-                <height>35</height>
-                <font>font12</font>
-                <align>left</align>
-                <textoffsetx>10</textoffsetx>
-                <texturefocus border="7">list-focus.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
-                <textcolor>88FFFFFF</textcolor>
-                <focusedcolor>ffffffff</focusedcolor>
-                <label2>$INFO[Window.Property(MasterBackendHostname)]</label2>
-                <enable>false</enable>
-            </control>
-
-            <control type="button" id="202">
-                <label>Master Backend Port</label>
-                <width>950</width>
-                <height>35</height>
-                <align>left</align>
-                <font>font12</font>
-                <textoffsetx>10</textoffsetx>
-                <texturefocus border="7">list-focus.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
-                <textcolor>88FFFFFF</textcolor>
-                <focusedcolor>ffffffff</focusedcolor>
-                <label2>$INFO[Window.Property(MasterBackendPort)]</label2>
-                <enable>false</enable>
-            </control>
-            
-            <control type="image" id="207">
-                <description>separator image</description>
-                <width>950</width>
-                <height>2</height>
-                <texture>separator.png</texture>
-            </control>
-            
-<!--             
-            <control type="button" id="203">
-                <label>Live TV Buffer Size (KB)</label>
-                <width>950</width>
-                <height>35</height>
-                <align>left</align>
-                <font>font12</font>
-                <textoffsetx>10</textoffsetx>
-                <texturefocus border="7">list-focus.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
-                <textcolor>88FFFFFF</textcolor>
-                <focusedcolor>ffffffff</focusedcolor>
-                <label2></label2>
-            </control>
-            
-            <control type="button" id="204">
-                <label>Live TV Timeout (seconds)</label>
-                <width>950</width>
-                <height>35</height>
-                <align>left</align>
-                <font>font12</font>
-                <textoffsetx>10</textoffsetx>
-                <texturefocus border="7">list-focus.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
-                <textcolor>88FFFFFF</textcolor>
-                <focusedcolor>ffffffff</focusedcolor>
-                <label2></label2>
-            </control>
-            
-            <control type="image" id="208">
-                <description>separator image</description>
-                <width>950</width>
-                <height>2</height>
-                <texture>separator.png</texture>
-                <enable>false</enable>
-            </control>
--->
-
-            <control type="button" id="205">
-                <label>Local Recording Directory(s)</label>
-                <width>950</width>
-                <height>35</height>
-                <align>left</align>
-                <font>font12</font>
-                <textoffsetx>10</textoffsetx>
-                <texturefocus border="7">list-focus.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
-                <textcolor>88FFFFFF</textcolor>
-                <focusedcolor>ffffffff</focusedcolor>
-                <label2></label2>
-            </control>
-
-            <control type="button" id="209">
-                <label>FFMpeg Executable Path</label>
-                <width>950</width>
-                <height>35</height>
-                <align>left</align>
-                <font>font12</font>
-                <textoffsetx>10</textoffsetx>
-                <texturefocus border="7">list-focus.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
-                <textcolor>88FFFFFF</textcolor>
-                <focusedcolor>ffffffff</focusedcolor>
-                <label2></label2>
-            </control>
-
-            <control type="image" id="210">
-                <description>separator image</description>
-                <width>950</width>
-                <height>2</height>
-                <texture>separator.png</texture>
-                <enable>false</enable>
-            </control>
-            
-            <control type="radiobutton" id="206">
-                <label>Confirm on Delete</label>
-                <width>950</width>
-                <height>35</height>
-                <align>left</align>
-                <font>font12</font>
-                <textoffsetx>10</textoffsetx>
-                <texturefocus border="7">list-focus.png</texturefocus>
-                <texturenofocus>-</texturenofocus>
-                <textcolor>88FFFFFF</textcolor>
-                <focusedcolor>ffffffff</focusedcolor>
-                <textureradiofocus>checkbox-focus.png</textureradiofocus>
-                <textureradionofocus>checkbox-nofocus.png</textureradionofocus>
-            </control>
-            
         </control>
 
         <control type="grouplist" id="9001">
@@ -272,6 +130,110 @@
             </control>
             
         </control>
+
+        <control type="grouplist" id="9000">
+            <description>MythTV Settings</description>
+            <posx>300</posx>
+            <posy>135</posy>
+            <width>1100</width>
+            <height>550</height>
+            <itemgap>4</itemgap>
+            <onleft>250</onleft>
+            <onright>250</onright>
+            <ondown>9000</ondown>
+            <onup>9000</onup>
+            <visible>Control.HasFocus(250)|ControlGroup(9000).HasFocus()</visible> 
+            <animation effect="fade" time="200">VisibleChange</animation>
+
+            <control type="button" id="201">
+                <label>Master Backend Hostname</label>
+                <width>950</width>
+                <height>35</height>
+                <font>font12</font>
+                <align>left</align>
+                <textoffsetx>10</textoffsetx>
+                <texturefocus border="7">list-focus.png</texturefocus>
+                <texturenofocus>-</texturenofocus>
+                <textcolor>88FFFFFF</textcolor>
+                <focusedcolor>ffffffff</focusedcolor>
+                <label2>$INFO[Window.Property(MasterBackendHostname)]</label2>
+                <enable>false</enable>
+            </control>
+
+            <control type="button" id="202">
+                <label>Master Backend Port</label>
+                <width>950</width>
+                <height>35</height>
+                <align>left</align>
+                <font>font12</font>
+                <textoffsetx>10</textoffsetx>
+                <texturefocus border="7">list-focus.png</texturefocus>
+                <texturenofocus>-</texturenofocus>
+                <textcolor>88FFFFFF</textcolor>
+                <focusedcolor>ffffffff</focusedcolor>
+                <label2>$INFO[Window.Property(MasterBackendPort)]</label2>
+                <enable>false</enable>
+            </control>
+            
+            <control type="image" id="207">
+                <description>separator image</description>
+                <width>950</width>
+                <height>2</height>
+                <texture>separator.png</texture>
+            </control>
+
+            <control type="button" id="205">
+                <label>Local Recording Directory(s)</label>
+                <width>950</width>
+                <height>35</height>
+                <align>left</align>
+                <font>font12</font>
+                <textoffsetx>10</textoffsetx>
+                <texturefocus border="7">list-focus.png</texturefocus>
+                <texturenofocus>-</texturenofocus>
+                <textcolor>88FFFFFF</textcolor>
+                <focusedcolor>ffffffff</focusedcolor>
+                <label2></label2>
+            </control>
+
+            <control type="button" id="209">
+                <label>FFMpeg Executable Path</label>
+                <width>950</width>
+                <height>35</height>
+                <align>left</align>
+                <font>font12</font>
+                <textoffsetx>10</textoffsetx>
+                <texturefocus border="7">list-focus.png</texturefocus>
+                <texturenofocus>-</texturenofocus>
+                <textcolor>88FFFFFF</textcolor>
+                <focusedcolor>ffffffff</focusedcolor>
+                <label2></label2>
+            </control>
+
+            <control type="image" id="210">
+                <description>separator image</description>
+                <width>950</width>
+                <height>2</height>
+                <texture>separator.png</texture>
+                <enable>false</enable>
+            </control>
+            
+            <control type="radiobutton" id="206">
+                <label>Confirm on Delete</label>
+                <width>950</width>
+                <height>35</height>
+                <align>left</align>
+                <font>font12</font>
+                <textoffsetx>10</textoffsetx>
+                <texturefocus border="7">list-focus.png</texturefocus>
+                <texturenofocus>-</texturenofocus>
+                <textcolor>88FFFFFF</textcolor>
+                <focusedcolor>ffffffff</focusedcolor>
+                <textureradiofocus>checkbox-focus.png</textureradiofocus>
+                <textureradionofocus>checkbox-nofocus.png</textureradionofocus>
+            </control>
+        </control>
+
 
         <control type="grouplist" id="9002">
             <description>Fan Art Scraper Settings</description>
@@ -435,27 +397,6 @@
             <visible>Control.HasFocus(255)|ControlGroup(9003).HasFocus</visible>
             <animation effect="fade" time="200">VisibleChange</animation>
 
-                        
-<!--            <control type="scrollbar" id="501">-->
-<!--                <posx>900</posx>-->
-<!--                <posy>10</posy>-->
-<!--                <width>20</width>-->
-<!--                <height>500</height>-->
-<!--                <texturesliderbackground border="2,2,2,2">scrollbar_bar_back2.png</texturesliderbackground>-->
-<!--                <texturesliderbar border="2,16,2,16">scrollbar_bar.png</texturesliderbar>-->
-<!--                <texturesliderbarfocus border="2,16,2,16">scrollbar_bar_focus.png</texturesliderbarfocus>-->
-<!--                <textureslidernib>scrollbar_nib.png</textureslidernib>-->
-<!--                <textureslidernibfocus>scrollbar_nib.png</textureslidernibfocus>-->
-<!--                <onleft>255</onleft>-->
-<!--                <onright>255</onright>-->
-<!--                <ondown>501</ondown>-->
-<!--                <onup>501</onup>-->
-<!--                <showonepage>true</showonepage>-->
-<!--                <orientation>vertical</orientation>-->
-<!--                <visible>false</visible>-->
-<!--            </control>-->
-            
-
             <control type="image">
                 <description>About Image</description>
                 <posy>10</posy>
@@ -502,40 +443,6 @@
 			<texturenofocus>-</texturenofocus>
             <animation effect="fade" time="200">VisibleChange</animation>
 	    </control>
-
-<!-- 
-	    <control type="button">
-	      	<description>help label</description>
-	      	<posx>300</posx>
-	      	<posy>580</posy>
-	      	<height>50</height>
-	      	<width>900</width>
-	      	<align>left</align>
-	      	<aligny>center</aligny>
-	      	<font>font12</font>
-	      	<textcolor>ffffffff</textcolor>
-	      	<label>If you have problems with LiveTV exiting prematurely, increase the buffer size.</label>
-			<visible>Control.HasFocus(203)</visible>
-			<texturenofocus>-</texturenofocus>
-            <animation effect="fade" time="200">VisibleChange</animation>
-	    </control>
-	    
-	    <control type="button">
-	      	<description>help label</description>
-	      	<posx>300</posx>
-	      	<posy>580</posy>
-	      	<height>50</height>
-	      	<width>900</width>
-	      	<align>left</align>
-	      	<aligny>center</aligny>
-	      	<font>font12</font>
-	      	<textcolor>ffffffff</textcolor>
-	      	<label>If you experience timeouts when starting LiveTV or have a "busy" backend, increase the timeout</label>
-			<visible>Control.HasFocus(204)</visible>
-			<texturenofocus>-</texturenofocus>
-            <animation effect="fade" time="200">VisibleChange</animation>
-	    </control>
--->
       
 	    <control type="button">
 	      	<description>help label</description>
@@ -747,10 +654,10 @@
         <animation effect="fade" time="200" condition="Skin.HasSetting(Animate_Skin)">WindowClose</animation>
         <animation effect="slide" start="-400,0" end="0,0" time="300" tween="quadratic" easing="out" condition="!Skin.HasSetting(Animate_Skin)">WindowOpen</animation>
         <animation effect="slide" end="-400,0" start="0,0" time="300" tween="quadratic" easing="out" condition="!Skin.HasSetting(Animate_Skin)">WindowClose</animation>
-        
-        <control type="button" id="250" >
-            <description>MythTV settings</description>
-            <label>MythTV</label>
+
+        <control type="button" id="251">
+            <description>MySQL</description>
+            <label>MySQL</label>
             <posx>0</posx>
             <posy>0</posy>
             <width>285</width>
@@ -762,15 +669,15 @@
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
             <enable>!substring(Window.Property(busy),true)</enable>
-            <onright>9000</onright>
-            <onleft>9000</onleft>
-            <ondown>251</ondown>
+            <onright>9001</onright>
+            <onleft>9001</onleft>
             <onup>255</onup>
+            <ondown>250</ondown>
         </control>
         
-        <control type="button" id="251">
-            <description>MySQL</description>
-            <label>MySQL</label>
+        <control type="button" id="250" >
+            <description>MythTV settings</description>
+            <label>MythTV</label>
             <posx>0</posx>
             <posy>40</posy>
             <width>285</width>
@@ -782,9 +689,9 @@
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
             <enable>!substring(Window.Property(busy),true)</enable>
-            <onright>9001</onright>
-            <onleft>9001</onleft>
-            <onup>250</onup>
+            <onright>9000</onright>
+            <onleft>9000</onleft>
+            <onup>251</onup>
             <ondown>254</ondown>
         </control>
         
@@ -802,7 +709,7 @@
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
             <enable>!substring(Window.Property(busy),true)</enable>
-            <onup>251</onup>
+            <onup>250</onup>
             <ondown>253</ondown>
             <onright>9002</onright>
             <onleft>9002</onleft>
@@ -881,7 +788,7 @@
             <pulseonselect>true</pulseonselect>
             <enable>!substring(Window.Property(busy),true)</enable>
             <onup>257</onup>
-            <ondown>250</ondown>
+            <ondown>251</ondown>
         </control>
     </control>
     
