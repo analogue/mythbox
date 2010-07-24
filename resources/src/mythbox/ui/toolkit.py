@@ -26,13 +26,13 @@ from mythbox.util import timed
 log = logging.getLogger('mythbox.ui')
 elog = logging.getLogger('mythbox.event')
 
-# =============================================================================
+
 class AspectRatio(object):
     STRETCH = 0       
     SCALE_UP = 1     # crops
     SCALE_DOWN = 2   # black bars
     
-# =============================================================================
+
 class Action(object):
     LEFT                    = 1
     RIGHT                   = 2
@@ -55,7 +55,7 @@ class Action(object):
     ACTION_SCROLL_DOWN      = 112
     CONTEXT_MENU            = 117  # TV Guide on MCE remote
 
-# =============================================================================
+
 class Align(object):
     # from xbmc/guilib/common/xbfont.h
     LEFT      = 0
@@ -64,7 +64,7 @@ class Align(object):
     CENTER_Y  = 4
     TRUNCATED = 8
 
-# =============================================================================
+
 def toString(action):
     """
     @type action: xbmcgui.Action
@@ -72,7 +72,7 @@ def toString(action):
     return "Action(id = %s, amount1=%s, amount2=%s, buttonCode=%s" % (
         action.getId(), action.getAmount1(), action.getAmount2(), action.getButtonCode())
          
-# =============================================================================
+
 def showPopup(title, text, millis=10000):
     # filter all commas out of text since they delimit args
     title = title.replace(',', ';')
@@ -81,7 +81,7 @@ def showPopup(title, text, millis=10000):
     log.debug('showPopup: %s' % s)
     xbmc.executebuiltin(s)
 
-# =============================================================================
+
 def enterText(control, validator=None, updater=None, heading=None, current=None):
     """
     Prompt user to enter a text string via xbmc's keyboard control and populate
@@ -133,7 +133,7 @@ def enterText(control, validator=None, updater=None, heading=None, current=None)
             
     return ok, txt
             
-# =============================================================================
+
 def enterNumeric(control, min=None, max=None, validator=None, updater=None, heading=None, current=None):
     """
     Prompt user to enter a number and update the associated control and/or domain object.
@@ -184,7 +184,7 @@ def enterNumeric(control, min=None, max=None, validator=None, updater=None, head
         
     return ok, value
 
-# =============================================================================
+
 @decorator
 def window_busy(func, *args, **kwargs):
     window = args[0]
@@ -195,7 +195,7 @@ def window_busy(func, *args, **kwargs):
         window.setBusy(False)
     return result
 
-# =============================================================================
+
 class WindowMixin(object):
     
     def setListItemProperty(self, listItem, name, value):
@@ -207,7 +207,6 @@ class WindowMixin(object):
         else:
             log.warn('Setting listitem with a None: listItem=%s name=%s value=%s' % (listItem, name, value))
 
-    @timed
     def setWindowProperty(self, name, value):
         """
         Convenience method to make sure None values don't get set on a Window
@@ -217,7 +216,7 @@ class WindowMixin(object):
         else:
             log.warn('Setting window property with a None: win=%s name=%s value=%s' % (self.win, name, value))
 
-# ==============================================================================
+
 class BaseWindow(xbmcgui.WindowXML, WindowMixin):
     
     def __init__(self, *args, **kwargs):
@@ -232,7 +231,7 @@ class BaseWindow(xbmcgui.WindowXML, WindowMixin):
         busy = self.win.getProperty('busy')
         return busy and busy == 'true'
 
-# ==============================================================================
+
 class BaseDialog(xbmcgui.WindowXMLDialog, WindowMixin):
     
     def __init__(self, *args, **kwargs):
