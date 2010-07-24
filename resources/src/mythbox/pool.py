@@ -132,8 +132,9 @@ class EvictingPool(Pool):
         log.debug('Evictor started')
         cnt = 1
         while not self.isShutdown and not self.stopReaping:
-            time.sleep(self.reapEverySecs)
-            self.reap(cnt)
+            time.sleep(1)
+            if cnt % self.reapEverySecs == 0:
+                self.reap(cnt)
             cnt+=1
         log.debug('Evictor exiting')
 
@@ -151,7 +152,7 @@ class EvictingPool(Pool):
             
             if now > evictAfter:
                 try:
-                    log.debug('Evicting resource %s in sweep %d' % (r, cnt))
+                    log.debug('Evicting resource %s in sweep %d' % (r, cnt/self.reapEverySecs))
                     self.inn.remove(r)
                     self.factory.destroy(r)
                     del self.dobs[r]

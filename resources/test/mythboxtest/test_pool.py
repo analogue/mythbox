@@ -284,8 +284,13 @@ class EvictingPoolTest(unittest.TestCase):
                 rs.append(p.checkout())
             for r in rs:
                 p.checkin(r)
+            
+            cnt = 0
             while p.available() > 0:
                 time.sleep(1)
+                cnt += 1
+                if cnt > 20:
+                    log.warn('Failed: expected available to go down to zero. Available = %d' % p.available())
             self.assertEquals(0, p.size())
         finally:
             p.shutdown()
@@ -295,4 +300,3 @@ if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')
     unittest.main()
-    logging.shutdown([])
