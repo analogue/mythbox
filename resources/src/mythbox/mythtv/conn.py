@@ -209,6 +209,7 @@ class Connection(object):
             serverVersion  = int(reply[1])
             log.debug('getServerVersion: %s %s' % (serverResponse, serverVersion))
         finally:
+            sock.shutdown(socket.SHUT_RDWR)
             sock.close()
         return serverVersion
         
@@ -1200,7 +1201,7 @@ class Connection(object):
         else:
             return msg[0].upper() == 'OK'
 
-# =============================================================================
+
 class ConnectionFactory(pool.PoolableFactory):
     
     def __init__(self, *args, **kwargs):
