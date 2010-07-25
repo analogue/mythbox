@@ -1,5 +1,5 @@
 # MySQL Connector/Python - MySQL driver written in Python.
-# Copyright 2009 Sun Microsystems, Inc. All rights reserved
+# Copyright (c) 2009,2010, Oracle and/or its affiliates. All rights reserved.
 # Use is subject to license terms. (See COPYING)
 
 # This program is free software; you can redistribute it and/or modify
@@ -24,12 +24,13 @@
 """Implementing communication to MySQL servers
 """
 
+import sys
 import socket
 import os
+from collections import deque
 
-import protocol
 import errors
-from constants import CharacterSet
+import utils
 
 class MySQLBaseConnection(object):
     """Base class for MySQL Connections subclasses.
@@ -39,15 +40,12 @@ class MySQLBaseConnection(object):
       MySQLTCPConnection
       MySQLUNIXConnection
     """
-    def __init__(self, prtcls=None):
+    def __init__(self):
         self.sock = None # holds the socket connection
         self.connection_timeout = None
-        self.protocol = None
         self.socket_flags = 0
-        try:
-            self.protocol = prtcls(self)
-        except:
-            self.protocol = protocol.MySQLProtocol(self)
+        self.buffer = deque()
+        self.recvsize = 1024*8
         self._set_socket_flags()
         
     def open_connection(self):
@@ -58,6 +56,9 @@ class MySQLBaseConnection(object):
             self.sock.close()
         except:
             pass
+    
+    def get_address(self):
+        pass
 
     def send(self, buf):
         """
@@ -70,77 +71,54 @@ class MySQLBaseConnection(object):
         except Exception, e:
             raise errors.OperationalError('%s' % e)
 
-#    def recv(self):
-#        """
-#        Receive packets using the socket from the server.
-#        """
-#        try:
-#            header = self.sock.recv(4, self.socket_flags)
-#            (pktsize, pktnr) = self.protocol.handle_header(header)
-#            buf = header + self.sock.recv(pktsize, self.socket_flags)
-#            self.protocol.is_error(buf)
-#        except:
-#            raise
-#
-#        return (buf, pktsize, pktnr)
-
+    def _next_buffer(self):
+        buf = self.buffer.popleft()
+        return buf
+            
     def recv(self):
-        """
-        Receive packets using the socket from the server.
+        """Receive packets from the MySQL server
         """
         try:
-            #header = self.sock.recv(4, self.socket_flags)
-            header = self.recv_all(self.sock, 4)
-            (pktsize, pktnr) = self.protocol.handle_header(header)
-            #buf = header + self.sock.recv(pktsize, self.socket_flags)
-            buf = header + self.recv_all(self.sock, pktsize)
-            #print('buflen=%d pktsize=%d pktnr=%d sum=%d' % (len(buf), pktsize, pktnr, pktsize + 4))
-            self.protocol.is_error(buf)
-        except: # socket.timeout, errmsg:
-            raise # InterfaceError('Timed out reading from socket.')
-
-        return (buf, pktsize, pktnr)
-
-    def recv_all(self, socket, bytes):
-        """Receive an exact number of bytes.
-    
-        Regular Socket.recv() may return less than the requested number of bytes,
-        dependning on what's in the OS buffer.  MSG_WAITALL is not available
-        on all platforms, but this should work everywhere.  This will return
-        less than the requested amount if the remote end closes.
-    
-        This isn't optimized and is intended mostly for use in testing.
-        """
-        b = ''
-        while len(b) < bytes:
-            left = bytes - len(b)
-            try:
-                new = socket.recv(left)
-            except Exception, e:
-                print('left bytes = %d out of %d'  % (left, bytes))
-                raise e
-            if new == '':
-                break # eof
-            b += new
-        return b
-
-    def set_protocol(self, prtcls):
-        try:
-            self.protocol = prtcls(self, self.protocol.handshake)
+            return self._next_buffer()
         except:
-            self.protocol = protocol.MySQLProtocol(self)
-    
+            pass
+        
+        pktnr = -1
+        
+        try:
+            buf = self.sock.recv(self.recvsize, self.socket_flags)
+            while buf:
+                totalsize = len(buf)
+                if pktnr == -1 and totalsize > 4:
+                    pktsize = utils.intread(buf[0:3])
+                    pktnr = utils.intread(buf[3])
+                if pktnr > -1 and totalsize >= pktsize+4:
+                    size = pktsize+4
+                    self.buffer.append(buf[0:size])
+                    buf = buf[size:]
+                    pktnr = -1
+                    if len(buf) == 0:
+                        break
+                elif len(buf) < pktsize+4:
+                    buf += self.sock.recv(self.recvsize, self.socket_flags)
+        except socket.error, e:
+            raise errors.InterfaceError(errno=2055,
+                values=(self.get_address(),e.errno))
+        except:
+            raise
+        
+        return self._next_buffer()
+
     def set_connection_timeout(self, timeout):
         self.connection_timeout = timeout
 
     def _set_socket_flags(self, flags=None):
         self.socket_flags = 0
         if flags is None:
-            if os.name == 'nt':
+            if os.name in ('nt','cygwin'):
                 flags = 0
             else:
-                flags = socket.MSG_WAITALL
-                
+                flags = 0
         if flags is not None:
             self.socket_flags = flags
     
@@ -148,10 +126,12 @@ class MySQLBaseConnection(object):
 class MySQLUnixConnection(MySQLBaseConnection):
     """Opens a connection through the UNIX socket of the MySQL Server."""
     
-    def __init__(self, prtcls=None,unix_socket='/tmp/mysql.sock'):
-        MySQLBaseConnection.__init__(self, prtcls=prtcls)
+    def __init__(self, unix_socket='/tmp/mysql.sock'):
+        MySQLBaseConnection.__init__(self)
         self.unix_socket = unix_socket
-        self.socket_flags = socket.MSG_WAITALL
+        
+    def get_address(self):
+        return self.unix_socket
         
     def open_connection(self):
         """Opens a UNIX socket and checks the MySQL handshake."""
@@ -159,19 +139,26 @@ class MySQLUnixConnection(MySQLBaseConnection):
             self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             self.sock.settimeout(self.connection_timeout)
             self.sock.connect(self.unix_socket)
+        except socket.error, e:
+            try:
+                m = e.errno
+            except:
+                m = e
+            raise errors.InterfaceError(errno=2002,
+                values=(self.get_address(),m))
         except StandardError, e:
-            raise errors.OperationalError('%s' % e)
+            raise errors.InterfaceError('%s' % e)
         
-        buf = self.recv()[0]
-        self.protocol.handle_handshake(buf)
-
 class MySQLTCPConnection(MySQLBaseConnection):
     """Opens a TCP connection to the MySQL Server."""
     
-    def __init__(self, prtcls=None, host='127.0.0.1', port=3306):
-        MySQLBaseConnection.__init__(self, prtcls=prtcls)
+    def __init__(self, host='127.0.0.1', port=3306):
+        MySQLBaseConnection.__init__(self)
         self.server_host = host
         self.server_port = port
+    
+    def get_address(self):
+        return "%s:%s" % (self.server_host,self.server_port)
         
     def open_connection(self):
         """Opens a TCP Connection and checks the MySQL handshake."""
@@ -179,10 +166,15 @@ class MySQLTCPConnection(MySQLBaseConnection):
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.settimeout(self.connection_timeout)
             self.sock.connect( (self.server_host, self.server_port) )
+        except socket.error, e:
+            try:
+                m = e.errno
+            except:
+                m = e
+            raise errors.InterfaceError(errno=2003,
+                values=(self.get_address(),m))
         except StandardError, e:
-            raise errors.OperationalError('%s' % e)
-            
-        buf = self.recv()[0]
-        self.protocol.handle_handshake(buf)
-
-        
+            raise errors.InterfaceError('%s' % e)
+        except:
+            raise
+                

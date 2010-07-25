@@ -1,5 +1,5 @@
 # MySQL Connector/Python - MySQL driver written in Python.
-# Copyright 2009 Sun Microsystems, Inc. All rights reserved
+# Copyright (c) 2009,2010, Oracle and/or its affiliates. All rights reserved.
 # Use is subject to license terms. (See COPYING)
 
 # This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 """Converting MySQL and Python types
 """
 
-import re
+import struct
 import datetime
 import time
 from decimal import Decimal
@@ -78,8 +78,7 @@ class MySQLConverter(ConverterBase):
     """
     def __init__(self, charset=None, use_unicode=True):
         ConverterBase.__init__(self, charset, use_unicode)
-                
-        # Python types
+    
         self.python_types = {
             int : int,
             str : self._str_to_mysql,
@@ -96,7 +95,6 @@ class MySQLConverter(ConverterBase):
             Decimal : self._decimal_to_mysql,
         }
         
-        # MySQL types
         self.mysql_types = {
             FieldType.TINY : self._int,
             FieldType.SHORT : self._int,
@@ -115,7 +113,9 @@ class MySQLConverter(ConverterBase):
             FieldType.NEWDATE : self._DATE_to_python,
             FieldType.DATETIME : self._DATETIME_to_python,
             FieldType.TIMESTAMP : self._DATETIME_to_python,
-            FieldType.BLOB : self._STRING_to_python,
+            FieldType.BLOB : self._BLOB_to_python,
+            FieldType.YEAR: self._YEAR_to_python,
+            FieldType.BIT: self._BIT_to_python,
         }
     
     def escape(self, value):
@@ -130,9 +130,8 @@ class MySQLConverter(ConverterBase):
             return value
         elif isinstance(value, (int,float,long,Decimal)):
             return value
-        backslash = re.compile(r'\134')
         res = value
-        res = backslash.sub(r'\\\\', res)
+        res = res.replace('\\','\\\\')
         res = res.replace('\n','\\n')
         res = res.replace('\r','\\r')
         res = res.replace('\047','\134\047') # single quotes
@@ -194,12 +193,11 @@ class MySQLConverter(ConverterBase):
         
         If the instance isn't a datetime.datetime type, it return None.
         
-        Returns a string or None when not valid.
+        Returns a string.
         """
-        if isinstance(value, datetime.datetime):
-            return value.strftime('%Y-%m-%d %H:%M:%S')
-        
-        return None
+        return '%d-%02d-%02d %02d:%02d:%02d' % (
+            value.year, value.month, value.day,
+            value.hour, value.minute, value.second)
     
     def _date_to_mysql(self, value):
         """
@@ -208,13 +206,9 @@ class MySQLConverter(ConverterBase):
         
         If the instance isn't a datetime.date type, it return None.
         
-        Returns a string or None when not valid.
+        Returns a string.
         """
-        if isinstance(value, datetime.date):
-            return value.strftime('%Y-%m-%d')
-        
-        
-        return None
+        return '%d-%02d-%02d' % (value.year, value.month, value.day)
     
     def _time_to_mysql(self, value):
         """
@@ -225,10 +219,7 @@ class MySQLConverter(ConverterBase):
         
         Returns a string or None when not valid.
         """
-        if isinstance(value, datetime.time):
-            return value.strftime('%H:%M:%S')
-        
-        return None
+        return value.strftime('%H:%M:%S')
     
     def _struct_time_to_mysql(self, value):
         """
@@ -238,24 +229,19 @@ class MySQLConverter(ConverterBase):
         
         Returns a string or None when not valid.
         """
-        if isinstance(value, time.struct_time):
-            return time.strftime('%Y-%m-%d %H:%M:%S',value)
-        return None
+        return time.strftime('%Y-%m-%d %H:%M:%S',value)
         
     def _timedelta_to_mysql(self, value):
         """
         Converts a timedelta instance to a string suitable for MySQL.
         The returned string has format: %H:%M:%S
 
-        Returns a string or None when not valid.
+        Returns a string.
         """
-        if isinstance(value, datetime.timedelta):
-            secs = value.seconds%60
-            mins = value.seconds%3600/60
-            hours = value.seconds/3600+(value.days*24)
-            return '%d:%02d:%02d' % (hours,mins,secs)
-
-        return None
+        (hours, r) = divmod(value.seconds, 3600)
+        (mins, secs) = divmod(r, 60)
+        hours = hours + (value.days * 24)
+        return '%02d:%02d:%02d' % (hours,mins,secs)
     
     def _decimal_to_mysql(self, value):
         """
@@ -279,7 +265,7 @@ class MySQLConverter(ConverterBase):
         """
         res = value
         
-        if value == '\x00':
+        if value == '\x00' and flddsc[1] != FieldType.BIT:
             # Don't go further when we hit a NULL value
             return None
         if value is None:
@@ -315,7 +301,7 @@ class MySQLConverter(ConverterBase):
         """
         Returns v as long type.
         """
-        return long(v)
+        return int(v)
     
     def _decimal(self, v, desc=None):
         """
@@ -328,6 +314,13 @@ class MySQLConverter(ConverterBase):
         Returns v as str type.
         """
         return str(v)
+    
+    def _BIT_to_python(self, v, dsc=None):
+        """Returns BIT columntype as integer"""
+        s = v
+        if len(s) < 8:
+            s = '\x00'*(8-len(s)) + s
+        return struct.unpack('>Q', s)[0]
     
     def _DATE_to_python(self, v, dsc=None):
         """
@@ -360,24 +353,37 @@ class MySQLConverter(ConverterBase):
         """
         pv = None
         try:
-            pv = datetime.datetime(*time.strptime(v, "%Y-%m-%d %H:%M:%S")[0:6])
+            (sd,st) = v.split(' ')
+            dt = [ int(v) for v in sd.split('-') ] +\
+                 [ int(v) for v in st.split(':') ]
+            pv = datetime.datetime(*dt)
         except ValueError:
             pv = None
         
         return pv
+    
+    def _YEAR_to_python(self, v, desc=None):
+        """Returns YEAR column type as integer"""
+        try:
+            year = int(v)
+        except ValueError:
+            raise ValueError("Failed converting YEAR to int (%s)" % v)
+        
+        return year
 
     def _SET_to_python(self, v, dsc=None):
-        """
+        """Returns SET column typs as set
+        
         Actually, MySQL protocol sees a SET as a string type field. So this
         code isn't called directly, but used by STRING_to_python() method.
         
-        Returns SET column type as string splitted using a comma.
+        Returns SET column type as a set.
         """
         pv = None
         try:
-            pv = v.split(',')
+            pv = set(v.split(','))
         except ValueError:
-            raise ValueError, "Could not convert set %s to a sequence." % v
+            raise ValueError, "Could not convert SET %s to a set." % v
         return pv
 
     def _STRING_to_python(self, v, dsc=None):
@@ -391,6 +397,8 @@ class MySQLConverter(ConverterBase):
             # Check if we deal with a SET
             if dsc[7] & FieldFlag.SET:
                 return self._SET_to_python(v, dsc)
+            if dsc[7] & FieldFlag.BINARY:
+                return v
         
         if self.use_unicode:
             try:
@@ -398,3 +406,11 @@ class MySQLConverter(ConverterBase):
             except:
                 raise
         return str(v)
+
+    def _BLOB_to_python(self, v, dsc=None):
+        if dsc is not None:
+            if dsc[7] & FieldFlag.BINARY:
+                return v
+        
+        return self._STRING_to_python(v, dsc)
+    

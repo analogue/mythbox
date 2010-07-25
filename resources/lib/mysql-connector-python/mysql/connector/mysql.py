@@ -1,5 +1,5 @@
 # MySQL Connector/Python - MySQL driver written in Python.
-# Copyright 2009 Sun Microsystems, Inc. All rights reserved
+# Copyright (c) 2009,2010, Oracle and/or its affiliates. All rights reserved.
 # Use is subject to license terms. (See COPYING)
 
 # This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,8 @@
 """Main classes for interacting with MySQL
 """
 
-import socket, string, os
+import os
+import weakref
 
 from connection import *
 import constants
@@ -41,6 +42,7 @@ class MySQLBase(object):
     def __init__(self):
         """Initializing"""
         self.conn = None # Holding the connection
+        self.protocol = None
         self.converter = None
         
         self.client_flags = constants.ClientFlag.get_default()
@@ -62,38 +64,43 @@ class MySQLBase(object):
         self.info_msg = ''
         self.use_unicode = True
         self.get_warnings = False
+        self.raise_on_warnings = False
         self.autocommit = False
         self.connection_timeout = None
         self.buffered = False
+        self.unread_result = False
 
     def connect(self):
         """To be implemented while subclassing MySQLBase."""
         pass
     
-    def _set_connection(self, prtcls=None):
+    def _get_connection(self, prtcls=None):
         """Automatically chooses based on configuration which connection type to setup."""
+        conn = None
         if self.unix_socket and os.name != 'nt':
-            self.conn = MySQLUnixConnection(prtcls=prtcls,
-                unix_socket=self.unix_socket)
+            conn = MySQLUnixConnection(unix_socket=self.unix_socket)
         else:
-            self.conn = MySQLTCPConnection(prtcls=prtcls,
-                host=self.server_host, port=self.server_port)
-        self.conn.set_connection_timeout(self.connection_timeout)
+            conn = MySQLTCPConnection(host=self.server_host,
+                port=self.server_port)
+        conn.set_connection_timeout(self.connection_timeout)
+        return conn
         
     def _open_connection(self):
-        """Opens the connection and sets the appropriated protocol."""
-        # We don't know yet the MySQL version we connect too
-        self._set_connection()
+        """Opens the connection
+        
+        Open the connection, check the MySQL version, and set the
+        protocol.
+        """        
         try:
-            self.conn.open_connection()
-            version = self.conn.protocol.server_version
+            self.protocol = protocol.MySQLProtocol(self._get_connection())
+            self.protocol.do_handshake()
+            version = self.protocol.server_version
             if version < (4,1):
-                raise InterfaceError("MySQL Version %s is not supported." % version)
-            else:
-                self.conn.set_protocol(protocol.MySQLProtocol)
-            self.protocol = self.conn.protocol
-            self.protocol.do_auth(username=self.username, password=self.password,
-                database=self.database)
+                raise errors.InterfaceError(
+                    "MySQL Version %s is not supported." % version)
+            self.protocol.do_auth(username=self.username,
+                password=self.password, client_flags=self.client_flags,
+                database=self.database, charset=self.charset)
         except:
             raise
         
@@ -101,9 +108,7 @@ class MySQLBase(object):
         """Should be called after a connection was established"""
         self.get_characterset_info()
         self.set_converter_class(conversion.MySQLConverter)
-        
         try:
-            self.set_charset(self.charset_name)
             self.set_autocommit(self.autocommit)
         except:
             raise
@@ -119,31 +124,30 @@ class MySQLBase(object):
         """
         Disconnect from the MySQL server.
         """
-        if not self.conn:
+        if not self.protocol:
             return
             
-        if self.conn.sock is not None:
+        if self.protocol.conn.sock is not None:
             self.protocol.cmd_quit()
             try:
-                self.conn.close_connection()
+                self.protocol.conn.close_connection()
             except:
                 pass
         self.protocol = None
-        self.conn = None
-    
+        
     def set_converter_class(self, convclass):
         """
         Set the converter class to be used. This should be a class overloading
         methods and members of conversion.MySQLConverter.
         """
-        self.converter_class = convclass
-        self.converter = self.converter_class(self.charset_name, self.use_unicode)
+        #self.converter_class = convclass
+        self.converter = convclass(self.charset_name, self.use_unicode)
     
     def get_characterset_info(self):
         try:
             (self.charset_name, self.collation_name) = constants.CharacterSet.get_info(self.charset)
         except:
-            raise ProgrammingError, "Illegal character set information (id=%d)" % self.charset
+            raise errors.ProgrammingError, "Illegal character set information (id=%d)" % self.charset
         return (self.charset_name, self.collation_name)
     
     def get_server_version(self):
@@ -185,8 +189,8 @@ class MySQLBase(object):
         """
         Set the username and/or password for the user connecting to the MySQL Server.
         """
-        self.username = username
-        self.password = password
+        self.username = username.strip() if username else ''
+        self.password = password.strip() if password else ''
     
     def set_unicode(self, value=True):
         """
@@ -201,7 +205,15 @@ class MySQLBase(object):
         """
         Set the database to be used after connection succeeded.
         """
-        self.database = database
+        self.database = database.strip() if database else ''
+    
+    def set_charset_info(self, info=None, charset=None):
+        
+        if info is None and charset is not None:
+            info = constants.CharacterSet.get_charset_info(charset)
+        
+        if info is not None:
+            (self.charset, self.charset_name, self.collation_name) = info
     
     def set_charset(self, name):
         """
@@ -219,32 +231,35 @@ class MySQLBase(object):
             raise
         
         try:
-            self.protocol.cmd_query("SET NAMES '%s'" % name)
+            self._execute_query("SET NAMES '%s'" % name)
         except:
             raise
         else:
-            (self.charset, self.charset_name, self.collation_name) = info
+            self.set_charset_info(info=info)
             self.converter.set_charset(self.charset_name)
 
-    def set_getwarnings(self, bool):
-        """
+    def set_warnings(self, fetch=False, raise_on_warnings=False):
+        """Set how to handle warnings coming from MySQL
+        
         Set wheter we should get warnings whenever an operation produced some.
+        If you set raise_on_warnings to True, any warning will be raised
+        as a DataError exception.
         """
-        self.get_warnings = bool
+        if raise_on_warnings is True:
+            self.get_warnings = True
+            self.raise_on_warnings = True
+        else:
+            self.get_warnings = fetch
+            self.raise_on_warnings = False
     
     def set_autocommit(self, switch):
-        """
-        Set auto commit on or off. The argument 'switch' must be a boolean type.
-        """
-        if not isinstance(switch, bool):
-            raise ValueError, "The switch argument must be boolean."
+        """Set autocommit on or off
         
-        s = 'OFF'
-        if switch:
-            s = 'ON'
-        
+        Set auto commit on or off.
+        """
         try:
-            self.protocol.cmd_query("SET AUTOCOMMIT = %s" % s)
+            s = 'ON' if switch else 'OFF'
+            self._execute_query("SET AUTOCOMMIT = %s" % s)
         except:
             raise
         else:
@@ -260,9 +275,28 @@ class MySQLBase(object):
     def set_client_flags(self, flags):
         self.client_flags = flags
     
+    def set_client_flag(self, flag):
+        if flag > 0:
+            self.client_flags |= flag
+    
+    def unset_client_flag(self, flag):
+        if flag > 0:
+            self.client_flags &= ~flag
+    
+    def isset_client_flag(self, flag):
+        if (self.client_flags & flag) > 0:
+            return True
+        return False
+    
     def set_buffered(self, val=False):
         """Sets whether cursor .execute() fetches rows"""
         self.buffered = val
+
+    def _execute_query(self, query):
+        if self.unread_result is True:
+            raise errors.InternalError("Unread result found.")
+
+        self.protocol.cmd_query(query)
 
 class MySQL(MySQLBase):
     """
@@ -285,10 +319,11 @@ class MySQL(MySQLBase):
         
         self.connect(*args, **kwargs)
             
-    def connect(self, dsn='', user='', password='', host='127.0.0.1',
-            port=3306, db=None, database=None, use_unicode=True, charset='utf8', get_warnings=False,
+    def connect(self, dsn='', user='', password='', passwd=None, host='127.0.0.1',
+            port=3306, db=None, database=None, use_unicode=True, charset='utf8',
+            get_warnings=False, raise_on_warnings=False,
             autocommit=False, unix_socket=None,
-            connection_timeout=None, client_flags=None, buffered=False):
+            connection_timeout=None, client_flags=0, buffered=False):
         """
         Establishes a connection to the MySQL Server. Called also when instansiating
         a new MySQLConnection object through the __init__ method.
@@ -297,12 +332,15 @@ class MySQL(MySQLBase):
 
         dsn
             (not used)
+            
         user
             The username used to authenticate with the MySQL Server.
 
         password
+        passwd
             The password to authenticate the user with the MySQL Server.
-
+            (password takes precedence; MySQLdb compatibility)
+            
         host
             The hostname or the IP address of the MySQL Server we are connecting with.
             (default 127.0.0.1)
@@ -314,7 +352,7 @@ class MySQL(MySQLBase):
         database
         db
             Initial database to use once we are connected with the MySQL Server.
-            The db argument is synonym, but database takes precedence.
+            (database takes precedence; MySQLdb compatibility)
 
         use_unicode
             If set to true, string values received from MySQL will be returned
@@ -335,6 +373,11 @@ class MySQL(MySQLBase):
             enable it though, or use strict mode in MySQL to make most of these
             warnings errors.
             Default: False
+        
+        raise_on_warnings
+            If set to True, warnings will be raised as exceptions. raise_on_warings
+            overrides get_warnings.
+            Default: False
 
         autocommit
             Auto commit is OFF by default, which is required by the Python Db API
@@ -352,24 +395,32 @@ class MySQL(MySQLBase):
             Allows to set flags for the connection. Check following for possible flags:
              >>> from mysql.connector.constants import ClientFlag
              >>> print '\n'.join(ClientFlag.get_full_info())
+            By default, it will be set to constants.ClientFlag.get_default()
         
         buffered
             When set to True .execute() will fetch the rows immediatly.
             
         """
-        # db is not part of Db API v2.0, but MySQLdb supports it.
         if db and not database:
             database = db
+        if passwd and not password:
+            password = passwd
 
         self.set_host(host)
         self.set_port(port)
         self.set_database(database)
-        self.set_getwarnings(get_warnings)
+        self.set_warnings(get_warnings,raise_on_warnings)
         self.set_unixsocket(unix_socket)
         self.set_connection_timeout(connection_timeout)
-        self.set_client_flags(client_flags)
         self.set_buffered(buffered)
-
+        self.set_charset_info(charset=charset)
+        self.use_unicode = use_unicode
+        
+        if client_flags is not None and client_flags > 0:
+            self.set_client_flags(client_flags)
+        else:
+            self.set_client_flags(constants.ClientFlag.get_default())
+        
         if user or password:
             self.set_login(user, password)
 
@@ -387,28 +438,23 @@ class MySQL(MySQLBase):
         except ValueError:
             raise errors.ProgrammingError(
                 "Cursor could not be removed.")
-    
-    def register_cursor(self, c):
-        try:
-            self.cursors.append(c)
-        except:
-            raise
-    
+        
     def cursor(self):
         if self.buffered:
             c = (cursor.MySQLCursorBuffered)(self)
         else:
             c = (cursor.MySQLCursor)(self)
         
-        self.register_cursor(c)
+        if c not in self.cursors:
+            self.cursors.append(c)
         return c
-
+        
     def commit(self):
         """Shortcut for executing COMMIT."""
-        self.protocol.cmd_query("COMMIT")
+        self._execute_query("COMMIT")
 
     def rollback(self):
         """Shortcut for executing ROLLBACK"""
-        self.protocol.cmd_query("ROLLBACK")
+        self._execute_query("ROLLBACK")
 
     

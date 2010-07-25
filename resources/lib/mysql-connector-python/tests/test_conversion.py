@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # MySQL Connector/Python - MySQL driver written in Python.
-# Copyright 2009 Sun Microsystems, Inc. All rights reserved
+# Copyright (c) 2009,2010, Oracle and/or its affiliates. All rights reserved.
 # Use is subject to license terms. (See COPYING)
 
 # This program is free software; you can redistribute it and/or modify
@@ -264,6 +264,8 @@ class MySQLConverterTests(tests.MySQLConnectorTests):
             ('2008-05-07 22:34:10', ('datetime', constants.FieldType.DATETIME)),
             ('val1,val2', ('set', constants.FieldType.SET, None, None, None, None, True, constants.FieldFlag.SET)),
             ('\xc3\xa4 utf8 string', ('utf8', constants.FieldType.STRING, None, None, None, None, True, 0)),
+            ('2008', ('year', constants.FieldType.YEAR)),
+            ('\x80\x00\x00\x00', ('bit', constants.FieldType.BIT)),
         )
         exp = (
             float(data[0][0]),
@@ -273,8 +275,10 @@ class MySQLConverterTests(tests.MySQLConnectorTests):
             datetime.date(2008, 5, 7),
             datetime.timedelta(hours=45, minutes=34, seconds=10),
             datetime.datetime(2008, 5, 7, 22, 34, 10),
-            ['val1', 'val2'],
+            set(['val1', 'val2']),
             unicode(data[8][0],'utf8'),
+            int(data[9][0]),
+            2147483648,
         )
         
         res = tuple([ self.cnv.to_python(v[1],v[0]) for v in data ])
@@ -311,7 +315,25 @@ class MySQLConverterTests(tests.MySQLConnectorTests):
         res = self.cnv._decimal(data)
 
         self.assertEqual(exp, res)
-
+        
+    def test__BIT_to_python(self):
+        """convert a MySQL BIT to Python int"""
+        data = [
+            '\x80',
+            '\x80\x00',
+            '\x80\x00\x00',
+            '\x80\x00\x00\x00',
+            '\x80\x00\x00\x00\x00',
+            '\x80\x00\x00\x00\x00\x00',
+            '\x80\x00\x00\x00\x00\x00\x00',
+            '\x80\x00\x00\x00\x00\x00\x00\x00',
+        ]
+        exp = [128, 32768, 8388608, 2147483648, 549755813888,
+            140737488355328, 36028797018963968, 9223372036854775808L]
+        
+        res = map(self.cnv._BIT_to_python,data)
+        self.assertEqual(exp,res)
+        
     def test__DATE_to_python(self):
         """convert a MySQL DATE to a Python datetime.date type"""
         data = '2008-05-07'
@@ -347,6 +369,15 @@ class MySQLConverterTests(tests.MySQLConnectorTests):
         self.assertEqual(None, res)
         res = self.cnv._DATETIME_to_python('1000-00-00 00:00:00')
         self.assertEqual(None, res)
+    
+    def test__YEAR_to_python(self):
+        """convert a MySQL YEAR to Python int"""
+        data = '2008'
+        exp = 2008
+        
+        self.assertEqual(exp,self.cnv._YEAR_to_python(data))
+        data = 'foobar'
+        self.assertRaises(ValueError,self.cnv._YEAR_to_python,data)
 
     def test__SET_to_python(self):
         """convert a MySQL SET type to a Python sequence
@@ -356,7 +387,7 @@ class MySQLConverterTests(tests.MySQLConnectorTests):
         has in it's field flags that the string is a SET.
         """
         data = 'val1,val2'
-        exp = ['val1', 'val2']
+        exp = set(['val1', 'val2'])
         desc = ('foo', constants.FieldType.STRING, 2, 3, 4, 5, 6, constants.FieldFlag.SET)
         res = self.cnv._STRING_to_python(data, desc)
 
@@ -382,4 +413,20 @@ class MySQLConverterTests(tests.MySQLConnectorTests):
         self.assertEqual(exp, res)
         self.cnv.set_charset('utf8')
         self.cnv.set_unicode(True)
+
+    def test__STRING_to_python_binary(self):
+        """convert a STRING BINARY to Python bytes type"""
+        data = '\x33\xfd\x34\xed'
+        desc = ('foo', constants.FieldType.STRING, 2, 3, 4, 5, 6, constants.FieldFlag.BINARY)
+        res = self.cnv._STRING_to_python(data,desc)
         
+        self.assertEqual(data,res)
+    
+    def test__BLOB_to_python_binary(self):
+        """convert a BLOB BINARY to Python bytes type"""
+        data = '\x33\xfd\x34\xed'
+        desc = ('foo', constants.FieldType.BLOB, 2, 3, 4, 5, 6, constants.FieldFlag.BINARY)
+        res = self.cnv._BLOB_to_python(data,desc)
+        
+        self.assertEqual(data,res)
+    

@@ -1,5 +1,5 @@
 # MySQL Connector/Python - MySQL driver written in Python.
-# Copyright 2009 Sun Microsystems, Inc. All rights reserved
+# Copyright (c) 2009,2010, Oracle and/or its affiliates. All rights reserved.
 # Use is subject to license terms. (See COPYING)
 
 # This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,6 @@
 """
 
 import sys
-sys.path.append('../')
 
 import mysql.connector as myconn
 
@@ -50,7 +49,7 @@ class TestExamples(tests.MySQLConnectorTests):
     def test_engines(self):
         """examples/engines.py"""
         try:
-            import examples.dates as exp
+            import examples.engines as exp
         except:
             self.fail()
         self._exec_main(exp)
@@ -94,3 +93,10 @@ class TestExamples(tests.MySQLConnectorTests):
             self.fail(e)
         self._exec_main(exp)
     
+    def test_multi_resultsets(self):
+        """examples/multi_resultsets.py"""
+        try:
+            import examples.multi_resultsets as exp
+        except StandardError, e:
+            self.fail(e)
+        self._exec_main(exp)

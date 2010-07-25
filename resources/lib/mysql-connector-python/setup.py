@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # MySQL Connector/Python - MySQL driver written in Python.
-# Copyright 2009 Sun Microsystems, Inc. All rights reserved
+# Copyright (c) 2009,2010, Oracle and/or its affiliates. All rights reserved.
 # Use is subject to license terms. (See COPYING)
 
 # This program is free software; you can redistribute it and/or modify
@@ -46,5 +46,6 @@ setup(
     keywords = metasetupinfo.keywords,
     url = metasetupinfo.url,
     download_url = metasetupinfo.download_url,
+    package_dir = metasetupinfo.package_dir,
     packages = metasetupinfo.packages,
 )

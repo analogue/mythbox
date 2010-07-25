@@ -1,5 +1,5 @@
 # MySQL Connector/Python - MySQL driver written in Python.
-# Copyright 2009 Sun Microsystems, Inc. All rights reserved
+# Copyright (c) 2009,2010, Oracle and/or its affiliates. All rights reserved.
 # Use is subject to license terms. (See COPYING)
 
 # This program is free software; you can redistribute it and/or modify
@@ -27,8 +27,6 @@
 import sys
 import getpass
 import inspect
-sys.path.append('../')
-
 import unittest
 
 MYSQL_CONFIG = {
@@ -42,7 +40,7 @@ MYSQL_CONFIG = {
 
 __all__ = [
     'MySQLConnectorTests',
-    
+    'get_test_names','printmsg',
     'active_testcases',
 ]
 
@@ -55,6 +53,7 @@ active_testcases = [
     'tests.test_pep249',
     'tests.test_bugs',
     'tests.test_examples',
+    'tests.test_mysql_datatypes',
 ]
 
 class MySQLConnectorTests(unittest.TestCase):
@@ -102,4 +101,29 @@ class MySQLConnectorTests(unittest.TestCase):
             except:
                 pass
             return have
+
+    def cmpResult(self, res1, res2):
+        """Compare results (list of tuples) comming from MySQL
+        
+        For certain results, like SHOW VARIABLES or SHOW WARNINGS, the
+        order is unpredictable. To check if what is expected in the
+        tests, we need to compare each row.
+        """
+        try:
+            if len(res1) != len(res2):
+                return False
+        
+                for row in res1:
+                    if row not in res2:
+                        return False
+        except:
+            return False
             
+        return True
+        
+def get_test_names():
+    return [ s.replace('tests.test_','') for s in active_testcases]
+
+def printmsg(msg=None):
+    if msg is not None:
+        print(msg)

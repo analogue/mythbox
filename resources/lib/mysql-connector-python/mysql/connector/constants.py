@@ -1,5 +1,5 @@
 # MySQL Connector/Python - MySQL driver written in Python.
-# Copyright 2009 Sun Microsystems, Inc. All rights reserved
+# Copyright (c) 2009,2010, Oracle and/or its affiliates. All rights reserved.
 # Use is subject to license terms. (See COPYING)
 
 # This program is free software; you can redistribute it and/or modify
@@ -26,6 +26,14 @@
 
 from errors import ProgrammingError
 
+def flag_is_set(flag, flags):
+    """Checks if the flag is set
+    
+    Returns boolean"""
+    if (flags & flag) > 0:
+        return True
+    return False
+
 class _constants(object):
     
     prefix = ''
@@ -36,21 +44,20 @@ class _constants(object):
         
     @classmethod
     def get_desc(cls,name):
-        res = ''
         try:
-            res = cls.desc[name][1]
-        except KeyError, e:
-            raise KeyError, e
-        else:
-            return res
+            return cls.desc[name][1]
+        except:
+            return None
             
     @classmethod
     def get_info(cls,n):
-        res = ()
-        for k,v in cls.desc.items():
-            if v[0] == n:
-                return v[1]
-        raise KeyError, e
+        try:
+            res = {}
+            for v in cls.desc.items():
+                res[v[1][0]] = v[0]
+            return res[n]
+        except:
+            return None
     
     @classmethod
     def get_full_info(cls):
@@ -61,7 +68,20 @@ class _constants(object):
             res = ('No information found in constant class.%s' % e)
         
         return res
-            
+
+class _constantflags(_constants):
+    
+    @classmethod
+    def get_bit_info(cls, v):
+        """Get the name of all bits set
+        
+        Returns a list of strings."""
+        res = []
+        for name,d in cls.desc.items():
+            if v & d[0]:
+                res.append(name)
+        return res
+    
 class FieldType(_constants):
     
     prefix = 'FIELD_TYPE_'
@@ -155,7 +175,7 @@ class FieldType(_constants):
             cls.DATETIME, cls.TIMESTAMP,
             ]
 
-class FieldFlag(_constants):
+class FieldFlag(_constantflags):
     """
     Field flags as found in MySQL sources mysql-src/include/mysql_com.h
     """
@@ -213,8 +233,7 @@ class FieldFlag(_constants):
         'FIELD_IN_ADD_INDEX':        (1 << 20, "Intern: Field used in ADD INDEX"),
         'FIELD_IS_RENAMED':          (1 << 21, "Intern: Field is being renamed"),
     }
-
-
+        
 class ServerCmd(_constants):
     _prefix = 'COM_'
     SLEEP           =  0
@@ -248,7 +267,7 @@ class ServerCmd(_constants):
     STMT_FETCH      = 28
     DAEMON          = 29
 
-class ClientFlag(_constants):
+class ClientFlag(_constantflags):
     """
     Client Options as found in the MySQL sources mysql-src/include/mysql_com.h
     """
@@ -314,7 +333,7 @@ class ClientFlag(_constants):
             flags |= f
         return flags
 
-class ServerFlag(_constants):
+class ServerFlag(_constantflags):
     """
     Server flags as found in the MySQL sources mysql-src/include/mysql_com.h
     """
@@ -364,204 +383,313 @@ class RefreshOption(_constants):
     }
     
 class CharacterSet(_constants):
-    """
-    List of supported character sets with their collations. This maps to the
-    character set we get from the server within the handshake packet.
+    """MySQL supported character sets and collations
     
-    To update this list, use the following query:
-      SELECT ID,CHARACTER_SET_NAME, COLLATION_NAME
-         FROM INFORMATION_SCHEMA.COLLATIONS
-         ORDER BY ID
+    List of character sets with their collations supported by MySQL. This
+    maps to the character set we get from the server within the handshake
+    packet.
     
-    This list is hardcoded because we want to avoid doing each time the above
-    query to get the name of the character set used.
+    The list is hardcode so we avoid a database query when getting the
+    name of the used character set or collation.
     """
     
-    _max_id = 211 # SELECT MAX(ID)+1 FROM INFORMATION_SCHEMA.COLLATIONS
-    
-    @classmethod
-    def _init_desc(cls):
-        if not cls.__dict__.has_key('desc'):
-            
-            # Do not forget to update the tests in test_constants!
-            cls.desc = [ None for i in range(cls._max_id)]
-            cls.desc[1] = ('big5','big5_chinese_ci')
-            cls.desc[2] = ('latin2','latin2_czech_cs')
-            cls.desc[3] = ('dec8','dec8_swedish_ci')
-            cls.desc[4] = ('cp850','cp850_general_ci')
-            cls.desc[5] = ('latin1','latin1_german1_ci')
-            cls.desc[6] = ('hp8','hp8_english_ci')
-            cls.desc[7] = ('koi8r','koi8r_general_ci')
-            cls.desc[8] = ('latin1','latin1_swedish_ci')
-            cls.desc[9] = ('latin2','latin2_general_ci')
-            cls.desc[10] = ('swe7','swe7_swedish_ci')
-            cls.desc[11] = ('ascii','ascii_general_ci')
-            cls.desc[12] = ('ujis','ujis_japanese_ci')
-            cls.desc[13] = ('sjis','sjis_japanese_ci')
-            cls.desc[14] = ('cp1251','cp1251_bulgarian_ci')
-            cls.desc[15] = ('latin1','latin1_danish_ci')
-            cls.desc[16] = ('hebrew','hebrew_general_ci')
-            cls.desc[18] = ('tis620','tis620_thai_ci')
-            cls.desc[19] = ('euckr','euckr_korean_ci')
-            cls.desc[20] = ('latin7','latin7_estonian_cs')
-            cls.desc[21] = ('latin2','latin2_hungarian_ci')
-            cls.desc[22] = ('koi8u','koi8u_general_ci')
-            cls.desc[23] = ('cp1251','cp1251_ukrainian_ci')
-            cls.desc[24] = ('gb2312','gb2312_chinese_ci')
-            cls.desc[25] = ('greek','greek_general_ci')
-            cls.desc[26] = ('cp1250','cp1250_general_ci')
-            cls.desc[27] = ('latin2','latin2_croatian_ci')
-            cls.desc[28] = ('gbk','gbk_chinese_ci')
-            cls.desc[29] = ('cp1257','cp1257_lithuanian_ci')
-            cls.desc[30] = ('latin5','latin5_turkish_ci')
-            cls.desc[31] = ('latin1','latin1_german2_ci')
-            cls.desc[32] = ('armscii8','armscii8_general_ci')
-            cls.desc[33] = ('utf8','utf8_general_ci')
-            cls.desc[34] = ('cp1250','cp1250_czech_cs')
-            cls.desc[35] = ('ucs2','ucs2_general_ci')
-            cls.desc[36] = ('cp866','cp866_general_ci')
-            cls.desc[37] = ('keybcs2','keybcs2_general_ci')
-            cls.desc[38] = ('macce','macce_general_ci')
-            cls.desc[39] = ('macroman','macroman_general_ci')
-            cls.desc[40] = ('cp852','cp852_general_ci')
-            cls.desc[41] = ('latin7','latin7_general_ci')
-            cls.desc[42] = ('latin7','latin7_general_cs')
-            cls.desc[43] = ('macce','macce_bin')
-            cls.desc[44] = ('cp1250','cp1250_croatian_ci')
-            cls.desc[47] = ('latin1','latin1_bin')
-            cls.desc[48] = ('latin1','latin1_general_ci')
-            cls.desc[49] = ('latin1','latin1_general_cs')
-            cls.desc[50] = ('cp1251','cp1251_bin')
-            cls.desc[51] = ('cp1251','cp1251_general_ci')
-            cls.desc[52] = ('cp1251','cp1251_general_cs')
-            cls.desc[53] = ('macroman','macroman_bin')
-            cls.desc[57] = ('cp1256','cp1256_general_ci')
-            cls.desc[58] = ('cp1257','cp1257_bin')
-            cls.desc[59] = ('cp1257','cp1257_general_ci')
-            cls.desc[63] = ('binary','binary')
-            cls.desc[64] = ('armscii8','armscii8_bin')
-            cls.desc[65] = ('ascii','ascii_bin')
-            cls.desc[66] = ('cp1250','cp1250_bin')
-            cls.desc[67] = ('cp1256','cp1256_bin')
-            cls.desc[68] = ('cp866','cp866_bin')
-            cls.desc[69] = ('dec8','dec8_bin')
-            cls.desc[70] = ('greek','greek_bin')
-            cls.desc[71] = ('hebrew','hebrew_bin')
-            cls.desc[72] = ('hp8','hp8_bin')
-            cls.desc[73] = ('keybcs2','keybcs2_bin')
-            cls.desc[74] = ('koi8r','koi8r_bin')
-            cls.desc[75] = ('koi8u','koi8u_bin')
-            cls.desc[77] = ('latin2','latin2_bin')
-            cls.desc[78] = ('latin5','latin5_bin')
-            cls.desc[79] = ('latin7','latin7_bin')
-            cls.desc[80] = ('cp850','cp850_bin')
-            cls.desc[81] = ('cp852','cp852_bin')
-            cls.desc[82] = ('swe7','swe7_bin')
-            cls.desc[83] = ('utf8','utf8_bin')
-            cls.desc[84] = ('big5','big5_bin')
-            cls.desc[85] = ('euckr','euckr_bin')
-            cls.desc[86] = ('gb2312','gb2312_bin')
-            cls.desc[87] = ('gbk','gbk_bin')
-            cls.desc[88] = ('sjis','sjis_bin')
-            cls.desc[89] = ('tis620','tis620_bin')
-            cls.desc[90] = ('ucs2','ucs2_bin')
-            cls.desc[91] = ('ujis','ujis_bin')
-            cls.desc[92] = ('geostd8','geostd8_general_ci')
-            cls.desc[93] = ('geostd8','geostd8_bin')
-            cls.desc[94] = ('latin1','latin1_spanish_ci')
-            cls.desc[95] = ('cp932','cp932_japanese_ci')
-            cls.desc[96] = ('cp932','cp932_bin')
-            cls.desc[97] = ('eucjpms','eucjpms_japanese_ci')
-            cls.desc[98] = ('eucjpms','eucjpms_bin')
-            cls.desc[128] = ('ucs2','ucs2_unicode_ci')
-            cls.desc[129] = ('ucs2','ucs2_icelandic_ci')
-            cls.desc[130] = ('ucs2','ucs2_latvian_ci')
-            cls.desc[131] = ('ucs2','ucs2_romanian_ci')
-            cls.desc[132] = ('ucs2','ucs2_slovenian_ci')
-            cls.desc[133] = ('ucs2','ucs2_polish_ci')
-            cls.desc[134] = ('ucs2','ucs2_estonian_ci')
-            cls.desc[135] = ('ucs2','ucs2_spanish_ci')
-            cls.desc[136] = ('ucs2','ucs2_swedish_ci')
-            cls.desc[137] = ('ucs2','ucs2_turkish_ci')
-            cls.desc[138] = ('ucs2','ucs2_czech_ci')
-            cls.desc[139] = ('ucs2','ucs2_danish_ci')
-            cls.desc[140] = ('ucs2','ucs2_lithuanian_ci')
-            cls.desc[141] = ('ucs2','ucs2_slovak_ci')
-            cls.desc[142] = ('ucs2','ucs2_spanish2_ci')
-            cls.desc[143] = ('ucs2','ucs2_roman_ci')
-            cls.desc[144] = ('ucs2','ucs2_persian_ci')
-            cls.desc[145] = ('ucs2','ucs2_esperanto_ci')
-            cls.desc[146] = ('ucs2','ucs2_hungarian_ci')
-            cls.desc[192] = ('utf8','utf8_unicode_ci')
-            cls.desc[193] = ('utf8','utf8_icelandic_ci')
-            cls.desc[194] = ('utf8','utf8_latvian_ci')
-            cls.desc[195] = ('utf8','utf8_romanian_ci')
-            cls.desc[196] = ('utf8','utf8_slovenian_ci')
-            cls.desc[197] = ('utf8','utf8_polish_ci')
-            cls.desc[198] = ('utf8','utf8_estonian_ci')
-            cls.desc[199] = ('utf8','utf8_spanish_ci')
-            cls.desc[200] = ('utf8','utf8_swedish_ci')
-            cls.desc[201] = ('utf8','utf8_turkish_ci')
-            cls.desc[202] = ('utf8','utf8_czech_ci')
-            cls.desc[203] = ('utf8','utf8_danish_ci')
-            cls.desc[204] = ('utf8','utf8_lithuanian_ci')
-            cls.desc[205] = ('utf8','utf8_slovak_ci')
-            cls.desc[206] = ('utf8','utf8_spanish2_ci')
-            cls.desc[207] = ('utf8','utf8_roman_ci')
-            cls.desc[208] = ('utf8','utf8_persian_ci')
-            cls.desc[209] = ('utf8','utf8_esperanto_ci')
-            cls.desc[210] = ('utf8','utf8_hungarian_ci')
+    desc = [
+      # (character set name, collation, default)
+      None,
+      ("big5","big5_chinese_ci",True), # 1
+      ("latin2","latin2_czech_cs",False), # 2
+      ("dec8","dec8_swedish_ci",True), # 3
+      ("cp850","cp850_general_ci",True), # 4
+      ("latin1","latin1_german1_ci",False), # 5
+      ("hp8","hp8_english_ci",True), # 6
+      ("koi8r","koi8r_general_ci",True), # 7
+      ("latin1","latin1_swedish_ci",True), # 8
+      ("latin2","latin2_general_ci",True), # 9
+      ("swe7","swe7_swedish_ci",True), # 10
+      ("ascii","ascii_general_ci",True), # 11
+      ("ujis","ujis_japanese_ci",True), # 12
+      ("sjis","sjis_japanese_ci",True), # 13
+      ("cp1251","cp1251_bulgarian_ci",False), # 14
+      ("latin1","latin1_danish_ci",False), # 15
+      ("hebrew","hebrew_general_ci",True), # 16
+      None,
+      ("tis620","tis620_thai_ci",True), # 18
+      ("euckr","euckr_korean_ci",True), # 19
+      ("latin7","latin7_estonian_cs",False), # 20
+      ("latin2","latin2_hungarian_ci",False), # 21
+      ("koi8u","koi8u_general_ci",True), # 22
+      ("cp1251","cp1251_ukrainian_ci",False), # 23
+      ("gb2312","gb2312_chinese_ci",True), # 24
+      ("greek","greek_general_ci",True), # 25
+      ("cp1250","cp1250_general_ci",True), # 26
+      ("latin2","latin2_croatian_ci",False), # 27
+      ("gbk","gbk_chinese_ci",True), # 28
+      ("cp1257","cp1257_lithuanian_ci",False), # 29
+      ("latin5","latin5_turkish_ci",True), # 30
+      ("latin1","latin1_german2_ci",False), # 31
+      ("armscii8","armscii8_general_ci",True), # 32
+      ("utf8","utf8_general_ci",True), # 33
+      ("cp1250","cp1250_czech_cs",False), # 34
+      ("ucs2","ucs2_general_ci",True), # 35
+      ("cp866","cp866_general_ci",True), # 36
+      ("keybcs2","keybcs2_general_ci",True), # 37
+      ("macce","macce_general_ci",True), # 38
+      ("macroman","macroman_general_ci",True), # 39
+      ("cp852","cp852_general_ci",True), # 40
+      ("latin7","latin7_general_ci",True), # 41
+      ("latin7","latin7_general_cs",False), # 42
+      ("macce","macce_bin",False), # 43
+      ("cp1250","cp1250_croatian_ci",False), # 44
+      None,
+      None,
+      ("latin1","latin1_bin",False), # 47
+      ("latin1","latin1_general_ci",False), # 48
+      ("latin1","latin1_general_cs",False), # 49
+      ("cp1251","cp1251_bin",False), # 50
+      ("cp1251","cp1251_general_ci",True), # 51
+      ("cp1251","cp1251_general_cs",False), # 52
+      ("macroman","macroman_bin",False), # 53
+      None,
+      None,
+      None,
+      ("cp1256","cp1256_general_ci",True), # 57
+      ("cp1257","cp1257_bin",False), # 58
+      ("cp1257","cp1257_general_ci",True), # 59
+      None,
+      None,
+      None,
+      ("binary","binary",True), # 63
+      ("armscii8","armscii8_bin",False), # 64
+      ("ascii","ascii_bin",False), # 65
+      ("cp1250","cp1250_bin",False), # 66
+      ("cp1256","cp1256_bin",False), # 67
+      ("cp866","cp866_bin",False), # 68
+      ("dec8","dec8_bin",False), # 69
+      ("greek","greek_bin",False), # 70
+      ("hebrew","hebrew_bin",False), # 71
+      ("hp8","hp8_bin",False), # 72
+      ("keybcs2","keybcs2_bin",False), # 73
+      ("koi8r","koi8r_bin",False), # 74
+      ("koi8u","koi8u_bin",False), # 75
+      None,
+      ("latin2","latin2_bin",False), # 77
+      ("latin5","latin5_bin",False), # 78
+      ("latin7","latin7_bin",False), # 79
+      ("cp850","cp850_bin",False), # 80
+      ("cp852","cp852_bin",False), # 81
+      ("swe7","swe7_bin",False), # 82
+      ("utf8","utf8_bin",False), # 83
+      ("big5","big5_bin",False), # 84
+      ("euckr","euckr_bin",False), # 85
+      ("gb2312","gb2312_bin",False), # 86
+      ("gbk","gbk_bin",False), # 87
+      ("sjis","sjis_bin",False), # 88
+      ("tis620","tis620_bin",False), # 89
+      ("ucs2","ucs2_bin",False), # 90
+      ("ujis","ujis_bin",False), # 91
+      ("geostd8","geostd8_general_ci",True), # 92
+      ("geostd8","geostd8_bin",False), # 93
+      ("latin1","latin1_spanish_ci",False), # 94
+      ("cp932","cp932_japanese_ci",True), # 95
+      ("cp932","cp932_bin",False), # 96
+      ("eucjpms","eucjpms_japanese_ci",True), # 97
+      ("eucjpms","eucjpms_bin",False), # 98
+      ("cp1250","cp1250_polish_ci",False), # 99
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      ("ucs2","ucs2_unicode_ci",False), # 128
+      ("ucs2","ucs2_icelandic_ci",False), # 129
+      ("ucs2","ucs2_latvian_ci",False), # 130
+      ("ucs2","ucs2_romanian_ci",False), # 131
+      ("ucs2","ucs2_slovenian_ci",False), # 132
+      ("ucs2","ucs2_polish_ci",False), # 133
+      ("ucs2","ucs2_estonian_ci",False), # 134
+      ("ucs2","ucs2_spanish_ci",False), # 135
+      ("ucs2","ucs2_swedish_ci",False), # 136
+      ("ucs2","ucs2_turkish_ci",False), # 137
+      ("ucs2","ucs2_czech_ci",False), # 138
+      ("ucs2","ucs2_danish_ci",False), # 139
+      ("ucs2","ucs2_lithuanian_ci",False), # 140
+      ("ucs2","ucs2_slovak_ci",False), # 141
+      ("ucs2","ucs2_spanish2_ci",False), # 142
+      ("ucs2","ucs2_roman_ci",False), # 143
+      ("ucs2","ucs2_persian_ci",False), # 144
+      ("ucs2","ucs2_esperanto_ci",False), # 145
+      ("ucs2","ucs2_hungarian_ci",False), # 146
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      ("utf8","utf8_unicode_ci",False), # 192
+      ("utf8","utf8_icelandic_ci",False), # 193
+      ("utf8","utf8_latvian_ci",False), # 194
+      ("utf8","utf8_romanian_ci",False), # 195
+      ("utf8","utf8_slovenian_ci",False), # 196
+      ("utf8","utf8_polish_ci",False), # 197
+      ("utf8","utf8_estonian_ci",False), # 198
+      ("utf8","utf8_spanish_ci",False), # 199
+      ("utf8","utf8_swedish_ci",False), # 200
+      ("utf8","utf8_turkish_ci",False), # 201
+      ("utf8","utf8_czech_ci",False), # 202
+      ("utf8","utf8_danish_ci",False), # 203
+      ("utf8","utf8_lithuanian_ci",False), # 204
+      ("utf8","utf8_slovak_ci",False), # 205
+      ("utf8","utf8_spanish2_ci",False), # 206
+      ("utf8","utf8_roman_ci",False), # 207
+      ("utf8","utf8_persian_ci",False), # 208
+      ("utf8","utf8_esperanto_ci",False), # 209
+      ("utf8","utf8_hungarian_ci",False), # 210
+    ]
 
     @classmethod
     def get_info(cls,setid):
-        """Returns information about the charset for given MySQL ID."""
-        cls._init_desc()
-        res = ()
-        errmsg =  "Character set with id '%d' unsupported." % (setid)
+        """Retrieves character set information as tuple using an ID
+        
+        Retrieves character set and collation information based on the
+        given MySQL ID.
+
+        Returns a tuple.
+        """
         try:
-            res = cls.desc[setid]
+            r = cls.desc[setid]
+            if r is None:
+                raise
+            return r[0:2]
         except:
-            raise ProgrammingError, errmsg
-
-        if res is None:
-            raise ProgrammingError, errmsg
-
-        return res
+            raise ProgrammingError("Character set '%d' unsupported" % (setid))
 
     @classmethod
     def get_desc(cls,setid):
-        """Returns info string about the charset for given MySQL ID."""
-        res = ()
+        """Retrieves character set information as string using an ID
+        
+        Retrieves character set and collation information based on the
+        given MySQL ID.
+
+        Returns a tuple.
+        """
         try:
-            res = "%s/%s" % self.get_info(setid)
-        except ProgrammingError, e:
+            return "%s/%s" % cls.get_info(setid)
+        except:
             raise
-        else:
-            return res
+    
+    @classmethod
+    def get_default_collation(cls, charset):
+      """Retrieves the default collation for given character set
+      
+      Raises ProgrammingError when character set is not supported.
+      
+      Returns a string.
+      """
+      
+      for cid, c in enumerate(cls.desc):
+        if c is None:
+          continue
+        if c[0] == charset and c[2] is True:
+          return c[1], c[0], cid
+      
+      raise ProgrammingError("Character set '%s' unsupported." % (charset))
     
     @classmethod
     def get_charset_info(cls, name, collation=None):
-        """Returns information about the charset and optional collation."""
-        cls._init_desc()
-        l = len(cls.desc)
-        errmsg =  "Character set '%s' unsupported." % (name)
+        """Retrieves character set information as tuple using a name
+        
+        Retrieves character set and collation information based on the
+        given a valid name.
+        
+        Raises ProgrammingError when character set is not supported.
+
+        Returns a tuple.
+        """
+        idx = None
         
         if collation is None:
-            collation = '%s_general_ci' % (name)
-        
-        # Search the list and return when found
-        idx = 0
-        for info in cls.desc:
-            if info and info[0] == name and info[1] == collation:
-                return (idx,info[0],info[1])
-            idx += 1
-        
-        # If we got here, we didn't find the charset
-        raise ProgrammingError, errmsg
+          collation, charset, idx = cls.get_default_collation(name)
+        else:
+          for cid, c in enumerate(cls.desc):
+            if c is None:
+              continue
+            if c[0] == name and c[1] == collation:
+              idx = cid
+              break
+              
+        if idx is not None:
+          return (idx,) + (name,collation)
+        else:
+          raise ProgrammingError("Character set '%s' unsupported." % (name))
         
     @classmethod
     def get_supported(cls):
-        """Returns a list with names of all supproted character sets."""
+        """Retrieves a list with names of all supproted character sets
+        
+        Returns a tuple.
+        """
         res = []
         for info in cls.desc:
             if info and info[0] not in res:

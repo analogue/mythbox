@@ -1,5 +1,5 @@
 # MySQL Connector/Python - MySQL driver written in Python.
-# Copyright 2009 Sun Microsystems, Inc. All rights reserved
+# Copyright (c) 2009,2010, Oracle and/or its affiliates. All rights reserved.
 # Use is subject to license terms. (See COPYING)
 
 # This program is free software; you can redistribute it and/or modify
@@ -28,91 +28,22 @@ __MYSQL_DEBUG__ = False
 
 import struct
 
-def int1read(c):
-    """
-    Takes a bytes and returns it was an integer.
-    
-    Returns integer.
-    """
-    if isinstance(c,int):
-        if c < 0 or c > 254:
-            raise ValueError('excepts int 0 <= x <= 254')
-        return c
-    elif len(c) > 1:
-        raise ValueError('excepts 1 byte long bytes-object or int')
-        
-    return int('%02x' % ord(c),16)
-
-def int2read(s):
-    """
-    Takes a string of 2 bytes and unpacks it as unsigned integer.
-    
-    Returns integer.
-    """
-    if len(s) > 2:
-        raise ValueError('int2read require s length of maximum 3 bytes')
-    elif len(s) < 2:
-        s = s + '\x00'
-    return struct.unpack('<H', s)[0]
-
-def int3read(s):
-    """
-    Takes a string of 3 bytes and unpacks it as integer.
-    
-    Returns integer.
-    """
-    if len(s) > 3:
-        raise ValueError('int3read require s length of maximum 3 bytes')
-    elif len(s) < 4:
-        s = s + '\x00'*(4-len(s))
-    return struct.unpack('<I', s)[0]
-    
-def int4read(s):
-    """
-    Takes a string of 4 bytes and unpacks it as integer.
-    
-    Returns integer.
-    """
-    if len(s) > 4:
-        raise ValueError('int4read require s length of maximum 4 bytes')
-    elif len(s) < 4:
-        s = s + '\x00'*(4-len(s))
-    return struct.unpack('<I', s)[0]
-
-def int8read(s):
-    """
-    Takes a string of 8 bytes and unpacks it as integer.
-
-    Returns integer.
-    """
-    if len(s) > 8:
-        raise ValueError('int4read require s length of maximum 8 bytes')
-    elif len(s) < 8:
-        s = s + '\x00'*(8-len(s))
-    return struct.unpack('<Q', s)[0]
-
-def intread(s):
-    """
-    Takes a string and unpacks it as an integer.
-    
-    This function uses int1read, int2read, int3read and int4read by
-    checking the length of the given string.
-    
-    Returns integer.
-    """
-    l = len(s)
-    if l < 1 or l > 4:
-        raise ValueError('intread expects a string not longer than 4 bytes')
-    if not isinstance(s, str):
-        raise ValueError('intread expects a string')
-    fs = {
-        1 : int1read,
-        2 : int2read,
-        3 : int3read,
-        4 : int4read,
-        8 : int8read,
-    }
-    return fs[l](s)
+def intread(b):
+    """Unpacks the given buffer to an integer"""
+    try:
+        if isinstance(b,int):
+            return b
+        l = len(b)
+        if l == 1:
+            return int(ord(b))
+        if l <= 4:
+            tmp = b + '\x00'*(4-l)
+            return struct.unpack('<I', tmp)[0]
+        else:
+            tmp = b + '\x00'*(8-l)
+            return struct.unpack('<Q', tmp)[0]
+    except:
+        raise
 
 def int1store(i):
     """
@@ -221,81 +152,32 @@ def read_lc_string(buf):
     it's a NULL and we return None as value.
     
     Returns a tuple (trucated buffer, string).
-    """    
+    """
     if buf[0] == '\xfb':
         # NULL value
         return (buf[1:], None)
         
-    l = lsize = start = 0
-    fst = buf[0]
-    # Remove the type byte, we got the length information.
-    buf = buf[1:]
+    l = lsize = 0
+    fst = ord(buf[0])
     
-    if fst <= '\xFA':
-        # Returns result right away.
-        l = ord(fst)
-        s = buf[:l]
-        return (buf[l:], s)
-    elif fst == '\xFC':
-        lsize = 2
-    elif fst == '\xFD':
-        lsize = 3
-    elif fst == '\xFE':
-        lsize = 4
-    
-    l = intread(buf[0:lsize])
-    # Chop of the bytes which hold the length
-    buf = buf[lsize:]
-    # Get the actual string
-    s = buf[0:l]
-    # Set the buffer so we can return it
-    buf = buf[l:]
-    
-    return (buf, s)
+    if fst <= 250:
+        l = fst
+        return (buf[1+l:], buf[1:l+1])
 
-def read_lc_string_list(buf):
-    """
-    Reads all length encoded strings from the given buffer.
+    lsize = fst - 250
+    l = intread(buf[1:lsize+1])
+    return (buf[lsize+l+1:], buf[lsize+1:l+lsize+1])
     
-    This is exact same function as read_lc_string() but duplicated
-    in hopes for performance gain when reading results.
+def read_lc_string_list(buf):
+    """Reads all length encoded strings from the given buffer
+    
+    Returns a list of strings
     """
     strlst = []
     
     while buf:
-        if buf[0] == '\xfb':
-            # NULL value
-            buf = buf[1:]
-            strlst.append(None)
-            continue
-        
-        l = lsize = start = 0
-        fst = buf[0]
-        # Remove the type byte, we got the length information.
-        buf = buf[1:]
-    
-        if fst <= '\xFA':
-            # Returns result right away.
-            l = ord(fst)
-            strlst.append(buf[:l])
-            buf = buf[l:]
-            continue
-        elif fst == '\xFC':
-            lsize = 2
-        elif fst == '\xFD':
-            lsize = 3
-        elif fst == '\xFE':
-            lsize = 4
-    
-        l = intread(buf[0:lsize])
-        # Chop of the bytes which hold the length
-        buf = buf[lsize:]
-        # Get the actual string
-        s = buf[0:l]
-        # Set the buffer so we can return it
-        buf = buf[l:]
-        
-        strlst.append(s)
+        (buf, b) = read_lc_string(buf)
+        strlst.append(b)
 
     return strlst
 
@@ -320,31 +202,17 @@ def read_string(buf, end=None, size=None):
     raise ValueError('read_string() needs either end or size (weird)')
     
 def read_int(buf, size):
-    """
-    Take a buffer and reads an integer of a certain size (1 <= size <= 4).
+    """Read an integer from buffer
     
     Returns a tuple (truncated buffer, int)
     """
-    if len(buf) == 0:
-        raise ValueError("Empty buffer.")
-    if not isinstance(size,int) or (size not in [1,2,3,4,8]):
-        raise ValueError('size should be int in range of 1..4 or 8')
-
-    i = None
-    if size == 1:
-        i = int1read(buf[0])
-    elif size == 2:
-        i = int2read(buf[0:2])
-    elif size == 3:
-        i = int3read(buf[0:3])
-    elif size == 4:
-        i = int4read(buf[0:4])
-    elif size == 8:
-        i = int8read(buf[0:8])
-    else:
-        raise ValueError('size should be int in range of 1..4 or 8 (weird)')
-        
-    return (buf[size:], int(i))
+    
+    try:
+        res = intread(buf[0:size])
+    except:
+        raise
+    
+    return (buf[size:], res)
 
 def read_lc_int(buf):
     """
@@ -385,8 +253,18 @@ def _dump_buffer(buf, label=None):
             if len(buf) == 0:
                 print "%s : EMPTY BUFFER" % label
             import string
-            print "%s: %s" % (label,string.join( [ "%02x" % ord(c) for c in buf ], ' '))
-            if debug > 1:
-                print "%s: %s" % (label,string.join( [ "%s" % chr(ord(c)) for c in buf ], ''))
+            if debug == 1:
+                print "%s: %s" % (label,string.join( [ "%02x" % ord(c) for c in buf ], ' '))
+            elif debug == 2:
+                print "%s: %s" % (label,string.join( [ "\\x%02x" % ord(c) for c in buf ], ''))
+            elif debug > 2:
+                print "%s: " % label,
+                for c in buf:
+                    o = ord(c)
+                    if o >= 33 and o < 127:
+                        print "%s" % c,
+                    else:
+                        print "%02x" % o,
+                print
     except:
         raise
