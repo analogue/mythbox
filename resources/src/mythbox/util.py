@@ -26,7 +26,6 @@ import time
 import xbmc
 import xbmcgui
 
-from copy import deepcopy
 from datetime import datetime, timedelta
 from decorator import decorator
 from odict import odict
@@ -42,7 +41,7 @@ elog = logging.getLogger('mythbox.event')
 
 threadlocals = {}   
 
-# =============================================================================
+
 def formatSize(sizeKB, gb=False):
     size = float(sizeKB)
     if size > 1024*1000 and gb:
@@ -53,7 +52,7 @@ def formatSize(sizeKB, gb=False):
         value = str("%.2f %s"% (size, 'KB')) 
     return re.sub(r'(?<=\d)(?=(\d\d\d)+\.)', ',', value)
     
-# =============================================================================
+
 def formatSeconds(secs):
     """
     Returns number of seconds into a nicely formatted string --> 00h 00m 00s
@@ -81,7 +80,7 @@ def formatSeconds(secs):
         
     return result
 
-# =============================================================================
+
 def slice(items, num):
     """
     Slices a list of items into the given number of separate lists
@@ -97,7 +96,7 @@ def slice(items, num):
         queues[i%num].append(item)
     return queues
 
-# =============================================================================
+
 def safe_unicode(obj, *args):
     """ return the unicode representation of obj """
     try:
@@ -107,7 +106,7 @@ def safe_unicode(obj, *args):
         ascii_text = str(obj).encode('string_escape')
         return unicode(ascii_text)
     
-# =============================================================================
+
 def safe_str(obj):
     """ return the byte string representation of obj """
     try:
@@ -116,7 +115,7 @@ def safe_str(obj):
         # obj is unicode
         return unicode(obj).encode('unicode_escape')
 
-# =============================================================================
+
 class BoundedEvictingQueue(object):
     """
     Fixed size queue that evicts objects in FIFO order when capacity
@@ -143,9 +142,9 @@ class BoundedEvictingQueue(object):
     def get(self):
         return self._queue.get(False, None)
 
-# =============================================================================
 
 _lircEvents = BoundedEvictingQueue(2)
+
 
 @decorator
 def lirc_hack(func, *args, **kwargs):
@@ -242,12 +241,14 @@ def lirc_hack(func, *args, **kwargs):
         log.debug('\n\n\n\t\tlirc hack consumed event with delta = %s\n\n' % diff)
         return None
 
-# =============================================================================
+
 __workersByName = odict()  # key = thread name, value = Thread
+
 
 def clearWorkers():
     """Only to be used by unit tests"""
     __workersByName.clear()
+
 
 def hasPendingWorkers():
     for workerName, worker in __workersByName.items():
@@ -256,6 +257,7 @@ def hasPendingWorkers():
                 return True
     return False
      
+
 def waitForWorkersToDie(timeout=None):
     """
     If the main python thread exits w/o first letting all child threads die, then
@@ -274,7 +276,7 @@ def waitForWorkersToDie(timeout=None):
                     
     log.debug('Done waiting for threads to die')
 
-# =============================================================================                
+
 @decorator
 def run_async(func, *args, **kwargs):
     """
@@ -305,7 +307,7 @@ def run_async(func, *args, **kwargs):
     # TODO: attach post-func decorator to target function and remove thread from __workersByName
     return worker
 
-# =============================================================================
+
 @decorator
 def timed(func, *args, **kw):
     """
@@ -326,7 +328,7 @@ def timed(func, *args, **kw):
     else:
         return func(*args, **kw)
 
-# =============================================================================
+
 @decorator
 def ui_locked(func, *args, **kw):
     """
@@ -342,9 +344,9 @@ def ui_locked(func, *args, **kw):
         pass #xbmcgui.unlock()
     return result
 
-# =============================================================================
-from threading import RLock
+
 uilocked = False
+
 
 @decorator
 def ui_locked2(func, *args, **kw):
@@ -365,7 +367,7 @@ def ui_locked2(func, *args, **kw):
             uilocked = False
         return result
 
-# =============================================================================
+
 @decorator
 def catchall(func, *args, **kw):
     """
@@ -377,7 +379,7 @@ def catchall(func, *args, **kw):
     except Exception, ex:
         log.exception('CATCHALL: Caught exception %s on method %s' % (str(ex), func))
 
-# =============================================================================
+
 @decorator
 def catchall_ui(func, *args, **kw):
     """
@@ -390,11 +392,9 @@ def catchall_ui(func, *args, **kw):
         log.exception('CATCHALL_UI: Caught exception %s on method %s' % (str(ex), func))
         xbmcgui.Dialog().ok('Error: CATCHALL', 'Exception: %s' % str(ex), 'Function: %s' % str(func))
 
-# =============================================================================
+
 def synchronized(func):
-    """
-    Synchronizes method invocation on an object using the method name as the mutex
-    """
+    """Synchronizes method invocation on an object using the method name as the mutex"""
     
     def wrapper(self,*__args,**__kw):
         try:
@@ -414,11 +414,9 @@ def synchronized(func):
     wrapper.__doc__ = func.__doc__
     return wrapper
 
-# =============================================================================
+
 def sync_instance(func):
-    """
-    Synchronizes method invocation on an object using the object instance as the mutex
-    """
+    """Synchronizes method invocation on an object using the object instance as the mutex"""
     
     def wrapper(self,*__args,**__kw):
         try:
@@ -437,11 +435,10 @@ def sync_instance(func):
     wrapper.__doc__ = func.__doc__
     return wrapper
 
-# =============================================================================
+
 def coalesce(func):
-    """
-    Coalesces concurrent calls to a function with no return value from multiple threads.
-    """
+    """Coalesces concurrent calls to a function with no return value from multiple threads."""
+
     def wrapper(self,*__args,**__kw):
         try:
             rlock = self.__get__('_coalesce_lock_%s' % func.__name__)
@@ -469,7 +466,7 @@ def coalesce(func):
     wrapper.__doc__ = func.__doc__
     return wrapper
 
-# =============================================================================
+
 def max_threads(t=1):
     '''Limits the number of threads that can execute the decorated method concurrently'''
     def wrap(f):
@@ -487,7 +484,7 @@ def max_threads(t=1):
         return wrapped_f
     return wrap
     
-# =============================================================================
+
 def timed_cache(seconds=0, minutes=0, hours=0, days=0):
     """
     Lifted from http://www.willmcgugan.com/blog/tech/2007/10/14/timed-caching-decorator/
@@ -521,12 +518,17 @@ def timed_cache(seconds=0, minutes=0, hours=0, days=0):
                     # Calculate
                     updates[key] = t
                     result = f(*args, **kwargs)
-                    results[key] = deepcopy(result)
+                    
+                    # DIFF: Removed deepcopy
+                    # results[key] = deepcopy(result)
+                    results[key] = result
                     return result
 
                 else:
                     # Cache
-                    return deepcopy(results[key])
+                    # DIFF: Removed deepcopy
+                    #return deepcopy(results[key])
+                    return results[key]
 
             finally:
                 lock.release()
@@ -535,7 +537,7 @@ def timed_cache(seconds=0, minutes=0, hours=0, days=0):
 
     return decorate
 
-# =============================================================================
+
 def which(program, all=False):
     """emulates unix' "which" command (with one argument only)"""
     
@@ -564,7 +566,7 @@ def which(program, all=False):
             return list(paths)
     return None
 
-# =============================================================================
+
 class NativeTranslator(xbmc.Language):
     
     def __init__(self, scriptPath, defaultLanguage=None, *args, **kwargs):
@@ -595,7 +597,7 @@ class NativeTranslator(xbmc.Language):
             result.append(self.get(someMap[key]))
         return result
     
-# =============================================================================
+
 class OnDemandConfig(object):
     """
     Used by unit tests to query user for values on stdin as they
@@ -629,7 +631,7 @@ class OnDemandConfig(object):
             inifile.close()
         return value
 
-# =============================================================================
+
 class SynchronizedDict(object):
     
     def __init__(self):
@@ -655,7 +657,7 @@ class SynchronizedDict(object):
     def clear(self):
         self.delegate.clear()
 
-# =============================================================================
+
 class BidiIterator(object):
     """
     Bidirectional list iterator
@@ -702,7 +704,7 @@ class BidiIterator(object):
     def size(self):
         return len(self.items)
     
-# =============================================================================
+
 class CyclingBidiIterator(BidiIterator):
     """Adds some cycle(...) goodness to our bidirectional iterator"""
     
