@@ -6,6 +6,7 @@ XX/XX/2010 - MythBox RC2
  - new     : Issue 106 - More responsive fanart lookup based on current list selection
  - fixed   : Issue 108 - Focus changes to Play+Skip button in Recording Details screen after user has already switched focus to another button
  - new     : Issue 109 - Enable navigation from the Settings screen to the XBMC settings screen
+ - new     : Issue 114 - Hostname added to comm flag status (slave backends only)
  
 06/08/2010 - MythBox RC1
 =============================

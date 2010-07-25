@@ -41,7 +41,7 @@ ID_COVERFLOW_GROUP    = 499
 ID_COVERFLOW_WRAPLIST = 500
 MAX_COVERFLOW         = 6
 
-# =============================================================================
+
 class HomeWindow(BaseWindow):
     
     def __init__(self, *args, **kwargs):
@@ -54,6 +54,7 @@ class HomeWindow(BaseWindow):
         self.bus          = kwargs['bus']
         self.feedHose     = kwargs['feedHose']
         self.win = None
+        self.lastFocusId = None
         
         self.mythThumbnailCache = self.cachesByName['mythThumbnailCache']
         self.mythChannelIconCache = self.cachesByName['mythChannelIconCache']
@@ -168,12 +169,10 @@ class HomeWindow(BaseWindow):
                 return False
             
         if self.settingsOK:      
-            # init pools for @inject_db and @inject_conn
             pool.pools['dbPool'] = pool.EvictingPool(MythDatabaseFactory(settings=self.settings, translator=self.translator), maxAgeSecs=10*60, reapEverySecs=10)
-            pool.pools['connPool'] = pool.EvictingPool(ConnectionFactory(settings=self.settings, translator=self.translator, platform=self.platform, bus=self.bus), maxAgeSecs=10*60, reapEverySecs=10)
-
-            #pool.pools['dbPool'] = pool.Pool(MythDatabaseFactory(settings=self.settings, translator=self.translator))
-            #pool.pools['connPool'] = pool.Pool(ConnectionFactory(settings=self.settings, translator=self.translator, platform=self.platform, bus=self.bus))
+            
+            # TODO: Conn pool is non-evicting (I think we have to maintain connections to backends don't go to sleep/suspend)
+            pool.pools['connPool'] = pool.Pool(ConnectionFactory(settings=self.settings, translator=self.translator, platform=self.platform, bus=self.bus))
         
         if self.settingsOK:
             self.dumpBackendInfo()
@@ -210,8 +209,10 @@ class HomeWindow(BaseWindow):
             # TODO: 
             #   Fix is to refactor EvictingPool to not use
             #   the @run_async decorator
-            for (poolName, poolInstance) in pool.pools.items():
-                poolInstance.stopReaping = True
+            
+            #for (poolName, poolInstance) in pool.pools.items():
+            #    poolInstance.stopReaping = True
+            pool.pools['dbPool'].stopReaping = True
             
             if hasPendingWorkers():
                 showPopup('Please wait', 'Closing connections...', 3000)
@@ -356,31 +357,45 @@ class HomeWindow(BaseWindow):
     @inject_conn
     @coalesce
     def renderTuners(self):
-        tuners = self.conn().getTuners()
+        tuners = self.conn().getTuners()[:]
         
-        listItems = []
-        for i, t in enumerate(tuners):
-            listItem = xbmcgui.ListItem()
-            self.setListItemProperty(listItem, 'tuner', '%s %s' % (t.tunerType, t.tunerId))
-            self.setListItemProperty(listItem, 'hostname', t.hostname)
-            self.setListItemProperty(listItem, 'status', t.formattedTunerStatus())
-            listItems.append(listItem)
+        for t in tuners:
+            t.listItem = xbmcgui.ListItem()
+            self.setListItemProperty(t.listItem, 'tuner', '%s %s' % (t.tunerType, t.tunerId))
+            self.setListItemProperty(t.listItem, 'hostname', t.hostname)
+            self.setListItemProperty(t.listItem, 'status', t.formattedTunerStatus())
 
         if len(tuners) > 2:    
+            
+            def nextToRecordFirst(t1, t2):
+                r1 = t1.getNextScheduledRecording()
+                r2 = t2.getNextScheduledRecording()
+                
+                if not r1 or not r2:
+                    return 0
+                elif r1 and not r2:
+                    return 1
+                elif not r1 and r2:
+                    return -1
+                else:
+                    return cmp(r1.starttimeAsTime(), r2.starttimeAsTime())
+                
             def idleTunersLast(t1, t2):
-                t1Idle = t1.getProperty('status').startswith('Idle')
-                t2Idle = t2.getProperty('status').startswith('Idle')
+                t1Idle = t1.listItem.getProperty('status').startswith('Idle')
+                t2Idle = t2.listItem.getProperty('status').startswith('Idle')
+
                 if t1Idle and t2Idle:
-                    return cmp(t1.getProperty('tuner'), t2.getProperty('tuner'))
+                    return nextToRecordFirst(t1,t2)
                 elif t1Idle and not t2Idle:
                     return 1
                 elif not t1Idle and t2Idle:
                     return -1
                 else:
-                    return cmp(t1.getProperty('tuner'), t2.getProperty('tuner'))            
-            listItems.sort(idleTunersLast)
-        
-        self.tunersListBox.addItems(listItems)
+                    return cmp(t1.listItem.getProperty('tuner'), t2.listItem.getProperty('tuner'))            
+
+            tuners.sort(idleTunersLast)
+
+        self.tunersListBox.addItems(map(lambda t: t.listItem, tuners))
 
     @run_async
     @inject_db
@@ -408,15 +423,26 @@ class HomeWindow(BaseWindow):
             else:                                    
                 return job.formattedJobStatus()
         
+        def getHostInfo(job):
+            commFlagBackend = self.db().toBackend(job.hostname)
+            if commFlagBackend.slave:
+                return ' on %s' % commFlagBackend.hostname
+            else:
+                return ''
+            
         i = 1    
         for j in running:
             listItem = xbmcgui.ListItem()
             self.setListItemProperty(listItem, 'jobNumber', '%d'%i)
             title = getTitle(j)
             
-            if j.jobType == JobType.COMMFLAG: status = 'Commercial flagging %s. %s' % (title, getJobStats(j))
-            elif j.jobType == JobType.TRANSCODE: status = 'Transcoding %s' % title
-            else: status = '%s processing %s' % (j.formattedJobType(), title)
+            if j.jobType == JobType.COMMFLAG:
+                status = 'Commercial flagging %s%s. %s' % (title, getHostInfo(j), getJobStats(j))
+            elif j.jobType == JobType.TRANSCODE: 
+                status = 'Transcoding %s' % title
+            else: 
+                status = '%s processing %s' % (j.formattedJobType(), title)
+                
             self.setListItemProperty(listItem, 'status', status)
             listItems.append(listItem)
             i += 1
@@ -426,9 +452,13 @@ class HomeWindow(BaseWindow):
             self.setListItemProperty(listItem, 'jobNumber', '%d'%i)
             title = getTitle(j)
 
-            if j.jobType == JobType.COMMFLAG: status = 'Waiting to commercial flag %s' % title
-            elif j.jobType == JobType.TRANSCODE: status = 'Waiting to transcode %s' % title
-            else: status = 'Waiting to run %s on %s' % (j.formattedJobType(), title)
+            if j.jobType == JobType.COMMFLAG: 
+                status = 'Waiting to commercial flag %s' % title
+            elif j.jobType == JobType.TRANSCODE: 
+                status = 'Waiting to transcode %s' % title
+            else: 
+                status = 'Waiting to run %s on %s' % (j.formattedJobType(), title)
+                
             self.setListItemProperty(listItem, 'status', status)
             listItems.append(listItem)
             i+=1

@@ -453,8 +453,12 @@ class LiveTvWindow2(BaseWindow):
         self.programs = None                     # [TVProgram]
         self.listItemsByChannel = odict()        # {Channel:ListItem}
         self.closed = False
-        self.workq = None                         
         self.lastSelected = int(self.settings.get('livetv_last_selected'))
+
+        # Async work queue for fanart lookup        
+        self.cancelRender = False
+        self.renderThread = None
+        self.workq = collections.deque()         # contains Channel elements                         
         
     @catchall_ui
     def onInit(self):
@@ -464,19 +468,27 @@ class LiveTvWindow2(BaseWindow):
             self.refreshButton = self.getControl(250)
         
         if self.programs:
-            # only refresh if program data stale
+            # only refresh if program data is stale (no longer showing)
             for p in self.programs:
                 if not p.isShowing():
+                    log.debug('STALE: %s' % p)
                     self.refresh()
-                    break;
+                    return
+                else:
+                    log.debug('OK: %s' % p)
         else:
             self.refresh()
 
     @window_busy
     def refresh(self):
+        if self.renderThread:
+            self.cancelRender = True    # induce abandonment of renderThread 
+            self.renderThread.join()
+            self.cancelRender = False
+
         self.loadPrograms()
         self.render()
-        self.renderPosters()
+        self.renderThread = self.renderPosters()
     
     @lirc_hack    
     @catchall    
@@ -501,60 +513,51 @@ class LiveTvWindow2(BaseWindow):
             
         elif action.getId() in (Action.UP, Action.DOWN, Action.PAGE_DOWN, Action.PAGE_UP, ):
             self.lastSelected = self.channelsListBox.getSelectedPosition()
-            listItem = self.channelsListBox.getSelectedItem()
-            channelId = int(listItem.getProperty('channelId'))
-            channel = self.channelsById[channelId]
-            if channel.currentProgram:
-                if channel.needsPoster:
-                    if self.workq is not None:
-                        log.debug("Adding channel %s to front of q" % channel)
-                        self.workq.append(channel)
+            channel = self.listItem2Channel(self.channelsListBox.getSelectedItem())
+            if channel.currentProgram and channel.needsPoster:
+                log.debug("Adding channel %s to front of q" % channel)
+                self.workq.append(channel)
 
+    def listIndex2Channel(self, i):
+        return self.listItem2Channel(self.channelsListBox.getListItem(i))
+
+    def listItem2Channel(self, li):
+        channelId = int(li.getProperty('channelId'))
+        channel = self.channelsById[channelId]
+        return channel
+        
     @window_busy
     @inject_conn
     def watchSelectedChannel(self):
         self.lastSelected = self.channelsListBox.getSelectedPosition()
-        listItem = self.channelsListBox.getSelectedItem()
-        channelId = int(listItem.getProperty('channelId'))
-        channel = self.channelsById[channelId]
+        channel = self.listItem2Channel(self.channelsListBox.getSelectedItem())
         
         # Use myth:// based player for 0.21
         # Use file based player for 0.22 until myth:// supports 0.22 
         brain = self.conn().protocol.getLiveTvBrain(self.settings)
         
         try:
-            try:
-                brain.watchLiveTV(channel)
-            except Exception, e:
-                log.error(e)
-                xbmcgui.Dialog().ok('Error', '', str(e))
-        finally:
-            pass    
-            #del brain
+            brain.watchLiveTV(channel)
+        except Exception, e:
+            log.error(e)
+            xbmcgui.Dialog().ok('Error', '', str(e))
 
-    @timed
     @inject_db
     def loadChannels(self):
-        """
-        @attention: Cached after initial invocation
-        @postcondition: self.channels contains list of channels in presentation order
-        @postcondition: self.channelsById contains channels keyed on channelId
-        """
         if self.channels == None:
             self.channels = Channel.mergeChannels(self.db().getChannels())
             self.channels.sort(key=Channel.getSortableChannelNumber)
             self.channelsById = odict()
             for c in self.channels:
                 self.channelsById[c.getChannelId()] = c
-
-    @timed
+        
     @inject_db
     def loadPrograms(self):
         self.loadChannels()
         now = datetime.datetime.now()
         self.programs = self.db().getTVGuideDataFlattened(now, now, self.channels)
+
         programsByChannelId = odict()
-        
         for p in self.programs:
             programsByChannelId[p.getChannelId()] = p
         
@@ -608,8 +611,26 @@ class LiveTvWindow2(BaseWindow):
         self.channelsListBox.reset()
         self.channelsListBox.addItems(listItems)
         self.channelsListBox.selectItem(self.lastSelected)
-        self.workq = collections.deque(reversed(self.listItemsByChannel.keys()))
+        self.workq.clear()
+        self.workq.extend(reversed(self.listItemsByChannel.keys()))
+        self.workq.append(self.listIndex2Channel(self.lastSelected))
         
+    @run_async
+    @catchall
+    @coalesce
+    def renderPosters(self):
+        while len(self.workq):
+            if self.closed or self.cancelRender: 
+                return
+            channel  = self.workq.pop()
+            try:
+                if channel.currentProgram and channel.needsPoster:
+                    listItem = self.listItemsByChannel[channel]
+                    self.lookupPoster(listItem, channel)
+                    channel.needsPoster = False
+            except:
+                log.exception('channel = %s' % channel)
+
     def lookupPoster(self, listItem, channel):
         posterPath = self.fanArt.getRandomPoster(channel.currentProgram)
         if not posterPath:
@@ -621,18 +642,3 @@ class LiveTvWindow2(BaseWindow):
                 posterPath = 'mythbox-logo.png'
         self.setListItemProperty(listItem, 'poster', posterPath)
         
-    @run_async
-    @catchall
-    @coalesce
-    def renderPosters(self):
-        while len(self.workq) > 0:
-            if self.closed: 
-                return
-            channel  = self.workq.pop()
-            try:
-                if channel.currentProgram and channel.needsPoster:
-                    listItem = self.listItemsByChannel[channel]
-                    self.lookupPoster(listItem, channel)
-                    channel.needsPoster = False
-            except:
-                log.exception('channel = %s' % channel)                
