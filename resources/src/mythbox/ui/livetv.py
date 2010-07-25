@@ -34,7 +34,7 @@ from odict import odict
 
 log = logging.getLogger('mythbox.ui')
     
-# =============================================================================
+
 class BaseLiveTvBrain(object):
 
     def __init__(self, settings):
@@ -65,7 +65,7 @@ class BaseLiveTvBrain(object):
             
         raise ServerException('Tuner(s) with channel %s are all busy.' % channel.getChannelNumber())
         
-# =============================================================================
+
 class MythLiveTvBrain(BaseLiveTvBrain):
     """
     Orchestrates live tv using XBMC's built in myth:// URL support
@@ -84,7 +84,7 @@ class MythLiveTvBrain(BaseLiveTvBrain):
         except ServerException, se:
             xbmcgui.Dialog().ok('Info', str(se))
 
-# ==============================================================================
+
 class MythLiveTvPlayer(xbmc.Player):
     """
     Plays live tv using XBMC's built in myth:// URL support
@@ -110,7 +110,7 @@ class MythLiveTvPlayer(xbmc.Player):
             str(channel.getChannelNumber()))
         self.play(url)
 
-# =============================================================================
+
 class FileLiveTvBrain(BaseLiveTvBrain):
     """
     Orchestrates live tv using the livetv recording available on the filesystem
@@ -183,7 +183,7 @@ class FileLiveTvBrain(BaseLiveTvBrain):
     def onPlayBackEnded(self):
         self.tuner.stopLiveTV()
     
-# =============================================================================
+
 class FileLiveTvPlayer(MythPlayer):
     """
     Play live tv using the livetv recording available on the filesystem
