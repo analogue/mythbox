@@ -32,7 +32,7 @@ from mythbox.mythtv import protocol
 from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.enums import TVState, Upcoming
 from mythbox.mythtv.protocol import ProtocolException
-from mythbox.util import timed, threadlocals
+from mythbox.util import timed, threadlocals, timed_cache
 
 log     = logging.getLogger('mythbox.core')     # mythtv core logger
 wirelog = logging.getLogger('mythbox.wire')     # wire level protocol logger
@@ -704,7 +704,9 @@ class Connection(object):
                     [self, None][self._db is None]))
             offset += self.protocol.recordSize()
         return scheduledRecordings
-    
+
+        
+    @timed_cache(seconds=5)
     @timed
     def getUpcomingRecordings(self, filter=Upcoming.SCHEDULED):
         """
@@ -755,7 +757,7 @@ class Connection(object):
         offset = 2
 
         from mythbox.mythtv.domain import RecordedProgram
-        for i in range(numRows):
+        for i in xrange(numRows):
             program = RecordedProgram(
                     reply[offset:offset+self.protocol.recordSize()],
                     self.settings, 
