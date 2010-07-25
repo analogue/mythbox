@@ -26,6 +26,7 @@ log = logging.getLogger('mythbox.core')
 
 __instance = None
 
+
 def getPlatform():
     global __instance
     if not __instance:
@@ -40,7 +41,7 @@ def getPlatform():
             __instance = UnixPlatform()
     return __instance
 
-# =============================================================================
+
 class Platform(object):
 
     def addLibsToSysPath(self):
@@ -121,7 +122,7 @@ script data dir = %s
         # TODO: Fix when we support multiple skins
         return os.path.join(self.getScriptDir(), 'resources', 'skins', 'Default', 'media', mediaFile)
         
-# =============================================================================
+
 class UnixPlatform(Platform):
 
     def getName(self):
@@ -136,7 +137,7 @@ class UnixPlatform(Platform):
     def getDefaultRecordingsDir(self):
         return '/var/lib/mythtv/recordings'
     
-# =============================================================================
+
 class WindowsPlatform(Platform):
 
     def getName(self):
@@ -148,7 +149,7 @@ class WindowsPlatform(Platform):
     def getDefaultRecordingsDir(self):
         return 'c:\\change\\me'
 
-# =============================================================================
+
 class MacPlatform(Platform):
 
     def getName(self):
