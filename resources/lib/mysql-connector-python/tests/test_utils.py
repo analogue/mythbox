@@ -1,5 +1,5 @@
 # MySQL Connector/Python - MySQL driver written in Python.
-# Copyright 2009 Sun Microsystems, Inc. All rights reserved
+# Copyright (c) 2009,2010, Oracle and/or its affiliates. All rights reserved.
 # Use is subject to license terms. (See COPYING)
 
 # This program is free software; you can redistribute it and/or modify
@@ -34,50 +34,6 @@ class UtilsTests(tests.MySQLConnectorTests):
     
     These tests should not make a connection to the database.
     """
-    def test_int1read(self):
-        """Pass int1read a valid string of 1 byte long."""
-        i = 65
-        b = '\x41'
-        self.assertEqual( i, utils.int1read(b))
-        self.assertRaises(ValueError,utils.int1read,b+'\x41')
-
-    def test_int2read(self):
-        """Pass int2read a valid string of 2 bytes long."""
-        i = 65 + (66 << 8)
-        b = '\x41\x42' # AB
-        self.assertEqual( i, utils.int2read(b))
-        self.assertRaises(ValueError,utils.int2read,b+'\x41')
-
-    def test_int3read(self):
-        """Pass int3read a valid string of 3 bytes long."""
-        i = 65 + (66 << 8) + (67 << 16)
-        b = '\x41\x42\x43'
-        self.assertEqual( i, utils.int3read(b))
-        self.assertRaises(ValueError,utils.int3read,b+'\x41')
-
-    def test_int4read(self):
-        """Pass int4read a valid string of 4 bytes long."""
-        i = 65 + (66 << 8) + (67 << 16) + (68 << 24)
-        b = '\x41\x42\x43\x44'
-        self.assertEqual( i, utils.int4read(b))
-        self.assertRaises(ValueError,utils.int4read,b+'\x41')
-
-    def test_int8read(self):
-        """Pass int8read a valid string of 8 bytes long."""
-        i = 12321848580485677055
-        b = '\xff\xff\xff\xff\xff\xff\xff\xaa'
-        self.assertEqual( i, utils.int8read(b))
-        self.assertRaises(ValueError,utils.int8read,b+'\x41')
-
-    def test_intread(self):
-        """Use intread to read from valid strings."""
-        try:
-            for r in range(4):
-                utils.intread('a'*(r+1))
-        except ValueError, e:
-            self.fail("intread failed calling 'int%dread: %s" % \
-                (int(r)+1), e)
-    
     def test_int1store(self):
         """Use int1store to pack an integer (2^8) as a string."""
         data = 2**(8-1)
@@ -259,9 +215,6 @@ class UtilsTests(tests.MySQLConnectorTests):
         """Read an integer from a buffer."""
         buf = '34581adbkdasdf'
 
-        self.assertRaises(ValueError,utils.read_int,'foo',5)
-        self.assertRaises(ValueError,utils.read_int,'',1)
-
         self.assertEqual(51, utils.read_int(buf,1)[1])
         self.assertEqual(13363, utils.read_int(buf,2)[1])
         self.assertEqual(3486771, utils.read_int(buf,3)[1])
@@ -271,9 +224,6 @@ class UtilsTests(tests.MySQLConnectorTests):
     def test_read_lc_int(self):
         """Read a length encoded integer from a buffer."""
         buf = '\xfb'
-
-        self.assertRaises(ValueError,utils.read_int,'foo',5)
-        self.assertRaises(ValueError,utils.read_int,'',1)
 
         exp = 2**(8-1)
         lcs = utils.intstore(exp)

@@ -1,5 +1,5 @@
 # MySQL Connector/Python - MySQL driver written in Python.
-# Copyright 2009 Sun Microsystems, Inc. All rights reserved
+# Copyright (c) 2009,2010, Oracle and/or its affiliates. All rights reserved.
 # Use is subject to license terms. (See COPYING)
 
 # This program is free software; you can redistribute it and/or modify
@@ -29,6 +29,25 @@ import struct
 
 import tests
 from mysql.connector import constants, errors
+
+class Helpers(tests.MySQLConnectorTests):
+    
+    def test_flag_is_set(self):
+        """Check if a particular flag/bit is set"""
+        
+        data = [
+            1 << 3,
+            1 << 5,
+            1 << 7,
+            ]
+        flags = 0
+        for d in data:
+            flags |= d
+        
+        for d in data:
+            self.assertTrue(constants.flag_is_set(d,flags))
+        
+        self.assertFalse(constants.flag_is_set(1 << 4,flags))
 
 class FieldTypeTests(tests.MySQLConnectorTests):
     
@@ -104,6 +123,8 @@ class FieldTypeTests(tests.MySQLConnectorTests):
             exp = v[1]
             res = constants.FieldType.get_desc(k)
             self.assertEqual(exp, res)
+        
+        self.assertEqual(None,constants.FieldType.get_desc('FooBar'))
             
     def test_get_info(self):
         """Get field type by id"""
@@ -112,6 +133,8 @@ class FieldTypeTests(tests.MySQLConnectorTests):
             exp = v[1]
             res = constants.FieldType.get_info(v[0])
             self.assertEqual(exp, res)
+    
+        self.assertEqual(None,constants.FieldType.get_info(999999999))
     
     def test_get_string_types(self):
         """DBAPI string types"""
@@ -192,6 +215,15 @@ class FieldFlagTests(tests.MySQLConnectorTests):
             exp = v[1]
             res = constants.FieldFlag.get_info(v[0])
             self.assertEqual(exp, res)
+    
+    def test_get_bit_info(self):
+        """Get names of the set flags"""
+        
+        data = 0
+        data |= constants.FieldFlag.BLOB
+        data |= constants.FieldFlag.BINARY
+        exp = ['BINARY', 'BLOB']
+        self.assertEqual(exp,constants.FieldFlag.get_bit_info(data))
             
 class CharacterSetTests(tests.MySQLConnectorTests):
     """Tests for constants.CharacterSet"""
@@ -200,28 +232,43 @@ class CharacterSetTests(tests.MySQLConnectorTests):
         """Get info about charset using MySQL ID"""
         exp = ('utf8','utf8_general_ci')
         data = 33
-        
         self.assertEqual(exp, constants.CharacterSet.get_info(data))
-    
-    def test_get_info_fail(self):
-        """Get info of unknown charset using false MySQL ID"""
+        
         exception = errors.ProgrammingError
         data = 50000
-        
         self.assertRaises(exception, constants.CharacterSet.get_info, data)
     
+    def test_get_desc(self):
+        """Get info about charset using MySQL ID as string"""
+        exp = 'utf8/utf8_general_ci'
+        data = 33
+        self.assertEqual(exp, constants.CharacterSet.get_desc(data))
+        
+        exception = errors.ProgrammingError
+        data = 50000
+        self.assertRaises(exception, constants.CharacterSet.get_desc, data)
+    
+    def test_get_default_collation(self):
+        """Get default collation for a given Character Set"""
+        func = constants.CharacterSet.get_default_collation
+        data = 'sjis'
+        exp = ('sjis_japanese_ci',data,13)
+        self.assertEqual(exp, func(data))
+        
+        exception = errors.ProgrammingError
+        data = 'foobar'
+        self.assertRaises(exception, func, data)
+        
     def test_get_charset_info(self):
         """Get info about charset by name and collation"""
-        exp = (33,'utf8','utf8_esperanto_ci')
+        exp = (209,'utf8','utf8_esperanto_ci')
         data = exp[1:]
         
         self.assertEqual(exp,
             constants.CharacterSet.get_charset_info(data[0],data[1]))
-    
-    def test_get_charset_info(self):
-        """Get info about charset by fals name and collation"""
+        
         exception = errors.ProgrammingError
-        data = ('utf8','utf8_OOOOPS_ci')
+        data = ('utf8','utf8_OOOOPS_ci',False)
 
         self.assertRaises(exception,
             constants.CharacterSet.get_charset_info, data[0], data[1])

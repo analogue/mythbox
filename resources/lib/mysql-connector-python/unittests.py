@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # MySQL Connector/Python - MySQL driver written in Python.
-# Copyright 2009 Sun Microsystems, Inc. All rights reserved
+# Copyright (c) 2009,2010, Oracle and/or its affiliates. All rights reserved.
 # Use is subject to license terms. (See COPYING)
 
 # This program is free software; you can redistribute it and/or modify
@@ -39,14 +39,19 @@ unittests.py has exit status 0 when tests were ran succesful, 1 otherwise.
 """
 import sys
 import unittest
-import tests
-
 from optparse import OptionParser
 
-def get_test_names():
-    return [ s.replace('tests.test_','') for s in tests.active_testcases]
+if sys.version_info >= (2,4) and sys.version_info < (3,0):
+    sys.path = ['.'] + sys.path
+elif sys.version_info >= (3,1):
+    sys.path = ['py3k/'] + sys.path
+else:
+    raise RuntimeError("Python %s is not a supported.")
+    sys.exit(1)
 
-def add_options(p):
+import tests
+
+def _add_options(p):
     p.add_option('-H','--host', dest='hostname', metavar='NAME',
         help='Connect to MySQL running on host.')
     p.add_option('-P','--port', dest='port', metavar='NUMBER',
@@ -61,11 +66,11 @@ def add_options(p):
         help='Password to use when connecting to server.')
     p.add_option('-D','--database', dest='database', metavar='NAME',
         help='Database to use.')
-    
-    p.add_option('-t','--test', dest='testcase', metavar='NAME',
-        help='Tests to execute, one of %s' % get_test_names())
 
-def set_config(options):
+    p.add_option('-t','--test', dest='testcase', metavar='NAME',
+        help='Tests to execute, one of %s' % tests.get_test_names())
+
+def _set_config(options):
     if options.hostname:
         tests.MYSQL_CONFIG['host'] = options.hostname
     if options.hostname:
@@ -78,25 +83,35 @@ def set_config(options):
         tests.MYSQL_CONFIG['password'] = options.password
     if options.database:
         tests.MYSQL_CONFIG['database'] = options.database
-    
-if __name__ == '__main__':
+
+def _show_help(msg=None,parser=None,exit=0):
+    tests.printmsg(msg)
+    if parser is not None:
+        parser.print_help()
+    if exit > -1:
+        sys.exit(exit)
+
+
+def main():
     usage = 'usage: %prog [options]'
     parser = OptionParser()
-    add_options(parser)
-    
+    _add_options(parser)
+
     (options, args) = parser.parse_args()
-    set_config(options)
-    
+    _set_config(options)
+
     if options.testcase is not None:
-        if options.testcase in get_test_names():
+        if options.testcase in tests.get_test_names():
             testcases = [ 'tests.test_%s' % options.testcase ]
         else:
-            print "Test case is not one of %s" % get_test_names()
-            parser.print_help()
-            sys.exit(1)
+            msg = "Test case is not one of %s" % tests.get_test_names()
+            _show_help(msg=msg,parser=parser,exit=1)
     else:
         testcases = tests.active_testcases
-        
+
     suite = unittest.TestLoader().loadTestsFromNames(testcases)
-    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    result = unittest.TextTestRunner(verbosity=2).run(suite)    
     sys.exit(not result.wasSuccessful())
+    
+if __name__ == '__main__':
+    main()

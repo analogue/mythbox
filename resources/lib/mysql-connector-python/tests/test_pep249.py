@@ -1,5 +1,5 @@
 # MySQL Connector/Python - MySQL driver written in Python.
-# Copyright 2009 Sun Microsystems, Inc. All rights reserved
+# Copyright (c) 2009,2010, Oracle and/or its affiliates. All rights reserved.
 # Use is subject to license terms. (See COPYING)
 
 # This program is free software; you can redistribute it and/or modify
@@ -331,6 +331,8 @@ class PEP249CursorTests(PEP249Base):
         stmt_select = "SELECT col1,col2 FROM %s" % (tbl)
         
         # Setup
+        c1.execute("SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ")
+        c2.execute("SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ")
         self._isolation_setup(stmt_drop,stmt_create)
         conn_equal = self._isolation_connection_equal(c1,c2)
         if db1 == db2 and not conn_equal:
@@ -399,7 +401,7 @@ class PEP249TypeObjConstructorsTests(PEP249Base):
     def test_DateFromTicks(self):
         """Interface exports DateFromTicks"""
         ticks = 1
-        exp = datetime.date(1970,1,1)
+        exp = datetime.date(*time.localtime(ticks)[:3])
         self.assertEqual(myconn.DateFromTicks(ticks),exp,
             "Interface DateFromTicks should return a datetime.date")
 

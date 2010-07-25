@@ -42,13 +42,14 @@ def main(config):
     warnings = cursor.fetchwarnings()
     if warnings:
         print warnings
-
+    db.commit()
+    
     # Read the names again and print them
     stmt_select = "SELECT id, name, info, age FROM names ORDER BY id"
     cursor.execute(stmt_select)
 
     for row in cursor.fetchall():
-        print "%d | %s | %d\nInfo: %s..\n\n" % (row[0], row[1], row[3], row[2][20])
+        print "%d | %s | %d\nInfo: %s..\n" % (row[0], row[1], row[3], row[2][20])
     	
     # Cleaning up, dropping the table again
     cursor.execute(stmt_drop)

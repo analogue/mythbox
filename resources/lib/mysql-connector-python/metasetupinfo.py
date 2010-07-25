@@ -1,6 +1,12 @@
+import sys
 
-from mysql.connector._version import version as myconnpy_version
-
+if sys.version_info >= (3,1):
+    from py3k.mysql.connector._version import version as myconnpy_version
+    package_dir = { '' : 'py3k'}
+else:
+    from mysql.connector._version import version as myconnpy_version
+    package_dir = None
+    
 name = 'mysql-connector-python'
 version = '%s-%s' % ('.'.join(map(str,myconnpy_version[0:3])),myconnpy_version[3])
 packages = ['mysql','mysql.connector']

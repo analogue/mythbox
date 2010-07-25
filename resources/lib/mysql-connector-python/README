@@ -1,7 +1,7 @@
 
 MySQL Connector/Python                          MySQL driver written in Python
 ==============================================================================
-Copyright 2009 Sun Microsystems, Inc. All rights reserved
+Copyright (c) 2009,2010, Oracle and/or its affiliates. All rights reserved.
 Use is subject to license terms. (See COPYING)
 
 MySQL Connector/Python is implementing the MySQL Client/Server protocol
@@ -37,6 +37,9 @@ Then, execute following (with proper permissions):
 
   shell> python ./setup.py install
 
+setup.py will figure out which Python version you have and install the
+correct modules.
+
 Usage
 =====================
 
@@ -48,6 +51,8 @@ Once that done, you should be able to run the examples. If not, contact me!
 
  shell> ./engines.py
 
+Python v3.1 users: The examples are in the py3k/ subdirectory.
+
 Testing
 =====================
 
@@ -58,7 +63,8 @@ MySQL Server.
 Report problems
 =====================
 
-Report problems to Geert Vanderkelen <geert.vanderkelen@sun.com>
+Report problems using LaunchPad's bug system here:
+  https://bugs.launchpad.net/myconnpy
 
 Credits
 =====================
