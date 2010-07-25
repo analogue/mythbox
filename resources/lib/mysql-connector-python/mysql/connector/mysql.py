@@ -189,8 +189,15 @@ class MySQLBase(object):
         """
         Set the username and/or password for the user connecting to the MySQL Server.
         """
-        self.username = username.strip() if username else ''
-        self.password = password.strip() if password else ''
+        if  username:
+            self.username = username.strip() 
+        else:
+            self.username = ''
+            
+        if password:
+            self.password = password.strip() 
+        else:
+            self.password = ''
     
     def set_unicode(self, value=True):
         """
@@ -205,7 +212,10 @@ class MySQLBase(object):
         """
         Set the database to be used after connection succeeded.
         """
-        self.database = database.strip() if database else ''
+        if database:
+            self.database = database.strip()
+        else:
+            self.database = ''
     
     def set_charset_info(self, info=None, charset=None):
         
@@ -258,7 +268,10 @@ class MySQLBase(object):
         Set auto commit on or off.
         """
         try:
-            s = 'ON' if switch else 'OFF'
+            if switch:
+                s = 'ON' 
+            else:
+                s = 'OFF'
             self._execute_query("SET AUTOCOMMIT = %s" % s)
         except:
             raise

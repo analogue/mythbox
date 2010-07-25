@@ -357,7 +357,10 @@ class MySQLProtocol(MySQLProtocolBase):
               "http://dev.mysql.com/doc/refman/5.1/en/password-hashing.html") 
         
         try:
-            with_db = True if client_flags & ClientFlag.CONNECT_WITH_DB else False
+            if client_flags & ClientFlag.CONNECT_WITH_DB:
+                with_db = True
+            else:
+                with_db = False
             if not with_db and database:
                 self.cmd_init_db(database)
         except:
