@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -28,7 +28,7 @@ from mythbox.util import sync_instance, safe_str, SynchronizedDict
 
 log = logging.getLogger('mythbox.cache')
 
-# =============================================================================
+
 class FileResolver(object):
     
     def store(self, fileUrl, dest):
@@ -37,21 +37,21 @@ class FileResolver(object):
     def hash(self, fileUrl):
         return md5.new(safe_str(fileUrl)).hexdigest()
     
-# =============================================================================    
+
 class FileSystemResolver(FileResolver):
     """Resolves files accessible via the local filesystem"""
     
     def store(self, fileUrl, dest):
         shutil.copyfile(fileUrl, dest)
 
-# =============================================================================
+
 class HttpResolver(FileResolver):
     """Resolves files accessible via a http:// url"""
     
     def store(self, fileUrl, dest):
         filename, headers = urllib.urlretrieve(fileUrl, dest)
         
-# =============================================================================
+
 class FileCache(object):
     """File cache which uses a FileResolver to populate the cache on-demand"""
     
@@ -143,7 +143,7 @@ class FileCache(object):
         os.makedirs(self.rootDir)
         self.locksByResource.clear()
         
-# =============================================================================
+
 class MythThumbnailFileCache(FileCache):
     """File cache + interested in bus events"""
     

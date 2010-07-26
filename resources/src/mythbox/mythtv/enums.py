@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -18,7 +18,7 @@
 #
 from odict import odict
 
-# =============================================================================
+
 class FlagMask(object):
     
     # from libs/libmythtv/programinfo.h
@@ -33,9 +33,9 @@ class FlagMask(object):
     FL_WATCHED        = 0x0800
     FL_PRESERVED      = 0x1000
 
-# =============================================================================
+
 class RecordingStatus(object):
-                   
+
     DELETED             = -5
     STOPPED             = -4 
     RECORDED            = -3
@@ -76,7 +76,7 @@ class RecordingStatus(object):
         TUNER_BUSY         :105
     }
 
-# =============================================================================
+
 class ScheduleType(object):
     
     ONCE        = 1
@@ -121,7 +121,7 @@ class ScheduleType(object):
             result.append(translator.get(ScheduleType.translations[key]))
         return result
 
-# =============================================================================
+
 class EpisodeFilter(object):
     """
         Really part of the CheckForDupesIn enum, but separated out since 
@@ -153,7 +153,7 @@ class EpisodeFilter(object):
         (EXCLUDE_GENERICS            ,202),
         (EXCLUDE_REPEATS_AND_GENERICS,203)])
     
-# =============================================================================
+
 class CheckForDupesIn(object):
     """
     RecordingDupInType:
@@ -189,10 +189,9 @@ class CheckForDupesIn(object):
 #   None                      Previous Recordings        Exclude Rep&Gen    98 (64+32+2)  1           Y
 #       
     
-# =============================================================================
-# TODO: Rename to RecordingDupMethodType
-#
+    
 class CheckForDupesUsing(object):
+    # TODO: Rename to RecordingDupMethodType
     
     NONE                      = 1
     SUBTITLE                  = 2
@@ -207,7 +206,7 @@ class CheckForDupesUsing(object):
         (SUBTITLE_AND_DESCRIPTION,  148), 
         (SUBTITLE_THEN_DESCRIPTION, 200)])
 
-# =============================================================================
+
 class TVState(object):
     """
     Pre protocol version 44 TV State
@@ -261,7 +260,7 @@ class TVState(object):
     #
     ChangingState = 5
 
-# =============================================================================
+
 class TVState44(object):
     """
     Protocol version 44 onwards TVState
@@ -321,7 +320,7 @@ class TVState44(object):
     #
     ChangingState = 7
 
-# =============================================================================
+
 class JobStatus(object):  
     """ 
     @see: Job.status
@@ -360,7 +359,7 @@ class JobStatus(object):
         (ERRORED,  'Errored' ),
         (CANCELED, 'Canceled')])
 
-# =============================================================================
+
 class JobType:  
     """ 
     @see: Job.jobType
@@ -386,7 +385,7 @@ class JobType:
         (USERJOB3,  'User Job 3'     ),        
         (USERJOB4,  'User Job 4'     )])
 
-# =============================================================================
+
 class Upcoming(object):
    
     # TODO: Verify MANUAL_OVERRIDE == ForceRecord from mythweb
@@ -397,7 +396,7 @@ class Upcoming(object):
     # TODO: All else...
     DEACTIVATED = () 
 
-# =============================================================================
+
 class CommercialDetectionType(object):
     
     COMMERCIAL_FREE = -2

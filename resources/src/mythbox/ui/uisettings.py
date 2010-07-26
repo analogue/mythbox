@@ -25,7 +25,7 @@ from mythbox.util import catchall, lirc_hack, timed
 
 log = logging.getLogger('mythbox.ui')
 
-# =============================================================================
+
 class SettingValidator(object):
     
     def __init__(self, errorMessage):
@@ -44,7 +44,7 @@ class SettingValidator(object):
         except:
             return False
 
-# =============================================================================
+
 class ExternalizedSettingValidator(SettingValidator):
     
     def __init__(self, validatorMethod, arg1=None):
@@ -63,7 +63,7 @@ class ExternalizedSettingValidator(SettingValidator):
         except Exception, ex:
             raise SettingsException(str(ex))
 
-# =============================================================================        
+
 class Setting(object):
     """
     Binds MythSettings, validation mechanism, ui rendering, and xbmc controls together
@@ -122,7 +122,7 @@ class Setting(object):
         else:
             raise Exception('Unknown widget in render(): %s' % type(self.widget))
             
-# =============================================================================
+
 class SettingsWindow(BaseWindow):
     
     def __init__(self, *args, **kwargs):

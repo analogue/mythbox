@@ -24,7 +24,7 @@ __author__       = "analogue@yahoo.com"
 __url__          = "http://mythbox.googlecode.com"
 __hg_url__       = "https://mythbox.googlecode.com/hg/"
 __credits__      = "bunch of ppl"
-__version__      = "RC1"
+__version__      = "RC2"
 
 if __name__ == '__main__':
     print '%s %s' % (__scriptname__, __version__)

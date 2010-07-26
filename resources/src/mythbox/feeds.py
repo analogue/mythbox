@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -22,7 +22,7 @@ from mythbox.bus import Event
 
 twitterApi = twitter.Api()
 
-# =============================================================================
+
 class FeedHose(object):
 
     def __init__(self, settings, bus):
@@ -47,7 +47,7 @@ class FeedHose(object):
         if event['id'] == Event.SETTING_CHANGED and event['tag'] == 'feeds_twitter':
             self.initFeeds()
             
-# =============================================================================
+
 class FeedEntry(object):
     
     def __init__(self, username=None, text=None, when=None):
@@ -62,7 +62,7 @@ class FeedEntry(object):
             self.when,
             self.text)
 
-# =============================================================================
+
 class TwitterFeed(object):
 
     def __init__(self, user, api=twitterApi):
@@ -90,6 +90,6 @@ class TwitterFeed(object):
             entries.append(FeedEntry(tweet.user.screen_name, tweet.text, tweet.created_at_in_seconds))
         return entries
     
-# =============================================================================
+
 class RssFeed(object):
     pass

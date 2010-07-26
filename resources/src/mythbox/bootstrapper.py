@@ -24,7 +24,7 @@ import xbmcgui
 
 from mythbox.bus import EventBus
 
-# =============================================================================
+
 class BootStrapper(object):
     
     def __init__(self):

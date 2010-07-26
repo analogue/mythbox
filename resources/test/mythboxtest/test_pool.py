@@ -289,8 +289,9 @@ class EvictingPoolTest(unittest.TestCase):
             while p.available() > 0:
                 time.sleep(1)
                 cnt += 1
+                # TODO: Likes to fail on mac
                 if cnt > 20:
-                    log.warn('Failed: expected available to go down to zero. Available = %d' % p.available())
+                    self.fail('Failed: expected available to go down to zero. Available = %d' % p.available())
             self.assertEquals(0, p.size())
         finally:
             p.shutdown()

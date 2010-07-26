@@ -35,9 +35,7 @@ class SettingsException(Exception):
 
 
 class MythSettings(object):
-    """
-    Settings reside in $HOME/.xbmc/userdata/script_data/MythBox/settings.xml
-    """
+    """Settings reside in $HOME/.xbmc/userdata/script_data/MythBox/settings.xml"""
 
     def __init__(self, platform, translator, filename='settings.xml', bus=None):
         self.platform = platform
@@ -58,30 +56,17 @@ class MythSettings(object):
         self.bus = bus
 
     def getFFMpegPath(self): return self.get('paths_ffmpeg')
-    def setFFMpegPath(self, ffmpegPath): self.put('paths_ffmpeg', ffmpegPath)
  
-    def setLiveTvBuffer(self, sizeKB): self.put('mythtv_minlivebufsize', '%s' % sizeKB)
-    def getLiveTvBuffer(self): return int(self.get('mythtv_minlivebufsize'))
-
-    def setLiveTvTimeout(self, seconds): self.put('mythtv_tunewait', '%s' % seconds)
-    def getLiveTvTimeout(self): int(self.get('mythtv_tunewait'))
-     
     def isConfirmOnDelete(self): return self.getBoolean('confirm_on_delete')
-    def setConfirmOnDelete(self, b): self.put('confirm_on_delete', ['False', 'True'][b])
             
-    def getMySqlHost(self): return self.get('mysql_host')
     def setMySqlHost(self, host): self.put('mysql_host', host)
 
     def setMySqlPort(self, port): self.put('mysql_port', '%s' % port)
-    def getMySqlPort(self): return int(self.get('mysql_port'))
 
-    def getMySqlDatabase(self): return self.get('mysql_database')
     def setMySqlDatabase(self, db): self.put('mysql_database', db)
     
-    def getMySqlUser(self): return self.get('mysql_user')
     def setMySqlUser(self, user): self.put('mysql_user', user)
 
-    def getMySqlPassword(self): return self.get('mysql_password')
     def setMySqlPassword(self, password): self.put('mysql_password', password)
 
     def setRecordingDirs(self, dirs):
@@ -120,12 +105,6 @@ class MythSettings(object):
             if self.bus:
                 self.bus.publish({'id': Event.SETTING_CHANGED, 'tag': tag, 'old': old, 'new': value})
                 
-        #if slog.isEnabledFor(logging.DEBUG):
-        #    pvalue = value
-        #    if 'password' in tag:
-        #        pvalue = '*secret*'
-        #    slog.debug("=> settings['%s'] = %s" % (tag, pvalue))
-
     def initDefaults(self):
         self.defaults = {
             'mysql_host'              : 'localhost',
@@ -209,11 +188,12 @@ class MythSettings(object):
         MythSettings.verifyMySQLPort(self.get('mysql_port'))
         MythSettings.verifyMySQLDatabase(self.get('mysql_database'))
         MythSettings.verifyString(self.get('mysql_user'), 'Enter MySQL user. Hint: mythtv is the MythTV default')
+        self.verifyMySQLConnectivity()
+        self.verifyMythTVConnectivity()
+        
         MythSettings.verifyRecordingDirs(self.get('paths_recordedprefix'))
         MythSettings.verifyFFMpeg(self.get('paths_ffmpeg'), self.platform)
         MythSettings.verifyBoolean(self.get('confirm_on_delete'), 'Confirm on delete must be True or False')
-        self.verifyMySQLConnectivity()
-        self.verifyMythTVConnectivity()
         slog.debug('verified settings')
 
     def verifyMythTVConnectivity(self):

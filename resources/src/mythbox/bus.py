@@ -21,12 +21,12 @@ import logging
 
 log = logging.getLogger('mythbox.event')
 
-# =============================================================================
+
 class Event(object):
     RECORDING_DELETED    = 'RECORDING_DELETED'  # key: id, program
     SETTING_CHANGED      = 'SETTING_CHANGED'    # keys: id, tag, old, new
 
-# =============================================================================
+
 class EventBus(object):
     
     def __init__(self):

@@ -38,7 +38,7 @@ from tvdb_api import Tvdb
 
 log = logging.getLogger('mythbox.fanart')
 
-# =============================================================================
+
 @decorator
 def chain(func, *args, **kwargs):
     provider = args[0]
@@ -49,7 +49,7 @@ def chain(func, *args, **kwargs):
     else:
         return result
 
-# =============================================================================
+
 class BaseFanartProvider(object):
 
     def __init__(self, nextProvider=None):
@@ -73,7 +73,7 @@ class BaseFanartProvider(object):
         if self.nextProvider:
             self.nextProvider.close()
 
-# =============================================================================
+
 class NoOpFanartProvider(BaseFanartProvider):
 
     def getPosters(self, program):
@@ -82,7 +82,7 @@ class NoOpFanartProvider(BaseFanartProvider):
     def getRandomPoster(self, program):
         return None
     
-# =============================================================================
+
 class OneStrikeAndYoureOutFanartProvider(BaseFanartProvider):
     """
     If a fanart provider can't serve up fanart for a program the first time, 
@@ -130,7 +130,7 @@ class OneStrikeAndYoureOutFanartProvider(BaseFanartProvider):
         self.struckOut.close()
         self.delegate.close()
         
-# =============================================================================
+
 class SpamSkippingFanartProvider(BaseFanartProvider):
     """
     Lets not waste cycles looking up fanart for programs which probably don't
@@ -153,7 +153,7 @@ class SpamSkippingFanartProvider(BaseFanartProvider):
             return True
         return self.nextProvider.hasPosters(program)
         
-# =============================================================================
+
 class SuperFastFanartProvider(BaseFanartProvider):
     """
     A fanart provider that remembers past attempts to lookup fanart and returns
@@ -203,7 +203,7 @@ class SuperFastFanartProvider(BaseFanartProvider):
         super(SuperFastFanartProvider, self).close()
         self.imagePathsByKey.close()
         
-# =============================================================================
+
 class CachingFanartProvider(BaseFanartProvider):
     """
     Caches references to fanart images retrieved via http on the local filesystem
@@ -254,7 +254,7 @@ class CachingFanartProvider(BaseFanartProvider):
         super(CachingFanartProvider, self).clear()
         self.httpCache.clear()
 
-# =============================================================================
+
 class HttpCachingFanartProvider(BaseFanartProvider):
     """
     Caches images retrieved via http on the local filesystem
@@ -324,7 +324,7 @@ class HttpCachingFanartProvider(BaseFanartProvider):
         super(HttpCachingFanartProvider, self).close()
         self.workThread.join()
         
-# =============================================================================
+
 class ImdbFanartProvider(BaseFanartProvider):
 
     def __init__(self, nextProvider=None):
@@ -349,7 +349,7 @@ class ImdbFanartProvider(BaseFanartProvider):
                 log.error('IMDB error looking up %s: %s' % (program.title(), str(e)))
         return posters
     
-# =============================================================================
+
 class TvdbFanartProvider(BaseFanartProvider):
     
     def __init__(self, platform, nextProvider=None):
@@ -397,7 +397,7 @@ class TvdbFanartProvider(BaseFanartProvider):
     def _queryTvDb(self, title):
         return self.tvdb[title]['_banners']['poster']
 
-# =============================================================================
+
 class TheMovieDbFanartProvider(BaseFanartProvider):
     
     def __init__(self, nextProvider=None):
@@ -442,7 +442,7 @@ class TheMovieDbFanartProvider(BaseFanartProvider):
                 log.error('TMDB fanart search error: %s %s' % (program.title(), e))
         return posters
 
-# =============================================================================
+
 class GoogleImageSearchProvider(BaseFanartProvider):
     
     # safe search on, tall image preferred,   
@@ -482,7 +482,7 @@ class GoogleImageSearchProvider(BaseFanartProvider):
             log.error('GOOGLE fanart search:  %s %s' % (program.title(), str(e)))
         return posters
         
-# =============================================================================
+
 class FanArt(object):
     """One stop shop for fanart"""
     

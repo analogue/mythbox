@@ -79,7 +79,7 @@ class ConnectionTest(unittest.TestCase):
         self.settings = MythSettings(self.platform, self.translator)
         
         privateConfig = OnDemandConfig()
-        self.settings.setMySqlHost(privateConfig.get('mysql_host'))
+        self.settings.put('mysql_host', privateConfig.get('mysql_host'))
         self.settings.put('mysql_port', privateConfig.get('mysql_port'))
         self.settings.setMySqlDatabase(privateConfig.get('mysql_database'))
         self.settings.setMySqlUser(privateConfig.get('mysql_user'))  
