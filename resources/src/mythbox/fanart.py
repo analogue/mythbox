@@ -32,7 +32,7 @@ import urllib
 import Queue
 
 from decorator import decorator
-from mythbox.util import synchronized, safe_str, run_async, max_threads, timed
+from mythbox.util import synchronized, safe_str, run_async, max_threads
 from mythbox.bus import Event
 from tvdb_api import Tvdb
 
@@ -181,10 +181,10 @@ class SuperFastFanartProvider(BaseFanartProvider):
                 self.imagePathsByKey[key] = posters
                 # TODO: Figure out if this is detrimental to performance -- sync on update
                 #       Sometimes throws RuntimeError if iterating while changing.
-                try:
-                    self.imagePathsByKey.sync()
-                except RuntimeError, re:
-                    pass
+                #try:
+                #    self.imagePathsByKey.sync()
+                #except RuntimeError, re:
+                #    pass
         return posters
         
     def hasPosters(self, program):
@@ -204,61 +204,57 @@ class SuperFastFanartProvider(BaseFanartProvider):
         self.imagePathsByKey.close()
         
 
-class CachingFanartProvider(BaseFanartProvider):
-    """
-    Caches references to fanart images retrieved via http on the local filesystem
-    """
-    
-    def __init__(self, httpCache, nextProvider=None):
-        BaseFanartProvider.__init__(self, nextProvider)
-        self.httpCache = httpCache
-
-    def getPosters(self, program):
-        # If the chained provider returns a http:// style url, 
-        # cache the contents and return the locally cached file path
-        posters = []
-        if self.nextProvider:
-            httpPosters = self.nextProvider.getPosters(program)
-            posters = self.cachePosters(httpPosters)
-        return posters
-
-    def cachePosters(self, httpPosters):
-        results = []
-        
-        @run_async
-        def async_wrapper(poster):
-            poster = self.tryToCache(poster)
-            if poster:
-                results.append(poster)
-        
-        workers = []
-        for p in httpPosters:    
-            workers.append(async_wrapper(p))
-            
-        for w in workers:
-            w.join()
-    
-        return results
-    
-    def tryToCache(self, poster):
-        if poster and poster[:4] == 'http':
-            try:
-                poster = self.httpCache.get(poster)
-            except Exception, ioe:
-            #except IOError, ioe:
-                log.exception(ioe)
-                return None
-        return poster
-    
-    def clear(self):
-        super(CachingFanartProvider, self).clear()
-        self.httpCache.clear()
+#class CachingFanartProvider(BaseFanartProvider):
+#    """Caches references to fanart images retrieved via http on the local filesystem"""
+#    
+#    def __init__(self, httpCache, nextProvider=None):
+#        BaseFanartProvider.__init__(self, nextProvider)
+#        self.httpCache = httpCache
+#
+#    def getPosters(self, program):
+#        # If the chained provider returns a http:// style url, 
+#        # cache the contents and return the locally cached file path
+#        posters = []
+#        if self.nextProvider:
+#            httpPosters = self.nextProvider.getPosters(program)
+#            posters = self.cachePosters(httpPosters)
+#        return posters
+#
+#    def cachePosters(self, httpPosters):
+#        results = []
+#        
+#        @run_async
+#        def async_wrapper(poster):
+#            poster = self.tryToCache(poster)
+#            if poster:
+#                results.append(poster)
+#        
+#        workers = []
+#        for p in httpPosters:    
+#            workers.append(async_wrapper(p))
+#            
+#        for w in workers:
+#            w.join()
+#    
+#        return results
+#    
+#    def tryToCache(self, poster):
+#        if poster and poster[:4] == 'http':
+#            try:
+#                poster = self.httpCache.get(poster)
+#            except Exception, ioe:
+#            #except IOError, ioe:
+#                log.exception(ioe)
+#                return None
+#        return poster
+#    
+#    def clear(self):
+#        super(CachingFanartProvider, self).clear()
+#        self.httpCache.clear()
 
 
 class HttpCachingFanartProvider(BaseFanartProvider):
-    """
-    Caches images retrieved via http on the local filesystem
-    """
+    """Caches images retrieved via http on the local filesystem"""
     
     def __init__(self, httpCache, nextProvider=None):
         BaseFanartProvider.__init__(self, nextProvider)
@@ -297,23 +293,25 @@ class HttpCachingFanartProvider(BaseFanartProvider):
         '''
         results = []
         
-        if httpPosters:
-            first = self.tryToCache(httpPosters[0])
+        while httpPosters:
+            first = self.tryToCache(httpPosters.pop())
             if first:
-                results.append(first)                  
-            for nextUrl in httpPosters[1:]:
-                self.workQueue.put({'results' : results, 'httpUrl' : nextUrl })
+                results.append(first)
+                break                  
+        
+        for nextUrl in httpPosters:
+            self.workQueue.put({'results' : results, 'httpUrl' : nextUrl })
         
         return results
     
     def tryToCache(self, poster):
         if poster and poster[:4] == 'http':
             try:
-                poster = self.httpCache.get(poster)
+                filepath = self.httpCache.get(poster)
             except Exception, ioe:
                 log.exception(ioe)
-                return None
-        return poster
+                filepath = None
+        return filepath
     
     def clear(self):
         super(HttpCachingFanartProvider, self).clear()
@@ -377,12 +375,13 @@ class TvdbFanartProvider(BaseFanartProvider):
                 # TODO: Fix this --  TVDB errored out on "K�nigreich der Himmel" with error "'ascii' codec can't decode byte 0xc3 in position 1: ordinal not in range(128)"
                 postersByDimension = self._queryTvDb(program.title()) 
                 for dimension in postersByDimension.keys():
-                    log.debug('key=%s' % dimension)
+                    #log.debug('key=%s' % dimension)
                     for id in postersByDimension[dimension].keys():
-                        log.debug('idkey = %s' % id)
+                        #log.debug('idkey = %s' % id)
                         bannerPath = postersByDimension[dimension][id]['_bannerpath']
-                        log.debug('bannerPath = %s' % bannerPath)
+                        #log.debug('bannerPath = %s' % bannerPath)
                         posters.append(bannerPath)
+                log.warn('TVDB[%s] = %s' % (len(posters), str(program.title())))
             except Exception, e:
                 log.error('TVDB errored out on "%s" with error "%s"' % (program.title(), str(e)))
         return posters

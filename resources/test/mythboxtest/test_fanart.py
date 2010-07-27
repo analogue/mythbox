@@ -35,7 +35,7 @@ from mythbox.filecache import HttpResolver
 
 log = logging.getLogger('mythbox.unittest')
 
-# =============================================================================
+
 class ChainDecoratorTest(unittest.TestCase):
 
     class Link1(object):
@@ -105,7 +105,7 @@ class ChainDecoratorTest(unittest.TestCase):
         result = link3.foo()
         self.assertTrue(len(result) == 0)
 
-# =============================================================================        
+
 class BaseFanartProviderTestCase(unittest.TestCase):
     
     movies = [
@@ -184,7 +184,7 @@ class BaseFanartProviderTestCase(unittest.TestCase):
             
         self.assertFalse(self.fail)
         
-# =============================================================================
+
 class ImdbFanartProviderTest(BaseFanartProviderTestCase):
 
     def getPrograms(self):
@@ -248,7 +248,7 @@ class ImdbFanartProviderTest(BaseFanartProviderTestCase):
         # Verify
         self.assertTrue(len(posters) == 0)
         
-# =============================================================================
+
 class TvdbFanartProviderTest(BaseFanartProviderTestCase):
     
     def setUp(self):
@@ -387,7 +387,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
 
         self.assertFalse(self.fail)
         
-# =============================================================================
+
 class TheMovieDbFanartProviderTest(BaseFanartProviderTestCase):
 
     def getPrograms(self):
@@ -450,7 +450,7 @@ class TheMovieDbFanartProviderTest(BaseFanartProviderTestCase):
         # Verify
         self.assertTrue(len(posters) == 0)
 
-# =============================================================================
+
 class GoogleImageSearchProviderTest(BaseFanartProviderTestCase):
 
     def getPrograms(self):
@@ -503,60 +503,60 @@ class GoogleImageSearchProviderTest(BaseFanartProviderTestCase):
         for p in posters:
             self.assertEquals('http', p[0:4])
 
-# =============================================================================
-class CachingFanartProviderTest(unittest.TestCase):
 
-    def setUp(self):
-        self.nextProvider = Mock()
-        self.httpCache = Mock()
-        self.program = TVProgram({'title': 'Two Fat Ladies', 'category_type':'series'}, translator=Mock())
-        self.provider = CachingFanartProvider(self.httpCache, self.nextProvider)
-        
-    def test_getRandomPoster_When_next_link_in_chain_returns_poster_Then_cache_locally_on_filesystem(self):
-        # Setup
-        when(self.nextProvider).getPosters(any(Program)).thenReturn(['http://www.google.com/intl/en_ALL/images/logo.gif'])
-        when(self.httpCache).get(any(str)).thenReturn('logo.gif')
-        
-        # Test
-        posterUrl = self.provider.getRandomPoster(self.program)
-        
-        # Verify
-        log.debug('Poster path = %s' % posterUrl)
-        self.assertEquals('logo.gif', posterUrl)
+#class CachingFanartProviderTest(unittest.TestCase):
+#
+#    def setUp(self):
+#        self.nextProvider = Mock()
+#        self.httpCache = Mock()
+#        self.program = TVProgram({'title': 'Two Fat Ladies', 'category_type':'series'}, translator=Mock())
+#        self.provider = CachingFanartProvider(self.httpCache, self.nextProvider)
+#        
+#    def test_getRandomPoster_When_next_link_in_chain_returns_poster_Then_cache_locally_on_filesystem(self):
+#        # Setup
+#        when(self.nextProvider).getPosters(any(Program)).thenReturn(['http://www.google.com/intl/en_ALL/images/logo.gif'])
+#        when(self.httpCache).get(any(str)).thenReturn('logo.gif')
+#        
+#        # Test
+#        posterUrl = self.provider.getRandomPoster(self.program)
+#        
+#        # Verify
+#        log.debug('Poster path = %s' % posterUrl)
+#        self.assertEquals('logo.gif', posterUrl)
+#
+#    def test_getRandomPoster_When_next_link_in_chain_doesnt_find_poster_Then_dont_cache_anything(self):
+#        # Setup
+#        when(self.nextProvider).getPosters(any(Program)).thenReturn([])
+#        
+#        # Test
+#        posterUrl = self.provider.getRandomPoster(self.program)
+#        
+#        # Verify
+#        self.assertTrue(posterUrl is None)
+#
+#    def test_getPosters_When_next_link_in_chain_returns_posters_Then_cache_locally_on_filesystem(self):
+#        # Setup
+#        when(self.nextProvider).getPosters(any(Program)).thenReturn(['http://www.google.com/intl/en_ALL/images/logo.gif'])
+#        when(self.httpCache).get(any(str)).thenReturn('logo.gif')
+#        
+#        # Test
+#        posters = self.provider.getPosters(self.program)
+#        
+#        # Verify
+#        log.debug('Posters= %s' % posters)
+#        self.assertEquals('logo.gif', posters[0])
+#
+#    def test_getPosters_When_next_link_in_chain_doesnt_find_posters_Then_dont_cache_anything(self):
+#        # Setup
+#        when(self.nextProvider).getPosters(any(Program)).thenReturn([])
+#        
+#        # Test
+#        posters = self.provider.getPosters(self.program)
+#        
+#        # Verify
+#        self.assertTrue(len(posters) == 0)
 
-    def test_getRandomPoster_When_next_link_in_chain_doesnt_find_poster_Then_dont_cache_anything(self):
-        # Setup
-        when(self.nextProvider).getPosters(any(Program)).thenReturn([])
-        
-        # Test
-        posterUrl = self.provider.getRandomPoster(self.program)
-        
-        # Verify
-        self.assertTrue(posterUrl is None)
 
-    def test_getPosters_When_next_link_in_chain_returns_posters_Then_cache_locally_on_filesystem(self):
-        # Setup
-        when(self.nextProvider).getPosters(any(Program)).thenReturn(['http://www.google.com/intl/en_ALL/images/logo.gif'])
-        when(self.httpCache).get(any(str)).thenReturn('logo.gif')
-        
-        # Test
-        posters = self.provider.getPosters(self.program)
-        
-        # Verify
-        log.debug('Posters= %s' % posters)
-        self.assertEquals('logo.gif', posters[0])
-
-    def test_getPosters_When_next_link_in_chain_doesnt_find_posters_Then_dont_cache_anything(self):
-        # Setup
-        when(self.nextProvider).getPosters(any(Program)).thenReturn([])
-        
-        # Test
-        posters = self.provider.getPosters(self.program)
-        
-        # Verify
-        self.assertTrue(len(posters) == 0)
-
-# =============================================================================
 class HttpCachingFanartProviderTest(unittest.TestCase):
 
     def setUp(self):
@@ -617,7 +617,7 @@ class HttpCachingFanartProviderTest(unittest.TestCase):
 #        # Verify
 #        self.assertTrue(len(posters) == 0)
 
-# =============================================================================
+
 class SuperFastFanartProviderTest(unittest.TestCase):
 
     def setUp(self):
@@ -690,7 +690,7 @@ class SuperFastFanartProviderTest(unittest.TestCase):
         key = self.provider.createKey('getPosters', program)
         self.assertTrue(len(key) > 0)
         
-# =============================================================================
+
 class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
 
     def setUp(self):
@@ -814,7 +814,7 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
         except Exception, e:
             log.debug('SUCCESS: got exception on null delegate')
 
-# =============================================================================
+
 class SpamSkippingFanartProviderTest(unittest.TestCase):
         
     def setUp(self):
@@ -837,7 +837,7 @@ class SpamSkippingFanartProviderTest(unittest.TestCase):
         when(self.next).hasPosters(any()).thenReturn(False)
         self.assertFalse(self.provider.hasPosters(self.notSpam))
            
-# =============================================================================    
+
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')
