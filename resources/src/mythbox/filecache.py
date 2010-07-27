@@ -84,7 +84,7 @@ class FileCache(object):
         """
         filepath = self._mapToPath(fileUrl) 
         if not os.path.exists(filepath) or os.path.getsize(filepath) == 0:
-            log.debug('Cache MISS for fileurl: %s   filepath: %s' % (safe_str(fileUrl), filepath))
+            log.debug('Cache MISS %s' % safe_str(fileUrl))
             
             self.lockResource(fileUrl)
             try:
@@ -103,7 +103,7 @@ class FileCache(object):
                 self.remove(fileUrl)
                 return None
         else:
-            log.debug('Cache HIT for fileurl: %s   filepath: %s' % (safe_str(fileUrl), filepath))
+            log.debug('Cache HIT %s ' % safe_str(fileUrl))
             
         return filepath
 
