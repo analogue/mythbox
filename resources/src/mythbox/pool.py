@@ -112,6 +112,7 @@ class Pool(object):
                 r = self.factory.create()
                 self.inn.append(r)
                 
+import threading
                 
 class EvictingPool(Pool):
     """Evicts resources asynchronously based on a configurable maximum age. Surprisingly, I came up empty finding 
@@ -121,15 +122,19 @@ class EvictingPool(Pool):
         Pool.__init__(self, factory)
         self.maxAgeSecs = maxAgeSecs
         self.reapEverySecs = reapEverySecs
-        self.evictorThread = self.evictor()  # TODO: Don't start evictor until something is actually in the pool
         self.dobs = {}
         self.stopReaping = False
         self.numEvictions = 0
+        self.startLock = threading.Event()
+        self.startLock.clear()
+        self.evictorThread = self.evictor()  # TODO: Don't start evictor until something is actually in the pool
+        self.startLock.wait()
         log.debug('Evictor thread = %s' % self.evictorThread)
         
     @run_async
     def evictor(self):
         log.debug('Evictor started')
+        self.startLock.set()
         cnt = 1
         while not self.isShutdown and not self.stopReaping:
             time.sleep(1)
