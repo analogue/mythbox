@@ -27,11 +27,11 @@ from mythbox.mythtv.enums import JobType, JobStatus
 from mythbox.ui.player import MythPlayer, NoOpCommercialSkipper, TrackingCommercialSkipper
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import *
-from mythbox.util import safe_str, catchall, catchall_ui, run_async, lirc_hack, coalesce, CyclingBidiIterator
+from mythbox.util import safe_str, catchall, catchall_ui, run_async, lirc_hack, coalesce
 
 log = logging.getLogger('mythbox.ui')
 
-# =============================================================================
+
 class RecordingDetailsWindow(BaseWindow):
     
     def __init__(self, *args, **kwargs):
@@ -205,9 +205,10 @@ class RecordingDetailsWindow(BaseWindow):
     @window_busy
     def render(self):
         self.renderDetail()
+        self.renderChannel()
         self.renderThumbnail()
         self.renderCommBreaks()  # NOTE: async
-        
+    
     def renderDetail(self):
         s = self.program
         self.setWindowProperty('title', s.fullTitle())
@@ -221,8 +222,25 @@ class RecordingDetailsWindow(BaseWindow):
         self.setWindowProperty('commBreaks', 'Loading...')       
         self.setWindowProperty('index', str(self.programIterator.index() + 1))
         self.setWindowProperty('numRecordings', str(self.programIterator.size()))
+
         
-        
+    @inject_db
+    def renderChannel(self):
+        channels = filter(lambda c: c.getChannelId() == self.program.getChannelId(), self.db().getChannels())
+        if channels:
+            icon = self.mythChannelIconCache.get(channels.pop())
+            if icon:
+                self.setWindowProperty('channelIcon', icon)
+
+    def renderThumbnail(self):
+        thumbFile = self.mythThumbnailCache.get(self.program)
+        self.setWindowProperty('thumbnailShadow', 'mb-DialogBack.png')
+        if thumbFile:
+            self.setWindowProperty('thumbnail', thumbFile)
+        else:
+            self.setWindowProperty('thumbnail', 'mythbox-logo.png')
+            log.error('Recording thumbnail preview image not found: %s' % safe_str(self.program.title()))
+                    
     @run_async
     @catchall
     @inject_db
@@ -257,12 +275,3 @@ class RecordingDetailsWindow(BaseWindow):
                 else:                                    
                     commBreaks = job.formattedJobStatus()
         self.setWindowProperty('commBreaks', commBreaks)
-        
-    def renderThumbnail(self):
-        thumbFile = self.mythThumbnailCache.get(self.program)
-        self.setWindowProperty('thumbnailShadow', 'mb-DialogBack.png')
-        if thumbFile:
-            self.setWindowProperty('thumbnail', thumbFile)
-        else:
-            self.setWindowProperty('thumbnail', 'mythbox-logo.png')
-            log.error('Recording thumbnail preview image not found: %s' % safe_str(self.program.title()))

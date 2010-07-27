@@ -59,9 +59,6 @@
             <control type="label"><label>Air Date</label></control>
             <control type="label"><label>Channel</label></control>
             <control type="label"><label>Category</label></control>
-<!--            <control type="label"><label>Auto-Expire</label></control>-->
-<!--            <control type="label"><label>Size</label></control>-->
-<!--            <control type="label"><label>Comm Breaks</label></control>-->
         </control>
 
         <control type="grouplist" id="3001">
@@ -115,9 +112,6 @@
                 <textcolor>0xffddddff</textcolor>
                 <info>Window.Property(category)</info>
             </control>
-<!--            <control type="label" id="4006"><label>Auto-Expire</label><textcolor>0xffddddff</textcolor></control>-->
-<!--            <control type="label" id="4007"><label>Size</label><textcolor>0xffddddff</textcolor></control>-->
-<!--            <control type="label" id="4008"><label>Comm Breaks</label><textcolor>0xffddddff</textcolor></control>-->
         </control>
 
         <control type="grouplist" id="4001">
@@ -258,7 +252,6 @@
             <texturenofocus>button_nofocus.png</texturenofocus>
             <enabled>true</enabled>
             <pulseonselect>true</pulseonselect>
-<!--            <enable>!substring(Window.Property(busy),true)</enable>-->
         </control>
         
         <control type="button" id="251">
@@ -270,7 +263,6 @@
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
-<!--            <enable>!substring(Window.Property(busy),true)</enable>-->
         </control>
         
         <control type="button" id="252">
@@ -282,7 +274,6 @@
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
-<!--            <enable>!substring(Window.Property(busy),true)</enable>-->
         </control>
 
         <control type="button" id="253">
@@ -294,7 +285,6 @@
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
-<!--            <enable>!substring(Window.Property(busy),true)</enable>-->
         </control>
 
         <control type="button" id="256">
@@ -305,7 +295,6 @@
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
-<!--            <enable>!substring(Window.Property(busy),true)</enable>-->
         </control>
 
         <control type="button" id="254">
@@ -317,7 +306,6 @@
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
-<!--            <enable>!substring(Window.Property(busy),true)</enable>-->
         </control>
 
         <control type="button" id="255">
@@ -329,9 +317,26 @@
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
-<!--            <enable>!substring(Window.Property(busy),true)</enable>-->
         </control>
-         
+    </control>
+
+
+    <control type="group">
+        <posx>60</posx>
+        <posy>470</posy>
+        <!-- Copy of include Window_OpenClose_Left_Panel_Animation -->
+        <animation effect="fade" time="200" condition="Skin.HasSetting(Animate_Skin)">WindowOpen</animation>
+        <animation effect="fade" time="200" condition="Skin.HasSetting(Animate_Skin)">WindowClose</animation>
+        <animation effect="slide" start="-400,0" end="0,0" time="300" tween="quadratic" easing="out" condition="!Skin.HasSetting(Animate_Skin)">WindowOpen</animation>
+        <animation effect="slide" end="-400,0" start="0,0" time="300" tween="quadratic" easing="out" condition="!Skin.HasSetting(Animate_Skin)">WindowClose</animation>
+
+        <control type="image">
+            <width>150</width>
+            <height>150</height>
+            <aspectratio>keep</aspectratio>
+            <info>Window.Property(channelIcon)</info>
+            <fadetime>400</fadetime>
+        </control>
     </control>
     
     <control type="multiimage">

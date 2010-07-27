@@ -34,7 +34,7 @@ log = logging.getLogger('mythbox.ui')
 ID_SCHEDULES_LISTBOX = 600
 ID_REFRESH_BUTTON = 250
 
-# ==============================================================================
+
 class SchedulesWindow(BaseWindow):
     
     def __init__(self, *args, **kwargs):
@@ -173,11 +173,9 @@ class SchedulesWindow(BaseWindow):
             finally:
                 self.setListItemProperty(listItem, 'poster', posterPath)
                 
-# =============================================================================            
+
 class ScheduleDialog(BaseDialog):
-    """
-    Create new and edit existing recording schedules
-    """
+    """Create new and edit existing recording schedules"""
         
     def __init__(self, *args, **kwargs):
         BaseDialog.__init__(self, *args, **kwargs)
