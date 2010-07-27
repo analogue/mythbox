@@ -209,7 +209,7 @@ class Connection(object):
             serverVersion  = int(reply[1])
             log.debug('getServerVersion: %s %s' % (serverResponse, serverVersion))
         finally:
-            sock.shutdown(socket.SHUT_RDWR)
+            #sock.shutdown(socket.SHUT_RDWR)
             sock.close()
         return serverVersion
         
