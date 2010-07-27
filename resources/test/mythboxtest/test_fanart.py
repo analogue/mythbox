@@ -25,7 +25,7 @@ import time
 
 from mockito import Mock, when, verify, any, verifyZeroInteractions
 from mythbox.fanart import chain, ImdbFanartProvider, TvdbFanartProvider, \
-    TheMovieDbFanartProvider, GoogleImageSearchProvider, CachingFanartProvider, \
+    TheMovieDbFanartProvider, GoogleImageSearchProvider, \
     SuperFastFanartProvider, OneStrikeAndYoureOutFanartProvider ,\
     SpamSkippingFanartProvider, HttpCachingFanartProvider
 from mythbox.mythtv.domain import TVProgram, Program
