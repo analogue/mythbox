@@ -28,7 +28,7 @@ from mythbox.platform import getPlatform, Platform, WindowsPlatform, MacPlatform
 
 log = logging.getLogger('mythbox.unittest')
 
-# =============================================================================
+
 class RunAsyncDecoratorTest(unittest.TestCase):
     
     @run_async
@@ -72,7 +72,7 @@ class RunAsyncDecoratorTest(unittest.TestCase):
         self.assertFalse(t2.isAlive())
         self.assertFalse(t3.isAlive())
 
-# =============================================================================
+
 class CoalesceDecoratorTest(unittest.TestCase):
     
     def setUp(self):
@@ -149,7 +149,7 @@ class CoalesceDecoratorTest(unittest.TestCase):
         self.assertEquals(1, self.barTimes)
         self.assertEquals(1, self.bazTimes)
 
-# =============================================================================
+
 class ModuleTest(unittest.TestCase):
 
 #    def formatSize(sizeKB, gb=False):
@@ -236,7 +236,7 @@ class ModuleTest(unittest.TestCase):
         self.assertTrue(len(queues[0]) == 2 and queues[0][0] == 1 and queues[0][1] == 3)
         self.assertTrue(len(queues[1]) == 2 and queues[1][0] == 2 and queues[1][1] == 4)
         
-# =============================================================================
+
 class LircHackDecoratorTest(unittest.TestCase):
 
     def setUp(self):
@@ -288,7 +288,7 @@ class LircHackDecoratorTest(unittest.TestCase):
         self.assertTrue(result1)
         self.assertTrue(result2)
     
-# =============================================================================
+
 class TimedDecoratorTest(unittest.TestCase):
     
     def test_DecoratorPrintsOutWarningWhenExecutionTimeExceedsOneSecond(self):
@@ -300,7 +300,7 @@ class TimedDecoratorTest(unittest.TestCase):
         log.debug('waiting 1.2 seconds...')
         time.sleep(1.2)
 
-# =============================================================================
+
 class SynchronizedDecoratorTest(unittest.TestCase):
 
 #    @synchronized
@@ -396,7 +396,7 @@ class SynchronizedDecoratorTest(unittest.TestCase):
         t6.join()
         # assertions are internal to baz()
         
-# =============================================================================    
+
 class NativeTranslatorTest(unittest.TestCase):
 
     def test_get_ByIntegerIdReturnsString(self):
@@ -411,7 +411,7 @@ class NativeTranslatorTest(unittest.TestCase):
         log.debug('localized = %s' % s)
         self.assertEquals('MythBox', s)
              
-# =============================================================================
+
 class BoundedEvictingQueueTest(unittest.TestCase):
     
     def test_put_FillingToCapacityPlusOneEvictsFirstItem(self):
@@ -429,7 +429,7 @@ class BoundedEvictingQueueTest(unittest.TestCase):
         self.assertEquals(4, q.get())
         self.assertTrue(q.empty())
         
-# =============================================================================
+
 #
 # Requires interactivity 
 #        
@@ -440,7 +440,7 @@ class BoundedEvictingQueueTest(unittest.TestCase):
 #        value = config.get('blah')
 #        log.debug('Value = %s' % value)
         
-# =============================================================================
+
 class MockPlatform(Platform):
     """
     Mock platform impl that directs unit tests to load resources from the  
@@ -470,7 +470,7 @@ class MockPlatform(Platform):
     def getDefaultRecordingsDir(self):
         return ''
 
-# =============================================================================
+
 class BidiIteratorTest(unittest.TestCase):
     
     def test_When_list_empty_Then_raise_StopIteration(self):
@@ -541,7 +541,7 @@ class BidiIteratorTest(unittest.TestCase):
         bi = BidiIterator(['a'], 0)
         self.assertEquals('a', bi.current())
         
-# =============================================================================
+
 class CyclingBidiIteratorTest(unittest.TestCase):
     
     def test_When_list_empty_Then_raise_StopIteration(self):
@@ -605,9 +605,8 @@ class CyclingBidiIteratorTest(unittest.TestCase):
         self.assertEquals('b', CyclingBidiIterator(['a','b','c','d'], 2).previous())
         self.assertEquals('c', CyclingBidiIterator(['a','b','c','d'], 3).previous())
 
-# =============================================================================
+
 class TimedCacheDecoratorTest(unittest.TestCase):
-    
     
     @timed_cache(seconds=2)
     def foo(self):
@@ -623,7 +622,7 @@ class TimedCacheDecoratorTest(unittest.TestCase):
         time.sleep(2)
         self.assertTrue(3, self.foo())
 
-# =============================================================================
+
 class MaxThreadsDecoratorTest(unittest.TestCase):
     
     @run_async
@@ -643,7 +642,7 @@ class MaxThreadsDecoratorTest(unittest.TestCase):
         for w in workers:
             w.join()    
         
-# =============================================================================
+
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')

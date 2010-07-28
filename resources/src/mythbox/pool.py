@@ -19,6 +19,7 @@
 
 import datetime
 import logging
+import threading
 import time
 
 from mythbox.util import sync_instance, run_async
@@ -32,9 +33,8 @@ pools = {}
           
 
 class PoolableFactory(object):
-    """
-    Any resource which is pooled needs a factory to create concrete instances.
-    """
+    """Pooled resources needs a factory to create/destroy concrete instances."""
+    
     def create(self):
         raise Exception, "Abstract method"
     
@@ -43,9 +43,7 @@ class PoolableFactory(object):
 
 
 class Pool(object):
-    """
-    Simple no frills unbounded resource pool
-    """
+    """Simple no frills unbounded resource pool"""
     
     def __init__(self, factory):
         """
@@ -111,12 +109,12 @@ class Pool(object):
             for i in range(delta):
                 r = self.factory.create()
                 self.inn.append(r)
-                
-import threading
+
                 
 class EvictingPool(Pool):
-    """Evicts resources asynchronously based on a configurable maximum age. Surprisingly, I came up empty finding 
-       an existing FOSS implementation where evictions were async."""
+    """Evicts resources asynchronously based on a configurable maximum age.
+    Surprisingly, I came up empty finding an existing FOSS implementation 
+    where evictions were async."""
        
     def __init__(self, factory, maxAgeSecs, reapEverySecs):
         Pool.__init__(self, factory)
