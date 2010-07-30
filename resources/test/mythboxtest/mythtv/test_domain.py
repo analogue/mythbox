@@ -37,6 +37,7 @@ from mythbox.platform import Platform
 
 log = logging.getLogger('mythbox.unittest')
 
+
 class ModuleFunctionsTest(unittest.TestCase):
     
     def test_ctime2MythTime_MinDateStringReturnsMinDate(self):

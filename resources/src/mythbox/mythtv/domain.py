@@ -458,8 +458,9 @@ class Program(object):
             repr(self.subtitle()), 
             repr(self.description()))
 
-    def isShowing(self, at=datetime.datetime.now()):
-        return at >= self.starttimeAsTime() and at <= self.endtimeAsTime()
+    def isShowing(self):
+        now = datetime.datetime.now()
+        return now >= self.starttimeAsTime() and now <= self.endtimeAsTime()
 
 
 class TVProgram(Program):

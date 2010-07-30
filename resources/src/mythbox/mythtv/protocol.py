@@ -148,7 +148,13 @@ class Protocol56(Protocol50):
         return 56
 
 
-class Protocol23056(Protocol56):
+class Protocol57(Protocol56):
+    
+    def version(self):
+        return 57
+
+
+class Protocol23056(Protocol57):
     
     def version(self):
         return 23056
@@ -168,5 +174,6 @@ protocols = {
     49: Protocol49(),
     50: Protocol50(),  # 0.22
     56: Protocol56(),  # 0.23
+    57: Protocol57(),  # 0.23.1
     23056: Protocol23056()  # mythbuntu weirdness
 }    

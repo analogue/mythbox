@@ -38,7 +38,7 @@ from mythbox.util import catchall_ui, timed, lirc_hack, catchall, ui_locked2, sa
 
 log = logging.getLogger('mythbox.ui')
 
-# =============================================================================
+
 class ProgramCell(object):
     
     def __init__(self, *args, **kwargs):
@@ -53,7 +53,7 @@ class ProgramCell(object):
         self.label     = None   # ControlLabel
         self.hdOverlay = None   # ControlImage
 
-# =============================================================================
+
 class ChannelCell(object):
     
     def __init__(self, *args, **kwargs):
@@ -61,7 +61,7 @@ class ChannelCell(object):
         self.label   = None   # ControlLabel of channel name and callsign
         self.shade   = None   # ControlImage of background shade 
 
-# =============================================================================
+
 class Pager(object):
     
     def __init__(self, numChannels, channelsPerPage):
@@ -82,8 +82,9 @@ class Pager(object):
             np = 0
         return np * self.cpp
 
-# =============================================================================
+
 WIDTH_CHANNEL_ICON = 40
+
 
 class TvGuideWindow(ui.BaseWindow):
     """
@@ -332,9 +333,6 @@ class TvGuideWindow(ui.BaseWindow):
                 break
         
         if program:
-            #import xbmcgui
-            #xbmcgui.Dialog().ok('debug', '%s' % program.isShowing(), '%s' % program.starttimeAsTime(), '%s' % program.endtimeAsTime())
-            
             if program.isShowing():
                 log.debug('launching livetv')
                 self.watchLiveTv(program)

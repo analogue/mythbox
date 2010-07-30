@@ -7,7 +7,9 @@ XX/XX/2010 - MythBox RC2
  - fixed   : Issue 108 - Focus changes to Play+Skip button in Recording Details screen after user has already switched focus to another button
  - new     : Issue 109 - Enable navigation from the Settings screen to the XBMC settings screen
  - new     : Issue 114 - Hostname added to comm flag status (slave backends only)
- 
+ - fixed   : Issue 117 - TV Guide - Clicking on currently playing program launches Create Schedule window instead of starting Live TV 
+ - new     : Issue 118 - MythTV 0.23-1 compatibility (Protocol 57)
+  
 06/08/2010 - MythBox RC1
 =============================
  - new     : MythTV 0.23 support added - Protocol version 56 
