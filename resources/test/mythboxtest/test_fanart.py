@@ -32,6 +32,7 @@ from mythbox.mythtv.domain import TVProgram, Program
 from mythbox.util import run_async, safe_str
 from mythbox.filecache import FileCache
 from mythbox.filecache import HttpResolver
+import os
 
 log = logging.getLogger('mythbox.unittest')
 
@@ -689,6 +690,53 @@ class SuperFastFanartProviderTest(unittest.TestCase):
         program = TVProgram({'title': u'madeleine (Grabación Manual)', 'category_type':'series'}, translator=Mock())
         key = self.provider.createKey('getPosters', program)
         self.assertTrue(len(key) > 0)
+        
+
+from mythbox.fanart import PicklingSuperFastFanartProvider
+import random
+
+class PicklingSuperFastFanartProviderTest(unittest.TestCase):
+
+    def setUp(self):
+        self.sandbox = tempfile.mkdtemp()
+        self.nextProvider = Mock()
+        self.platform = Mock()
+        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
+        self.program = TVProgram({'title': 'Two Fat Ladies', 'category_type':'series'}, translator=Mock())
+        self.provider = PicklingSuperFastFanartProvider(self.platform, self.nextProvider)
+            
+    def tearDown(self):
+        shutil.rmtree(self.sandbox, ignore_errors=True)
+   
+    @staticmethod
+    def programs(cnt):
+        for i in xrange(cnt):
+            yield TVProgram({
+                'starttime': '20081121140000',
+                'endtime'  : '20081121140000',
+                'chanid'   : random.randint(1,9999999),
+                'channum'  : str(random.randint(1,10)),
+                'title'    : 'Two Fat Ladies %d' % random.randint(1,999999),
+                'subtitle' : 'Away we go....', 
+                'description' : 'blah blah blah', 
+                'category_type':'series'}, 
+                translator=Mock())
+
+    def test_pickling(self):
+        when(self.nextProvider).getPosters(any(Program)).thenReturn(['logo.gif'])
+                        
+        for p in self.programs(20000):
+            posters = self.provider.getPosters(p)
+            #log.debug('%s %s' % (p,posters))
+            #log.debug('cache size = %d' % len(self.provider.imagePathsByKey))
+        self.provider.close()
+        
+        self.provider.loadCache()
+        
+        #for k, v in self.provider.imagePathsByKey.items():
+        #    log.debug('%s %s' % (k,v))
+            
+        log.debug('Pickle file size = %d' % os.path.getsize(self.provider.pfile))
         
 
 class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):

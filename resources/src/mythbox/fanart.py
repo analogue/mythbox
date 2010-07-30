@@ -203,6 +203,88 @@ class SuperFastFanartProvider(BaseFanartProvider):
         super(SuperFastFanartProvider, self).close()
         self.imagePathsByKey.close()
         
+import pickle
+
+class PicklingSuperFastFanartProvider(BaseFanartProvider):
+    """
+    A fanart provider that remembers past attempts to lookup fanart and returns
+    locally cached results (fast) instead of hitting the network (slow). This 
+    can be good (super fast) and bad (images may become stale if fanart is updated 
+    in the system of record) but then everything has its trade-offs :-)
+    """
+    
+    def __init__(self, platform, nextProvider=None):
+        BaseFanartProvider.__init__(self, nextProvider)
+        self.platform = platform
+        self.pfile = os.path.join(platform.getScriptDataDir(), 'SuperFastFanartProvider.pickle')
+        
+        # TODO: durus craps out when running in xbmc for some reason. file r/w perm related...
+        #self.imagePathsByKey = shove.Shove('durus://' + os.path.join(platform.getScriptDataDir(), 'superFastFanartProviderDb'))
+        #self.imagePathsByKey = shove.Shove('file://' + os.path.join(platform.getScriptDataDir(), 'superFastFanartProviderDb'))
+
+        self.imagePathsByKey = self.loadCache()
+        
+    
+    def loadCache(self):
+        if os.path.exists(self.pfile):
+            f = open(self.pfile, 'rb')
+            cache = pickle.load(f)
+            if cache is None:
+                log.warn('Pickle file corrupt..starting over')
+                cache = {}
+            f.close()
+        else:
+            cache = {}
+        return cache
+
+    def saveCache(self):
+        print 'Saving pickle cache'
+        
+        #for k,v in self.imagePathsByKey.items():
+        #    print "%s = %s" % (k,v)
+            
+        f = open(self.pfile, 'wb')
+        print 'Before dump'
+        pickle.dump(self.imagePathsByKey, f)
+        print 'After dump'
+        f.close()
+
+    def getPosters(self, program):
+        posters = []
+        key = self.createKey('getPosters', program)
+        if key in self.imagePathsByKey:
+            posters = self.imagePathsByKey[key]
+        
+        if not posters and self.nextProvider:
+            posters = self.nextProvider.getPosters(program)
+            if posters:  # cache returned poster 
+                self.imagePathsByKey[key] = posters
+                # TODO: Figure out if this is detrimental to performance -- sync on update
+                #       Sometimes throws RuntimeError if iterating while changing.
+                #try:
+                #    self.imagePathsByKey.sync()
+                #except RuntimeError, re:
+                #    pass
+        return posters
+        
+    def hasPosters(self, program):
+        return self.createKey('getPosters', program) in self.imagePathsByKey
+        
+    def createKey(self, methodName, program):
+        key = '%s-%s' % (methodName, safe_str(program.title()))
+        return key
+    
+    def clear(self):
+        super(PicklingSuperFastFanartProvider, self).clear()
+        self.imagePathsByKey.clear()
+        #self.imagePathsByKey.sync()
+        self.saveCache()
+        
+    def close(self):
+        super(PicklingSuperFastFanartProvider, self).close()
+        #self.imagePathsByKey.close()
+        self.saveCache()
+
 
 #class CachingFanartProvider(BaseFanartProvider):
 #    """Caches references to fanart images retrieved via http on the local filesystem"""
