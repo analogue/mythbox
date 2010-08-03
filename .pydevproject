@@ -23,6 +23,10 @@
 <path>/xbmc-mythtv2/resources/lib/htmltestrunner</path>
 <path>/xbmc-mythtv2/resources/lib/feedparser</path>
 <path>/xbmc-mythtv2/resources/lib/python-twitter</path>
+<path>/xbmc-mythtv2/resources/lib/pyasn1</path>
+<path>/xbmc-mythtv2/resources/lib/TwistedCore</path>
+<path>/xbmc-mythtv2/resources/lib/TwistedConch</path>
+<path>/xbmc-mythtv2/resources/lib/zope.interface/src</path>
 </pydev_pathproperty>
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">Default</pydev_property>
 </pydev_project>
