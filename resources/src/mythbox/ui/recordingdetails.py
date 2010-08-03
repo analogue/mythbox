@@ -124,12 +124,16 @@ class RecordingDetailsWindow(BaseWindow):
             xbmcgui.Dialog().ok('Error', 'Job not found')
 
     def play(self):
-        p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache)
+        #p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache)
+        from mythbox.ui.player import MythStreamingPlayer
+        p = MythStreamingPlayer(mythThumbnailCache=self.mythThumbnailCache, settings=self.settings)
         p.playRecording(self.program, NoOpCommercialSkipper(p, self.program))
         del p 
     
     def playWithCommSkip(self):
-        p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache)
+        #p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache)
+        from mythbox.ui.player import MythStreamingPlayer
+        p = MythStreamingPlayer(mythThumbnailCache=self.mythThumbnailCache, settings=self.settings)
         p.playRecording(self.program, TrackingCommercialSkipper(p, self.program))
         del p 
         

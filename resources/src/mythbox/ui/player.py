@@ -177,6 +177,7 @@ class MythStreamingPlayer(MythPlayer):
     def getFileUrl(self):
         # myth://dbuser:dbpassword@mythbackend_hostname:mythbackend_port/recordings/filename.mpg
         backend = self.db().toBackend(self.getProgram().hostname())
+        #backend = self.db().getMasterBackend()
         url = 'myth://%s:%s@%s:%s/recordings/%s' % (
             self.settings.get('mysql_database'),
             self.settings.get('mysql_password'),
