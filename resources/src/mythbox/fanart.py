@@ -168,6 +168,11 @@ class SuperFastFanartProvider(BaseFanartProvider):
         # TODO: durus craps out when running in xbmc for some reason. file r/w perm related...
         #self.imagePathsByKey = shove.Shove('durus://' + os.path.join(platform.getScriptDataDir(), 'superFastFanartProviderDb'))
         self.imagePathsByKey = shove.Shove('file://' + os.path.join(platform.getScriptDataDir(), 'superFastFanartProviderDb'))
+        self.dump()
+        
+    def dump(self):
+        for k,v in self.imagePathsByKey.items():
+            log.debug('%s %s' % (k, len(v)))
 
     def getPosters(self, program):
         posters = []
@@ -201,7 +206,14 @@ class SuperFastFanartProvider(BaseFanartProvider):
 
     def close(self):
         super(SuperFastFanartProvider, self).close()
+        self.imagePathsByKey.sync()
+        
+        self.dump()
+        
         self.imagePathsByKey.close()
+        log.debug('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+        log.debug('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+        log.debug('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
         
 import pickle
 
@@ -261,10 +273,10 @@ class PicklingSuperFastFanartProvider(BaseFanartProvider):
                 self.imagePathsByKey[key] = posters
                 # TODO: Figure out if this is detrimental to performance -- sync on update
                 #       Sometimes throws RuntimeError if iterating while changing.
-                #try:
-                #    self.imagePathsByKey.sync()
-                #except RuntimeError, re:
-                #    pass
+                try:
+                    self.imagePathsByKey.sync()
+                except RuntimeError, re:
+                    pass
         return posters
         
     def hasPosters(self, program):
@@ -375,13 +387,15 @@ class HttpCachingFanartProvider(BaseFanartProvider):
         '''
         results = []
         
-        while httpPosters:
-            first = self.tryToCache(httpPosters.pop())
+        copyOfPosters = httpPosters[:]
+        
+        for i in xrange(len(httpPosters)):
+            first = self.tryToCache(copyOfPosters.pop())
             if first:
                 results.append(first)
                 break                  
         
-        for nextUrl in httpPosters:
+        for nextUrl in copyOfPosters:
             self.workQueue.put({'results' : results, 'httpUrl' : nextUrl })
         
         return results
@@ -606,7 +620,7 @@ class FanArt(object):
                         
         #p = CachingFanartProvider(self.httpCache, p)
         p = HttpCachingFanartProvider(self.httpCache, p)
-        p = SuperFastFanartProvider(self.platform, p)
+        self.sffp = p = SuperFastFanartProvider(self.platform, p)
         p = SpamSkippingFanartProvider(p)
         self.provider = p
     

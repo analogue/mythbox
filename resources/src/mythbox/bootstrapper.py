@@ -31,7 +31,8 @@ class BootStrapper(object):
         self.log = None
         self.platform = None
         self.stage = 'Initializing'
-    
+        self.shell = None
+        
     def run(self):
         try:
             self.bootstrapLogger()
@@ -41,6 +42,7 @@ class BootStrapper(object):
             self.bootstrapSettings()
             self.bootstrapUpdater()
             self.bootstrapFeeds()
+            self.bootstrapDebugShell()
             self.bootstrapHomeScreen()
         except Exception, ex:
             self.handleFailure(ex)
@@ -130,6 +132,15 @@ class BootStrapper(object):
         from mythbox.feeds import FeedHose
         self.feedHose = FeedHose(self.settings, self.bus)
             
+    def bootstrapDebugShell(self):
+        try:
+            from mythbox.shell import DebugShell
+            globals()['bootstrapper'] = self
+            self.shell = DebugShell(namespace=globals())
+            self.shell.start()
+        except:
+            self.log.exception('fail')
+        
     def bootstrapHomeScreen(self):
         from mythbox.ui.home import HomeWindow
         HomeWindow(
@@ -142,6 +153,9 @@ class BootStrapper(object):
             cachesByName=self.cachesByName,
             bus=self.bus,
             feedHose=self.feedHose).doModal()
+
+        if self.shell:
+            self.shell.stop()
 
     def onEvent(self, event):
         from bus import Event

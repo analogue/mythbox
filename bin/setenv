@@ -21,10 +21,9 @@ resources/lib/durus:\
 resources/lib/mysql-connector-python:\
 resources/lib/htmltestrunner:\
 resources/lib/python-twitter:\
-resources/lib/TwistedCore:\
-resources/lib/TwistedConch:\
+resources/lib/twisted:\
 resources/lib/pyasn1:\
-resources/lib/zope.interface/src
+resources/lib/zope.interface
 
 #/var/lib/python-support/python2.5
 

@@ -60,7 +60,10 @@ class Platform(object):
             'shove', 
             'durus',
             'mysql-connector-python',
-            'python-twitter']
+            'python-twitter',
+            'twisted',
+            'pyasn1',
+            'zope.interface']
         
         for lib in libs:
             sys.path.append(os.path.join(self.getScriptDir(), 'resources', 'lib', lib))
