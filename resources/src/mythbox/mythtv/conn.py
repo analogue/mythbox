@@ -593,11 +593,18 @@ class Connection(object):
             reply = self._sendRequest(self.cmdSock, msg)
             result = self._isOk(reply)
         else:
-            s = self.connect(slaveBackend=backend.ipAddress)
-            reply = self._sendRequest(s, msg)
-            result = self._isOk(reply)
-            s.shutdown(socket.SHUT_RDWR)
-            s.close()
+            try:
+                s = self.connect(slaveBackend=backend.ipAddress)
+                reply = self._sendRequest(s, msg)
+                result = self._isOk(reply)
+                s.shutdown(socket.SHUT_RDWR)
+                s.close()
+            except socket.error, se:
+                if backend.slave:
+                    log.error('YYY Slave down, rerouting to master')
+                    return self.generateThumbnail(program, self.db().getMasterBackend().ipAddress, width, height)
+                else:
+                    raise
 
         log.debug('genpixmap reply = %s' % reply)
         return result
@@ -1075,7 +1082,12 @@ class Connection(object):
             commandSocket = self.cmdSock
         else:
             log.debug('Requesting file from slave backend: %s' % backend.ipAddress)
-            commandSocket = self.connect(announce='Playback', slaveBackend=backend.ipAddress)
+            try:
+                commandSocket = self.connect(announce='Playback', slaveBackend=backend.ipAddress)
+            except socket.error, se:
+                if backend.slave:
+                    log.error('XXX slave %s is not available...trying master' % backend)
+                    return self.transferFile(backendPath, destPath, self.db().getMasterBackend().ipAddress, numBytes)
             closeCommandSocket = True 
          
         reply,dataSocket = self.annFileTransfer(backend.hostname, backendPath)
