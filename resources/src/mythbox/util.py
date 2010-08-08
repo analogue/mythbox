@@ -389,7 +389,8 @@ def catchall_ui(func, *args, **kw):
     try:
         return func(*args, **kw)
     except Exception, ex:
-        log.exception('CATCHALL_UI: Caught exception %s on method %s' % (str(ex), func))
+        log.error(sys.exc_info())
+        log.exception('CATCHALL_UI: Caught %s exception %s on method %s' % (type(ex), str(ex), func))
         xbmcgui.Dialog().ok('Error: CATCHALL', 'Exception: %s' % str(ex), 'Function: %s' % str(func))
 
 
