@@ -5,8 +5,7 @@
 find . -name "*.pyc" | xargs rm -fv
 find . -name "*.pyo" | xargs rm -fv
 
-#export rev=`svn -r HEAD  info | grep Revision | cut -d ' ' -f 2`
-export rev='RC1'
+export rev='RC2'
 echo Packaging $rev 
 
 tar czf mythbox_stage.tar.gz \

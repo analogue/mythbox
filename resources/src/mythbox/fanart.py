@@ -229,11 +229,6 @@ class PicklingSuperFastFanartProvider(BaseFanartProvider):
         BaseFanartProvider.__init__(self, nextProvider)
         self.platform = platform
         self.pfile = os.path.join(platform.getScriptDataDir(), 'SuperFastFanartProvider.pickle')
-        
-        # TODO: durus craps out when running in xbmc for some reason. file r/w perm related...
-        #self.imagePathsByKey = shove.Shove('durus://' + os.path.join(platform.getScriptDataDir(), 'superFastFanartProviderDb'))
-        #self.imagePathsByKey = shove.Shove('file://' + os.path.join(platform.getScriptDataDir(), 'superFastFanartProviderDb'))
-
         self.imagePathsByKey = self.loadCache()
         
     
@@ -271,12 +266,6 @@ class PicklingSuperFastFanartProvider(BaseFanartProvider):
             posters = self.nextProvider.getPosters(program)
             if posters:  # cache returned poster 
                 self.imagePathsByKey[key] = posters
-                # TODO: Figure out if this is detrimental to performance -- sync on update
-                #       Sometimes throws RuntimeError if iterating while changing.
-                try:
-                    self.imagePathsByKey.sync()
-                except RuntimeError, re:
-                    pass
         return posters
         
     def hasPosters(self, program):
@@ -289,62 +278,11 @@ class PicklingSuperFastFanartProvider(BaseFanartProvider):
     def clear(self):
         super(PicklingSuperFastFanartProvider, self).clear()
         self.imagePathsByKey.clear()
-        #self.imagePathsByKey.sync()
         self.saveCache()
         
     def close(self):
         super(PicklingSuperFastFanartProvider, self).close()
-        #self.imagePathsByKey.close()
         self.saveCache()
-
-
-#class CachingFanartProvider(BaseFanartProvider):
-#    """Caches references to fanart images retrieved via http on the local filesystem"""
-#    
-#    def __init__(self, httpCache, nextProvider=None):
-#        BaseFanartProvider.__init__(self, nextProvider)
-#        self.httpCache = httpCache
-#
-#    def getPosters(self, program):
-#        # If the chained provider returns a http:// style url, 
-#        # cache the contents and return the locally cached file path
-#        posters = []
-#        if self.nextProvider:
-#            httpPosters = self.nextProvider.getPosters(program)
-#            posters = self.cachePosters(httpPosters)
-#        return posters
-#
-#    def cachePosters(self, httpPosters):
-#        results = []
-#        
-#        @run_async
-#        def async_wrapper(poster):
-#            poster = self.tryToCache(poster)
-#            if poster:
-#                results.append(poster)
-#        
-#        workers = []
-#        for p in httpPosters:    
-#            workers.append(async_wrapper(p))
-#            
-#        for w in workers:
-#            w.join()
-#    
-#        return results
-#    
-#    def tryToCache(self, poster):
-#        if poster and poster[:4] == 'http':
-#            try:
-#                poster = self.httpCache.get(poster)
-#            except Exception, ioe:
-#            #except IOError, ioe:
-#                log.exception(ioe)
-#                return None
-#        return poster
-#    
-#    def clear(self):
-#        super(CachingFanartProvider, self).clear()
-#        self.httpCache.clear()
 
 
 class HttpCachingFanartProvider(BaseFanartProvider):
