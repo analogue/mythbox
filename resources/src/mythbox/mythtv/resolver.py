@@ -97,3 +97,5 @@ class MythChannelIconResolver(FileResolver):
     def hash(self, channel):
         if channel.getIconPath():
             return md5.new(safe_str(channel.getIconPath())).hexdigest()
+        else:
+            return u''

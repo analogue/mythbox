@@ -20,7 +20,10 @@ resources/lib/shove:\
 resources/lib/durus:\
 resources/lib/mysql-connector-python:\
 resources/lib/htmltestrunner:\
-resources/lib/python-twitter
+resources/lib/python-twitter:\
+resources/lib/twisted:\
+resources/lib/pyasn1:\
+resources/lib/zope.interface
 
 #/var/lib/python-support/python2.5
 
