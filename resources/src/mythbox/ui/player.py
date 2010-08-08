@@ -177,6 +177,17 @@ class MythStreamingPlayer(MythPlayer):
     def getFileUrl(self):
         # myth://dbuser:dbpassword@mythbackend_hostname:mythbackend_port/recordings/filename.mpg
         backend = self.db().toBackend(self.getProgram().hostname())
+        
+        #
+        # TODO: This doesn't work even with MasterBackendOverride=1. Must be a myth:// thing
+        #
+#        if backend.slave:
+#            if False: #backend.isAlive():
+#                pass
+#            else:
+#                log.error('ZZZ Slave down...trying master')
+#                backend = self.db().getMasterBackend()
+                
         #backend = self.db().getMasterBackend()
         url = 'myth://%s:%s@%s:%s/recordings/%s' % (
             self.settings.get('mysql_database'),
