@@ -23,8 +23,9 @@ log = logging.getLogger('mythbox.event')
 
 
 class Event(object):
-    RECORDING_DELETED    = 'RECORDING_DELETED'  # key: id, program
+    RECORDING_DELETED    = 'RECORDING_DELETED'  # keys: id, program
     SETTING_CHANGED      = 'SETTING_CHANGED'    # keys: id, tag, old, new
+    SHUTDOWN             = 'SHUDTOWN'           # keys: None
 
 
 class EventBus(object):

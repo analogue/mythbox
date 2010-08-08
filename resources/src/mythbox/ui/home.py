@@ -197,6 +197,8 @@ class HomeWindow(BaseWindow):
 
         self.fanArt.shutdown()
 
+        self.bus.publish({'id':Event.SHUTDOWN})
+        
         try:
             # HACK ALERT:
             #   Pool reaper thread is @run_async so we need to 
@@ -231,7 +233,7 @@ class HomeWindow(BaseWindow):
         try:
             log.info('Goodbye!')
             logging.shutdown()
-            #sys.modules.clear()
+            #sys.modules.clear()  -- crashes XBMC
         except Exception, e:
             xbmc.log('%s' % str(e))            
         

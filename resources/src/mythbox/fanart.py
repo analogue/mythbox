@@ -21,12 +21,12 @@ import logging
 import md5
 import os
 import random
-import tmdb
 import imdb
 import imdb.helpers
 import shove
 import shutil
 import simplejson as json
+import tmdb
 import urllib2
 import urllib
 import Queue
@@ -168,7 +168,7 @@ class SuperFastFanartProvider(BaseFanartProvider):
         # TODO: durus craps out when running in xbmc for some reason. file r/w perm related...
         #self.imagePathsByKey = shove.Shove('durus://' + os.path.join(platform.getScriptDataDir(), 'superFastFanartProviderDb'))
         self.imagePathsByKey = shove.Shove('file://' + os.path.join(platform.getScriptDataDir(), 'superFastFanartProviderDb'))
-        self.dump()
+        #self.dump()
         
     def dump(self):
         for k,v in self.imagePathsByKey.items():
@@ -208,12 +208,12 @@ class SuperFastFanartProvider(BaseFanartProvider):
         super(SuperFastFanartProvider, self).close()
         self.imagePathsByKey.sync()
         
-        self.dump()
+        #self.dump()
         
         self.imagePathsByKey.close()
-        log.debug('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
-        log.debug('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
-        log.debug('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+        #log.debug('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+        #log.debug('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+        #log.debug('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
         
 import pickle
 

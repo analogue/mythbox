@@ -131,15 +131,18 @@ class BootStrapper(object):
     def bootstrapFeeds(self):
         from mythbox.feeds import FeedHose
         self.feedHose = FeedHose(self.settings, self.bus)
-            
+    
     def bootstrapDebugShell(self):
-        try:
-            from mythbox.shell import DebugShell
-            globals()['bootstrapper'] = self
-            self.shell = DebugShell(namespace=globals())
-            self.shell.start()
-        except:
-            self.log.exception('fail')
+        # only startup debug shell on my mythboxen
+        import socket
+        if socket.gethostname() in ('htpc', 'faraday', 'athena', 'zeus'):
+            try:
+                from mythbox.shell import DebugShell
+                globals()['bootstrapper'] = self
+                self.shell = DebugShell(self.bus, namespace=globals())
+                self.shell.start()
+            except:
+                self.log.exception('Debug shell startup')
         
     def bootstrapHomeScreen(self):
         from mythbox.ui.home import HomeWindow
@@ -153,9 +156,6 @@ class BootStrapper(object):
             cachesByName=self.cachesByName,
             bus=self.bus,
             feedHose=self.feedHose).doModal()
-
-        if self.shell:
-            self.shell.stop()
 
     def onEvent(self, event):
         from bus import Event

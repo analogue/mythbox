@@ -124,16 +124,21 @@ class RecordingDetailsWindow(BaseWindow):
             xbmcgui.Dialog().ok('Error', 'Job not found')
 
     def play(self):
-        #p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache)
-        from mythbox.ui.player import MythStreamingPlayer
-        p = MythStreamingPlayer(mythThumbnailCache=self.mythThumbnailCache, settings=self.settings)
+        p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache)
+        
+        # TODO: Can't turn off commskip in myth://. I like my commskip w/ toasters better...
+        #from mythbox.ui.player import MythStreamingPlayer
+        #p = MythStreamingPlayer(mythThumbnailCache=self.mythThumbnailCache, settings=self.settings)
         p.playRecording(self.program, NoOpCommercialSkipper(p, self.program))
         del p 
     
     def playWithCommSkip(self):
-        #p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache)
-        from mythbox.ui.player import MythStreamingPlayer
-        p = MythStreamingPlayer(mythThumbnailCache=self.mythThumbnailCache, settings=self.settings)
+        p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache)
+        
+        # TODO: Can't turn off commskip in myth://. I like my commskip w/ toasters better...
+        #from mythbox.ui.player import MythStreamingPlayer
+        #p = MythStreamingPlayer(mythThumbnailCache=self.mythThumbnailCache, settings=self.settings)
+        
         p.playRecording(self.program, TrackingCommercialSkipper(p, self.program))
         del p 
         
@@ -209,9 +214,9 @@ class RecordingDetailsWindow(BaseWindow):
     @window_busy
     def render(self):
         self.renderDetail()
-        self.renderChannel()
         self.renderThumbnail()
-        self.renderCommBreaks()  # NOTE: async
+        self.renderChannel()     # async
+        self.renderCommBreaks()  # async
     
     def renderDetail(self):
         s = self.program
@@ -227,8 +232,11 @@ class RecordingDetailsWindow(BaseWindow):
         self.setWindowProperty('index', str(self.programIterator.index() + 1))
         self.setWindowProperty('numRecordings', str(self.programIterator.size()))
 
-        
+
+    @run_async
+    @catchall        
     @inject_db
+    @coalesce
     def renderChannel(self):
         channels = filter(lambda c: c.getChannelId() == self.program.getChannelId(), self.db().getChannels())
         if channels:
