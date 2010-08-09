@@ -23,7 +23,6 @@
 <path>/xbmc-mythtv2/resources/lib/htmltestrunner</path>
 <path>/xbmc-mythtv2/resources/lib/feedparser</path>
 <path>/xbmc-mythtv2/resources/lib/python-twitter</path>
-<path>/xbmc-mythtv2/resources/lib/pyasn1</path>
 <path>/xbmc-mythtv2/resources/lib/twisted</path>
 <path>/xbmc-mythtv2/resources/lib/zope.interface</path>
 </pydev_pathproperty>

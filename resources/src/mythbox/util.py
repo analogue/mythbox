@@ -568,35 +568,73 @@ def which(program, all=False):
     return None
 
 
-class NativeTranslator(xbmc.Language):
-    
-    def __init__(self, scriptPath, defaultLanguage=None, *args, **kwargs):
-        xbmc.Language.__init__(self, scriptPath, defaultLanguage, *args, **kwargs)
+try:
+    #
+    #  XBMC Camelot 9.11
+    #
+    import xbmc.Language
+    class NativeTranslator(xbmc.Language):
         
-    def get(self, id):
-        """
-        Alias for getLocalizedString(...)
-
-        @param id: translation id
-        @type id: int
-        @return: translated text
-        @rtype: string
-        """
-        # if id is a string, assume no need to lookup translation
-        if type(id) is str:
-            return id
-        else:
-            return self.getLocalizedString(id)
+        def __init__(self, scriptPath, defaultLanguage=None, *args, **kwargs):
+            xbmc.Language.__init__(self, scriptPath, defaultLanguage, *args, **kwargs)
+            
+        def get(self, id):
+            """
+            Alias for getLocalizedString(...)
     
-    def toList(self, someMap):
-        """
-        @param someMap: dict with translation ids as values. Keys are ignored
-        @return: list of strings containing translations
-        """
-        result = []
-        for key in someMap.keys():
-            result.append(self.get(someMap[key]))
-        return result
+            @param id: translation id
+            @type id: int
+            @return: translated text
+            @rtype: string
+            """
+            # if id is a string, assume no need to lookup translation
+            if type(id) is str:
+                return id
+            else:
+                return self.getLocalizedString(id)
+        
+        def toList(self, someMap):
+            """
+            @param someMap: dict with translation ids as values. Keys are ignored
+            @return: list of strings containing translations
+            """
+            result = []
+            for key in someMap.keys():
+                result.append(self.get(someMap[key]))
+            return result
+except:
+    #
+    #  XBMC Dharma
+    #
+    class NativeTranslator(object):
+        
+        def __init__(self, scriptPath, defaultLanguage=None, *args, **kwargs):
+            pass
+            
+        def get(self, id):
+            """
+            Alias for getLocalizedString(...)
+    
+            @param id: translation id
+            @type id: int
+            @return: translated text
+            @rtype: string
+            """
+            # if id is a string, assume no need to lookup translation
+            if type(id) is str:
+                return id
+            else:
+                return xbmc.getLocalizedString(id)
+        
+        def toList(self, someMap):
+            """
+            @param someMap: dict with translation ids as values. Keys are ignored
+            @return: list of strings containing translations
+            """
+            result = []
+            for key in someMap.keys():
+                result.append(self.get(someMap[key]))
+            return result
     
 
 class OnDemandConfig(object):
