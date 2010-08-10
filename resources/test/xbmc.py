@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -21,14 +21,18 @@ import os
 import socket
 import time
 
+
 def getIPAddress():
     return socket.gethostbyname(socket.gethostname())
+
 
 def getLanguage():
     return 'English'
 
+
 def getSkinDir():
     return os.getcwd()
+
 
 def executebuiltin(command):
     """
@@ -43,6 +47,7 @@ def executebuiltin(command):
     """
     pass
 
+
 def dashboard():
     """
     Boot to dashboard as set in My Pograms/General.
@@ -51,6 +56,7 @@ def dashboard():
       - xbmc.dashboard()
     """
     pass
+
 
 def enableNavSounds(yesNo):
     """
@@ -62,6 +68,7 @@ def enableNavSounds(yesNo):
       - xbmc.enableNavSounds(True)
     """
     pass
+
 
 def executehttpapi(httpcommand):
     """
@@ -76,6 +83,7 @@ def executehttpapi(httpcommand):
     """
     pass
 
+
 def executescript(script):
     """
     Execute a python script.
@@ -87,6 +95,7 @@ def executescript(script):
     """
     pass
 
+
 def getCacheThumbName(path):
     """
     Returns a thumb cache filename.
@@ -97,6 +106,7 @@ def getCacheThumbName(path):
       - thumb = xbmc.getCacheThumbName('f:\\videos\\movie.avi')
     """
     pass
+
 
 def getCondVisibility(condition):
     """
@@ -114,6 +124,7 @@ def getCondVisibility(condition):
     """
     pass
 
+
 def getDVDState():
     """
     Returns the dvd state as an integer.
@@ -129,6 +140,7 @@ def getDVDState():
     """
     pass
 
+
 def getFreeMem():
     """
     Returns the amount of free memory in MB as an integer.
@@ -138,6 +150,7 @@ def getFreeMem():
     """
     pass
 
+
 def getGlobalIdleTime():
     """
     Returns the elapsed idle time in seconds as an integer.
@@ -145,6 +158,7 @@ def getGlobalIdleTime():
       - t = xbmc.getGlobalIdleTime()
     """
     pass
+
 
 def getInfoImage(infotag):
     """
@@ -159,6 +173,7 @@ def getInfoImage(infotag):
     """
     pass
 
+
 def getInfoLabel(infotag):
     """
     Returns an InfoLabel as a string.
@@ -172,6 +187,7 @@ def getInfoLabel(infotag):
     """
     pass
 
+
 def getLocalizedString(id):
     """
     Returns a localized 'unicode string'.
@@ -184,7 +200,8 @@ def getLocalizedString(id):
     example:
       - locstr = xbmc.getLocalizedString(6)
     """
-    pass
+    return 'TODO'
+
 
 def getRegion(id):
     """
@@ -200,6 +217,7 @@ def getRegion(id):
       - date_long_format = xbmc.getRegion('datelong')
     """
     pass
+
 
 def getSupportedMediaa(media):
     """
@@ -217,6 +235,7 @@ def getSupportedMediaa(media):
       - mTypes = xbmc.getSupportedMedia('video')
     """
     pass
+
 
 def log(msg, level):
     """Write a string to XBMC's log file.
@@ -236,6 +255,7 @@ def log(msg, level):
     """
     pass
 
+
 def makeLegalFilename(filename, fatX):
     """Returns a legal filename or path as a string.
      
@@ -252,6 +272,7 @@ def makeLegalFilename(filename, fatX):
       - filename = xbmc.makeLegalFilename('F:\Trailers\Ice Age: The Meltdown.avi')
     """
     pass
+
 
 def output(msg, level):
     """
@@ -271,6 +292,7 @@ def output(msg, level):
     """
     pass
 
+
 def playSFX(filename):
     """
     Plays a wav file by filename
@@ -282,6 +304,7 @@ def playSFX(filename):
     """
     pass
 
+
 def restart():
     """
     Restart the xbox.
@@ -291,6 +314,7 @@ def restart():
     """
     pass
 
+
 def shutdown():
     """
     Shutdown the xbox.
@@ -299,6 +323,7 @@ def shutdown():
       - xbmc.shutdown()
     """
     pass
+
 
 def skinHasImage(image):
     """
@@ -314,6 +339,7 @@ def skinHasImage(image):
       - exists = xbmc.skinHasImage('ButtonFocusedTexture.png')
     """
     pass
+
 
 def sleep(millis):
     """
@@ -332,6 +358,7 @@ def sleep(millis):
     secs = float(millis) / float(1000)
     time.sleep(secs)
 
+
 def translatePath(path):
     """
     Returns the translated path.
@@ -346,51 +373,14 @@ def translatePath(path):
       - fpath = xbmc.translatePath('special://masterprofile/script_data')
     """
     return path
-      
-# =============================================================================
-class Language(object):
 
-    def __init__(self, scriptPath, defaultLanguage, *args, **kwargs):
-        """
-        Language class.
-
-        Language(scriptPath, defaultLanguage) -- Creates a new Language class.
-
-        scriptPath      : string - path to script. (eg os.getcwd())
-        defaultLanguage : [opt] string - default language to fallback to. (default=English)
-
-        *Note, language folder structure is eg(language/English/strings.xml)
-
-        You can use the above as keywords for arguments and skip certain optional arguments.
-        Once you use a keyword, all following arguments require the keyword.
-
-        example:
-         - self.Language = xbmc.Language(os.getcwd())
-        """
-        pass
-        
-    def getLocalizedString(self, id):
-        """
-        Returns a localized 'unicode string'.
-        id : integer - id# for string you want to localize.
-        
-        *Note, getLocalizedString() will fallback to XBMC strings if no string found.
-        
-        You can use the above as keywords for arguments and skip certain optional arguments"
-        Once you use a keyword, all following arguments require the keyword."
-        
-        example:
-        locstr = self.Language.getLocalizedString(id=6)
-        """
-        return 'TODO'
     
-# =============================================================================
 class PlayList(object):
     
     def __init__(self, someInt):
         pass
     
-# =============================================================================    
+
 class Player(object):
     
     def __init__(self):
@@ -538,7 +528,7 @@ class Player(object):
         self._time = 0
         self.onPlayBackStopped()
         
-# =============================================================================
+
 class Keyboard(object):
 
     stubConfirmed = True
@@ -564,7 +554,7 @@ class Keyboard(object):
     def getText(self):
         return Keyboard.stubText
 
-# =============================================================================    
+
 class Settings(object):
  
     def __init__(self, path):

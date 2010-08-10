@@ -51,7 +51,7 @@ def getCurrentWindowDialogId():
     """Returns the id for the current 'active' dialog as an integer."""
     log.debug('xbmcgui.getCurrentWindowDialogId() called')
 
-# =============================================================================
+
 class Action(object):
     """
     Action class.
@@ -74,7 +74,7 @@ class Action(object):
         """Returns the action's current id as a long or 0 if no action is mapped in the xml's."""
         pass
     
-# =============================================================================
+
 class DialogProgress(object):
     """
     Mock progress bar
@@ -95,7 +95,7 @@ class DialogProgress(object):
         log.debug('DialogProgress::close()')
         self.canceled = True
 
-# =============================================================================
+
 class Window(object):
 
     def getWidth(self):
@@ -140,7 +140,7 @@ class Window(object):
         """
         log.debug('calling getFocusId(...)')
 
-# =============================================================================
+
 class WindowDialog(Window):
     
     def onAction(self, action):
@@ -156,7 +156,7 @@ class WindowDialog(Window):
     def doModal(self):
         log.debug('calling WindowDialog.doModal()')
 
-# =============================================================================
+
 class WindowXML(Window):
     
     def addItem(self, item, position):
@@ -234,11 +234,11 @@ class WindowXML(Window):
         """
         pass
     
-# =============================================================================
+
 class WindowXMLDialog(WindowXML):
     pass
 
-# =============================================================================
+
 class Dialog(object):
 
     def browse(self, type, heading, shares, mask, useThumbs, treatAsFolder, default):
@@ -307,7 +307,7 @@ class Dialog(object):
         """
         log.debug('numeric')
                 
-# =============================================================================
+
 class Control(object):
     
     def __init__(self, type, top, left, width, height):
@@ -348,7 +348,6 @@ class Control(object):
         log.debug('calling Control::controlRight()')
 
 
-# =============================================================================
 class ControlLabel(Control):
 
     def __init__(self, top, left, width, height, text, fontStyle = None, fontColor = None,
@@ -375,7 +374,7 @@ class ControlLabel(Control):
         """
         pass
       
-# =============================================================================
+
 class ControlFadeLabel(Control):
 
     def __init__(self,top, left, width, height, fontStyle, fontColor, alignment):
@@ -396,7 +395,7 @@ class ControlFadeLabel(Control):
         """Clears this fadelabel."""
         pass
       
-# =============================================================================
+
 class ControlButton(Control):
 
     def __init__(self,
@@ -447,7 +446,7 @@ class ControlButton(Control):
         """
         pass
       
-# =============================================================================
+
 class ControlList(Control):
 
     def __init__(self, top, left, width, height, font = "", itemTextXOffset=1, space=1, itemHeight=20):
@@ -602,7 +601,7 @@ class ControlList(Control):
         """
         pass
                               
-# =============================================================================
+
 class ControlImage(Control):
 
     def __init__(self, x, y, width, height, filename, aspectRatio, colorDiffuse):
@@ -643,7 +642,7 @@ class ControlImage(Control):
         """
         pass
       
-# =============================================================================    
+
 class ControlTextBox(Control):
     
     def __init__(self, x, y, w, h, fnt, tcol):
@@ -669,7 +668,7 @@ class ControlTextBox(Control):
         """
         pass
           
-# =============================================================================    
+
 class ControlCheckMark(Control):
     
     def __init__(self, x, y, w, h, l, checkWidth, checkHeight, alignment, textColor):
@@ -715,7 +714,7 @@ class ControlCheckMark(Control):
         """
         pass
     
-# =============================================================================    
+
 class ControlRadioButton(Control):
     
     def __init__(self, x, y, w, h, tx):
@@ -775,13 +774,13 @@ class ControlRadioButton(Control):
         """
         pass
 
-# =============================================================================
+
 class ControlGroup(Control):
     
     def __init(self, x, y, width, height):
         pass
 
-# =============================================================================
+
 class ControlProgress(Control):
 
     def __init__(self, x, y, width, height, texturebg, textureleft, texturemid, textureright, textureoverlay):
@@ -827,7 +826,7 @@ class ControlProgress(Control):
         """
         pass
       
-# =============================================================================
+
 class ListItem(object):
  
     def __init__(self, label = "", label2 = "", iconImage = None, thumbnailImage = None):
