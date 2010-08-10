@@ -567,12 +567,10 @@ def which(program, all=False):
             return list(paths)
     return None
 
-
 try:
     #
     #  XBMC Camelot 9.11
     #
-    import xbmc.Language
     class NativeTranslator(xbmc.Language):
         
         def __init__(self, scriptPath, defaultLanguage=None, *args, **kwargs):
