@@ -26,6 +26,7 @@ import imdb.helpers
 import shove
 import shutil
 import simplejson as json
+import threading
 import tmdb
 import urllib2
 import urllib
@@ -292,11 +293,15 @@ class HttpCachingFanartProvider(BaseFanartProvider):
         BaseFanartProvider.__init__(self, nextProvider)
         self.httpCache = httpCache
         self.workQueue = Queue.Queue()   
-        self.workThread = self.workerBee()
         self.closeRequested = False
+        self.startLock = threading.Event()
+        self.startLock.clear()
+        self.workThread = self.workerBee()
+        self.startLock.wait()
         
     @run_async
     def workerBee(self):
+        self.startLock.set()
         while not self.closeRequested:
             try:
                 if not self.workQueue.empty():
