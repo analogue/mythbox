@@ -632,6 +632,30 @@ class SuperFastFanartProviderTest(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.sandbox, ignore_errors=True)
         
+    def test_cache_consistent_across_sessions(self):
+        sandbox = tempfile.mkdtemp()
+        nextProvider = Mock()
+        platform = Mock()
+        when(platform).getScriptDataDir().thenReturn(sandbox)
+        when(nextProvider).getPosters(any(Program)).thenReturn(['http://a.com/a.gif', 'http://b.com/b.gif', 'http://c.com/c.gif', 'http://d.com/d.gif'])
+        provider = SuperFastFanartProvider(platform, nextProvider)
+
+        programs = []        
+        for i in xrange(1000):
+            program = TVProgram({'title': 'P%d' % i, 'category_type':'series'}, translator=Mock())
+            httpUrls = provider.getPosters(program)
+            self.assertTrue(4, len(httpUrls))
+            programs.append(program)
+        provider.close()
+        
+        nextProvider = Mock()
+        provider2 = SuperFastFanartProvider(platform, nextProvider)
+        for p in programs:
+            httpUrls = provider2.getPosters(p)
+            self.assertTrue(4, len(httpUrls))
+        provider2.close()
+        shutil.rmtree(sandbox, ignore_errors=True)
+    
     def test_getRandomPoster_When_poster_not_in_cache_and_returned_by_next_in_chain_Then_cache_locally_and_return_poster(self):
         # Setup
         when(self.nextProvider).getPosters(any(Program)).thenReturn(['logo.gif'])
