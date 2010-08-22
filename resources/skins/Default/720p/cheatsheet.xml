@@ -18,3 +18,25 @@ http://xbmc.org/wiki/?title=Conditional_Visibility
 
 <aspectratio aligny="center">keep|stretch|scale</aspectratio>
 <label>[B]$INFO[Container(500).ListItem.Property(title)][/B] - $INFO[Container(500).ListItem.Property(description)]</label>
+
+xbmc.executebuiltin('ActivateWindow(xxx)')
+
+fullscreenvideo  -- reset to only video playing
+videoosd         -- player controls
+fullscreeninfo   -- video info at bottom of screen with time bar, tiitle, etc
+
+xbmc.executebuiltin('Action(xxx)')
+
+Up
+Down
+Stop
+Play
+PreviousMenu
+Fullscreen
+
+
+
+WINDOW_FULLSCREEN_VIDEO
+12005
+2005
+VideoFullScreen.xml
