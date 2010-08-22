@@ -8,7 +8,7 @@ Q3. Where are the MythBox configuration settings stored?
 Q4. When is the next release coming out?
 Q5. How do I specify more than one recording directory in the settings?
 Q6. Where can I discuss MythBox online with other MythBox users?
-Q7. (0.22 backend only) When I try to watch Live TV, MythBox starts buffering but then the dialog box disappears and Live TV never starts up.
+Q7. TODO: Placeholder
 Q8. (Linux Only) Why does XBMC act like I pressed a button twice on my remote control when I only pressed it once?
 Q9. Where is the source code?
 Q10. When are you going to add feature <insert your feature here> to MythBox?
@@ -50,8 +50,7 @@ A1. Please file a defect if the issue has not already been identified @
 -------------------------------------------------------------------------------
 Q2. How to I change the log settings?
 
-A2. Tweak the log levels in mythbox_log.ini which is located in the MythBox 
-    script installation directory.
+A2. MythBox -> Settings -> Advanced -> Enabled debug logging 
 
 -------------------------------------------------------------------------------
 Q3. Where are the MythBox configuration settings stored?
@@ -79,13 +78,9 @@ Q6. Where can I discuss MythBox online with other MythBox users?
 A6. Try the XBMC forums @ http://xbmc.org/forum/showthread.php?t=43115
 
 -------------------------------------------------------------------------------
-Q7. (0.22 backend only) When I try to watch Live TV, MythBox starts buffering but 
-    then the dialog box disappears and Live TV never starts up. 
+Q7. TODO: Placeholder 
 
-A7. Increase the size of the Live TV buffer in the MythTV section of the Settings
-    screen. The larger the buffer size, the longer it will take Live TV to start
-    up. Take into account that a HD (High Definition) stream will fill up the 
-    buffer alot quicker than a SD (Standard Definition) stream.
+A7. TODO: Placeholder
 
 -------------------------------------------------------------------------------
 Q8. (Linux Only) Why does XBMC act like I pressed a button twice on my remote
@@ -123,17 +118,17 @@ A9. To checkout the source (assuming you have Mercurial installed):
 -------------------------------------------------------------------------------    
 Q10. When are you going to add feature <insert your feature here> to MythBox?  
      
-A10. If I find the feature compelling enough, there are reasonable chances that
+A10. If I find the feature compelling enough, there is reasonable chance that
      it might make its way into the codebase. If you're technically inclined,
      feel free to submit a patch. High quality patches are always welcome! 
      Otherwise, create an enhancement request on Google Code's issue tracker
-     so that the feature can tracked.
+     so that the feature can be tracked.
 
 -------------------------------------------------------------------------------      
 Q11. What sort of MythTV setup do you use with MythBox? My setup doesn't seem
      to work.
 
-     It is quite possible that you may be having problems getting MythBox working
+     It is quite possible that you may be having problems getting MythBox to work
      if your setup is significantly different from mine.
      
      Master Backend (Athlon 4800+)
@@ -143,7 +138,7 @@ Q11. What sort of MythTV setup do you use with MythBox? My setup doesn't seem
         Recording dirs mounted via NFS
         2 comm flagging slots
              
-     Slave Backend / FrontEnd (Acer Aspire Revo)
+     FrontEnd + Slave Backend (Acer Aspire Revo/NVidia ION)
         Ubuntu Karmic (32bit)
         Hauppauge HD-PVR (capturing @ 1280x720x60fps) 
         DirecTV HD receiver
@@ -153,8 +148,12 @@ Q11. What sort of MythTV setup do you use with MythBox? My setup doesn't seem
         HP MCE Remote
         XBMC 9.11 + VDPAU playback
         
-     FrontEnd (Mac Book - white)
-        Mac OS X 10.5.6
+     Slave Backend (Athlon 4600+)
+       Ubuntu Lucid (32bit)
+       2 comm flagging slots
+        
+     FrontEnd (Mac Book)
+        Mac OS X Snow Leopard
         Wireless 802.11n
         Recording dirs mounted via NFS
         XBMC 9.11
@@ -183,7 +182,7 @@ Q14. How do I fix a 'MySQL connection error 1043 bad handshake' error?
      reset it making sure you select MySQL 4.1+ for 'Password hashing'.
      
 ---------------------------------------------------------------------------------     
-Q15. Q15. How do I fix a 'Connect to MySQL failed: Found EOF after Auth' error?
+Q15. How do I fix a 'Connect to MySQL failed: Found EOF after Auth' error?
 
      1. Edit /etc/mysql/my.cnf and change old_passwords=1 to old_passwords=0
      2. Reset the password for the MythTV database (see Q14) and restart MythBox
