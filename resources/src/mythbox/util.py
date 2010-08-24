@@ -377,6 +377,7 @@ def catchall(func, *args, **kw):
     try:
         return func(*args, **kw)
     except Exception, ex:
+        log.error(sys.exc_info())
         log.exception('CATCHALL: Caught exception %s on method %s' % (str(ex), func))
 
 

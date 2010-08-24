@@ -170,6 +170,7 @@ class SuperFastFanartProvider(BaseFanartProvider):
         #self.imagePathsByKey = shove.Shove('durus://' + os.path.join(platform.getScriptDataDir(), 'superFastFanartProviderDb'))
         self.imagePathsByKey = shove.Shove('file://' + os.path.join(platform.getScriptDataDir(), 'superFastFanartProviderDb'))
         #self.dump()
+        self.nextProvider.parent = self
         
     def dump(self):
         for k,v in self.imagePathsByKey.items():
@@ -185,13 +186,15 @@ class SuperFastFanartProvider(BaseFanartProvider):
             posters = self.nextProvider.getPosters(program)
             if posters:  # cache returned poster 
                 self.imagePathsByKey[key] = posters
+                log.debug('For %s urls for first time and putting in shove' % len(posters))
                 # TODO: Figure out if this is detrimental to performance -- sync on update
                 #       Sometimes throws RuntimeError if iterating while changing.
-                #try:
-                #    self.imagePathsByKey.sync()
-                #except RuntimeError, re:
-                #    pass
+                try:
+                    self.imagePathsByKey.sync()
+                except RuntimeError, re:
+                    pass
         return posters
+    
         
     def hasPosters(self, program):
         return self.createKey('getPosters', program) in self.imagePathsByKey
@@ -205,6 +208,9 @@ class SuperFastFanartProvider(BaseFanartProvider):
         self.imagePathsByKey.clear()
         self.imagePathsByKey.sync()
 
+    def sync(self):
+        self.imagePathsByKey.sync()
+        
     def close(self):
         super(SuperFastFanartProvider, self).close()
         self.imagePathsByKey.sync()
@@ -291,6 +297,7 @@ class HttpCachingFanartProvider(BaseFanartProvider):
     
     def __init__(self, httpCache, nextProvider=None):
         BaseFanartProvider.__init__(self, nextProvider)
+        self.parent = None
         self.httpCache = httpCache
         self.workQueue = Queue.Queue()   
         self.closeRequested = False
@@ -311,7 +318,12 @@ class HttpCachingFanartProvider(BaseFanartProvider):
                 httpUrl = workUnit['httpUrl']
                 filePath = self.tryToCache(httpUrl)
                 if filePath:
+                    log.debug('Adding %s to results of size %d' % (filePath, len(results)))
                     results.append(filePath)
+                    if self.parent:
+                        log.debug('Syncing parent')
+                        self.parent.sync()
+                        self.parent.dump()
             except Queue.Empty:
                 pass
         
@@ -324,24 +336,25 @@ class HttpCachingFanartProvider(BaseFanartProvider):
             posters = self.cachePosters(httpPosters)
         return posters
 
-    def cachePosters(self, httpPosters):
+    def cachePosters(self, httpUrls):
         '''Immediately retrieve the first URL and add the remaining to the 
         work queue so we can return *something* very quickly.
         '''
-        results = []
+        filepaths = []
+        remainingUrls = []
         
-        copyOfPosters = httpPosters[:]
-        
-        for i in xrange(len(httpPosters)):
-            first = self.tryToCache(copyOfPosters.pop())
+        for i in xrange(len(httpUrls)):
+            first = self.tryToCache(httpUrls[i])
             if first:
-                results.append(first)
+                filepaths.append(first)
+                remainingUrls = httpUrls[i:]
                 break                  
         
-        for nextUrl in copyOfPosters:
-            self.workQueue.put({'results' : results, 'httpUrl' : nextUrl })
+        for nextUrl in remainingUrls:
+            httpUrls.remove(nextUrl)
+            self.workQueue.put({'results' : filepaths, 'httpUrl' : nextUrl })
         
-        return results
+        return filepaths
     
     def tryToCache(self, poster):
         if poster and poster[:4] == 'http':
@@ -563,7 +576,8 @@ class FanArt(object):
                         
         #p = CachingFanartProvider(self.httpCache, p)
         p = HttpCachingFanartProvider(self.httpCache, p)
-        self.sffp = p = SuperFastFanartProvider(self.platform, p)
+        #self.sffp = p = SuperFastFanartProvider(self.platform, p)
+        self.sffp = p = PicklingSuperFastFanartProvider(self.platform, p)
         p = SpamSkippingFanartProvider(p)
         self.provider = p
     

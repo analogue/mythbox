@@ -1184,7 +1184,7 @@ class Connection(object):
             try:
                 new = socket.recv(left)
             except Exception, e:
-                #print('left bytes = %d out of %d'  % (left, bytes))
+                wirelog.error('left bytes = %d out of %d'  % (left, bytes))
                 raise e
             if new == '':
                 break # eof
