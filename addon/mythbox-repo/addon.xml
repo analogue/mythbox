@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon 
+    id="repository.mythbox"
+    name="MythBox Repository"
+    version="1.0.0"
+    provider-name="analogue">
+    <extension point="xbmc.addon.metadata">
+        <summary>Install Add-ons from the MythBox repository</summary>
+        <description>Download and install add-ons from the MythBox repository.</description>
+        <disclaimer>Use at your own risk</disclaimer>
+        <platform>all</platform>
+    </extension>
+    <extension point="xbmc.addon.repository"
+        name="MythBox Add-on Repository">
+        <info compressed="true">http://mythbox.googlecode.com/hg/addon/addons.xml</info>
+        <checksum>http://mythbox.googlecode.com/hg/addon/addons.xml.md5</checksum>
+        <datadir zip="true">http://mythbox.googlecode.com/files/</datadir>
+    </extension>
+</addon>

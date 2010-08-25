@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+#
+# Creates a zip file for the MythBox repo addon.
+# Run from the root of script directory, not the bin dir.
+#
+import os, zipfile
+srcdir = 'addon/mythbox-repo'
+zfname = 'repository.mythbox.zip'
+destpath = os.path.join('target', zfname)
+try:
+    os.makedirs('target')
+except OSError:
+    pass
+    
+zf = zipfile.ZipFile(destpath, 'w', compression=zipfile.ZIP_DEFLATED)
+for f in os.listdir(srcdir):
+    fpath = os.path.join(srcdir, f)
+    if os.path.isfile(fpath):
+        print 'Adding %s to %s' % (f, zfname)
+        zf.write(fpath, arcname=f)
+zf.close()
+print 'Created %s' % destpath
