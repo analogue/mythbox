@@ -238,8 +238,8 @@ class HomeWindow(BaseWindow):
             xbmc.log('%s' % str(e))            
         
     def goWatchTv(self):
-        from livetv import LiveTvWindow2 
-        LiveTvWindow2(
+        from mythbox.ui.livetv import LiveTvWindow 
+        LiveTvWindow(
             'mythbox_livetv.xml', 
             os.getcwd(), 
             settings=self.settings, 

@@ -33,7 +33,7 @@ import urllib
 import Queue
 
 from decorator import decorator
-from mythbox.util import synchronized, safe_str, run_async, max_threads
+from mythbox.util import timed, synchronized, safe_str, run_async, max_threads
 from mythbox.bus import Event
 from tvdb_api import Tvdb
 
@@ -238,30 +238,25 @@ class PicklingSuperFastFanartProvider(BaseFanartProvider):
         self.pfile = os.path.join(platform.getScriptDataDir(), 'SuperFastFanartProvider.pickle')
         self.imagePathsByKey = self.loadCache()
         
-    
+    @timed
     def loadCache(self):
-        if os.path.exists(self.pfile):
-            f = open(self.pfile, 'rb')
-            cache = pickle.load(f)
-            if cache is None:
-                log.warn('Pickle file corrupt..starting over')
-                cache = {}
-            f.close()
-        else:
-            cache = {}
+        cache = {}
+        try:
+            if os.path.exists(self.pfile):
+                f = open(self.pfile, 'rb')
+                cache = pickle.load(f)
+                f.close()
+        except:
+            log.exception('Error loading imagePathsByKey from %s' % self.pfile)
         return cache
 
     def saveCache(self):
-        print 'Saving pickle cache'
-        
-        #for k,v in self.imagePathsByKey.items():
-        #    print "%s = %s" % (k,v)
-            
-        f = open(self.pfile, 'wb')
-        print 'Before dump'
-        pickle.dump(self.imagePathsByKey, f)
-        print 'After dump'
-        f.close()
+        try:
+            f = open(self.pfile, 'wb')
+            pickle.dump(self.imagePathsByKey, f)
+            f.close()
+        except:
+            log.exception('Error saving imagePathsbyKey to %s' % self.pfile)
 
     def getPosters(self, program):
         posters = []
@@ -433,7 +428,7 @@ class TvdbFanartProvider(BaseFanartProvider):
                         bannerPath = postersByDimension[dimension][id]['_bannerpath']
                         #log.debug('bannerPath = %s' % bannerPath)
                         posters.append(bannerPath)
-                log.warn('TVDB[%s] = %s' % (len(posters), str(program.title())))
+                log.debug('TVDB[%s] = %s' % (len(posters), str(program.title())))
             except Exception, e:
                 log.error('TVDB errored out on "%s" with error "%s"' % (program.title(), str(e)))
         return posters

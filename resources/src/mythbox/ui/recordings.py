@@ -40,12 +40,12 @@ SORT_BY = odict.odict([
     ('Title', lambda x: '%s%s' % (x.title(), x.originalAirDate())), 
     ('Orig. Air Date', lambda x: x.originalAirDate())])
 
-# ==============================================================================
+
 class RecordingsWindow(BaseWindow):
         
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
-        
+ 
         self.settings = kwargs['settings']
         self.translator = kwargs['translator']
         self.platform = kwargs['platform']
