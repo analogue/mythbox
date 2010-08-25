@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addons>
+    <addon 
+        id="script.mythbox" 
+        name="MythBox" 
+        version="1.0.RC2" 
+        provider-name="analogue@yahoo.com">
+        <requires>
+            <import addon="xbmc.python" version="1.0" />
+        </requires>
+        <extension point="xbmc.python.script" library="default.py" />
+        <provides>executable</provides>
+        <extension point="xbmc.addon.metadata">
+            <platform>all</platform>
+            <summary lang="en">MythBox for XBMC</summary>
+            <description lang="en">MythBox is a MythTV frontend for XBMC</description>
+        </extension>
+    </addon>
+</addons>
