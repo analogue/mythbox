@@ -5,3 +5,4 @@ syntax: regexp
 .*\.pyo$
 ^mythbox\.log$
 ^mythbox_report\.html$
+^target$
