@@ -58,7 +58,6 @@ class Platform(object):
             'IMDbPY', 
             'simplejson', 
             'shove', 
-            'durus',
             'mysql-connector-python',
             'python-twitter',
             'twisted',
