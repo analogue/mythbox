@@ -23,7 +23,7 @@ import os
 import random
 import imdb
 import imdb.helpers
-import shove
+import pickle
 import shutil
 import simplejson as json
 import threading
@@ -33,7 +33,7 @@ import urllib
 import Queue
 
 from decorator import decorator
-from mythbox.util import timed, synchronized, safe_str, run_async, max_threads
+from mythbox.util import synchronized, safe_str, run_async, max_threads
 from mythbox.bus import Event
 from tvdb_api import Tvdb
 
@@ -55,7 +55,7 @@ class BaseFanartProvider(object):
 
     def __init__(self, nextProvider=None):
         self.nextProvider = nextProvider
-        
+
     def getPosters(self, program):
         raise Exception, 'Abstract method'
     
@@ -84,7 +84,44 @@ class NoOpFanartProvider(BaseFanartProvider):
         return None
     
 
-class OneStrikeAndYoureOutFanartProvider(BaseFanartProvider):
+class PersistentFanartProvider(BaseFanartProvider):
+    """Abstract base class which persists a dict (pcache) to disk across sessions"""
+    
+    def __init__(self, nextProvider, pfilename):
+        BaseFanartProvider.__init__(self, nextProvider)
+        self.pfilename = pfilename
+        self.pcache = self.loadCache()
+
+    def loadCache(self):
+        cache = {}
+        try:
+            if os.path.exists(self.pfilename):
+                f = open(self.pfilename, 'rb')
+                cache = pickle.load(f)
+                f.close()
+        except:
+            log.exception('Error loading persistent cache from %s. Starting empty' % self.pfilename)
+        return cache
+
+    def saveCache(self):
+        try:
+            f = open(self.pfilename, 'wb')
+            pickle.dump(self.pcache, f)
+            f.close()
+        except:
+            log.exception('Error saving persistent cache to %s' % self.pfilename)
+
+    def clear(self):
+        super(PersistentFanartProvider, self).clear()
+        self.pcache.clear()
+        self.saveCache()
+            
+    def close(self):
+        super(PersistentFanartProvider, self).close()
+        self.saveCache()
+        
+
+class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
     """
     If a fanart provider can't serve up fanart for a program the first time, 
     chances are it won't succeed on subsequent requests. For instances where
@@ -93,11 +130,12 @@ class OneStrikeAndYoureOutFanartProvider(BaseFanartProvider):
     """
     
     def __init__(self, platform, delegate, nextProvider=None):
-        BaseFanartProvider.__init__(self, nextProvider)
+        PersistentFanartProvider.__init__(self, nextProvider,  
+            os.path.join(platform.getScriptDataDir(), 'onestrike.pickle'))
         if not delegate:
             raise Exception('delegate cannot be None')
         self.delegate = delegate
-        self.struckOut = shove.Shove('file://' + os.path.join(platform.getScriptDataDir(), 'oneStrikeAndYoureOut'))
+        self.struckOut = self.pcache
 
     def createKey(self, method, program):
         return '%s-%s' % (method, md5.new(safe_str(program.title())).hexdigest())
@@ -122,15 +160,12 @@ class OneStrikeAndYoureOutFanartProvider(BaseFanartProvider):
     
     def clear(self):
         super(OneStrikeAndYoureOutFanartProvider, self).clear()
-        self.struckOut.clear()
-        self.struckOut.sync()
         self.delegate.clear()
 
     def close(self):
         super(OneStrikeAndYoureOutFanartProvider, self).close()
-        self.struckOut.close()
         self.delegate.close()
-        
+
 
 class SpamSkippingFanartProvider(BaseFanartProvider):
     """
@@ -154,109 +189,13 @@ class SpamSkippingFanartProvider(BaseFanartProvider):
             return True
         return self.nextProvider.hasPosters(program)
         
-
-class SuperFastFanartProvider(BaseFanartProvider):
-    """
-    A fanart provider that remembers past attempts to lookup fanart and returns
-    locally cached results (fast) instead of hitting the network (slow). This 
-    can be good (super fast) and bad (images may become stale if fanart is updated 
-    in the system of record) but then everything has its trade-offs :-)
-    """
+        
+class SuperFastFanartProvider(PersistentFanartProvider):
     
     def __init__(self, platform, nextProvider=None):
-        BaseFanartProvider.__init__(self, nextProvider)
-        self.platform = platform
-        # TODO: durus craps out when running in xbmc for some reason. file r/w perm related...
-        #self.imagePathsByKey = shove.Shove('durus://' + os.path.join(platform.getScriptDataDir(), 'superFastFanartProviderDb'))
-        self.imagePathsByKey = shove.Shove('file://' + os.path.join(platform.getScriptDataDir(), 'superFastFanartProviderDb'))
-        #self.dump()
-        self.nextProvider.parent = self
-        
-    def dump(self):
-        for k,v in self.imagePathsByKey.items():
-            log.debug('%s %s' % (k, len(v)))
-
-    def getPosters(self, program):
-        posters = []
-        key = self.createKey('getPosters', program)
-        if key in self.imagePathsByKey:
-            posters = self.imagePathsByKey[key]
-        
-        if not posters and self.nextProvider:
-            posters = self.nextProvider.getPosters(program)
-            if posters:  # cache returned poster 
-                self.imagePathsByKey[key] = posters
-                log.debug('For %s urls for first time and putting in shove' % len(posters))
-                # TODO: Figure out if this is detrimental to performance -- sync on update
-                #       Sometimes throws RuntimeError if iterating while changing.
-                try:
-                    self.imagePathsByKey.sync()
-                except RuntimeError, re:
-                    pass
-        return posters
-    
-        
-    def hasPosters(self, program):
-        return self.createKey('getPosters', program) in self.imagePathsByKey
-        
-    def createKey(self, methodName, program):
-        key = '%s-%s' % (methodName, safe_str(program.title()))
-        return key
-    
-    def clear(self):
-        super(SuperFastFanartProvider, self).clear()
-        self.imagePathsByKey.clear()
-        self.imagePathsByKey.sync()
-
-    def sync(self):
-        self.imagePathsByKey.sync()
-        
-    def close(self):
-        super(SuperFastFanartProvider, self).close()
-        self.imagePathsByKey.sync()
-        
-        #self.dump()
-        
-        self.imagePathsByKey.close()
-        #log.debug('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
-        #log.debug('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
-        #log.debug('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
-        
-import pickle
-
-class PicklingSuperFastFanartProvider(BaseFanartProvider):
-    """
-    A fanart provider that remembers past attempts to lookup fanart and returns
-    locally cached results (fast) instead of hitting the network (slow). This 
-    can be good (super fast) and bad (images may become stale if fanart is updated 
-    in the system of record) but then everything has its trade-offs :-)
-    """
-    
-    def __init__(self, platform, nextProvider=None):
-        BaseFanartProvider.__init__(self, nextProvider)
-        self.platform = platform
-        self.pfile = os.path.join(platform.getScriptDataDir(), 'SuperFastFanartProvider.pickle')
-        self.imagePathsByKey = self.loadCache()
-        
-    @timed
-    def loadCache(self):
-        cache = {}
-        try:
-            if os.path.exists(self.pfile):
-                f = open(self.pfile, 'rb')
-                cache = pickle.load(f)
-                f.close()
-        except:
-            log.exception('Error loading imagePathsByKey from %s' % self.pfile)
-        return cache
-
-    def saveCache(self):
-        try:
-            f = open(self.pfile, 'wb')
-            pickle.dump(self.imagePathsByKey, f)
-            f.close()
-        except:
-            log.exception('Error saving imagePathsbyKey to %s' % self.pfile)
+        PersistentFanartProvider.__init__(self, nextProvider,  
+            os.path.join(platform.getScriptDataDir(), 'sffp.pickle'))
+        self.imagePathsByKey = self.pcache
 
     def getPosters(self, program):
         posters = []
@@ -276,17 +215,8 @@ class PicklingSuperFastFanartProvider(BaseFanartProvider):
     def createKey(self, methodName, program):
         key = '%s-%s' % (methodName, safe_str(program.title()))
         return key
-    
-    def clear(self):
-        super(PicklingSuperFastFanartProvider, self).clear()
-        self.imagePathsByKey.clear()
-        self.saveCache()
+
         
-    def close(self):
-        super(PicklingSuperFastFanartProvider, self).close()
-        self.saveCache()
-
-
 class HttpCachingFanartProvider(BaseFanartProvider):
     """Caches images retrieved via http on the local filesystem"""
     
@@ -315,10 +245,6 @@ class HttpCachingFanartProvider(BaseFanartProvider):
                 if filePath:
                     log.debug('Adding %s to results of size %d' % (filePath, len(results)))
                     results.append(filePath)
-                    if self.parent:
-                        log.debug('Syncing parent')
-                        self.parent.sync()
-                        self.parent.dump()
             except Queue.Empty:
                 pass
         
@@ -419,7 +345,6 @@ class TvdbFanartProvider(BaseFanartProvider):
                 # Example: tvdb['scrubs']['_banners']['poster']['680x1000']['35308']['_bannerpath']
                 #posterUrl = self.tvdb[program.title()]['_banners']['poster'].itervalues().next().itervalues().next()['_bannerpath']
                 
-                # TODO: Fix this --  TVDB errored out on "K�nigreich der Himmel" with error "'ascii' codec can't decode byte 0xc3 in position 1: ordinal not in range(128)"
                 postersByDimension = self._queryTvDb(program.title()) 
                 for dimension in postersByDimension.keys():
                     #log.debug('key=%s' % dimension)
@@ -430,7 +355,7 @@ class TvdbFanartProvider(BaseFanartProvider):
                         posters.append(bannerPath)
                 log.debug('TVDB[%s] = %s' % (len(posters), str(program.title())))
             except Exception, e:
-                log.error('TVDB errored out on "%s" with error "%s"' % (program.title(), str(e)))
+                log.warn('TVDB errored out on "%s" with error "%s"' % (program.title(), str(e)))
         return posters
 
     def clear(self):
@@ -569,10 +494,8 @@ class FanArt(object):
         if settings.getBoolean('fanart_tmdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, TheMovieDbFanartProvider(), p)        
         if settings.getBoolean('fanart_tvdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, TvdbFanartProvider(self.platform), p)
                         
-        #p = CachingFanartProvider(self.httpCache, p)
         p = HttpCachingFanartProvider(self.httpCache, p)
-        #self.sffp = p = SuperFastFanartProvider(self.platform, p)
-        self.sffp = p = PicklingSuperFastFanartProvider(self.platform, p)
+        self.sffp = p = SuperFastFanartProvider(self.platform, p)
         p = SpamSkippingFanartProvider(p)
         self.provider = p
     

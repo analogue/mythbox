@@ -16,7 +16,6 @@ resources/lib/themoviedb:\
 resources/lib/IMDbPY:\
 resources/lib/simplejson:\
 resources/lib/feedparser:\
-resources/lib/shove:\
 resources/lib/mysql-connector-python:\
 resources/lib/htmltestrunner:\
 resources/lib/python-twitter:\

@@ -17,22 +17,22 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-import logging
-import shutil
-import tempfile
-import unittest
-import time
-
 from mockito import Mock, when, verify, any, verifyZeroInteractions
 from mythbox.fanart import chain, ImdbFanartProvider, TvdbFanartProvider, \
-    TheMovieDbFanartProvider, GoogleImageSearchProvider, \
-    SuperFastFanartProvider, OneStrikeAndYoureOutFanartProvider ,\
-    SpamSkippingFanartProvider, HttpCachingFanartProvider
+    TheMovieDbFanartProvider, GoogleImageSearchProvider, SuperFastFanartProvider, \
+    OneStrikeAndYoureOutFanartProvider, SpamSkippingFanartProvider, \
+    HttpCachingFanartProvider
+from mythbox.filecache import FileCache, HttpResolver
 from mythbox.mythtv.domain import TVProgram, Program
 from mythbox.util import run_async, safe_str
-from mythbox.filecache import FileCache
-from mythbox.filecache import HttpResolver
+import logging
 import os
+import random
+import shutil
+import tempfile
+import time
+import unittest
+
 
 log = logging.getLogger('mythbox.unittest')
 
@@ -170,15 +170,15 @@ class BaseFanartProviderTestCase(unittest.TestCase):
         @run_async
         def work(p):
             posters = provider.getPosters(p)
-            if not posters:
-                log.debug('Failed on %s' % safe_str(p.title()))
+            if len(posters) == 0:
+                log.exception('Failed on %s' % safe_str(p.title()))
                 self.fail = True
             for poster in posters:
                 log.debug('%s - %s' % (safe_str(p.title()), poster))
 
         self.fail = False
         threads = [] 
-        for p in programs:
+        for p in programs[0:1]:
             threads.append(work(p))
         for t in threads:
             t.join()
@@ -350,7 +350,6 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         for posterUrl in posterUrls:
             self.assertEquals("http", posterUrl[0:4])
 
-
     def test_getPosters_When_title_has_funny_chars_Then_dont_fail_miserably(self):
         # Setup
         program = TVProgram({'title': u'Königreich der Himmel', 'category_type':'series'}, translator=Mock())
@@ -374,7 +373,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         @run_async
         def work(p):
             posters = provider.getPosters(p)
-            if not posters:
+            if len(posters) == 0:
                 self.fail = True
             for poster in posters:
                 log.debug('%s - %s' % (p.title(), poster))
@@ -505,59 +504,6 @@ class GoogleImageSearchProviderTest(BaseFanartProviderTestCase):
             self.assertEquals('http', p[0:4])
 
 
-#class CachingFanartProviderTest(unittest.TestCase):
-#
-#    def setUp(self):
-#        self.nextProvider = Mock()
-#        self.httpCache = Mock()
-#        self.program = TVProgram({'title': 'Two Fat Ladies', 'category_type':'series'}, translator=Mock())
-#        self.provider = CachingFanartProvider(self.httpCache, self.nextProvider)
-#        
-#    def test_getRandomPoster_When_next_link_in_chain_returns_poster_Then_cache_locally_on_filesystem(self):
-#        # Setup
-#        when(self.nextProvider).getPosters(any(Program)).thenReturn(['http://www.google.com/intl/en_ALL/images/logo.gif'])
-#        when(self.httpCache).get(any(str)).thenReturn('logo.gif')
-#        
-#        # Test
-#        posterUrl = self.provider.getRandomPoster(self.program)
-#        
-#        # Verify
-#        log.debug('Poster path = %s' % posterUrl)
-#        self.assertEquals('logo.gif', posterUrl)
-#
-#    def test_getRandomPoster_When_next_link_in_chain_doesnt_find_poster_Then_dont_cache_anything(self):
-#        # Setup
-#        when(self.nextProvider).getPosters(any(Program)).thenReturn([])
-#        
-#        # Test
-#        posterUrl = self.provider.getRandomPoster(self.program)
-#        
-#        # Verify
-#        self.assertTrue(posterUrl is None)
-#
-#    def test_getPosters_When_next_link_in_chain_returns_posters_Then_cache_locally_on_filesystem(self):
-#        # Setup
-#        when(self.nextProvider).getPosters(any(Program)).thenReturn(['http://www.google.com/intl/en_ALL/images/logo.gif'])
-#        when(self.httpCache).get(any(str)).thenReturn('logo.gif')
-#        
-#        # Test
-#        posters = self.provider.getPosters(self.program)
-#        
-#        # Verify
-#        log.debug('Posters= %s' % posters)
-#        self.assertEquals('logo.gif', posters[0])
-#
-#    def test_getPosters_When_next_link_in_chain_doesnt_find_posters_Then_dont_cache_anything(self):
-#        # Setup
-#        when(self.nextProvider).getPosters(any(Program)).thenReturn([])
-#        
-#        # Test
-#        posters = self.provider.getPosters(self.program)
-#        
-#        # Verify
-#        self.assertTrue(len(posters) == 0)
-
-
 class HttpCachingFanartProviderTest(unittest.TestCase):
 
     def setUp(self):
@@ -596,173 +542,29 @@ class HttpCachingFanartProviderTest(unittest.TestCase):
         
         self.provider.close()
         
-#    def test_getPosters_When_next_link_in_chain_returns_posters_Then_cache_locally_on_filesystem(self):
-#        # Setup
-#        when(self.nextProvider).getPosters(any(Program)).thenReturn(['http://www.google.com/intl/en_ALL/images/logo.gif'])
-#        when(self.httpCache).get(any(str)).thenReturn('logo.gif')
-#        
-#        # Test
-#        posters = self.provider.getPosters(self.program)
-#        
-#        # Verify
-#        log.debug('Posters= %s' % posters)
-#        self.assertEquals('logo.gif', posters[0])
-#
-#    def test_getPosters_When_next_link_in_chain_doesnt_find_posters_Then_dont_cache_anything(self):
-#        # Setup
-#        when(self.nextProvider).getPosters(any(Program)).thenReturn([])
-#        
-#        # Test
-#        posters = self.provider.getPosters(self.program)
-#        
-#        # Verify
-#        self.assertTrue(len(posters) == 0)
-
-
-class SuperFastFanartProviderTest(unittest.TestCase):
-
-    def setUp(self):
-        self.sandbox = tempfile.mkdtemp()
-        self.nextProvider = Mock()
-        self.platform = Mock()
-        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
-        self.program = TVProgram({'title': 'Two Fat Ladies', 'category_type':'series'}, translator=Mock())
-        self.provider = SuperFastFanartProvider(self.platform, self.nextProvider)
-
-    def tearDown(self):
-        shutil.rmtree(self.sandbox, ignore_errors=True)
-        
-    def test_cache_consistent_across_sessions(self):
-        sandbox = tempfile.mkdtemp()
-        nextProvider = Mock()
-        platform = Mock()
-        when(platform).getScriptDataDir().thenReturn(sandbox)
-        when(nextProvider).getPosters(any(Program)).thenReturn(['http://a.com/a.gif', 'http://b.com/b.gif', 'http://c.com/c.gif', 'http://d.com/d.gif'])
-        provider = SuperFastFanartProvider(platform, nextProvider)
-
-        programs = []        
-        for i in xrange(1000):
-            program = TVProgram({'title': 'P%d' % i, 'category_type':'series'}, translator=Mock())
-            httpUrls = provider.getPosters(program)
-            self.assertTrue(4, len(httpUrls))
-            programs.append(program)
-        provider.close()
-        
-        nextProvider = Mock()
-        provider2 = SuperFastFanartProvider(platform, nextProvider)
-        for p in programs:
-            httpUrls = provider2.getPosters(p)
-            self.assertTrue(4, len(httpUrls))
-        provider2.close()
-        shutil.rmtree(sandbox, ignore_errors=True)
-    
-    def test_getRandomPoster_When_poster_not_in_cache_and_returned_by_next_in_chain_Then_cache_locally_and_return_poster(self):
+    def test_getPosters_When_next_link_in_chain_returns_posters_Then_cache_locally_on_filesystem(self):
         # Setup
-        when(self.nextProvider).getPosters(any(Program)).thenReturn(['logo.gif'])
-        key = self.provider.createKey('getPosters', self.program)
-        self.assertFalse(key in self.provider.imagePathsByKey)
-                        
-        # Test
-        posterPath = self.provider.getRandomPoster(self.program)
+        when(self.nextProvider).getPosters(any(Program)).thenReturn(['http://www.google.com/intl/en_ALL/images/logo.gif'])
+        when(self.httpCache).get(any(str)).thenReturn('logo.gif')
         
-        # Verify
-        log.debug('Poster path = %s' % posterPath)
-        self.assertEquals('logo.gif', posterPath)
-        self.assertTrue(key in self.provider.imagePathsByKey)
-
-    def test_getRandomPoster_When_next_link_in_chain_doesnt_find_poster_Then_dont_cache_anything(self):
-        # Setup
-        when(self.nextProvider).getPosters(any(Program)).thenReturn([])
-        key = self.provider.createKey('getPosters', self.program)
-        self.assertFalse(key in self.provider.imagePathsByKey)
-                        
-        # Test
-        posterPath = self.provider.getRandomPoster(self.program)
-        
-        # Verify
-        self.assertTrue(posterPath is None)
-        self.assertFalse(key in self.provider.imagePathsByKey)
-
-    def test_getPosters_When_posters_not_in_cache_and_returned_by_next_in_chain_Then_cache_locally_and_return_posters(self):
-        # Setup
-        when(self.nextProvider).getPosters(any(Program)).thenReturn(['logo.gif'])
-        key = self.provider.createKey('getPosters', self.program)
-        self.assertFalse(key in self.provider.imagePathsByKey)
-                        
         # Test
         posters = self.provider.getPosters(self.program)
         
         # Verify
-        log.debug('Posters = %s' % posters)
+        log.debug('Posters= %s' % posters)
         self.assertEquals('logo.gif', posters[0])
-        self.assertTrue(key in self.provider.imagePathsByKey)
 
     def test_getPosters_When_next_link_in_chain_doesnt_find_posters_Then_dont_cache_anything(self):
         # Setup
         when(self.nextProvider).getPosters(any(Program)).thenReturn([])
-        key = self.provider.createKey('getPosters', self.program)
-        self.assertFalse(key in self.provider.imagePathsByKey)
-                        
+        
         # Test
         posters = self.provider.getPosters(self.program)
         
         # Verify
         self.assertTrue(len(posters) == 0)
-        self.assertFalse(key in self.provider.imagePathsByKey)
 
-    def test_createKey_When_program_title_contains_unicode_chars_Then_dont_blow_up(self):
-        program = TVProgram({'title': u'madeleine (Grabación Manual)', 'category_type':'series'}, translator=Mock())
-        key = self.provider.createKey('getPosters', program)
-        self.assertTrue(len(key) > 0)
         
-
-from mythbox.fanart import PicklingSuperFastFanartProvider
-import random
-
-class PicklingSuperFastFanartProviderTest(unittest.TestCase):
-
-    def setUp(self):
-        self.sandbox = tempfile.mkdtemp()
-        self.nextProvider = Mock()
-        self.platform = Mock()
-        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
-        self.program = TVProgram({'title': 'Two Fat Ladies', 'category_type':'series'}, translator=Mock())
-        self.provider = PicklingSuperFastFanartProvider(self.platform, self.nextProvider)
-            
-    def tearDown(self):
-        shutil.rmtree(self.sandbox, ignore_errors=True)
-   
-    @staticmethod
-    def programs(cnt):
-        for i in xrange(cnt):
-            yield TVProgram({
-                'starttime': '20081121140000',
-                'endtime'  : '20081121140000',
-                'chanid'   : random.randint(1,9999999),
-                'channum'  : str(random.randint(1,10)),
-                'title'    : 'Two Fat Ladies %d' % random.randint(1,999999),
-                'subtitle' : 'Away we go....', 
-                'description' : 'blah blah blah', 
-                'category_type':'series'}, 
-                translator=Mock())
-
-    def test_pickling(self):
-        when(self.nextProvider).getPosters(any(Program)).thenReturn(['logo.gif'])
-                        
-        for p in self.programs(20000):
-            posters = self.provider.getPosters(p)
-            #log.debug('%s %s' % (p,posters))
-            #log.debug('cache size = %d' % len(self.provider.imagePathsByKey))
-        self.provider.close()
-        
-        self.provider.loadCache()
-        
-        #for k, v in self.provider.imagePathsByKey.items():
-        #    log.debug('%s %s' % (k,v))
-            
-        log.debug('Pickle file size = %d' % os.path.getsize(self.provider.pfile))
-        
-
 class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
 
     def setUp(self):
@@ -908,7 +710,127 @@ class SpamSkippingFanartProviderTest(unittest.TestCase):
     def test_hasPosters_When_not_spam_Then_forwards_to_next(self):
         when(self.next).hasPosters(any()).thenReturn(False)
         self.assertFalse(self.provider.hasPosters(self.notSpam))
-           
+
+
+class SuperFastFanartProviderTest(unittest.TestCase):
+    
+    def setUp(self):
+        self.sandbox = tempfile.mkdtemp()
+        self.nextProvider = Mock()
+        self.platform = Mock()
+        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
+        self.program = TVProgram({'title': 'Two Fat Ladies', 'category_type':'series'}, translator=Mock())
+        self.provider = SuperFastFanartProvider(self.platform, self.nextProvider)
+
+    def tearDown(self):
+        shutil.rmtree(self.sandbox, ignore_errors=True)
+
+    @staticmethod
+    def programs(cnt):
+        for i in xrange(cnt):
+            yield TVProgram({
+                'starttime': '20081121140000',
+                'endtime'  : '20081121140000',
+                'chanid'   : random.randint(1,9999999),
+                'channum'  : str(random.randint(1,10)),
+                'title'    : 'Two Fat Ladies %d' % random.randint(1,999999),
+                'subtitle' : 'Away we go....', 
+                'description' : 'blah blah blah', 
+                'category_type':'series'}, 
+                translator=Mock())
+
+    def test_pickling(self):
+        when(self.nextProvider).getPosters(any(Program)).thenReturn(['logo.gif'])
+        for p in self.programs(20000):
+            self.provider.getPosters(p)
+        self.provider.close()
+        filesize = os.path.getsize(self.provider.pfilename)
+        log.debug('Pickle file size = %d' % filesize)
+        self.assertTrue(filesize > 0)
+        
+    def test_cache_consistent_across_sessions(self):
+        sandbox = tempfile.mkdtemp()
+        nextProvider = Mock()
+        platform = Mock()
+        when(platform).getScriptDataDir().thenReturn(sandbox)
+        when(nextProvider).getPosters(any(Program)).thenReturn(['http://a.com/a.gif', 'http://b.com/b.gif', 'http://c.com/c.gif', 'http://d.com/d.gif'])
+        provider = SuperFastFanartProvider(platform, nextProvider)
+
+        programs = []        
+        for i in xrange(1000):
+            program = TVProgram({'title': 'P%d' % i, 'category_type':'series'}, translator=Mock())
+            httpUrls = provider.getPosters(program)
+            self.assertTrue(4, len(httpUrls))
+            programs.append(program)
+        provider.close()
+        
+        nextProvider = Mock()
+        provider2 = SuperFastFanartProvider(platform, nextProvider)
+        for p in programs:
+            httpUrls = provider2.getPosters(p)
+            self.assertTrue(4, len(httpUrls))
+        provider2.close()
+        shutil.rmtree(sandbox, ignore_errors=True)
+    
+    def test_getRandomPoster_When_poster_not_in_cache_and_returned_by_next_in_chain_Then_cache_locally_and_return_poster(self):
+        # Setup
+        when(self.nextProvider).getPosters(any(Program)).thenReturn(['logo.gif'])
+        key = self.provider.createKey('getPosters', self.program)
+        self.assertFalse(key in self.provider.imagePathsByKey)
+                        
+        # Test
+        posterPath = self.provider.getRandomPoster(self.program)
+        
+        # Verify
+        log.debug('Poster path = %s' % posterPath)
+        self.assertEquals('logo.gif', posterPath)
+        self.assertTrue(key in self.provider.imagePathsByKey)
+
+    def test_getRandomPoster_When_next_link_in_chain_doesnt_find_poster_Then_dont_cache_anything(self):
+        # Setup
+        when(self.nextProvider).getPosters(any(Program)).thenReturn([])
+        key = self.provider.createKey('getPosters', self.program)
+        self.assertFalse(key in self.provider.imagePathsByKey)
+                        
+        # Test
+        posterPath = self.provider.getRandomPoster(self.program)
+        
+        # Verify
+        self.assertTrue(posterPath is None)
+        self.assertFalse(key in self.provider.imagePathsByKey)
+
+    def test_getPosters_When_posters_not_in_cache_and_returned_by_next_in_chain_Then_cache_locally_and_return_posters(self):
+        # Setup
+        when(self.nextProvider).getPosters(any(Program)).thenReturn(['logo.gif'])
+        key = self.provider.createKey('getPosters', self.program)
+        self.assertFalse(key in self.provider.imagePathsByKey)
+                        
+        # Test
+        posters = self.provider.getPosters(self.program)
+        
+        # Verify
+        log.debug('Posters = %s' % posters)
+        self.assertEquals('logo.gif', posters[0])
+        self.assertTrue(key in self.provider.imagePathsByKey)
+
+    def test_getPosters_When_next_link_in_chain_doesnt_find_posters_Then_dont_cache_anything(self):
+        # Setup
+        when(self.nextProvider).getPosters(any(Program)).thenReturn([])
+        key = self.provider.createKey('getPosters', self.program)
+        self.assertFalse(key in self.provider.imagePathsByKey)
+                        
+        # Test
+        posters = self.provider.getPosters(self.program)
+        
+        # Verify
+        self.assertTrue(len(posters) == 0)
+        self.assertFalse(key in self.provider.imagePathsByKey)
+
+    def test_createKey_When_program_title_contains_unicode_chars_Then_dont_blow_up(self):
+        program = TVProgram({'title': u'madeleine (Grabación Manual)', 'category_type':'series'}, translator=Mock())
+        key = self.provider.createKey('getPosters', program)
+        self.assertTrue(len(key) > 0)
+
 
 if __name__ == '__main__':
     import logging.config

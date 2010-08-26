@@ -17,8 +17,6 @@
 <path>/xbmc-mythtv2/resources/src</path>
 <path>/xbmc-mythtv2/resources/lib/IMDbPY</path>
 <path>/xbmc-mythtv2/resources/lib/simplejson</path>
-<path>/xbmc-mythtv2/resources/lib/shove</path>
-<path>/xbmc-mythtv2/resources/lib/durus</path>
 <path>/xbmc-mythtv2/resources/lib/mysql-connector-python</path>
 <path>/xbmc-mythtv2/resources/lib/htmltestrunner</path>
 <path>/xbmc-mythtv2/resources/lib/feedparser</path>

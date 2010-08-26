@@ -57,11 +57,9 @@ class Platform(object):
             'themoviedb', 
             'IMDbPY', 
             'simplejson', 
-            'shove', 
             'mysql-connector-python',
             'python-twitter',
             'twisted',
-            'pyasn1',
             'zope.interface']
         
         for lib in libs:
