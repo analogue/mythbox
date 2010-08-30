@@ -171,7 +171,7 @@ class HomeWindow(BaseWindow):
         if self.settingsOK:      
             pool.pools['dbPool'] = pool.EvictingPool(MythDatabaseFactory(settings=self.settings, translator=self.translator), maxAgeSecs=10*60, reapEverySecs=10)
             
-            # TODO: Conn pool is non-evicting (I think we have to maintain connections to backends don't go to sleep/suspend)
+            # TODO: Conn pool is non-evicting (I think we have to maintain connections to backends so they don't go to sleep/suspend)
             pool.pools['connPool'] = pool.Pool(ConnectionFactory(settings=self.settings, translator=self.translator, platform=self.platform, bus=self.bus))
         
         if self.settingsOK:

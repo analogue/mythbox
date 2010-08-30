@@ -1,4 +1,4 @@
-XX/XX/2010 - MythBox RC2
+07/30/2010 - MythBox RC2
 =============================
  - new     : Issue 97 - Myth TV hostname and port are now queried directly from the database. Changed to read-only on the Settings->MythTV screen
  - fixed   : Issue 98 - IP addresses are used throughout the codebase. No more host not found errors.
@@ -9,6 +9,8 @@ XX/XX/2010 - MythBox RC2
  - new     : Issue 114 - Hostname added to comm flag status (slave backends only)
  - fixed   : Issue 117 - TV Guide - Clicking on currently playing program launches Create Schedule window instead of starting Live TV 
  - new     : Issue 118 - MythTV 0.23-1 compatibility (Protocol 57)
+ - fixed   : Minor issues here and there
+ - new     : Runs under the forthcoming version of XBMC - Dharma
   
 06/08/2010 - MythBox RC1
 =============================

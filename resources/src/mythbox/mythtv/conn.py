@@ -601,7 +601,7 @@ class Connection(object):
                 s.close()
             except socket.error, se:
                 if backend.slave:
-                    log.error('YYY Slave down, rerouting to master')
+                    log.error('Slave down, rerouting to master')
                     return self.generateThumbnail(program, self.db().getMasterBackend().ipAddress, width, height)
                 else:
                     raise
@@ -1192,13 +1192,9 @@ class Connection(object):
         return b
     
     def _sendMsg(self, s, req):
-        try: 
-            msg = self._buildMsg(req)
-            wirelog.debug('write -> %s' % msg[:80])
-            s.send(msg)
-        except:
-            # TODO: Raise instead?
-            wirelog.exception('Error sending msg over socket')
+        msg = self._buildMsg(req)
+        wirelog.debug('write -> %s' % msg[:80])
+        s.send(msg)
             
     def _sendRequest(self, s, msg):
         self._sendMsg(s, msg)

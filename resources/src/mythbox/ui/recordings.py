@@ -114,6 +114,20 @@ class RecordingsWindow(BaseWindow):
                 except:
                     log.exception('Thumbnail generation for recording %s failed' % program.title())
 
+    @run_async
+    @coalesce
+    def preCacheCommBreaks(self):
+        if self.allPrograms:
+            log.debug('Precaching comm breaks for %d recordings' % len(self.allPrograms))
+            for program in self.programs:
+                if self.closed: 
+                    return
+                try:
+                    if program.isCommFlagged():
+                        program.getCommercials()
+                except:
+                    log.exception('Comm break caching for recording %s failed' % program.title())
+
     @window_busy
     @inject_conn
     def refresh(self):
@@ -125,6 +139,7 @@ class RecordingsWindow(BaseWindow):
         
         self.programs.sort(key=SORT_BY[self.sortBy], reverse=self.sortAscending)
         self.preCacheThumbnails()
+        #self.preCacheCommBreaks()
         self.render()
     
     def applySort(self):
