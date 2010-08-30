@@ -20,6 +20,11 @@ tar czf mythbox_stage.tar.gz \
     --exclude=ondemandconfig.ini \
     --exclude=doc \
     --exclude="trac" \
+    --exclude="addon" \
+    --exclude="mythbox_report.html" \
+    --exclude="./bin" \
+    --exclude="./resources/test" \
+    --exclude="./resources/itest" \
     --transform s/^./MythBox/g .
 
 mkdir -p target
