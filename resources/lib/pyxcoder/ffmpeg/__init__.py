@@ -4,6 +4,8 @@ from ffmpeg.options import Options
 from ffmpeg.options import build_ffmpeg_args
 from ffmpeg.metadata import parse_ffmpeg_metadata
 
+import tempfile
+import os
 
 BUF_SIZE = 4096
 
@@ -14,6 +16,7 @@ class FFMPEG:
         self.ffmpeg = ffmpeg
         self.closeFDs = closeFDs
         self.windows = kwargs.has_key('windows') and kwargs['windows'] == True
+        self.tempdir = kwargs.get('tempdir', tempfile.gettempdir())
         
     def get_metadata(self, input_filename):
         args = build_ffmpeg_args(input_filename)
@@ -21,23 +24,32 @@ class FFMPEG:
         # Nasty windows hack since Popen doesn't work in XBMC for Windows
         #
         if True:
-            import tempfile
-            import os
-            outfile = '%s%s%s' % (tempfile.gettempdir(), os.sep, 'mythbox.out')
-            outfileQuoted = '"' + outfile + '"'
-            print 'outfile = %s' % outfileQuoted
-            #'start /B /WAIT /MIN ' +
+            outfile = os.path.join(self.tempdir, os.path.basename(input_filename)) + '.out'
             
-            if self.windows:
-                # Crappy windows needs extra set of quotes - see Issue 79
-                cmd = '"' + '"' + self.ffmpeg + '"' + ' -i ' + '"' + input_filename + '"' + ' 2>' + outfileQuoted + '"'
+            # 
+            # If output exists from a previous run, use it
+            #
+            if os.path.exists(outfile):
+                print 'Using cached ffmpeg output for %s' % input_filename
             else:
-                cmd = '"' + self.ffmpeg + '"' + ' -i ' + '"' + input_filename + '"' + ' 2>' + outfileQuoted
-             
-            
-            print 'cmd = %s' % cmd
-            result = os.system(cmd)
-            print 'os.system = %s' % result
+                outfileQuoted = '"' + outfile + '"'
+                print 'outfile = %s' % outfileQuoted
+                #'start /B /WAIT /MIN ' +
+                
+                #print 'ffmpeg = %s' % self.ffmpeg
+                #print 'input  = %s' % input_filename
+                #print 'outfile = %s' % outfileQuoted
+                
+                if self.windows:
+                    # Crappy windows needs extra set of quotes - see Issue 79
+                    cmd = '"' + '"' + self.ffmpeg + '"' + ' -i ' + '"' + input_filename + '"' + ' 2>' + outfileQuoted + '"'
+                else:
+                    cmd = '"' + self.ffmpeg + '"' + ' -i ' + '"' + input_filename + '"' + ' 2>' + outfileQuoted
+                
+                print 'cmd = %s' % cmd
+                result = os.system(cmd)
+                print 'os.system = %s' % result
+                    
             child_stderr = open(outfile)
         else:
             (child_stdout, child_stderr) = self.exec_ffmpeg(args)

@@ -963,11 +963,16 @@ class RecordedProgram(Program):
         @note: most recordings are either 29.97 or 59.97
         """
         if not self._fps:
+            
+            ffmpeg_cache_dir=os.path.join(self._platform.getScriptDataDir(), 'cache', 'ffmpeg') 
+            if not os.path.exists(ffmpeg_cache_dir):
+                os.makedirs(ffmpeg_cache_dir)
+                
             ffmpegParser = FFMPEG(
                 ffmpeg=self.settings.get('paths_ffmpeg'),
-                closeFDs=(type(self._platform) != WindowsPlatform),
-                windows=(type(self._platform) == WindowsPlatform))  
-                # WORKAROUND: close_fds borked on windows
+                closeFDs=(type(self._platform) != WindowsPlatform),  # WORKAROUND: close_fds borked on windows
+                windows=(type(self._platform) == WindowsPlatform),   # WORKAROUND: let pyxcoder know we're on windows
+                tempdir=ffmpeg_cache_dir)
             
             try:
                 metadata = ffmpegParser.get_metadata(self.getLocalPath())

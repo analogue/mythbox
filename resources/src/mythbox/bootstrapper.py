@@ -73,8 +73,8 @@ class BootStrapper(object):
     
     def bootstrapPlatform(self):
         self.stage = 'Initializing Platform'
-        from mythbox.platform import getPlatform
-        self.platform = getPlatform()
+        import mythbox.platform
+        self.platform = mythbox.platform.getPlatform()
         self.platform.addLibsToSysPath()
         self.log.debug('Default Check interval: %s' % sys.getcheckinterval())
         sys.setcheckinterval(0)

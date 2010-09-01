@@ -19,6 +19,8 @@
 import datetime
 import logging
 import os
+import shutil
+import tempfile
 import time
 import unittest
 
@@ -229,13 +231,23 @@ class RecordedProgramTest(unittest.TestCase):
         verify(self.conn).getCommercialBreaks(p)
 
     def test_getFrameRate_29point97(self):
-        self.data[8] = "myth://192.168.1.11:6543/movie_29.97_fps.mpg" # filename 
-        self.data[16] = "localhost" # hostname
-        when(self.settings).getRecordingDirs().thenReturn([os.path.join(os.getcwd(), 'resources', 'test')])
-        when(self.platform).getFFMpegExecutableName().thenReturn('ffmpeg')
-        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
-        fps = p.getFrameRate()
-        self.assertEquals(29.97, fps)
+        try:
+            datadir = tempfile.mkdtemp()
+            self.data[8] = "myth://192.168.1.11:6543/movie_29.97_fps.mpg" # filename 
+            self.data[16] = "localhost" # hostname
+            when(self.settings).getRecordingDirs().thenReturn([os.path.join(os.getcwd(), 'resources', 'test')])
+            when(self.settings).get('paths_ffmpeg').thenReturn('ffmpeg')
+            when(self.platform).getScriptDataDir().thenReturn(datadir)
+            
+            # Should invoke ffmpeg
+            p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+            self.assertEquals(29.97, p.getFrameRate())
+            
+            # TODO: Verify ffmpeg executable not invoked again (separate instance of a RecordedProgram)
+            p2 = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+            self.assertEquals(29.97, p2.getFrameRate())            
+        finally:
+            shutil.rmtree(datadir, True)
         
     def test_eq_True_self(self):
         self.data[4]  = "99"

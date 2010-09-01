@@ -44,6 +44,10 @@ def getPlatform():
 
 class Platform(object):
 
+    def __init__(self):
+        # os.getcwd() can and does change @ runtime. retain and use initial value
+        self.cwd = os.getcwd() 
+        
     def addLibsToSysPath(self):
         """
         Add 3rd party libs in ${scriptdir}/resources/lib to the PYTHONPATH
@@ -79,8 +83,8 @@ class Platform(object):
         windows: c:\Documents and Settings\[user]\Application Data\XBMC\scripts\MythBox
         mac    : ~/Library/Application Support/XBMC/scripts/MythBox
         """
-        return os.getcwd()
-
+        return self.cwd
+    
     def getScriptDataDir(self):
         """
         @return: directory for storing user settings for this xbmc script.
