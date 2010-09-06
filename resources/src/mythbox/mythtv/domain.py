@@ -30,7 +30,7 @@ from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, \
     ScheduleType, Upcoming
 from mythbox.platform import WindowsPlatform
 from mythbox.ui.toolkit import showPopup
-from mythbox.util import timed, formatSeconds, formatSize 
+from mythbox.util import timed, formatSeconds, formatSize, synchronized
 from odict import odict
 
 log = logging.getLogger('mythbox.core')
@@ -956,6 +956,7 @@ class RecordedProgram(Program):
         return self.getFilename() + '.png'
 
     @timed
+    @synchronized
     def getFrameRate(self):
         """
         @rtype: float
