@@ -187,4 +187,48 @@
   <string id="167">Record LiveTV Length</string>
   <string id="168">Re-Record</string>
   <string id="169">Play+Skip</string>
+  
+  
+  <!--  Common -->
+  <string id="200">Refresh</string>
+  
+  <!-- Home Screen -->
+  <string id="300">Watch Recordings</string>
+  <string id="301">Watch TV</string>
+  <string id="302">TV Guide</string>
+  <string id="303">Recording Schedules</string>              
+  <string id="304">Upcoming Recordings</string>
+  <string id="305">Settings</string>
+  
+  
+  <!-- Settings Screen -->
+  <string id="400">MySQL DB</string>
+  <string id="401">Hostname</string>
+  <string id="402">Port</string>
+  <string id="403">Database Name</string>
+  <string id="404">User</string>
+  <string id="405">Password</string>
+            
+  <string id="410">MythTV</string>
+  <string id="411">Master Backend Hostname</string>
+  <string id="412">Master Backend Port</string>
+  <string id="413">Local Recording Directory(s)</string>
+  <string id="414">FFMpeg Executable Path</string>
+  <string id="415">Confirm on Delete</string>
+  
+  <string id="420">Fan Art</string>
+  <string id="421">Enable TVDB.com</string>
+  <string id="422">Enable TheMovieDB.org</string>
+  <string id="423">Enable IMDB.com</string>
+  <string id="424">Enable Google Image Search</string>
+  <string id="425">Clear Cache</string>
+  
+  <string id="430">Test Settings</string>
+
+  <string id="440">Advanced</string>
+  
+  <string id="450">XBMC Settings</string>
+    
+  <string id="460">About</string>
+  
 </strings>

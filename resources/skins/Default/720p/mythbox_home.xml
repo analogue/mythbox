@@ -554,7 +554,8 @@
         <animation effect="slide" end="-400,0" start="0,0" time="300" tween="quadratic" easing="out" condition="!Skin.HasSetting(Animate_Skin)">WindowClose</animation>
         
         <control type="button" id="250" >
-            <label>Watch Recordings</label>
+            <description>watch recordings</description>
+            <label>SCRIPT300</label>
             <width>285</width>
             <align>left</align>
             <textoffsetx>40</textoffsetx>
@@ -566,7 +567,8 @@
         </control>
         
         <control type="button" id="251">
-            <label>Watch TV</label>
+            <description>watch tv</description>
+            <label>SCRIPT301</label>
             <width>285</width>
             <align>left</align>
             <textoffsetx>40</textoffsetx>
@@ -577,7 +579,8 @@
         </control>
         
         <control type="button" id="252">
-            <label>TV Guide</label>
+            <description>tv guide</description>     
+            <label>SCRIPT302</label>
             <width>285</width>
             <align>left</align>
             <textoffsetx>40</textoffsetx>
@@ -588,7 +591,8 @@
         </control>
 
         <control type="button" id="253">
-            <label>Recording Schedules</label>
+            <description>recording schedules</description>
+            <label>SCRIPT303</label>
             <width>285</width>
             <align>left</align>
             <textoffsetx>40</textoffsetx>
@@ -599,7 +603,8 @@
         </control>
 
         <control type="button" id="254">
-            <label>Upcoming Recordings</label>
+            <description>upcoming recordings</description>
+            <label>SCRIPT304</label>
             <width>285</width>
             <align>left</align>
             <textoffsetx>40</textoffsetx>
@@ -610,7 +615,8 @@
         </control>
 
         <control type="button" id="256">
-            <label>Settings</label>
+            <description>settings</description>
+            <label>SCRIPT305</label>
             <width>285</width>
             <align>left</align>
             <textoffsetx>40</textoffsetx>
@@ -621,7 +627,8 @@
         </control>
 
         <control type="button" id="255">
-            <label>Refresh</label>
+            <description>refresh</description>
+            <label>SCRIPT200</label>
             <width>285</width>
             <align>left</align>
             <textoffsetx>40</textoffsetx>
@@ -659,39 +666,6 @@
         <wrapmultiline>false</wrapmultiline>
         <label>$INFO[Window.Property(newsfeed)]</label>
     </control>
-
-    <!--
-    
-    <control type="label">
-        <description>rss feed</description>
-        <posx>0</posx>
-        <posy>40r</posy>
-        <width>1280</width>
-        <font>font12</font>
-        <urlset>1</urlset>
-        <textcolor>ffe2ff43</textcolor>
-        <titlecolor>ffe2ff43</titlecolor>
-        <headlinecolor>white</headlinecolor>
-        <visible>system.getbool(lookandfeel.enablerssfeeds)</visible>
-        <visible>true</visible>
-        <include>Window_OpenClose_Animation</include>
-    </control>
-    
-    <control type="rss">
-        <description>rss feed</description>
-        <posx>0</posx>
-        <posy>40r</posy>
-        <width>1280</width>
-        <font>font12</font>
-        <urlset>1</urlset>
-        <textcolor>green</textcolor>
-        <titlecolor>green</titlecolor>
-        <headlinecolor>white</headlinecolor>
-        <visible>system.getbool(lookandfeel.enablerssfeeds)</visible>
-        <visible>true</visible>
-        <include>Window_OpenClose_Animation</include>
-    </control>
-    -->
         
   </controls>
 </window>
