@@ -209,6 +209,7 @@
                 </control>
                 
                 <control type="label">
+                    <description>tuner name</description>
                     <posx>10</posx>
                     <posy>0</posy>
                     <width>200</width>
@@ -218,10 +219,11 @@
                     <selectedcolor>FFe2ff43</selectedcolor>
                     <align>left</align>
                     <aligny>center</aligny>
-                    <label>[B]Tuner[/B]</label>
+                    <label>SCRIPT310</label>
                 </control>
         
                 <control type="label">
+                    <description>tuner status</description>
                     <posx>180</posx>
                     <posy>0</posy>
                     <width>500</width>
@@ -231,7 +233,7 @@
                     <selectedcolor>FFe2ff43</selectedcolor>
                     <align>left</align>
                     <aligny>center</aligny>
-                    <label>[B]Status[/B]</label>
+                    <label>SCRIPT311</label>
                 </control>
         
                 <!-- ============================================= -->
@@ -373,6 +375,7 @@
                 </control>
                 
                 <control type="label">
+                    <description>job name</description>
                     <posx>10</posx>
                     <posy>0</posy>
                     <width>200</width>
@@ -382,9 +385,10 @@
                     <selectedcolor>FFe2ff43</selectedcolor>
                     <align>left</align>
                     <aligny>center</aligny>
-                    <label>[B]Job[/B]</label>
+                    <label>SCRIPT312</label>
                 </control>
                 <control type="label">
+                    <description>Job status</description>
                     <posx>60</posx>
                     <posy>0</posy>
                     <width>500</width>
@@ -394,7 +398,7 @@
                     <selectedcolor>FFe2ff43</selectedcolor>
                     <align>left</align>
                     <aligny>center</aligny>
-                    <label>[B]Status[/B]</label>
+                    <label>SCRIPT311</label>
                 </control>
         
                 <!-- ============================================= -->
@@ -628,7 +632,7 @@
 
         <control type="button" id="255">
             <description>refresh</description>
-            <label>SCRIPT200</label>
+            <label>SCRIPT210</label>
             <width>285</width>
             <align>left</align>
             <textoffsetx>40</textoffsetx>

@@ -352,7 +352,8 @@
             <animation effect="fade" time="200">VisibleChange</animation>
 
             <control type="radiobutton" id="501">
-                <label>Enable lirc hack for repeated button presses</label>
+                <description>Enable lirc hack for repeated button presses</description>
+                <label>SCRIPT441</label>
                 <width>950</width>
                 <height>35</height>
                 <align>left</align>
@@ -368,7 +369,8 @@
             </control>
 
             <control type="radiobutton" id="502">
-                <label>Enable debug logging</label>
+                <description>Enable debug logging</description>
+                <label>SCRIPT442</label>
                 <width>950</width>
                 <height>35</height>
                 <align>left</align>
@@ -383,7 +385,8 @@
             </control>
 
             <control type="button" id="503">
-                <label>Twitter Feeds</label>
+                <description>Twitter Feeds</description>
+                <label>SCRIPT443</label>
                 <width>950</width>
                 <height>35</height>
                 <align>left</align>
@@ -460,7 +463,7 @@
 	    </control>
       
 	    <control type="button">
-	      	<description>help label</description>
+	      	<description>mythtv recording dirs help1</description>
 	      	<posx>300</posx>
 	      	<posy>580</posy>
 	      	<height>50</height>
@@ -469,14 +472,14 @@
 	      	<aligny>center</aligny>
 	      	<font>font12</font>
 	      	<textcolor>ffffffff</textcolor>
-	      	<label>Location of MythTV recordings on the local filesystem (mounted dirs if your backend is remote)</label>
+	      	<label>SCRIPT416</label>
 			<visible>Control.HasFocus(205)</visible>
 			<texturenofocus>-</texturenofocus>
             <animation effect="fade" time="200">VisibleChange</animation>
 	    </control>
 	    
 	    <control type="button">
-	      	<description>help label</description>
+	      	<description>mythtv recording dirs help2</description>
 	      	<posx>300</posx>
 	      	<posy>610</posy>
 	      	<height>50</height>
@@ -485,14 +488,14 @@
 	      	<aligny>center</aligny>
 	      	<font>font12</font>
 	      	<textcolor>ffffffff</textcolor>
-	      	<label>Multiple directories can be separated with a colon on Linux/Mac or a semi-colon on Windows</label>
+	      	<label>SCRIPT417</label>
 			<visible>Control.HasFocus(205)</visible>
 			<texturenofocus>-</texturenofocus>
             <animation effect="fade" time="200">VisibleChange</animation>
 	    </control>
 
 	    <control type="button">
-	      	<description>help label</description>
+	      	<description>ffmpeg help</description>
 	      	<posx>300</posx>
 	      	<posy>580</posy>
 	      	<height>50</height>
@@ -501,14 +504,14 @@
 	      	<aligny>center</aligny>
 	      	<font>font12</font>
 	      	<textcolor>ffffffff</textcolor>
-	      	<label>FFMpeg comes bundled with MythBox for Mac and Windows.  Linux users must 'apt-get install ffmpeg'</label>
+	      	<label>SCRIPT418</label>
 			<visible>Control.HasFocus(209)</visible>
 			<texturenofocus>-</texturenofocus>
             <animation effect="fade" time="200">VisibleChange</animation>
 	    </control>
 
 	    <control type="button">
-	      	<description>help label</description>
+	      	<description>mysql port help</description>
 	      	<posx>300</posx>
 	      	<posy>580</posy>
 	      	<height>50</height>
@@ -517,14 +520,14 @@
 	      	<aligny>center</aligny>
 	      	<font>font12</font>
 	      	<textcolor>ffffffff</textcolor>
-	      	<label>Default port is 3306</label>
+	      	<label>SCRIPT406</label>
 			<visible>Control.HasFocus(302)</visible>
 			<texturenofocus>-</texturenofocus>
             <animation effect="fade" time="200">VisibleChange</animation>
 	    </control>
 
 	    <control type="button">
-	      	<description>help label</description>
+	      	<description>mysql dbname help</description>
 	      	<posx>300</posx>
 	      	<posy>580</posy>
 	      	<height>50</height>
@@ -533,14 +536,14 @@
 	      	<aligny>center</aligny>
 	      	<font>font12</font>
 	      	<textcolor>ffffffff</textcolor>
-	      	<label>Default database name is mythconverg</label>
+	      	<label>SCRIPT407</label>
 			<visible>Control.HasFocus(303)</visible>
 			<texturenofocus>-</texturenofocus>
             <animation effect="fade" time="200">VisibleChange</animation>
 	    </control>
 
 	    <control type="button">
-	      	<description>help label</description>
+	      	<description>mysql user help</description>
 	      	<posx>300</posx>
 	      	<posy>580</posy>
 	      	<height>50</height>
@@ -549,14 +552,14 @@
 	      	<aligny>center</aligny>
 	      	<font>font12</font>
 	      	<textcolor>ffffffff</textcolor>
-	      	<label>Default user is mythtv</label>
+	      	<label>SCRIPT408</label>
 			<visible>Control.HasFocus(304)</visible>
 			<texturenofocus>-</texturenofocus>
             <animation effect="fade" time="200">VisibleChange</animation>
 	    </control>
 
         <control type="button">
-            <description>help label</description>
+            <description>lirc hack help1</description>
             <posx>300</posx>
             <posy>580</posy>
             <height>50</height>
@@ -565,14 +568,14 @@
             <aligny>center</aligny>
             <font>font12</font>
             <textcolor>ffffffff</textcolor>
-            <label>If you're using a remote control with lirc and sometimes get two button events instead of just one</label>
+            <label>SCRIPT444</label>
             <visible>Control.HasFocus(501)</visible>
             <texturenofocus>-</texturenofocus>
             <animation effect="fade" time="200">VisibleChange</animation>
         </control>
 
         <control type="button">
-            <description>help label</description>
+            <description>lirc hack help2</description>
             <posx>300</posx>
             <posy>610</posy>
             <height>50</height>
@@ -581,14 +584,14 @@
             <aligny>center</aligny>
             <font>font12</font>
             <textcolor>ffffffff</textcolor>
-            <label>then enable this workaround to consume the extra event.</label>
+            <label>SCRIPT445</label>
             <visible>Control.HasFocus(501)</visible>
             <texturenofocus>-</texturenofocus>
             <animation effect="fade" time="200">VisibleChange</animation>
         </control>
 
         <control type="button">
-            <description>help label</description>
+            <description>twitter help</description>
             <posx>300</posx>
             <posy>580</posy>
             <height>50</height>
@@ -597,7 +600,7 @@
             <aligny>center</aligny>
             <font>font12</font>
             <textcolor>ffffffff</textcolor>
-            <label>Comma separated list of public Twitter names. Try some: cnnbrk, woot, thelittleidiot, wired, current... </label>
+            <label>SCRIPT446</label>
             <visible>Control.HasFocus(503)</visible>
             <texturenofocus>-</texturenofocus>
             <animation effect="fade" time="200">VisibleChange</animation>
@@ -637,7 +640,7 @@
       <align>right</align>
       <aligny>center</aligny>
       <textcolor>ffffffff</textcolor>
-      <label>[B]Settings[/B]</label>
+      <label>SCRIPT295</label>
       <animation effect="fade" time="200">WindowOpen</animation>
       <animation effect="fade" time="200">WindowClose</animation>
     </control>

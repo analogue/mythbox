@@ -190,7 +190,15 @@
   
   
   <!--  Common -->
-  <string id="200">Refresh</string>
+  <string id="210">Refresh</string>
+
+  <!-- Screen Titles -->
+  <string id="290">[B]Watch Recordings[/B]</string>
+  <string id="291">[B]Watch TV[/B]</string>
+  <string id="292">[B]TV Guide[/B]</string>
+  <string id="293">[B]Recording Schedules[/B]</string>              
+  <string id="294">[B]Upcoming Recordings[/B]</string>
+  <string id="295">[B]Settings[/B]</string>
   
   <!-- Home Screen -->
   <string id="300">Watch Recordings</string>
@@ -200,6 +208,9 @@
   <string id="304">Upcoming Recordings</string>
   <string id="305">Settings</string>
   
+  <string id="310">[B]Tuner[/B]</string>
+  <string id="311">[B]Status[/B]</string>
+  <string id="312">[B]Job[/B]</string>
   
   <!-- Settings Screen -->
   <string id="400">MySQL DB</string>
@@ -208,6 +219,9 @@
   <string id="403">Database Name</string>
   <string id="404">User</string>
   <string id="405">Password</string>
+  <string id="406">Default port is 3306</string>
+  <string id="407">Default database name is mythconverg</string>
+  <string id="408">Default user is mythtv</string>
             
   <string id="410">MythTV</string>
   <string id="411">Master Backend Hostname</string>
@@ -215,6 +229,9 @@
   <string id="413">Local Recording Directory(s)</string>
   <string id="414">FFMpeg Executable Path</string>
   <string id="415">Confirm on Delete</string>
+  <string id="416">Location of MythTV recordings on the local filesystem (mounted storage group dirs if your backend is remote).</string>
+  <string id="417">Multiple directories can be separated with a colon on Linux/Mac or a semi-colon on Windows.</string>
+  <string id="418">FFMpeg comes bundled with MythBox for Mac and Windows.  Linux users must 'apt-get install ffmpeg'</string>
   
   <string id="420">Fan Art</string>
   <string id="421">Enable TVDB.com</string>
@@ -226,9 +243,17 @@
   <string id="430">Test Settings</string>
 
   <string id="440">Advanced</string>
+  <string id="441">Enable lirc hack for repeated button presses</string>
+  <string id="442">Enable debug logging</string>
+  <string id="443">Twitter Feeds</string>
+  <string id="444">If you're using a remote control with lirc and sometimes get two button events instead of just one</string>
+  <string id="445">then enable this workaround to consume the extra event.</string>
+  <string id="446">Comma separated list of public Twitter names. Try some: cnnbrk, woot, thelittleidiot, wired, current...</string> 
   
   <string id="450">XBMC Settings</string>
     
   <string id="460">About</string>
+
+
   
 </strings>
