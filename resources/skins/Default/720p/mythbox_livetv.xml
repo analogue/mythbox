@@ -8,16 +8,6 @@
     <posy>0</posy>
   </coordinates>
 
-<!--<colors>-->
-<!--    <color name="white">FFFFFFFF</color>-->
-<!--    <color name="grey">66FFFFFF</color>-->
-<!--    <color name="grey2">88FFFFFF</color>-->
-<!--    <color name="grey3">33FFFFFF</color>-->
-<!--    <color name="black">FF000000</color>-->
-<!--    <color name="green">ffe2ff43</color>-->
-<!--    <color name="dialogheader">DDced8da</color>-->
-<!--</colors>-->
-
   <controls>
 
     <!-- ============================================= -->
@@ -338,7 +328,7 @@
       <align>right</align>
       <aligny>center</aligny>
       <textcolor>ffffffff</textcolor>
-      <label>[B]Watch TV[/B]</label>
+      <label>SCRIPT700</label>
       <animation effect="fade" time="200">WindowOpen</animation>
       <animation effect="fade" time="200">WindowClose</animation>
     </control>
@@ -380,7 +370,7 @@
           
           <control type="button" id="250">
               <description>Refresh button</description>
-              <label>Refresh</label>
+              <label>SCRIPT210</label>
               <width>285</width>
               <align>left</align>
               <textoffsetx>40</textoffsetx>

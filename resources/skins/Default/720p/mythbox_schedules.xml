@@ -8,16 +8,6 @@
     <posy>0</posy>
   </coordinates>
 
-<!--<colors>-->
-<!--    <color name="white">FFFFFFFF</color>-->
-<!--    <color name="grey">66FFFFFF</color>-->
-<!--    <color name="grey2">88FFFFFF</color>-->
-<!--    <color name="grey3">33FFFFFF</color>-->
-<!--    <color name="black">FF000000</color>-->
-<!--    <color name="green">ffe2ff43</color>-->
-<!--    <color name="dialogheader">DDced8da</color>-->
-<!--</colors>-->
-
   <controls>
 
     <!-- ============================================= -->
@@ -68,6 +58,7 @@
         </control>
 
         <control type="label">
+            <description>title</description>
             <posx>325</posx>
             <posy>140</posy>
             <width>340</width>
@@ -77,10 +68,11 @@
             <selectedcolor>FFe2ff43</selectedcolor>
             <align>left</align>
             <aligny>center</aligny>
-            <label>[B]Title[/B]</label>
+            <label>SCRIPT901</label>
         </control>
 
         <control type="label">
+            <description>type</description>
             <posx>690</posx>
             <posy>140</posy>
             <width>150</width>
@@ -90,10 +82,11 @@
             <selectedcolor>FFe2ff43</selectedcolor>
             <align>left</align>
             <aligny>center</aligny>
-            <label>[B]Type[/B]</label>
+            <label>SCRIPT902</label>
         </control>
 
         <control type="label">
+            <description>priority</description>
             <posx>825</posx>
             <posy>140</posy>
             <width>100</width>
@@ -103,10 +96,11 @@
             <selectedcolor>FFe2ff43</selectedcolor>
             <align>left</align>
             <aligny>center</aligny>
-            <label>[B]Priority[/B]</label>
+            <label>SCRIPT903</label>
         </control>
 
         <control type="label">
+            <description>channel</description>
             <posx>965</posx>
             <posy>140</posy>
             <width>240</width>
@@ -116,7 +110,7 @@
             <selectedcolor>FFe2ff43</selectedcolor>
             <align>left</align>
             <aligny>center</aligny>
-            <label>[B]Channel[/B]</label>
+            <label>SCRIPT904</label>
         </control>
 
         <!-- ============================================= -->
@@ -322,21 +316,6 @@
     </control>
 
     <control type="label">
-        <description>screen label 1</description>
-        <posx>390</posx>
-        <posy>55</posy>
-        <width>400</width>
-        <height>35</height>
-        <align>left</align>
-        <aligny>center</aligny>
-        <textcolor>ffffffff</textcolor>
-        <label>Upcoming Recordings</label>
-        <animation effect="fade" time="200">WindowOpen</animation>
-        <animation effect="fade" time="200">WindowClose</animation>
-        <visible>false</visible>
-    </control>
-
-    <control type="label">
         <description>screen title</description>
         <posx>70r</posx>
         <posy>25</posy>
@@ -345,7 +324,7 @@
         <align>right</align>
         <aligny>center</aligny>
         <textcolor>ffddddff</textcolor>
-        <label>[B]Recording Schedules[/B]</label>
+        <label>SCRIPT900</label>
         <animation effect="fade" time="200">WindowOpen</animation>
         <animation effect="fade" time="200">WindowClose</animation>
     </control>
@@ -403,7 +382,7 @@
             
             <control type="button" id="250">
                 <description>Refresh button</description>
-                <label>Refresh</label>
+                <label>SCRIPT210</label>
                 <width>285</width>
                 <align>left</align>
                 <textoffsetx>40</textoffsetx>

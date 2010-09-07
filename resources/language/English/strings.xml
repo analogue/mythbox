@@ -195,10 +195,6 @@
   <string id="212">[B]Title[/B]</string>
 
   <!-- Screen Titles -->
-  <string id="291">[B]Watch TV[/B]</string>
-  <string id="292">[B]TV Guide[/B]</string>
-  <string id="293">[B]Recording Schedules[/B]</string>              
-  <string id="294">[B]Upcoming Recordings[/B]</string>
   <string id="295">[B]Settings[/B]</string>
 
   
@@ -237,7 +233,30 @@
   <string id="616">Size</string>
   <string id="617">Comm Breaks</string>
   
-  <string id="620"></string>
+
+  <!-- Watch TV Screen -->
+  <string id="700">[B]Watch TV[/B]</string>
+
+
+  <!-- TV Guide Screen -->
+  <string id="800">[B]TV Guide[/B]</string>
+
+
+  <!-- Recording Schedules Screen -->
+  <string id="900">[B]Recording Schedules[/B]</string>
+  <string id="901">[B]Title[/B]</string>
+  <string id="902">[B]Type[/B]</string>
+  <string id="903">[B]Priority[/B]</string>
+  <string id="904">[B]Channel[/B]</string>
+    
+  
+  <!-- Upcoming Recording Screen -->
+  <string id="1000">[B]Upcoming Recordings[/B]</string>
+  <string id="1001">[B]Date[/B]</string>
+  <string id="1002">[B]Title[/B]</string>
+  <string id="1003">[B]Start Time[/B]</string>
+  <string id="1004">[B]Channel[/B]</string>
+  <string id="1005">[B]Tuner[/B]</string>
   
   
   <!-- Settings Screen -->

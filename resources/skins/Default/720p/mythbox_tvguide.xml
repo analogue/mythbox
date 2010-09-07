@@ -141,7 +141,7 @@
       <align>right</align>
       <aligny>center</aligny>
       <textcolor>ffffffff</textcolor>
-      <label>[B]TV Guide[/B]</label>
+      <label>SCRIPT800</label>
       <animation effect="fade" time="200">WindowOpen</animation>
       <animation effect="fade" time="200">WindowClose</animation>
     </control>

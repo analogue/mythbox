@@ -8,17 +8,6 @@
     <posy>0</posy>
   </coordinates>
 
-<!--<colors>-->
-<!--    <color name="white">FFFFFFFF</color>-->
-<!--    <color name="grey">66FFFFFF</color>-->
-<!--    <color name="grey2">88FFFFFF</color>-->
-<!--    <color name="grey3">33FFFFFF</color>-->
-<!--    <color name="black">FF000000</color>-->
-<!--    <color name="green">ffe2ff43</color>-->
-<!--    <color name="dialogheader">DDced8da</color>-->
-<!--    lavender 0xffddddff -->
-<!--</colors>-->
-
   <controls>
 
     <!-- ============================================= -->
@@ -69,6 +58,7 @@
         </control>
         
         <control type="label">
+            <description>date</description>
             <posx>325</posx>
             <posy>140</posy>
             <width>200</width>
@@ -78,10 +68,11 @@
             <selectedcolor>FFe2ff43</selectedcolor>
             <align>left</align>
             <aligny>center</aligny>
-            <label>[B]Date[/B]</label>
+            <label>SCRIPT1001</label>
         </control>
 
         <control type="label">
+            <description>title</description>
             <posx>465</posx>
             <posy>140</posy>
             <width>200</width>
@@ -91,10 +82,11 @@
             <selectedcolor>FFe2ff43</selectedcolor>
             <align>left</align>
             <aligny>center</aligny>
-            <label>[B]Title[/B]</label>
+            <label>SCRIPT1002</label>
         </control>
 
         <control type="label">
+            <description>start time</description>
             <posx>815</posx>
             <posy>140</posy>
             <width>500</width>
@@ -104,10 +96,11 @@
             <selectedcolor>FFe2ff43</selectedcolor>
             <align>left</align>
             <aligny>center</aligny>
-            <label>[B]Start Time[/B]</label>
+            <label>SCRIPT1003</label>
         </control>
 
         <control type="label">
+            <description>channel</description>
             <posx>1015</posx>
             <posy>140</posy>
             <width>100</width>
@@ -117,10 +110,11 @@
             <selectedcolor>FFe2ff43</selectedcolor>
             <align>left</align>
             <aligny>center</aligny>
-            <label>[B]Channel[/B]</label>
+            <label>SCRIPT1004</label>
         </control>
 
         <control type="label">
+            <description>tuner</description>
             <posx>1145</posx>
             <posy>140</posy>
             <width>140</width>
@@ -130,7 +124,7 @@
             <selectedcolor>FFe2ff43</selectedcolor>
             <align>left</align>
             <aligny>center</aligny>
-            <label>[B]Tuner[/B]</label>
+            <label>SCRIPT1005</label>
         </control>
 
         <!-- ============================================= -->
@@ -465,21 +459,6 @@
     </control>
 
     <control type="label">
-      <description>screen label 1</description>
-      <posx>390</posx>
-      <posy>55</posy>
-      <width>400</width>
-      <height>35</height>
-      <align>left</align>
-      <aligny>center</aligny>
-      <textcolor>ffffffff</textcolor>
-      <label>Upcoming Recordings</label>
-      <animation effect="fade" time="200">WindowOpen</animation>
-      <animation effect="fade" time="200">WindowClose</animation>
-      <visible>false</visible>
-    </control>
-
-    <control type="label">
       <description>screen title</description>
       <posx>70r</posx>
       <posy>25</posy>
@@ -488,7 +467,7 @@
       <align>right</align>
       <aligny>center</aligny>
       <textcolor>ffffffff</textcolor>
-      <label>[B]Upcoming Recordings[/B]</label>
+      <label>SCRIPT1000</label>
       <animation effect="fade" time="200">WindowOpen</animation>
       <animation effect="fade" time="200">WindowClose</animation>
     </control>
@@ -526,7 +505,7 @@
             <onright>600</onright>
             <control type="button" id="250">
                 <description>Refresh button</description>
-                <label>Refresh</label>
+                <label>SCRIPT210</label>
                 <width>285</width>
                 <align>left</align>
                 <textoffsetx>40</textoffsetx>
@@ -574,7 +553,7 @@
 <!-- Footer -->        
 
     <control type="label">
-        <posx>20r</posx>
+        <posx>195r</posx>
         <posy>50r</posy>
         <!--<width>200</width>-->
         <height>35</height>
