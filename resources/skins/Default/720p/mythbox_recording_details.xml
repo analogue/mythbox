@@ -53,12 +53,12 @@
             <posx>320</posx>
             <posy>135</posy>
             <itemgap>32</itemgap>
-            <control type="label"><label>Title</label></control>
-            <control type="label"><label>Description</label></control>
+            <control type="label"><description>title</description><label>SCRIPT610</label></control>
+            <control type="label"><description>desc</description><label>SCRIPT611</label></control>
             
-            <control type="label"><label>Air Date</label></control>
-            <control type="label"><label>Channel</label></control>
-            <control type="label"><label>Category</label></control>
+            <control type="label"><description>air date</description><label>SCRIPT612</label></control>
+            <control type="label"><description>channel</description><label>SCRIPT613</label></control>
+            <control type="label"><description>category</description><label>SCRIPT614</label></control>
         </control>
 
         <control type="grouplist" id="3001">
@@ -68,9 +68,9 @@
             <itemgap>32</itemgap>
             <control type="label"><label>-</label></control>  <!-- spacing -->
             <control type="label"><label>-</label></control>  <!-- spacing -->
-            <control type="label"><label>Orig. Air Date</label></control>
-            <control type="label"><label>Size</label></control>
-            <control type="label"><label>Comm Breaks</label></control>
+            <control type="label"><description>orignal air date</description><label>SCRIPT615</label></control>
+            <control type="label"><description>size</description><label>SCRIPT616</label></control>
+            <control type="label"><description>comm breaks</description><label>SCRIPT617</label></control>
         </control>
 
         <!-- ============================================= -->
@@ -205,7 +205,7 @@
       <align>right</align>
       <aligny>center</aligny>
       <textcolor>ffffffff</textcolor>
-      <label>[B]Recording Details[/B]</label>
+      <label>SCRIPT600</label>
       <animation effect="fade" time="200">WindowOpen</animation>
       <animation effect="fade" time="200">WindowClose</animation>
     </control>
@@ -244,7 +244,7 @@
         
         <control type="button" id="250" >
             <description>Play button</description>
-            <label>Play</label>
+            <label>SCRIPT601</label>
             <width>285</width>
             <align>left</align>
             <textoffsetx>40</textoffsetx>
@@ -256,7 +256,7 @@
         
         <control type="button" id="251">
             <description>Play+Skip button</description>
-            <label>Play+Skip</label>
+            <label>SCRIPT602</label>
             <width>285</width>
             <align>left</align>
             <textoffsetx>40</textoffsetx>
@@ -267,7 +267,7 @@
         
         <control type="button" id="252">
             <description>Delete button</description>
-            <label>Delete</label>
+            <label>SCRIPT603</label>
             <width>285</width>
             <align>left</align>
             <textoffsetx>40</textoffsetx>
@@ -278,7 +278,7 @@
 
         <control type="button" id="253">
             <description>Re-Record button</description>
-            <label>Re-Record</label>
+            <label>SCRIPT604</label>
             <width>285</width>
             <align>left</align>
             <textoffsetx>40</textoffsetx>
@@ -288,7 +288,8 @@
         </control>
 
         <control type="button" id="256">
-            <label>Edit Schedule</label>
+            <description>edit schedule</description>
+            <label>SCRIPT605</label>
             <width>285</width>
             <align>left</align>
             <textoffsetx>40</textoffsetx>
@@ -299,7 +300,7 @@
 
         <control type="button" id="254">
             <description>Move to first job in Queue Button</description>
-            <label>Front of Queue</label>
+            <label>SCRIPT606</label>
             <width>285</width>
             <align>left</align>
             <textoffsetx>40</textoffsetx>
@@ -310,7 +311,7 @@
 
         <control type="button" id="255">
             <description>Refresh button</description>
-            <label>Refresh</label>
+            <label>SCRIPT210</label>
             <width>285</width>
             <align>left</align>
             <textoffsetx>40</textoffsetx>
@@ -353,7 +354,7 @@
     </control>
 
     <control type="label">
-        <posx>20r</posx>
+        <posx>195r</posx>
         <posy>50r</posy>
         <!--<width>200</width>-->
         <height>35</height>

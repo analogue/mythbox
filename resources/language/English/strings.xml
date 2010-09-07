@@ -195,7 +195,6 @@
   <string id="212">[B]Title[/B]</string>
 
   <!-- Screen Titles -->
-  <string id="290">[B]Recordings[/B]</string>
   <string id="291">[B]Watch TV[/B]</string>
   <string id="292">[B]TV Guide[/B]</string>
   <string id="293">[B]Recording Schedules[/B]</string>              
@@ -217,16 +216,29 @@
 
 
   <!-- Watch Recordings Screen -->
-  <string id="500">MySQL DB</string>
-  <string id="501">Hostname</string>
-  <string id="502">Port</string>
-  <string id="503">Database Name</string>
-  <string id="504">User</string>
-  <string id="505">Password</string>
-  <string id="506">Default port is 3306</string>
-  <string id="507">Default database name is mythconverg</string>
-  <string id="508">Default user is mythtv</string>
+  <string id="500">[B]Recordings[/B]</string>
 
+
+  <!-- Recording Details Screen -->
+  <string id="600">[B]Recording Details[/B]</string>
+  <string id="601">Play</string>
+  <string id="602">Play + Skip</string>
+  <string id="603">Delete</string>
+  <string id="604">Re-Record</string>
+  <string id="605">Edit Schedule</string>
+  <string id="606">Front of Queue</string>
+  
+  <string id="610">Title</string>
+  <string id="611">Description</string>
+  <string id="612">Air Date</string>
+  <string id="613">Channel</string>
+  <string id="614">Category</string>
+  <string id="615">Orig. Air Date</string>
+  <string id="616">Size</string>
+  <string id="617">Comm Breaks</string>
+  
+  <string id="620"></string>
+  
   
   <!-- Settings Screen -->
   <string id="400">MySQL DB</string>
