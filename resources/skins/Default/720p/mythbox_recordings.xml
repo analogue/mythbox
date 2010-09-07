@@ -8,16 +8,6 @@
     <posy>0</posy>
   </coordinates>
 
-<!--<colors>-->
-<!--    <color name="white">FFFFFFFF</color>-->
-<!--    <color name="grey">66FFFFFF</color>-->
-<!--    <color name="grey2">88FFFFFF</color>-->
-<!--    <color name="grey3">33FFFFFF</color>-->
-<!--    <color name="black">FF000000</color>-->
-<!--    <color name="green">ffe2ff43</color>-->
-<!--    <color name="dialogheader">DDced8da</color>-->
-<!--</colors>-->
-
   <controls>
 
     <!-- ============================================= -->
@@ -95,6 +85,7 @@
         </control>
         
         <control type="label">
+            <descriptin>date</descriptin>
             <posx>325</posx>
             <posy>140</posy>
             <width>340</width>
@@ -104,10 +95,11 @@
             <selectedcolor>FFe2ff43</selectedcolor>
             <align>left</align>
             <aligny>center</aligny>
-            <label>[B]Date[/B]</label>
+            <label>SCRIPT211</label>
         </control>
 
         <control type="label">
+            <description>title</description>
             <posx>520</posx>
             <posy>140</posy>
             <width>150</width>
@@ -117,7 +109,7 @@
             <selectedcolor>FFe2ff43</selectedcolor>
             <align>left</align>
             <aligny>center</aligny>
-            <label>[B]Title[/B]</label>
+            <label>SCRIPT212</label>
         </control>
 
 <!--  Programs Listbox -->
@@ -142,6 +134,7 @@
             <itemlayout height="30">
 
                 <control type="label">
+                    <descriptino>list item date and time</descriptino>
                     <posx>10</posx>
                     <posy>0</posy>
                     <width>340</width>
@@ -155,6 +148,7 @@
                 </control>
 
                 <control type="label">
+                    <description>list item title</description>
                     <posx>200</posx>
                     <posy>0</posy>
                     <width>790</width>
@@ -189,6 +183,7 @@
                 </control>
             
                 <control type="label">
+                    <description>list item date and time</description>
                     <posx>10</posx>
                     <posy>0</posy>
                     <width>340</width>
@@ -202,6 +197,7 @@
                 </control>
 
                 <control type="label">
+                    <description>list item title</description>
                     <posx>200</posx>
                     <posy>0</posy>
                     <width>790</width>
@@ -259,7 +255,7 @@
         <align>right</align>
         <aligny>center</aligny>
         <textcolor>ffddddff</textcolor>
-        <label>[B]Recordings[/B]</label>
+        <label>SCRIPT290</label>
         <animation effect="fade" time="200">WindowOpen</animation>
         <animation effect="fade" time="200">WindowClose</animation>
     </control>
@@ -282,7 +278,8 @@
 <!-- Footer -->        
 
     <control type="label">
-        <posx>20r</posx>
+        <description>recording x of y</description>
+        <posx>190r</posx>
         <posy>50r</posy>
         <!--<width>200</width>-->
         <height>35</height>
@@ -350,7 +347,7 @@
                 <description>Refresh button</description>
                 <posx>0</posx>
                 <posy>40</posy>
-                <label>Refresh</label>
+                <label>SCRIPT210</label>
                 <width>285</width>
                 <align>left</align>
                 <textoffsetx>40</textoffsetx>

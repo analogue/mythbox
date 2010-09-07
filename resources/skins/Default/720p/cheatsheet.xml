@@ -1,6 +1,16 @@
 
 http://xbmc.org/wiki/?title=Conditional_Visibility
 
+<colors>
+    <color name="white">FFFFFFFF</color>
+    <color name="grey">66FFFFFF</color>
+    <color name="grey2">88FFFFFF</color>
+    <color name="grey3">33FFFFFF</color>
+    <color name="black">FF000000</color>
+    <color name="green">ffe2ff43</color>
+    <color name="dialogheader">DDced8da</color>
+</colors>
+
 <visible>system.getbool(lookandfeel.enablemouse)</visible>
 <visible>!IsEmpty(ListItem.Artist)</visible>
 <visible>!Skin.HasSetting(ShutdownUseHibernate)</visible>

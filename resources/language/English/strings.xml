@@ -191,14 +191,17 @@
   
   <!--  Common -->
   <string id="210">Refresh</string>
+  <string id="211">[B]Date[/B]</string>
+  <string id="212">[B]Title[/B]</string>
 
   <!-- Screen Titles -->
-  <string id="290">[B]Watch Recordings[/B]</string>
+  <string id="290">[B]Recordings[/B]</string>
   <string id="291">[B]Watch TV[/B]</string>
   <string id="292">[B]TV Guide[/B]</string>
   <string id="293">[B]Recording Schedules[/B]</string>              
   <string id="294">[B]Upcoming Recordings[/B]</string>
   <string id="295">[B]Settings[/B]</string>
+
   
   <!-- Home Screen -->
   <string id="300">Watch Recordings</string>
@@ -211,6 +214,19 @@
   <string id="310">[B]Tuner[/B]</string>
   <string id="311">[B]Status[/B]</string>
   <string id="312">[B]Job[/B]</string>
+
+
+  <!-- Watch Recordings Screen -->
+  <string id="500">MySQL DB</string>
+  <string id="501">Hostname</string>
+  <string id="502">Port</string>
+  <string id="503">Database Name</string>
+  <string id="504">User</string>
+  <string id="505">Password</string>
+  <string id="506">Default port is 3306</string>
+  <string id="507">Default database name is mythconverg</string>
+  <string id="508">Default user is mythtv</string>
+
   
   <!-- Settings Screen -->
   <string id="400">MySQL DB</string>
@@ -253,7 +269,6 @@
   <string id="450">XBMC Settings</string>
     
   <string id="460">About</string>
-
 
   
 </strings>
