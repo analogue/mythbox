@@ -514,6 +514,7 @@ class HttpCachingFanartProviderTest(unittest.TestCase):
         self.provider = HttpCachingFanartProvider(self.httpCache, self.nextProvider)
 
     def tearDown(self):
+        self.provider.close()
         shutil.rmtree(self.dir, ignore_errors=True)
         
     def test_getPosters_When_next_provider_returns_posters_Then_cache_and_return_first_poster_and_add_remaining_to_work_queue(self):
@@ -539,8 +540,6 @@ class HttpCachingFanartProviderTest(unittest.TestCase):
         while len(posters) < len(httpUrls):
             time.sleep(1)
             log.debug('Images downloaded: %d' % len(posters))
-        
-        self.provider.close()
         
     def test_getPosters_When_next_link_in_chain_returns_posters_Then_cache_locally_on_filesystem(self):
         # Setup
