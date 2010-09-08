@@ -22,6 +22,7 @@ import sys
 
 import xbmc
 import xbmcgui
+import mythbox.msg as msg
 
 from mythbox import pool
 from mythbox.bus import Event
@@ -123,7 +124,7 @@ class HomeWindow(BaseWindow):
     def deleteRecording(self):
         yes = True
         if self.settings.isConfirmOnDelete():
-            yes = xbmcgui.Dialog().yesno(self.translator.get(28), self.translator.get(65))
+            yes = xbmcgui.Dialog().yesno(self.translator.get(msg.CONFIRMATION), self.translator.get(msg.ASK_DELETE_RECORDING))
             
         if yes:
             program = self.recordings[self.coverFlow.getSelectedPosition()]
@@ -134,7 +135,7 @@ class HomeWindow(BaseWindow):
     def rerecordRecording(self):
         yes = True
         if self.settings.isConfirmOnDelete():
-            yes = xbmcgui.Dialog().yesno(self.translator.get(28), self.translator.get(65))
+            yes = xbmcgui.Dialog().yesno(self.translator.get(msg.CONFIRMATION), self.translator.get(msg.ASK_RERECORD_RECORDING))
             
         if yes:
             program = self.recordings[self.coverFlow.getSelectedPosition()]

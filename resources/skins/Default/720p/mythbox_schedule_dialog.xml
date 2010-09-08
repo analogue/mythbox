@@ -155,7 +155,8 @@
             <onup>9000</onup>
             
             <control type="button" id="201">
-                <label>Record</label>
+                <description>schedule type</description>
+                <label>SCRIPT1102</label>
                 <label2>$INFO[Window.Property(scheduleType)]</label2>
                 <width>650</width>
                 <height>35</height>
@@ -167,7 +168,8 @@
             </control>
             
             <control type="button" id="202">
-                <label>Priority</label>
+                <description>schedule priority</description>
+                <label>SCRIPT1103</label>
                 <label2>$INFO[Window.Property(priority)]</label2>
                 <width>650</width>
                 <height>35</height>
@@ -197,7 +199,8 @@
             -->
              
             <control type="button" id="203">
-                <label>Check for Duplicates Using</label>
+                <description>check for dupes using</description>   
+                <label>SCRIPT1104</label>
                 <label2>$INFO[Window.Property(checkForDupesUsing)]</label2>
                 <width>650</width>
                 <height>35</height>
@@ -209,7 +212,8 @@
             </control>
             
             <control type="button" id="204">
-                <label>Check for Duplicates In</label>
+                <description>check for dupes in</description>
+                <label>SCRIPT1105</label>
                 <label2>$INFO[Window.Property(checkForDupesIn)]</label2>
                 <width>650</width>
                 <height>35</height>
@@ -221,7 +225,8 @@
             </control>
 
             <control type="button" id="208">
-                <label>Episode Filter</label>
+                <description>episode filter</description>
+                <label>SCRIPT1106</label>
                 <label2>$INFO[Window.Property(episodeFilter)]</label2>
                 <width>650</width>
                 <height>35</height>
@@ -233,7 +238,8 @@
             </control>
             
             <control type="radiobutton" id="205">
-                <label>Auto-flag Commercials</label>
+                <description>autoflag commercials</description>
+                <label>SCRIPT1107</label>
                 <width>650</width>
                 <height>35</height>
                 <font>font12</font>
@@ -246,7 +252,8 @@
             </control>
             
             <control type="radiobutton" id="207">
-                <label>Auto-expire</label>
+                <description>autoexpire</description>
+                <label>SCRIPT1108</label>
                 <width>650</width>
                 <height>35</height>
                 <align>left</align>
@@ -259,7 +266,8 @@
             </control>
 
             <control type="radiobutton" id="218">
-                <label>Auto-transcode</label>
+                <description>autotranscode</description>
+                <label>SCRIPT1109</label>
                 <width>650</width>
                 <height>35</height>
                 <align>left</align>
@@ -272,7 +280,8 @@
             </control>
 
             <control type="button" id="206">
-                <label>Keep At Most</label>
+                <description>keep at most</description>
+                <label>SCRIPT1110</label>
                 <label2>$INFO[Window.Property(maxEpisodes)]</label2>
                 <width>650</width>
                 <height>35</height>
@@ -285,10 +294,10 @@
 
             <control type="radiobutton" id="213">
                 <description>Record New and Expire Old CheckBox</description>
+                <label>SCRIPT1111</label>
                 <width>650</width>
                 <height>35</height>
                 <align>left</align>
-                <label>Record New and Expire Old</label>
                 <font>font12</font>
                 <textoffsetx>10</textoffsetx>
                 <texturefocus>input-focus.png</texturefocus>
@@ -298,7 +307,8 @@
             </control>
 
             <control type="button" id="209">
-                <label>Start Recording</label>
+                <description>start recording</description>
+                <label>SCRIPT1112</label>
                 <label2>$INFO[Window.Property(startEarly)]</label2>
                 <width>650</width>
                 <height>35</height>
@@ -310,7 +320,8 @@
             </control>
 
             <control type="button" id="210">
-                <label>End Recording</label>
+                <description>end recording</description>
+                <label>SCRIPT1113</label>
                 <label2>$INFO[Window.Property(endLate)]</label2>
                 <width>650</width>
                 <height>35</height>
@@ -322,7 +333,8 @@
             </control>
             
             <control type="radiobutton" id="212">
-                <label>Schedule Enabled</label>
+                <description>schedule enabled</description>
+                <label>SCRIPT1114</label>
                 <width>650</width>
                 <height>35</height>
                 <align>left</align>
@@ -345,7 +357,8 @@
             <onup>2000</onup>
             
             <control type="button" id="250">
-                <label>Save</label>
+                <description>save</description>
+                <label>SCRIPT1120</label>
                 <width>120</width>
                 <height>35</height>
                 <align>center</align>
@@ -354,7 +367,8 @@
             </control>
 
             <control type="button" id="251">
-                <label>Delete</label>
+                <description>delete</description>
+                <label>SCRIPT1122</label>
                 <width>120</width>
                 <height>35</height>
                 <align>center</align>
@@ -363,7 +377,8 @@
             </control>
             
             <control type="button" id="252">
-                <label>Cancel</label>
+                <description>cancel</description>
+                <label>SCRIPT1121</label>
                 <width>120</width>
                 <height>35</height>
                 <align>center</align>

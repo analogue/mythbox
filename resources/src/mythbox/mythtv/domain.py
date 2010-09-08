@@ -23,6 +23,7 @@ import re
 import sre
 import time
 
+import mythbox.msg as m
 from ffmpeg import FFMPEG
 from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, \
@@ -434,7 +435,7 @@ class Program(object):
             else:
                 value = u''
         except:
-            value = self.translator.get(45)
+            value = self.translator.get(m.UNKNOWN)
         return value
 
     def formattedDescription(self):

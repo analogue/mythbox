@@ -285,10 +285,39 @@ class Dialog(object):
         """
         log.debug('ok')
         
-    def select(self, title, valueList):
-        log.debug('select')
+    def select(self, heading, list):
+        """
+        select(heading, list) -- Show a select dialog.
         
-    def yesno(self, title, line1, line2, line3):
+        heading        : string or unicode - dialog heading.
+        list           : string list - list of items.
+        autoclose      : [opt] integer - milliseconds to autoclose dialog. (default=do not autoclose)
+        
+        *Note, Returns the position of the highlighted item as an integer.
+        
+        example:
+          - dialog = xbmcgui.Dialog()
+          - ret = dialog.select('Choose a playlist', ['Playlist #1', 'Playlist #2, 'Playlist #3'])\n");
+        """
+        log.debug('select' + str(heading) + str(list))
+        
+    def yesno(self, heading, line1, line2, line3, nolabel, yeslabel):
+        """
+        yesno(heading, line1[, line2, line3]) -- Show a dialog 'YES/NO'.
+        
+        heading        : string or unicode - dialog heading.
+        line1          : string or unicode - line #1 text.
+        line2          : [opt] string or unicode - line #2 text.
+        line3          : [opt] string or unicode - line #3 text.
+        nolabel        : [opt] label to put on the no button.
+        yeslabel       : [opt] label to put on the yes button.
+        
+        *Note, Returns True if 'Yes' was pressed, else False.
+        
+        example:
+          - dialog = xbmcgui.Dialog()
+          - ret = dialog.yesno('XBMC', 'Do you want to exit this script?')
+        """
         log.debug('yesno')
         
     def numeric(self, type, heading, default=None):

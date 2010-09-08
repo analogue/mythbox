@@ -114,13 +114,6 @@ class ScheduleType(object):
         (OVERRIDE   ,141),
         (DONT_RECORD,142)])
     
-    @staticmethod
-    def toList(translator):
-        result = []
-        for key in ScheduleType.translations.keys():
-            result.append(translator.get(ScheduleType.translations[key]))
-        return result
-
 
 class EpisodeFilter(object):
     """
@@ -343,21 +336,21 @@ class JobStatus(object):
     CANCELED = 0x0140 # 320
     
     translations = odict([
-        (UNKNOWN,  'Unknown' ),
-        (QUEUED,   'Queued'  ),
-        (PENDING,  'Pending' ),
-        (STARTING, 'Starting'),
-        (RUNNING,  'Running' ),
-        (STOPPING, 'Stopping'),
-        (PAUSED,   'Paused'  ),
-        (RETRYING, 'Retrying'),
-        (ERRORING, 'Erroring'),
-        (ABORTING, 'Aborting'),
-        (DONE,     'Done (Invalid status!)'),
-        (FINISHED, 'Finished'),
-        (ABORTED,  'Aborted' ),
-        (ERRORED,  'Errored' ),
-        (CANCELED, 'Canceled')])
+        (UNKNOWN,  260),
+        (QUEUED,   261),
+        (PENDING,  262),
+        (STARTING, 263),
+        (RUNNING,  264),
+        (STOPPING, 265),
+        (PAUSED,   266),
+        (RETRYING, 267),
+        (ERRORING, 268),
+        (ABORTING, 269),
+        (DONE,     270),
+        (FINISHED, 271),
+        (ABORTED,  272),
+        (ERRORED,  273),
+        (CANCELED, 274)])
 
 
 class JobType:  
@@ -375,15 +368,15 @@ class JobType:
     USERJOB4     = 0x0800
 
     translations = odict([
-        (NONE,      'None'           ),
-        (SYSTEMJOB, 'System'         ),
-        (TRANSCODE, 'Transcode'      ),
-        (COMMFLAG,  'Commercial Flag'),
-        (USERJOB,   'User Job'       ),
-        (USERJOB1,  'User Job 1'     ),
-        (USERJOB2,  'User Job 2'     ),        
-        (USERJOB3,  'User Job 3'     ),        
-        (USERJOB4,  'User Job 4'     )])
+        (NONE,      250),
+        (SYSTEMJOB, 251),
+        (TRANSCODE, 252),
+        (COMMFLAG,  253),
+        (USERJOB,   254),
+        (USERJOB1,  255),
+        (USERJOB2,  256),     
+        (USERJOB3,  257),       
+        (USERJOB4,  258)])
 
 
 class Upcoming(object):
