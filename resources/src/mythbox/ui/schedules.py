@@ -357,9 +357,9 @@ class ScheduleDialog(BaseDialog):
         @return: entered number as int
         """
         value = xbmcgui.Dialog().numeric(0, heading, str(current))
-        if value == str(current):
+        if value is None or value == str(current):
             return current
-        
+
         result = int(value)
         
         if min is not None and result < min:
