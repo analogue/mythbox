@@ -29,8 +29,6 @@
   <string id="23">Paths</string>
   <string id="24">Test Settings</string>
   <string id="25">Settings saved successfully.</string>
-  <string id="26">Information</string>
-  <string id="27">Error</string>
   
   <string id="29">Settings have been modified.  Lose unsaved changes?</string>
   <string id="30">Invalid integer value specified.</string>
@@ -50,6 +48,8 @@
   <string id="44">Description</string>
   
   <!-- Strings -->
+  <string id="26">Information</string>
+  <string id="27">Error</string>
   <string id="28">Confirmation</string>
   <string id="45">Unknown</string>
   <string id="65">Are you sure you want to delete the recording?</string>
@@ -354,8 +354,10 @@
   <string id="423">Enable IMDB.com</string>
   <string id="424">Enable Google Image Search</string>
   <string id="425">Clear Cache</string>
-  
+  <string id="426">Caches cleared successfully</string>
+    
   <string id="430">Test Settings</string>
+  <string id="431">Settings OK</string>
 
   <string id="440">Advanced</string>
   <string id="441">Enable lirc hack for repeated button presses</string>

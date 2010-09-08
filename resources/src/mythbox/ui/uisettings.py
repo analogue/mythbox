@@ -18,6 +18,7 @@
 #
 import logging
 import xbmcgui
+import mythbox.msg as m
 
 from mythbox.settings import MythSettings, SettingsException
 from mythbox.ui.toolkit import window_busy, BaseWindow, enterNumeric, enterText, Action
@@ -136,6 +137,7 @@ class SettingsWindow(BaseWindow):
         self.fanArt = kwargs['fanArt']
         self.cachesByName = kwargs['cachesByName']
         self.settingsMap = {}  # key = controlId,  value = Setting
+        self.t = self.translator.get
         
     def register(self, setting):
         self.settingsMap[setting.widget.getId()] = setting
@@ -219,19 +221,19 @@ class SettingsWindow(BaseWindow):
     def testSettings(self):
         try:
             self.settings.verify()
-            xbmcgui.Dialog().ok('Info', '', 'Settings OK')
             self.setWindowProperty('MasterBackendHostname', '%s / %s' % (self.settings.master.hostname, self.settings.master.ipAddress))
             self.setWindowProperty('MasterBackendPort', str(self.settings.master.port))
+            xbmcgui.Dialog().ok(self.t(m.INFO), u'', self.t(m.SETTINGS_OK))
         except SettingsException, ex:
             self.settings.master = None
             self.setWindowProperty('MasterBackendHostname', '')
             self.setWindowProperty('MasterBackendPort', '')
-            xbmcgui.Dialog().ok('Error', '', str(ex))
+            xbmcgui.Dialog().ok(self.t(m.ERROR), u'', str(ex))
             
     @window_busy    
     def clearCache(self):
         for fileCache in self.cachesByName.values():
             fileCache.clear()
         self.fanArt.clear()
-        xbmcgui.Dialog().ok('Info', '', 'Caches cleared successfully.')
+        xbmcgui.Dialog().ok(self.t(m.INFO), u'', self.t(m.CACHES_CLEARED))
         
