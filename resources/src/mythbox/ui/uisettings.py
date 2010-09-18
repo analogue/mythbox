@@ -160,6 +160,7 @@ class SettingsWindow(BaseWindow):
             self.register(Setting(self.settings, 'paths_recordedprefix', str, ExternalizedSettingValidator(MythSettings.verifyRecordingDirs), self.getControl(205)))
             self.register(Setting(self.settings, 'paths_ffmpeg', str, ExternalizedSettingValidator(MythSettings.verifyFFMpeg, self.platform), self.getControl(209)))
             self.register(Setting(self.settings, 'confirm_on_delete', bool, None, self.getControl(206)))
+            self.register(Setting(self.settings, 'aggressive_caching', bool, None, self.getControl(207)))
             
             # MySQL Settings
             self.register(Setting(self.settings, 'mysql_host', str, ExternalizedSettingValidator(MythSettings.verifyMySQLHost), self.getControl(301)))

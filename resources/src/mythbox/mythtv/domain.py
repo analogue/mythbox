@@ -963,6 +963,7 @@ class RecordedProgram(Program):
         @rtype: float
         @note: cached 
         @note: most recordings are either 29.97 or 59.97
+        @todo: GUIInfoManager.cpp - look at refs to GetFPS()
         """
         if not self._fps:
             

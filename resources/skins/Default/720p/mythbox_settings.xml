@@ -182,11 +182,12 @@
                 <enable>false</enable>
             </control>
             
-            <control type="image" id="207">
+            <control type="image" id="211">
                 <description>separator image</description>
                 <width>950</width>
                 <height>2</height>
                 <texture>separator.png</texture>
+                <enable>false</enable>
             </control>
 
             <control type="button" id="205">
@@ -230,6 +231,22 @@
             <control type="radiobutton" id="206">
                 <description>confirm on delete</description>
                 <label>SCRIPT415</label>
+                <width>950</width>
+                <height>35</height>
+                <align>left</align>
+                <font>font12</font>
+                <textoffsetx>10</textoffsetx>
+                <texturefocus border="7">list-focus.png</texturefocus>
+                <texturenofocus>-</texturenofocus>
+                <textcolor>88FFFFFF</textcolor>
+                <focusedcolor>ffffffff</focusedcolor>
+                <textureradiofocus>checkbox-focus.png</textureradiofocus>
+                <textureradionofocus>checkbox-nofocus.png</textureradionofocus>
+            </control>
+
+            <control type="radiobutton" id="207">
+                <description>aggressive caching</description>
+                <label>SCRIPT419</label>
                 <width>950</width>
                 <height>35</height>
                 <align>left</align>
@@ -509,6 +526,38 @@
 			<texturenofocus>-</texturenofocus>
             <animation effect="fade" time="200">VisibleChange</animation>
 	    </control>
+
+        <control type="button">
+            <description>aggressive caching help1</description>
+            <posx>300</posx>
+            <posy>580</posy>
+            <height>50</height>
+            <width>900</width>
+            <align>left</align>
+            <aligny>center</aligny>
+            <font>font12</font>
+            <textcolor>ffffffff</textcolor>
+            <label>SCRIPT427</label>
+            <visible>Control.HasFocus(207)</visible>
+            <texturenofocus>-</texturenofocus>
+            <animation effect="fade" time="200">VisibleChange</animation>
+        </control>
+        
+        <control type="button">
+            <description>aggressive caching help2</description>
+            <posx>300</posx>
+            <posy>610</posy>
+            <height>50</height>
+            <width>900</width>
+            <align>left</align>
+            <aligny>center</aligny>
+            <font>font12</font>
+            <textcolor>ffffffff</textcolor>
+            <label>SCRIPT428</label>
+            <visible>Control.HasFocus(207)</visible>
+            <texturenofocus>-</texturenofocus>
+            <animation effect="fade" time="200">VisibleChange</animation>
+        </control>
 
 	    <control type="button">
 	      	<description>mysql port help</description>

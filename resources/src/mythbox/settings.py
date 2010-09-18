@@ -58,6 +58,8 @@ class MythSettings(object):
     def getFFMpegPath(self): return self.get('paths_ffmpeg')
  
     def isConfirmOnDelete(self): return self.getBoolean('confirm_on_delete')
+    
+    def isAggressiveCaching(self): return self.getBoolean('aggressive_caching')
             
     def setMySqlHost(self, host): self.put('mysql_host', host)
 
@@ -115,6 +117,7 @@ class MythSettings(object):
             'mysql_encoding_override' : 'latin1',
             'paths_recordedprefix'    : self.platform.getDefaultRecordingsDir(),
             'paths_ffmpeg'            : self.platform.getFFMpegPath(),
+            'aggressive_caching'      : 'False',
             'recorded_view_by'        : '2', 
             'upcoming_view_by'        : '2',
             'confirm_on_delete'       : 'True',
@@ -194,6 +197,7 @@ class MythSettings(object):
         MythSettings.verifyRecordingDirs(self.get('paths_recordedprefix'))
         MythSettings.verifyFFMpeg(self.get('paths_ffmpeg'), self.platform)
         MythSettings.verifyBoolean(self.get('confirm_on_delete'), 'Confirm on delete must be True or False')
+        MythSettings.verifyBoolean(self.get('aggressive_caching'), 'Aggressive Caching must be True or False')
         slog.debug('verified settings')
 
     def verifyMythTVConnectivity(self):
@@ -270,16 +274,6 @@ class MythSettings(object):
     def verifyMySQLDatabase(dbName):
         MythSettings.verifyString(dbName, 'Enter MySQL database name. Hint: mythconverg is the MythTV default')
     
-    @staticmethod    
-    def verifyLiveTVBufferSize(numKB):
-        MythSettings.verifyString(numKB, 'Live TV buffer size must be between 1,000 and 20,000 KB')
-        MythSettings.verifyNumberBetween(numKB, 1000, 20000, 'Live TV buffer size must be between 1,000 and 20,000 KB')
-
-    @staticmethod    
-    def verifyLiveTVTimeout(numSecs):
-        MythSettings.verifyString(numSecs, 'Live TV timeout must be between 10 and 180 seconds')
-        MythSettings.verifyNumberBetween(numSecs, 10, 180, 'Live TV timeout must be between 10 and 180')
-        
     @staticmethod    
     def verifyHostnameOrIPAddress(host, errMsg):
         try:

@@ -24,7 +24,8 @@ import xbmcgui
 from mythbox.mythtv.conn import inject_conn
 from mythbox.ui.recordingdetails import RecordingDetailsWindow
 from mythbox.ui.toolkit import window_busy, BaseWindow, Action
-from mythbox.util import catchall_ui, run_async, lirc_hack, timed, catchall, ui_locked, ui_locked2, coalesce
+from mythbox.util import catchall_ui, run_async, lirc_hack, timed, catchall, ui_locked, ui_locked2, coalesce,\
+    safe_str
 from mythbox.util import CyclingBidiIterator
 
 log = logging.getLogger('mythbox.ui')
@@ -105,7 +106,7 @@ class RecordingsWindow(BaseWindow):
     @coalesce
     def preCacheThumbnails(self):
         if self.allPrograms:
-            log.debug('Precaching thumbnails for %d recordings' % len(self.allPrograms))
+            log.debug('Precaching %d thumbnails' % len(self.allPrograms))
             for program in self.allPrograms[:]:  # work on copy since async
                 if self.closed: 
                     return
@@ -118,15 +119,16 @@ class RecordingsWindow(BaseWindow):
     @coalesce
     def preCacheCommBreaks(self):
         if self.allPrograms:
-            log.debug('Precaching comm breaks for %d recordings' % len(self.allPrograms))
+            log.debug('Precaching %d comm breaks' % len(self.allPrograms))
             for program in self.programs:
                 if self.closed: 
                     return
                 try:
                     if program.isCommFlagged():
-                        program.getCommercials()
+                        #program.getCommercials()
+                        program.getFrameRate()
                 except:
-                    log.exception('Comm break caching for recording %s failed' % program.title())
+                    log.exception('Comm break caching for recording %s failed' % safe_str(program.title()))
 
     @window_busy
     @inject_conn
@@ -139,7 +141,10 @@ class RecordingsWindow(BaseWindow):
         
         self.programs.sort(key=SORT_BY[self.sortBy], reverse=self.sortAscending)
         self.preCacheThumbnails()
-        #self.preCacheCommBreaks()
+        
+        if self.platform.getName() in ('unix','mac') and  self.settings.isAggressiveCaching(): 
+            self.preCacheCommBreaks()
+            
         self.render()
     
     def applySort(self):
