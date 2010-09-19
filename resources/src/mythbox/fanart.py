@@ -300,7 +300,7 @@ class ImdbFanartProvider(BaseFanartProvider):
 
     def __init__(self, nextProvider=None):
         BaseFanartProvider.__init__(self, nextProvider)
-        self.imdb = imdb.IMDb(accessSystem='httpThin')
+        self.imdb = imdb.IMDb(accessSystem=None)
 
     @chain
     @max_threads(2)
@@ -308,16 +308,16 @@ class ImdbFanartProvider(BaseFanartProvider):
         posters = []
         if program.isMovie():
             try:
-                movies = self.imdb.search_movie(title=program.title(), results=1)
+                movies = self.imdb.search_movie(title=u'' + program.title(), results=1)
                 for movie in movies:
                     m = self.imdb.get_movie(movie.getID())
                     #for key,value in m.items():
-                    #    log.debug('movie[%d] id[%s] key[%s] -> %s' % (index, m.getID(), key, value))
-                    posters.append(imdb.helpers.fullSizeCoverURL(m['cover url']))
+                    #    log.warn('movie[%d] id[%s] key[%s] -> %s' % (1, m.getID(), key, safe_str(value)))
+                    posters.append(m['full-size cover url'])  
             except imdb.IMDbError, e:
-                log.error('IMDB error looking up movie: %s' % program.title())
+                log.error('IMDB error looking up movie: %s %s' % (safe_str(program.title()), safe_str(str(e))))
             except Exception, e:
-                log.error('IMDB error looking up %s: %s' % (program.title(), str(e)))
+                log.error('IMDB error looking up %s: %s' % (safe_str(program.title()), safe_str(str(e))))
         return posters
     
 
