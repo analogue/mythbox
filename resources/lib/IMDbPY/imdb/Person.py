@@ -4,7 +4,7 @@ Person module (imdb package).
 This module provides the Person class, used to store information about
 a given person.
 
-Copyright 2004-2008 Davide Alberani <da@erlug.linux.it>
+Copyright 2004-2010 Davide Alberani <da@erlug.linux.it>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -69,16 +69,25 @@ class Person(_Container):
                   'mini-biography author': 'imdb mini-biography by',
                   'biography author': 'imdb mini-biography by',
                   'genre': 'genres',
+                  'portrayed': 'portrayed in',
                   'keys': 'keywords',
+                  'trademarks': 'trade mark',
+                  'trade mark': 'trade mark',
+                  'trade marks': 'trade mark',
+                  'trademark': 'trade mark',
+                  'pictorials': 'pictorial',
+                  'magazine covers': 'magazine cover photo',
+                  'magazine-covers': 'magazine cover photo',
                   'tv series episodes': 'episodes',
                   'tv-series episodes': 'episodes',
+                  'articles': 'article',
                   'keyword': 'keywords'}
 
     # 'nick names'???
     keys_tomodify_list = ('mini biography', 'spouse', 'quotes', 'other works',
-                        'salary history', 'trivia', 'trademarks', 'news',
-                        'books', 'biographical movies', 'portrayed',
-                        'where now', 'interviews', 'articles',
+                        'salary history', 'trivia', 'trade mark', 'news',
+                        'books', 'biographical movies', 'portrayed in',
+                        'where now', 'interviews', 'article',
                         "biography from leonard maltin's movie encyclopedia")
 
     cmpFunct = cmpPeople
@@ -133,10 +142,13 @@ class Person(_Container):
 
     def _additional_keys(self):
         """Valid keys to append to the data.keys() list."""
+        addkeys = []
         if self.data.has_key('name'):
-            return ['canonical name', 'long imdb name',
-                    'long imdb canonical name']
-        return []
+            addkeys += ['canonical name', 'long imdb name',
+                        'long imdb canonical name']
+        if self.data.has_key('headshot'):
+            addkeys += ['full-size headshot']
+        return addkeys
 
     def _getitem(self, key):
         """Handle special keys."""
@@ -149,6 +161,8 @@ class Person(_Container):
                 return build_name(self.data, canonical=0)
             elif key == 'long imdb canonical name':
                 return build_name(self.data)
+        if key == 'full-size headshot' and self.data.has_key('headshot'):
+            return self._re_fullsizeURL.sub('', self.data.get('headshot', ''))
         return None
 
     def getID(self):

@@ -1597,7 +1597,7 @@ def doAkaNames():
             try:
                 name_dict = analyze_name(line)
             except IMDbParserError:
-                if line: print 'WARNING: wrong name:', _(line)
+                if line: print 'WARNING doAkaNames wrong name:', _(line)
                 continue
             name = name_dict.get('name')
             namePcodeCf, namePcodeNf, surnamePcode = name_soundexes(name)
@@ -1692,7 +1692,13 @@ def doAkaTitles():
                 if line[0] == '\n': continue
                 line = line.strip()
                 if obsolete:
-                    tonD = analyze_title(line, _emptyString='')
+                    try:
+                        tonD = analyze_title(line, _emptyString='')
+                    except IMDbParserError:
+                        if line:
+                            print 'WARNING doAkaTitles(obsol O) invalid title:',
+                            print _(line)
+                        continue
                     tonD['title'] = normalizeTitle(tonD['title'])
                     line = build_title(tonD, ptdf=1, _emptyString='')
                     # Aka information for titles in obsolete files are
@@ -1702,7 +1708,13 @@ def doAkaTitles():
                         continue
                 mid = CACHE_MID.addUnique(line)
                 if line[0] == '"':
-                    titleDict = analyze_title(line, _emptyString='')
+                    try:
+                        titleDict = analyze_title(line, _emptyString='')
+                    except IMDbParserError:
+                        if line:
+                            print 'WARNING doAkaTitles (O) invalid title:',
+                            print _(line)
+                        continue
                     if 'episode of' in titleDict:
                         if obsolete:
                             titleDict['episode of']['title'] = \
@@ -1735,7 +1747,13 @@ def doAkaTitles():
                 if not akat:
                     continue
                 if obsolete:
-                    akatD = analyze_title(akat, _emptyString='')
+                    try:
+                        akatD = analyze_title(akat, _emptyString='')
+                    except IMDbParserError:
+                        if line:
+                            print 'WARNING doAkaTitles(obsol) invalid title:',
+                            print _(akat)
+                        continue
                     akatD['title'] = normalizeTitle(akatD['title'])
                     akat = build_title(akatD, ptdf=1, _emptyString='')
                 if count % 10000 == 0:
@@ -1744,7 +1762,13 @@ def doAkaTitles():
                 if isEpisode and seriesID is not None:
                     # Handle series for which only single episodes have
                     # aliases.
-                    akaDict = analyze_title(akat, _emptyString='')
+                    try:
+                        akaDict = analyze_title(akat, _emptyString='')
+                    except IMDbParserError:
+                        if line:
+                            print 'WARNING doAkaTitles (epis) invalid title:',
+                            print _(akat)
+                        continue
                     if 'episode of' in akaDict:
                         if obsolete:
                             akaDict['episode of']['title'] = normalizeTitle(
@@ -2196,24 +2220,27 @@ def _parseBiography(biol):
         elif x4 == 'RN: ':
             n = x[4:].strip()
             if not n: continue
-            rn = build_name(analyze_name(n, canonical=1), canonical=1)
-            res['birth name'] = rn
+            try:
+                rn = build_name(analyze_name(n, canonical=1), canonical=1)
+                res['birth name'] = rn
+            except IMDbParserError:
+                if line: print 'WARNING _parseBiography wrong name:', _(n)
+                continue
         elif x6 == 'AT: * ':
-            res.setdefault('articles', []).append(x[6:].strip())
+            res.setdefault('article', []).append(x[6:].strip())
         elif x4 == 'HT: ':
             res['height'] = x[4:].strip()
         elif x6 == 'PT: * ':
-            res.setdefault('pictorials', []).append(x[6:].strip())
+            res.setdefault('pictorial', []).append(x[6:].strip())
         elif x6 == 'CV: * ':
-            res.setdefault('magazine covers', []).append(x[6:].strip())
+            res.setdefault('magazine cover photo', []).append(x[6:].strip())
         elif x4 == 'NK: ':
             res.setdefault('nick names', []).append(normalizeName(x[4:]))
         elif x6 == 'PI: * ':
-            res.setdefault('portrayed', []).append(x[6:].strip())
+            res.setdefault('portrayed in', []).append(x[6:].strip())
         elif x6 == 'SA: * ':
             sal = x[6:].strip().replace(' -> ', '::')
             res.setdefault('salary history', []).append(sal)
-
     trl = _parseList(biol, 'TR')
     if trl: res['trivia'] = trl
     quotes = _parseList(biol, 'QU')
@@ -2229,7 +2256,7 @@ def _parseBiography(biol):
     biomovies = _parseList(biol, 'BT')
     if biomovies: res['biographical movies'] = biomovies
     tm = _parseList(biol, 'TM')
-    if tm: res['trademarks'] = tm
+    if tm: res['trade mark'] = tm
     interv = _parseList(biol, 'IT')
     if interv: res['interviews'] = interv
     return res

@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 __all__ = ['IMDb', 'IMDbError', 'Movie', 'Person', 'Character', 'Company',
             'available_access_systems']
-__version__ = VERSION = '4.5.1'
+__version__ = VERSION = '4.6'
 
 # Import compatibility module (importing it is enough).
 import _compat
@@ -37,6 +37,8 @@ from imdb import Movie, Person, Character, Company
 import imdb._logging
 from imdb._exceptions import IMDbError, IMDbDataAccessError
 from imdb.utils import build_title, build_name, build_company_name
+
+_aux_logger = logging.getLogger('imdbpy.aux')
 
 
 # URLs of the main pages for movies, persons, characters and queries.
@@ -98,8 +100,7 @@ class ConfigParserWithCase(ConfigParser.ConfigParser):
                 self.read(fname)
             except (ConfigParser.MissingSectionHeaderError,
                     ConfigParser.ParsingError), e:
-                import warnings
-                warnings.warn('Troubles reading config file: %s' % e)
+                _aux_logger.warn('Troubles reading config file: %s' % e)
             # Stop at the first valid file.
             if self.has_section('imdbpy'):
                 break
@@ -155,9 +156,8 @@ def IMDb(accessSystem=None, *arguments, **keywords):
             kwds.update(keywords)
             keywords = kwds
         except Exception, e:
-            import warnings
-            warnings.warn('Unable to read configuration file; ' + \
-                            'complete error: %s' % e)
+            logging.getLogger('imdbpy').warn('Unable to read configuration' \
+                                            ' file; complete error: %s' % e)
             # It just LOOKS LIKE a bad habit: we tried to read config
             # options from some files, but something is gone horribly
             # wrong: ignore everything and pretend we were called with
@@ -173,8 +173,8 @@ def IMDb(accessSystem=None, *arguments, **keywords):
             import logging.config
             logging.config.fileConfig(os.path.expanduser(logCfg))
         except Exception, e:
-            import warnings
-            warnings.warn('unable to read logger config: %s' % e)
+            logging.getLogger('imdbpy').warn('unable to read logger ' \
+                                            'config: %s' % e)
     if accessSystem in ('http', 'web', 'html'):
         from parser.http import IMDbHTTPAccessSystem
         return IMDbHTTPAccessSystem(*arguments, **keywords)
@@ -705,11 +705,14 @@ class IMDbBase:
                 continue
             if not i:
                 continue
+            self._imdb_logger.debug('retrieving "%s" info set', i)
             try:
                 method = getattr(aSystem, 'get_%s_%s' %
                                     (prefix, i.replace(' ', '_')))
             except AttributeError:
-                raise IMDbDataAccessError, 'unknown information set "%s"' % i
+                self._imdb_logger.error('unknown information set "%s"', i)
+                # Keeps going.
+                method = lambda *x: {}
             try:
                 ret = method(mopID)
             except Exception, e:

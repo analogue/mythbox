@@ -75,15 +75,15 @@ You can exclude the unwanted one with:
 If you specify both, --without-sql is implied.
 
 
-  SVN VERSION
-  ===========
+  Mercurial VERSION
+  =================
 
 The best thing is always to use a package for your distribution,
 or use easy_install or pip to install the latest release, but it
 goes without saying that sometimes you need the very latest version
 (keep in mind that the IMDb site is a moving target...).
-In this case, you can always use the SVN version, available here:
-  http://imdbpy.sourceforge.net/?page=download#svn
+In this case, you can always use the Mercurial version, available here:
+  http://imdbpy.sourceforge.net/?page=download#hg
 
 
   HELP
@@ -159,7 +159,7 @@ access systems are 'http' (i.e.: the data are fetched through the IMDb's
 web server http://akas.imdb.com) and 'sql', meaning that the data are
 taken from a SQL database, populated (using the imdbpy2sql.py script) with
 data taken from the plain text data files; see
-http://www.imdb.com/interfaces.html for more information.
+http://www.imdb.com/interfaces/ for more information.
 For mobile systems there's the 'mobile' data access system, useful
 for PDA, hand-held devices and smart phones.
 Another data access system is 'httpThin', which is equal to 'http'

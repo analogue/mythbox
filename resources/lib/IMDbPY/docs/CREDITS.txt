@@ -1,14 +1,31 @@
 
+  CREDITS
+  =======
+
 See also CONTRIBUTORS.txt for a list of the most important developers
 who share the copyright on some portions of the code.
 
+First of all, I want to thank all the maintainers of the
+packages, listed on http://imdbpy.sf.net/?page=download#otherpkg,
+and especially Ana Guerrero.
+Another big thank to the developers who used IMDbPY for their
+projects and researches; they can be found here:
+  http://imdbpy.sf.net/?page=programs
 
-I'd like to thank the following people for their help:
+Other very special thanks go to some people who followed very
+closely the development of IMDbPY, providing hints and insights:
+Ori Cohen, James Rubino, Tero Saarni and Jesper Noer (for a lot
+of help, and also for the wonderful http://bitbucket.org)
 
-* Ana Guerrero, for maintaining the official debian package.
 
-* H. Turgut Uyar for a number of bug reports and a lot of work on
-  the test-suite.
+Below, a list of persons who contributed with bug reports, small
+patches and hints (kept in a reverse order since IMDbPY 4.5):
+
+* David Kaufman for an idea to make the 'update' method more robust.
+
+* Dustin Wyatt for a bug with SQLite of Python 2.6. 
+
+* Julian Scheid for bug reports about garbage in the ptdf.
 
 * Adeodato Simó for a bug report about the new imdb.com layout.
 
@@ -20,12 +37,19 @@ I'd like to thank the following people for their help:
 
 * Mark Jeffery, for some help debugging a lxml bug.
 
-* Tero Saarni, for the series 60 GUI and a lot of testing and
-  debugging.
-
 * Hieu Nguyen for a bug report about fetching real imdbIDs.
 
 * Rdian06 for a patch for movies without plot authors.
+
+* Tero Saarni, for the series 60 GUI and a lot of testing and
+  debugging.
+
+* Ana Guerrero, for maintaining the official debian package.
+
+* H. Turgut Uyar for a number of bug reports and a lot of work on
+  the test-suite.
+
+* Ori Cohen for some code and various hints.
 
 * Jesper Nøhr for a lot of testing, especially on 'sql'.
 
@@ -35,6 +59,12 @@ I'd like to thank the following people for their help:
 
 * Andre LeBlanc for a bug report about airing date of tv series episodes.
 
+* aow for a note about some misleading descriptions.
+
+* Sébastien Ragons for tests and reports.
+
+* Sridhar Ratnakumar for info about PKG-INF.
+
 * neonrush for a bug parsing Malcolm McDowell filmography!
 
 * Alen Ribic for some bug reports and hints.
@@ -43,9 +73,12 @@ I'd like to thank the following people for their help:
   of testing and debugging of the ibm_db driver (plus a lot of hints
   about how to improve the imdbpy2sql.py script).
 
-* Chris Thompson for some bug reports about summary() methods.
+* Karl Newman for bug reports about the installer of version 4.5.
 
-* Ori Cohen for some code and various hints.
+* Saruke Kun and Treas0n for bug reports about 'Forbidden' errors
+  from the imdb.com server.
+
+* Chris Thompson for some bug reports about summary() methods.
 
 * Mike Castle for performace tests with SQLite and numerous hints.
 

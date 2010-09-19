@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
 import os
+import sys
 import ez_setup
 ez_setup.use_setuptools()
 
 import setuptools
 
-# version of the software; in SVN this represents the _next_ release.
-# setuptools will automatically add 'dev-rREVISION'.
-version = '4.5.1'
+# version of the software; in the code repository this represents
+# the _next_ release.  setuptools will automatically add 'dev-rREVISION'.
+version = '4.6'
 
 home_page = 'http://imdbpy.sf.net/'
 
@@ -51,7 +52,7 @@ Topic :: Software Development :: Libraries :: Python Modules
 
 keywords = ['imdb', 'movie', 'people', 'database', 'cinema', 'film', 'person',
             'cast', 'actor', 'actress', 'director', 'sql', 'character',
-            'company', 'svn', 'package', 'plain text data files',
+            'company', 'package', 'plain text data files',
             'keywords', 'top250', 'bottom100', 'xml']
 
 
@@ -69,8 +70,7 @@ scripts = ['./bin/get_first_movie.py',
 
 # XXX: I'm not sure that 'etc' is a good idea.  Making it an absolute
 #      path seems a recipe for a disaster (with bdist_egg, at least).
-data_files = [('doc', [f for f in setuptools.findall('docs')
-                if '.svn' not in f]), ('etc', ['docs/imdbpy.cfg'])]
+data_files = [('doc', setuptools.findall('docs')), ('etc', ['docs/imdbpy.cfg'])]
 
 
 # Defining these 'features', it's possible to run commands like:
@@ -203,13 +203,29 @@ def runRebuildmo():
     os.chdir(cwd)
     return languages
 
+
+def hasCommand():
+    """Return true if at least one command is found on the command line."""
+    args = sys.argv[1:]
+    if '--help' in args:
+        return False
+    if '-h' in args:
+        return False
+    for arg in args:
+        if arg and not arg.startswith('-'):
+            return True
+    return False
+
+
 try:
-    languages = runRebuildmo()
+    if hasCommand():
+        languages = runRebuildmo()
+    else:
+        languages = []
     if languages:
         data_files.append(('imdb/locale', ['imdb/locale/imdbpy.pot']))
     for lang in languages:
-        files_found = [f for f in setuptools.findall('imdb/locale/%s' % lang)
-                        if '.svn' not in f]
+        files_found = setuptools.findall('imdb/locale/%s' % lang)
         if not files_found:
             continue
         base_dir = os.path.dirname(files_found[0])

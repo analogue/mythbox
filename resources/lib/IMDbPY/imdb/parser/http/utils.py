@@ -4,7 +4,7 @@ parser.http.utils module (imdb package).
 This module provides miscellaneous utilities used by
 the imdb.parser.http classes.
 
-Copyright 2004-2009 Davide Alberani <da@erlug.linux.it>
+Copyright 2004-2010 Davide Alberani <da@erlug.linux.it>
                2008 H. Turgut Uyar <uyar@tekir.org>
 
 This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import re
 import logging
-import warnings
 
 from imdb._exceptions import IMDbError
 
@@ -407,12 +406,12 @@ class DOMParserBase(object):
                     self._is_xml_unicode = True
                     self.usingModule = 'beautifulsoup'
                 else:
-                    warnings.warn('unknown module "%s"' % mod)
+                    self._logger.warn('unknown module "%s"' % mod)
                     continue
                 self.fromstring = fromstring
                 self._tostring = tostring
                 if _gotError:
-                    warnings.warn('falling back to "%s"' % mod)
+                    self._logger.warn('falling back to "%s"' % mod)
                 break
             except ImportError, e:
                 if idx+1 >= nrMods:
@@ -421,7 +420,7 @@ class DOMParserBase(object):
                     raise IMDbError, 'unable to use any parser in %s: %s' % \
                                     (str(useModule), str(e))
                 else:
-                    warnings.warn('unable to use "%s": %s' % (mod, str(e)))
+                    self._logger.warn('unable to use "%s": %s' % (mod, str(e)))
                     _gotError = True
                 continue
         else:
@@ -549,6 +548,8 @@ class DOMParserBase(object):
         """Here we can modify the text, before it's parsed."""
         if not html_string:
             return html_string
+        # Remove silly &nbsp;&raquo; chars.
+        html_string = html_string.replace(u' \xbb', u'')
         try:
             preprocessors = self.preprocessors
         except AttributeError:

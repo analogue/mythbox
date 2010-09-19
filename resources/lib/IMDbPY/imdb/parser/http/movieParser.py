@@ -123,7 +123,8 @@ def _replaceBR(mo):
 
 _reAkas = re.compile(r'<h5>also known as:</h5>.*?</div>', re.I | re.M | re.S)
 
-def makeSplitter(lstrip=None, sep='|', comments=True):
+def makeSplitter(lstrip=None, sep='|', comments=True,
+                origNotesSep=' (', newNotesSep='::(', strip=None):
     """Return a splitter function suitable for a given set of data."""
     def splitter(x):
         if not x: return x
@@ -134,7 +135,9 @@ def makeSplitter(lstrip=None, sep='|', comments=True):
         lx = x.split(sep)
         lx[:] = filter(None, [j.strip() for j in lx])
         if comments:
-            lx[:] = [j.replace(' (', '::(', 1) for j in lx]
+            lx[:] = [j.replace(origNotesSep, newNotesSep, 1) for j in lx]
+        if strip:
+            lx[:] = [j.strip(strip) for j in lx]
         return lx
     return splitter
 
@@ -240,7 +243,10 @@ class DOMHTMLMovieParser(DOMParserBase):
                             Attribute(key='other akas',
                                 path="./h5[starts-with(text(), " \
                                         "'Also Known As')]/../div//text()",
-                                postprocess=makeSplitter(sep='::')),
+                                postprocess=makeSplitter(sep='::',
+                                                origNotesSep='" - ',
+                                                newNotesSep='::',
+                                                strip='"')),
                             Attribute(key='runtimes',
                                 path="./h5[starts-with(text(), " \
                                         "'Runtime')]/../div/text()",
@@ -319,8 +325,8 @@ class DOMHTMLMovieParser(DOMParserBase):
                         path="//i[@class='transl']",
                         attrs=Attribute(key='akas', multi=True, path='text()',
                                 postprocess=lambda x:
-                                x.replace('  ', ' ').replace(' (',
-                                    '::(', 1).replace('  ', ' '))),
+                                x.replace('  ', ' ').rstrip('-').replace('" - ',
+                                    '"::', 1).strip('"').replace('  ', ' '))),
 
                 Extractor(label='production notes/status',
                         path="//div[@class='info inprod']",
@@ -410,7 +416,8 @@ class DOMHTMLMovieParser(DOMParserBase):
                         obj.modFunct = self._modFunct
         if 'akas' in data or 'other akas' in data:
             akas = data.get('akas') or []
-            akas += data.get('other akas') or []
+            other_akas = data.get('other akas') or []
+            akas += other_akas
             if 'akas' in data:
                 del data['akas']
             if 'other akas' in data:
@@ -499,13 +506,14 @@ class DOMHTMLMovieParser(DOMParserBase):
 
 def _process_plotsummary(x):
     """Process a plot (contributed by Rdian06)."""
-    if x.get('author') is None:
-        xauthor = u'Anonymous'
-    else:
-        xauthor = x.get('author').replace('{', '<').replace('}',
-                        '>').replace('(','<').replace(')', '>')
-    xplot = x.get('plot', '').strip()
-    return u'%s::%s' % (xplot, xauthor)
+    xauthor = x.get('author')
+    if xauthor:
+        xauthor = xauthor.replace('{', '<').replace('}', '>').replace('(',
+                                    '<').replace(')', '>').strip()
+    xplot = x.get('plot', u'').strip()
+    if xauthor:
+        xplot += u'::%s' % xauthor
+    return xplot
 
 class DOMHTMLPlotParser(DOMParserBase):
     """Parser for the "plot summary" page of a given movie.
@@ -520,6 +528,8 @@ class DOMHTMLPlotParser(DOMParserBase):
     """
     _defGetRefs = True
 
+    # Notice that recently IMDb started to put the email of the
+    # author only in the link, that we're not collecting, here.
     extractors = [Extractor(label='plot',
                     path="//p[@class='plotpar']",
                     attrs=Attribute(key='plot',
@@ -695,8 +705,7 @@ class DOMHTMLKeywordsParser(DOMParserBase):
 
 
 class DOMHTMLAlternateVersionsParser(DOMParserBase):
-    """Parser for the "alternate versions" and "trivia" pages of a
-    given movie.
+    """Parser for the "alternate versions" page of a given movie.
     The page should be provided as a string, as taken from
     the akas.imdb.com server.  The final result will be a
     dictionary, with a key for every relevant section.
@@ -706,13 +715,38 @@ class DOMHTMLAlternateVersionsParser(DOMParserBase):
         result = avparser.parse(alternateversions_html_string)
     """
     _defGetRefs = True
-    kind = 'alternate versions'
     extractors = [Extractor(label='alternate versions',
                             path="//ul[@class='trivia']/li",
-                            attrs=Attribute(key='self.kind',
+                            attrs=Attribute(key='alternate versions',
                                             multi=True,
                                             path=".//text()",
                                             postprocess=lambda x: x.strip()))]
+
+
+class DOMHTMLTriviaParser(DOMParserBase):
+    """Parser for the "trivia" page of a given movie.
+    The page should be provided as a string, as taken from
+    the akas.imdb.com server.  The final result will be a
+    dictionary, with a key for every relevant section.
+
+    Example:
+        avparser = HTMLAlternateVersionsParser()
+        result = avparser.parse(alternateversions_html_string)
+    """
+    _defGetRefs = True
+    extractors = [Extractor(label='alternate versions',
+                            path="//div[@class='sodatext']",
+                            attrs=Attribute(key='trivia',
+                                            multi=True,
+                                            path=".//text()",
+                                            postprocess=lambda x: x.strip()))]
+
+    def preprocess_dom(self, dom):
+        # Remove "link this quote" links.
+        for qLink in self.xpath(dom, "//span[@class='linksoda']"):
+            qLink.drop_tree()
+        return dom
+
 
 
 class DOMHTMLSoundtrackParser(DOMHTMLAlternateVersionsParser):
@@ -1881,7 +1915,7 @@ _OBJECTS = {
     'crazycredits_parser':  ((DOMHTMLCrazyCreditsParser,), None),
     'goofs_parser':  ((DOMHTMLGoofsParser,), None),
     'alternateversions_parser':  ((DOMHTMLAlternateVersionsParser,), None),
-    'trivia_parser':  ((DOMHTMLAlternateVersionsParser,), {'kind': 'trivia'}),
+    'trivia_parser':  ((DOMHTMLTriviaParser,), None),
     'soundtrack_parser':  ((DOMHTMLSoundtrackParser,), {'kind': 'soundtrack'}),
     'quotes_parser':  ((DOMHTMLQuotesParser,), None),
     'releasedates_parser':  ((DOMHTMLReleaseinfoParser,), None),
