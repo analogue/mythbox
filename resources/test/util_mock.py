@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -30,7 +30,7 @@ from xml.dom import minidom, Node
 
 log = logging.getLogger('mythbox.unittest')
 
-# ============================================================================
+
 class Translator(object):
     """
     Real XBMC uses xbmc.Language but the unit tests don't have access to this
@@ -66,14 +66,14 @@ class Translator(object):
         # parse the string file
         dom = minidom.parse(langFile)
         
-        #print(dom.toxml())
+        #log.debug(dom.toxml())
 
         # load up localized string hash from file
         for n in dom.getElementsByTagName("string"):
             strId = None
             strValue = None
 
-            strId = n.getAttribute("id")
+            strId = int(n.getAttribute("id"))
             strValue = n.childNodes[0].nodeValue 
             
             # only add it if an id has been specified
@@ -101,7 +101,7 @@ class Translator(object):
             log.debug("translated %d => %s" % (id, retStr))
             return retStr
 
-# =============================================================================
+
 class XBMCSettings(object):
 
     def __init__(self, filePath = None):
@@ -144,7 +144,7 @@ class XBMCSettings(object):
         #log.debug("returned (tag = %s, value = %s)"%(tag, value))
         return value
 
-# =============================================================================
+
 class XBMCLangInfo(XBMCSettings):
     
     def __init__(self, platform):
@@ -153,7 +153,7 @@ class XBMCLangInfo(XBMCSettings):
         filePath = os.path.join('resources', 'test', 'test_util', 'xbmc', 'language', xbmc.getLanguage(), 'langinfo.xml')
         XBMCSettings.__init__(self, filePath)
 
-# =============================================================================    
+
 class TranslatorTest(unittest.TestCase):
 
     def setUp(self):
@@ -172,7 +172,7 @@ class TranslatorTest(unittest.TestCase):
         log.debug('translated string(999) = ' + s)
         self.assertEquals('<Undefined>', s)
         
-# =============================================================================
+
 class XBMCLangInfoTest(unittest.TestCase):
 
     def test_getSetting_Success(self):
