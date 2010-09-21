@@ -26,6 +26,7 @@
 import logging
 import os
 import xbmcgui
+import mythbox.msg as m
 import mythbox.ui.toolkit as ui
 
 from datetime import datetime, timedelta
@@ -315,7 +316,7 @@ class TvGuideWindow(ui.BaseWindow):
             brain.watchLiveTV(channel)
         except Exception, e:
             log.exception(e)
-            xbmcgui.Dialog().ok('Error', '', str(e))
+            xbmcgui.Dialog().ok(self.translator.get(m.ERROR), '', str(e))
             
     @catchall_ui
     @lirc_hack

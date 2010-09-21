@@ -22,6 +22,7 @@ import logging
 import odict
 import os
 import xbmcgui
+import mythbox.msg as m
 
 from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.conn import inject_conn
@@ -34,7 +35,7 @@ log = logging.getLogger('mythbox.ui')
 ONE_DAY = datetime.timedelta(days=1)
 ONE_WEEK = datetime.timedelta(weeks=1)
 
-# ==============================================================================
+
 class UpcomingRecordingsWindow(BaseWindow):
     
     def __init__(self, *args, **kwargs):
@@ -80,12 +81,12 @@ class UpcomingRecordingsWindow(BaseWindow):
         program = self.programsByListItem[listItem]
         scheduleId = program.getScheduleId()
         if not scheduleId:
-            xbmcgui.Dialog().ok('Error', 'Program has no associated recording schedule')
+            xbmcgui.Dialog().ok(self.translator.get(m.ERROR), self.translator.get(m.ERR_NO_RECORDING_SCHEDULE))
             return
         
         schedules = self.db().getRecordingSchedules(scheduleId=scheduleId)
         if not schedules:
-            xbmcgui.Dialog().ok('Error', 'Recording schedule %d not found' % scheduleId)
+            xbmcgui.Dialog().ok(self.translator.get(m.ERROR), self.translator.get(m.ERR_SCHEDULE_NOT_FOUND) % scheduleId)
             return
         
         ScheduleDialog(
@@ -195,16 +196,15 @@ class UpcomingRecordingsWindow(BaseWindow):
             else:
                 self.setListItemProperty(listItem, 'poster', 'mythbox.png')
 
-    @staticmethod
-    def formattedAirDate(previous, current):
+    def formattedAirDate(self, previous, current):
         result = u''
         airDate = current.starttimeAsTime().date()
         if not previous or previous.starttimeAsTime().date() < airDate:
             today = datetime.date.today()
             if airDate == today:
-                result = u'Today'
+                result = self.translator.get(m.TODAY)
             elif today + ONE_DAY == airDate:
-                result = u'Tomorrow'
+                result = self.translator.get(m.TOMORROW)
             else:
                 result = datetime.date.strftime(airDate, '%a, %b %d')
         return result

@@ -154,7 +154,7 @@ class FileLiveTvBrain(BaseLiveTvBrain):
             progress.close()
             livePlayer = FileLiveTvPlayer()
             livePlayer.addListener(self)
-            livePlayer.playRecording(whatsPlaying, NoOpCommercialSkipper(livePlayer, whatsPlaying))
+            livePlayer.playRecording(whatsPlaying, NoOpCommercialSkipper(livePlayer, whatsPlaying, None))
             # del livePlayer # induce GC so on* callbacks unregistered
         except:
             # If things went south after starting livetv, attempt to stop livetv

@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 
-<!--  Next id = 204 -->
-
 <strings>
   <string id="0">Myth TV</string>
   <string id="1">Watch TV</string>
@@ -168,7 +166,7 @@
   <string id="143">Once each day</string>
   <string id="144">Once each week</string>
   
-  <!-- CheckForDupesUsing -->
+  <!-- enums.CheckForDupesUsing -->
   <string id="145">None</string>
   <string id="146">Subtitle</string>
   <string id="147">Description</string>
@@ -180,7 +178,7 @@
   <string id="150">Previous recordings</string>
   <string id="153">All recordings</string>
   
-  <!-- CheckForDupesIn:Filter -->
+  <!-- enums.EpisodeFilter -->
   <string id="201">None</string>
   <string id="152">New episodes only</string>
   <string id="151">Exclude repeat episodes</string>
@@ -278,15 +276,29 @@
   <string id="616">Size</string>
   <string id="617">Comm Breaks</string>
   
-
+  <string id="630">Job not found</string>
+  <string id="631">Loading...</string>
+  <string id="632">None</string>
+  <string id="633">Queued %d of %d</string>
+  
   <!-- Watch TV Screen -->
   <string id="700">[B]Watch TV[/B]</string>
 
+  <!-- Player -->
+  <string id="750">Resuming at %s</string>
+  <string id="751">Skipping commercial %s</string>
+  <string id="752">Forwarding through commercial %s</string>
 
   <!-- TV Guide Screen -->
   <string id="800">[B]TV Guide[/B]</string>
 
 
+  <!-- Recordings Screen -->
+  <string id="850">Date</string>
+  <string id="851">Title</string>
+  <string id="852">Orig. Air Date</string>
+  <string id="853">Sort</string>  
+  
   <!-- Recording Schedules Screen -->
   <string id="900">[B]Recording Schedules[/B]</string>
   <string id="901">[B]Title[/B]</string>
@@ -303,10 +315,14 @@
   <string id="1004">[B]Channel[/B]</string>
   <string id="1005">[B]Tuner[/B]</string>
   
+  <string id='1010'>Program has no associated recording schedule</string>
+  <string id='1011'>Recording schedule %d not found</string>
+  <string id='1012'>Today</string>
+  <string id='1013'>Tomorrow</string>  
 
   <!-- Create/Edit schedule dialog -->
-  <string id="1100">title1</string>
-  <string id="1101">title2</string>
+  <string id="1100">New Recording Schedule</string>
+  <string id="1101">Edit Recording Schedule</string>
   
   <string id="1102">Record</string>
   <string id="1103">Priority</string>
@@ -321,6 +337,12 @@
   <string id="1112">Start Recording</string>
   <string id="1113">End Recording</string>
   <string id="1114">Schedule Enabled</string>
+  <string id="1115">%d Episode(s)</string>
+  <string id="1116">All Episodes</string>
+  <string id="1117">%d minute(s) early</string>
+  <string id="1118">On time</string>
+  <string id="1119">%d minute(s) late</string>  
+  <string id="1123">Value must be between %d and %d</string>
   
   <string id="1120">Save</string>
   <string id="1121">Cancel</string>

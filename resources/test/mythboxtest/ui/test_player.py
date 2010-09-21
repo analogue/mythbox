@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -29,7 +29,7 @@ from mythbox.ui.player import EdlCommercialSkipper, PositionTracker, TrackerSamp
 
 log = logging.getLogger('mythbox.unittest')
 
-# =============================================================================
+
 class PositionTrackerTest(unittest.TestCase):
 
     def test_constructor(self):
@@ -66,7 +66,7 @@ class PositionTrackerTest(unittest.TestCase):
         for i in range(1, PositionTracker.HISTORY_SECS):
             self.assertTrue(i * (1000/SLEEP_MILLIS) <= len(tracker.getHistory(i)))
 
-# =============================================================================        
+
 class MockPlayer(object):
     
     def __init__(self, duration):
@@ -82,14 +82,14 @@ class MockPlayer(object):
     def getTime(self):
         return time.time() - self.timestamp
 
-# =============================================================================
+
 class MythPlayerTest(unittest.TestCase):
     
     def test_playRecording(self):
         pass
     
 #        # Setup
-#        player = MythPlayer(mythThumbnailCache=Mock())
+#        player = MythPlayer(mythThumbnailCache=Mock(), translator=Mock())
 #        program = Mock()
 #        conn = Mock()
 #        
@@ -109,7 +109,7 @@ class MythPlayerTest(unittest.TestCase):
 #        
 #        # Verify
             
-# =============================================================================
+
 class EdlCommercialSkipperTest(unittest.TestCase):
     
     def test_constructor_SkipFileCreatedForRecordingWithCommercials(self):
@@ -149,17 +149,18 @@ class EdlCommercialSkipperTest(unittest.TestCase):
         edlFile = os.path.join(tempfile.gettempdir(), 'movie2.edl')
         self.assertFalse(os.path.isfile(edlFile))
 
-# =============================================================================
+
 class BookmarkerTest(unittest.TestCase):
     
     def test_constructor(self):
         # TODO
         pass
     
-# =============================================================================
+
 class TrackingCommercialSkipperTest(unittest.TestCase):
     
     def setUp(self):
+        self.translator = Mock()
         self.tracker = Mock()
         
         self.player = Mock()
@@ -176,7 +177,7 @@ class TrackingCommercialSkipperTest(unittest.TestCase):
         when(self.player).getTime().thenReturn(500)
         
         # Test
-        skipper = TrackingCommercialSkipper(self.player, self.program)
+        skipper = TrackingCommercialSkipper(self.player, self.program, self.translator)
         skipper.onPlayBackStarted()
         time.sleep(1)
         when(self.player).isPlaying().thenReturn(False)
@@ -193,7 +194,7 @@ class TrackingCommercialSkipperTest(unittest.TestCase):
         when(self.player).getTime().thenReturn(500)
         
         # Test
-        skipper = TrackingCommercialSkipper(self.player, self.program)
+        skipper = TrackingCommercialSkipper(self.player, self.program, self.translator)
         skipper.onPlayBackStarted()
         time.sleep(2)
         when(self.player).isPlaying().thenReturn(False)
@@ -218,7 +219,7 @@ class TrackingCommercialSkipperTest(unittest.TestCase):
         when(self.tracker).getHistory(any()).thenReturn(trackerHistory)
         
         # Test
-        skipper = TrackingCommercialSkipper(self.player, self.program)
+        skipper = TrackingCommercialSkipper(self.player, self.program, self.translator)
         skipper.onPlayBackStarted()
         time.sleep(1)
         when(self.player).isPlaying().thenReturn(False)
@@ -243,7 +244,7 @@ class TrackingCommercialSkipperTest(unittest.TestCase):
 #        when(self.tracker).getHistory(any()).thenReturn(trackerHistory)
 #        
 #        # Test
-#        skipper = TrackingCommercialSkipper(self.player, self.program)
+#        skipper = TrackingCommercialSkipper(self.player, self.program, self.translator)
 #        skipper.onPlayBackStarted()
 #        time.sleep(1)
 #        when(self.player).isPlaying().thenReturn(False)
@@ -268,7 +269,7 @@ class TrackingCommercialSkipperTest(unittest.TestCase):
         when(self.tracker).getHistory(any()).thenReturn(trackerHistory)
         
         # Test
-        skipper = TrackingCommercialSkipper(self.player, self.program)
+        skipper = TrackingCommercialSkipper(self.player, self.program, self.translator)
         skipper.onPlayBackStarted()
         time.sleep(1)
         when(self.player).isPlaying().thenReturn(False)
@@ -277,7 +278,7 @@ class TrackingCommercialSkipperTest(unittest.TestCase):
         # Verify
         verify(self.player, times(0)).seekTime(any())        
 
-# =============================================================================    
+
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')

@@ -317,7 +317,7 @@
                 <posx>0</posx>
                 <posy>0</posy>
                 <width>285</width>
-                <label>Sort: $INFO[Window.Property(sortBy)]</label>
+                <label>$INFO[Window.Property(sortBy)]</label>
                 <align>left</align>
                 <textoffsetx>40</textoffsetx>
                 <texturefocus>button_focus.png</texturefocus>

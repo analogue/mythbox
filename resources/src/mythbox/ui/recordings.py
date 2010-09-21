@@ -20,6 +20,7 @@ import logging
 import odict
 import os
 import xbmcgui
+import mythbox.msg as m
 
 from mythbox.mythtv.conn import inject_conn
 from mythbox.ui.recordingdetails import RecordingDetailsWindow
@@ -37,9 +38,9 @@ ID_SORT_ASCENDING_TOGGLE = 252
 ID_RECORDING_GROUP_BUTTON = 253
 
 SORT_BY = odict.odict([
-    ('Date', lambda x: x.starttimeAsTime()), 
-    ('Title', lambda x: '%s%s' % (x.title(), x.originalAirDate())), 
-    ('Orig. Air Date', lambda x: x.originalAirDate())])
+    ('Date',           {'translation_id': 850, 'sorter' : lambda x: x.starttimeAsTime() }), 
+    ('Title',          {'translation_id': 851, 'sorter' : lambda x: '%s%s' % (x.title(), x.originalAirDate())}), 
+    ('Orig. Air Date', {'translation_id': 852, 'sorter' : lambda x: x.originalAirDate()})])
 
 
 class RecordingsWindow(BaseWindow):
@@ -139,7 +140,7 @@ class RecordingsWindow(BaseWindow):
         # TODO: Recording group filter
         #self.programs = filter(lambda p: p.getRecordingGroup() == self.group, self.programs)
         
-        self.programs.sort(key=SORT_BY[self.sortBy], reverse=self.sortAscending)
+        self.programs.sort(key=SORT_BY[self.sortBy]['sorter'], reverse=self.sortAscending)
         self.preCacheThumbnails()
         
         if self.platform.getName() in ('unix','mac') and  self.settings.isAggressiveCaching(): 
@@ -148,7 +149,7 @@ class RecordingsWindow(BaseWindow):
         self.render()
     
     def applySort(self):
-        self.programs.sort(key=SORT_BY[self.sortBy], reverse=self.sortAscending)
+        self.programs.sort(key=SORT_BY[self.sortBy]['sorter'], reverse=self.sortAscending)
         self.render()
         
 #    def applyRecordingGroup(self):
@@ -163,7 +164,7 @@ class RecordingsWindow(BaseWindow):
         self.renderPosters()
         
     def renderNav(self):
-        self.setWindowProperty('sortBy', self.sortBy)
+        self.setWindowProperty('sortBy', self.translator.get(m.SORT) + ': ' + self.translator.get(SORT_BY[self.sortBy]['translation_id']))
         self.setWindowProperty('sortAscending', ['false', 'true'][self.sortAscending])
 
     @timed

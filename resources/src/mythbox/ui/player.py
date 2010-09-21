@@ -22,9 +22,10 @@ import threading
 import time
 import xbmc
 import xbmcgui
+import mythbox.msg as m
 
 from mythbox.ui.toolkit import showPopup
-from mythbox.util import formatSeconds, BoundedEvictingQueue
+from mythbox.util import formatSeconds, BoundedEvictingQueue, safe_str
 from mythbox.mythtv.db import inject_db
 
 log = logging.getLogger('mythbox.ui')
@@ -46,7 +47,8 @@ class MythPlayer(xbmc.Player):
         xbmc.Player.__init__(self, *args, **kwargs)    
         self._active = True
         self.mythThumbnailCache = kwargs['mythThumbnailCache']
-    
+        self.translator = kwargs['translator']
+        
 #    def __del__(self):
 #        log.warn("\n\n\n\n\t\tGC'ing player\n\n\n")
 #        try:
@@ -134,7 +136,7 @@ class MythPlayer(xbmc.Player):
         self._playbackCompletedLock = threading.Event()
         self._playbackCompletedLock.clear()
         self._tracker = PositionTracker(self)
-        self._bookmarker = Bookmarker(self, self._program)
+        self._bookmarker = Bookmarker(self, self._program, self.translator)
         
     def _waitForPlaybackCompleted(self):
         while not self._playbackCompletedLock.isSet():
@@ -202,9 +204,10 @@ class MythStreamingPlayer(MythPlayer):
 class Bookmarker(object):
     """Mimics XBMC video player's builtin auto resume functionality"""
     
-    def __init__(self, player, program):
+    def __init__(self, player, program, translator):
         self._player = player
         self._program = program
+        self.translator = translator
         
     def onPlayBackStarted(self):
         self._resumeFromBookmark()
@@ -224,7 +227,7 @@ class Bookmarker(object):
         if bookmarkSecs > 0:
             fb = formatSeconds(bookmarkSecs)
             log.debug('Resuming recording at bookmarked position of %s' % fb)
-            showPopup(self._program.title(), 'Resuming at %s'%fb)
+            showPopup(self._program.title(), self.translator.get(m.RESUMING_AT) % fb)
             self._player.seekTime(bookmarkSecs)
             while self._player.getTime() < bookmarkSecs:
                 log.debug('Waiting for player time %s to seek past bookmark of %s' %(formatSeconds(self._player.getTime()), fb))
@@ -234,7 +237,7 @@ class Bookmarker(object):
 
     def _saveLastPositionAsBookmark(self):
         lastPos = self._player.getTracker().getLastPosition()
-        log.debug('Setting bookmark on %s to %s' %(self._program.title(), formatSeconds(lastPos)))
+        log.debug('Setting bookmark on %s to %s' %(safe_str(self._program.title()), formatSeconds(lastPos)))
         try:
             self._program.setBookmark(lastPos)
         except:
@@ -312,10 +315,11 @@ class TrackerSample(object):
 class ICommercialSkipper(object):
     """Common interface for commercial skipping implementations."""
     
-    def __init__(self, player, program):
+    def __init__(self, player, program, translator):
         self._player = player
         self._program = program
-    
+        self.translator = translator
+        
     def onPlayBackStarted(self):
         raise NotImplementedError, 'Abstract base class'
     
@@ -328,8 +332,8 @@ class ICommercialSkipper(object):
 
 class NoOpCommercialSkipper(ICommercialSkipper):
 
-    def __init__(self, player, program):
-        ICommercialSkipper.__init__(self, player, program)
+    def __init__(self, player, program, translator):
+        ICommercialSkipper.__init__(self, player, program, translator)
 
     def onPlayBackStarted(self):
         pass
@@ -353,8 +357,8 @@ class EdlCommercialSkipper(ICommercialSkipper):
     
     http://xbmc.org/trac/ticket/5048
     """
-    def __init__(self, player, program):
-        ICommercialSkipper.__init__(self, player, program)
+    def __init__(self, player, program, translator):
+        ICommercialSkipper.__init__(self, player, program, translator)
         self._writeSkipFile()
     
     def onPlayBackStarted(self):
@@ -391,8 +395,8 @@ class TrackingCommercialSkipper(ICommercialSkipper):
     and skips commercials accordingly.
     """
     
-    def __init__(self, player, program):
-        ICommercialSkipper.__init__(self, player, program)
+    def __init__(self, player, program, translator):
+        ICommercialSkipper.__init__(self, player, program, translator)
         
     def onPlayBackStarted(self):
         log.debug('program in skipper = %s' % self._program.title())
@@ -436,12 +440,12 @@ class TrackingCommercialSkipper(ICommercialSkipper):
                     log.debug('entered comm break = %s' % self._currentBreak)
                     if self._isCloseToStartOfCommercial(pos) and not self._wasUserSkippingAround(pos): 
                         log.debug('Comm skip activated!')
-                        showPopup(self._program.title(), 'Skipping commercial %s' % formatSeconds(self._currentBreak.duration()), 3000)
+                        showPopup(self._program.title(), self.translator.get(m.SKIPPING_COMMERCIAL) % formatSeconds(self._currentBreak.duration()), 3000)
                         self._player.seekTime(self._currentBreak.end)
                         self._waitForPlayerToPassCommercialBreak()
                     if self._landedInCommercial(pos):
                         log.debug("\n\n\n\t\t\tI landed in comm break and want to skip forward\n\n\n")  
-                        showPopup(self._program.title(), 'Forwarding through commercial %s' % formatSeconds(self._currentBreak.duration()), 3000)
+                        showPopup(self._program.title(), self.translator.get(m.FORWARDING_THROUGH) % formatSeconds(self._currentBreak.duration()), 3000)
                         self._player.seekTime(self._currentBreak.end)
                         self._waitForPlayerToPassCommercialBreak()
                     else:

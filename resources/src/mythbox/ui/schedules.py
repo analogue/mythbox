@@ -21,6 +21,7 @@ import logging
 import odict
 import os
 import xbmcgui
+import mythbox.msg as m
 
 from mythbox.mythtv.conn import inject_conn 
 from mythbox.mythtv.db import inject_db 
@@ -219,14 +220,15 @@ class ScheduleDialog(BaseDialog):
     @lirc_hack    
     @inject_conn
     def onClick(self, controlId):
+        t = self.translator.get
         log.debug('onClick %s ' % controlId)
         source = self.getControl(controlId)
         s = self.schedule
         
-        if controlId == 201: self._chooseFromList(ScheduleType.long_translations, 'Record When', 'scheduleType', s.setScheduleType)
+        if controlId == 201: self._chooseFromList(ScheduleType.long_translations, t(m.RECORD_WHEN), 'scheduleType', s.setScheduleType)
         
         elif controlId == 202:
-            priority = self._enterNumber('Recording Priority', s.getPriority(), -99, 99)
+            priority = self._enterNumber(t(m.RECORDING_PRIORITY), s.getPriority(), -99, 99)
             s.setPriority(priority)
             self.setWindowProperty('priority', str(priority))
         
@@ -245,25 +247,25 @@ class ScheduleDialog(BaseDialog):
         elif self.recordNewExpireOldCheckBox == source: 
             s.setRecordNewAndExpireOld(self.recordNewExpireOldCheckBox.isSelected())    
         
-        elif controlId == 203: self._chooseFromList(CheckForDupesUsing.translations, 'Check for Duplicates Using', 'checkForDupesUsing', s.setCheckForDupesUsing)            
-        elif controlId == 204: self._chooseFromList(CheckForDupesIn.translations, 'Check for Duplicates In', 'checkForDupesIn', s.setCheckForDupesIn)
-        elif controlId == 208: self._chooseFromList(EpisodeFilter.translations, 'Episode Filter', 'episodeFilter', s.setEpisodeFilter)
+        elif controlId == 203: self._chooseFromList(CheckForDupesUsing.translations, t(m.CHECK_FOR_DUPES_USING), 'checkForDupesUsing', s.setCheckForDupesUsing)            
+        elif controlId == 204: self._chooseFromList(CheckForDupesIn.translations, t(m.CHECK_FOR_DUPES_IN), 'checkForDupesIn', s.setCheckForDupesIn)
+        elif controlId == 208: self._chooseFromList(EpisodeFilter.translations, t(m.EPISODE_FILTER), 'episodeFilter', s.setEpisodeFilter)
             
         elif controlId == 206:
-            maxEpisodes = self._enterNumber('Keep At Most - Episodes', s.getMaxEpisodes(), 0, 99)
+            maxEpisodes = self._enterNumber(t(m.KEEP_AT_MOST), s.getMaxEpisodes(), 0, 99)
             s.setMaxEpisodes(maxEpisodes)
-            self.setWindowProperty('maxEpisodes', ('%d Episode(s)' % maxEpisodes, 'All Episodes')[maxEpisodes == 0])
+            self.setWindowProperty('maxEpisodes', (t(m.N_EPISODES) % maxEpisodes, t(m.ALL_EPISODES))[maxEpisodes == 0])
 
         elif controlId == 209:
-            minutes = self._enterNumber('Start Recording Early - Minutes', s.getStartOffset(), 0, 60) 
+            minutes = self._enterNumber(t(m.START_RECORDING_EARLY), s.getStartOffset(), 0, 60) 
             s.setStartOffset(minutes)
-            self.setWindowProperty('startEarly', ('%d minute(s) early' % minutes, 'On time')[minutes == 0]) 
-
+            self.setWindowProperty('startEarly', (t(m.N_MINUTES_EARLY) % minutes, t(m.ON_TIME))[minutes == 0]) 
+             
         elif controlId == 210:
-            minutes = self._enterNumber('End Recording Late - Minutes', s.getEndOffset(), 0, 60) 
+            minutes = self._enterNumber(t(m.END_RECORDING_LATE), s.getEndOffset(), 0, 60) 
             s.setEndOffset(minutes)
-            self.setWindowProperty('endLate', ('%d minute(s) late' % minutes, 'On time')[minutes == 0])
-            
+            self.setWindowProperty('endLate', (t(m.N_MINUTES_LATE) % minutes, t(m.ON_TIME))[minutes == 0])
+             
         elif self.saveButton == source:
             log.debug("Save button clicked")
             self.conn().saveSchedule(self.schedule)
@@ -282,12 +284,13 @@ class ScheduleDialog(BaseDialog):
 
     def _updateView(self):
         s = self.schedule
+        t = self.translator.get
         
         if s.getScheduleId() is None:
-            self.setWindowProperty('heading', 'New Recording Schedule')
+            self.setWindowProperty('heading', t(m.NEW_SCHEDULE))
             self.deleteButton.setEnabled(False)
         else:
-            self.setWindowProperty('heading', 'Edit Recording Schedule')
+            self.setWindowProperty('heading', t(m.EDIT_SCHEDULE))
 
         logo = 'mythbox-logo.png'    
         try:
@@ -305,30 +308,30 @@ class ScheduleDialog(BaseDialog):
             self.setWindowProperty('startTime', s.formattedTime())
         except:
             log.exception("HACK ALERT: s.formattedTime() blew up. Known issue.")
-            self.setWindowProperty('startTime', 'Unknown')
+            self.setWindowProperty('startTime', t(m.UNKNOWN))
             
         self.setWindowProperty('title', s.title())    
         self.setWindowProperty('startDate', s.formattedStartDate())    
         self.setWindowProperty('scheduleType', s.formattedScheduleTypeDescription())
         self.setWindowProperty('priority', str(s.getPriority()))
 
-        self.autoCommFlagCheckBox.setLabel('Auto-flag Commercials')
+        self.autoCommFlagCheckBox.setLabel(t(m.AUTOFLAG_COMMERCIALS))
         self.autoCommFlagCheckBox.setSelected(s.isAutoCommFlag())
         
-        self.autoExpireCheckBox.setLabel('Auto-expire')
+        self.autoExpireCheckBox.setLabel(t(m.AUTO_EXPIRE))
         self.autoExpireCheckBox.setSelected(s.isAutoExpire())
         
-        self.setWindowProperty('checkForDupesUsing', self.translator.get(CheckForDupesUsing.translations[s.getCheckForDupesUsing()]))
-        self.setWindowProperty('checkForDupesIn', self.translator.get(CheckForDupesIn.translations[s.getCheckForDupesIn()]))
-        self.setWindowProperty('episodeFilter', self.translator.get(EpisodeFilter.translations[s.getEpisodeFilter()])) 
+        self.setWindowProperty('checkForDupesUsing', t(CheckForDupesUsing.translations[s.getCheckForDupesUsing()]))
+        self.setWindowProperty('checkForDupesIn', t(CheckForDupesIn.translations[s.getCheckForDupesIn()]))
+        self.setWindowProperty('episodeFilter', t(EpisodeFilter.translations[s.getEpisodeFilter()])) 
         
         self.enabledCheckBox.setSelected(s.isEnabled())
         self.autoTranscodeCheckBox.setSelected(s.isAutoTranscode())
         self.recordNewExpireOldCheckBox.setSelected(s.isRecordNewAndExpireOld())
         
-        self.setWindowProperty('maxEpisodes', ('%d Episode(s)' % s.getMaxEpisodes(), 'All Episodes')[s.getMaxEpisodes() == 0])
-        self.setWindowProperty('startEarly', ('%d minute(s) early' % s.getStartOffset(), 'On time')[s.getStartOffset() == 0])
-        self.setWindowProperty('endLate', ("%d minute(s) late" % s.getEndOffset(), 'On time')[s.getEndOffset() == 0])
+        self.setWindowProperty('maxEpisodes', (t(m.N_EPISODES) % s.getMaxEpisodes(), t(m.ALL_EPISODES))[s.getMaxEpisodes() == 0])
+        self.setWindowProperty('startEarly', (t(m.N_MINUTES_EARLY) % s.getStartOffset(), t(m.ON_TIME))[s.getStartOffset() == 0])
+        self.setWindowProperty('endLate', (t(m.N_MINUTES_LATE) % s.getEndOffset(), t(m.ON_TIME))[s.getEndOffset() == 0])
             
     def _chooseFromList(self, translations, title, property, setter):
         """
@@ -356,6 +359,7 @@ class ScheduleDialog(BaseDialog):
         @param max: Max value of number as int
         @return: entered number as int
         """
+        t = self.translator.get
         value = xbmcgui.Dialog().numeric(0, heading, str(current))
         if value is None or value == str(current):
             return current
@@ -363,11 +367,11 @@ class ScheduleDialog(BaseDialog):
         result = int(value)
         
         if min is not None and result < min:
-            xbmcgui.Dialog().ok('Error', 'Value must be between %d and %d' % (min, max))
+            xbmcgui.Dialog().ok(t(m.ERROR), t(m.ERR_VALUE_BETWEEN) % (min, max))
             result = current
             
         if max is not None and result > max:
-            xbmcgui.Dialog().ok('Error', 'Value must be between %d and %d' % (min, max))
+            xbmcgui.Dialog().ok(t(m.ERROR), t(m.ERR_VALUE_BETWEEN) % (min, max))
             result = current
             
         return result             

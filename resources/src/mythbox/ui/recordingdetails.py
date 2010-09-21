@@ -19,6 +19,7 @@
 import logging
 import os
 import xbmcgui
+import mythbox.msg as m
 
 from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.conn import inject_conn
@@ -84,7 +85,7 @@ class RecordingDetailsWindow(BaseWindow):
     def delete(self):
         yes = True
         if self.settings.isConfirmOnDelete():
-            yes = xbmcgui.Dialog().yesno(self.translator.get(28), self.translator.get(65))
+            yes = xbmcgui.Dialog().yesno(self.translator.get(m.CONFIRMATION), self.translator.get(m.ASK_DELETE_RECORDING))
 
         @run_async
         @catchall
@@ -100,8 +101,8 @@ class RecordingDetailsWindow(BaseWindow):
     def rerecord(self):
         yes = True
         if self.settings.isConfirmOnDelete():
-            yes = xbmcgui.Dialog().yesno(self.translator.get(28), self.translator.get(65))
-      
+            yes = xbmcgui.Dialog().yesno(self.translator.get(m.CONFIRMATION), self.translator.get(m.ASK_RERECORD_RECORDING))
+
         @run_async
         @catchall
         @inject_conn
@@ -121,36 +122,36 @@ class RecordingDetailsWindow(BaseWindow):
             job.moveToFrontOfQueue()
             self.refresh()
         else:
-            xbmcgui.Dialog().ok('Error', 'Job not found')
+            xbmcgui.Dialog().ok(self.translator.get(m.ERROR), self.translator.get(m.JOB_NOT_FOUND)) 
 
     def play(self):
-        p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache)
+        p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
         
         # TODO: Can't turn off commskip in myth://. I like my commskip w/ toasters better...
         #from mythbox.ui.player import MythStreamingPlayer
         #p = MythStreamingPlayer(mythThumbnailCache=self.mythThumbnailCache, settings=self.settings)
-        p.playRecording(self.program, NoOpCommercialSkipper(p, self.program))
+        p.playRecording(self.program, NoOpCommercialSkipper(p, self.program, self.translator))
         del p 
     
     def playWithCommSkip(self):
-        p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache)
+        p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
         
         # TODO: Can't turn off commskip in myth://. I like my commskip w/ toasters better...
         #from mythbox.ui.player import MythStreamingPlayer
         #p = MythStreamingPlayer(mythThumbnailCache=self.mythThumbnailCache, settings=self.settings)
         
-        p.playRecording(self.program, TrackingCommercialSkipper(p, self.program))
+        p.playRecording(self.program, TrackingCommercialSkipper(p, self.program, self.translator))
         del p 
         
     @inject_db
     def editSchedule(self):
         if self.program.getScheduleId() is None:
-            xbmcgui.Dialog().ok('Info', 'Recording schedule not found.')
+            xbmcgui.Dialog().ok(self.translator.get(m.INFO), self.translator.get(m.ERR_SCHEDULE_NOT_FOUND))
             return
     
         schedules = self.db().getRecordingSchedules(scheduleId=self.program.getScheduleId())
         if len(schedules) == 0:
-            xbmcgui.Dialog().ok('Info', 'Recording schedule not found.')
+            xbmcgui.Dialog().ok(self.translator.get(m.INFO), self.translator.get(m.ERR_SCHEDULE_NOT_FOUND))
             return 
 
         editScheduleDialog = ScheduleDialog(
@@ -228,7 +229,7 @@ class RecordingDetailsWindow(BaseWindow):
         self.setWindowProperty('category', s.category())
         self.setWindowProperty('fileSize', s.formattedFileSize())
         self.setWindowProperty('autoExpire', (('No', 'Yes')[s.isAutoExpire()]))
-        self.setWindowProperty('commBreaks', 'Loading...')       
+        self.setWindowProperty('commBreaks', self.translator.get(m.LOADING))       
         self.setWindowProperty('index', str(self.programIterator.index() + 1))
         self.setWindowProperty('numRecordings', str(self.programIterator.size()))
 
@@ -260,7 +261,7 @@ class RecordingDetailsWindow(BaseWindow):
     def renderCommBreaks(self):
         self.playSkipButton.setEnabled(self.program.hasCommercials())
         self.firstInQueueButton.setEnabled(False)
-        commBreaks = 'No'
+        commBreaks = '-'
         if self.program.isCommFlagged():
             if self.program.hasCommercials():
                 # Only move focus to Skip button if user hasn't changed the initial focus
@@ -268,14 +269,14 @@ class RecordingDetailsWindow(BaseWindow):
                     self.setFocus(self.playSkipButton)
                 commBreaks = "%d" % len(self.program.getCommercials())
             else:
-                commBreaks = 'None'
+                commBreaks = self.translator.get(m.NONE)
         else:
             jobs = self.db().getJobs(program=self.program, jobType=JobType.COMMFLAG)
             if len(jobs) == 1:
                 job = jobs[0]
                 if job.jobStatus == JobStatus.QUEUED:
                     position, numJobs = job.getPositionInQueue() 
-                    commBreaks = 'Queued %d of %d' % (position, numJobs)
+                    commBreaks = self.translator.get(m.QUEUED_N_OF_M) % (position, numJobs)
                     if position != 1:
                         self.firstInQueueButton.setEnabled(True)
                 elif job.jobStatus == JobStatus.RUNNING:
