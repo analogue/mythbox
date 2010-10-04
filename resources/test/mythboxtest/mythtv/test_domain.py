@@ -339,7 +339,21 @@ class RecordedProgramTest(unittest.TestCase):
             s = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn).formattedDuration()
             log.debug('Duration = %s' % s)
             self.assertEquals(d['expected'], s)
+      
+    def test_originalAirDate_When_missing_Returns_None(self):
+        self.data[38] = 0
+        self.data[37] = ''
+        rp = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+        self.assertTrue(rp.originalAirDate() is None)
+        self.assertFalse(rp.hasOriginalAirDate())
         
+    def test_originalAirDate_When_available_Returns_date_as_string(self):
+        self.data[38] = 1
+        self.data[37] = '2008-10-10'
+        rp = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+        self.assertEquals('2008-10-10', rp.originalAirDate())
+        self.assertTrue(rp.hasOriginalAirDate())
+            
     def socketTime(self, h, m, s):
         # return raw value that myth passes over socket for today and passed in starttime/endtime (in local timezone)
         return time.mktime(datetime.datetime.combine(datetime.date.today(), datetime.time(h,m,s)).timetuple())

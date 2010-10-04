@@ -645,7 +645,7 @@ class RecordedProgram(Program):
         """
         @todo: not available via myth protocol record. Fix me!
         """
-        return False
+        return self.getDuration() >= 90
     
     def conn(self):
         return self._conn
@@ -843,15 +843,15 @@ class RecordedProgram(Program):
         """
         return self._data[34]
 
+    def hasOriginalAirDate(self):
+        return int(self._data[38]) == 1
+    
     def originalAirDate(self):
-        try:
-            if int(self._data[38]) <> 0:
-                return self._data[37]
-            else:
-                return None
-        except:
-            # TODO: Do we need this catch this?
-            return None
+        '''
+        @rtype: str
+        @sample: 2010-07-14
+        '''
+        return [None, self._data[37]][self.hasOriginalAirDate()]
     
     def getStorageGroup(self):
         """
