@@ -23,21 +23,24 @@ from mythbox.fanart import chain, ImdbFanartProvider, TvdbFanartProvider, \
     OneStrikeAndYoureOutFanartProvider, SpamSkippingFanartProvider, \
     HttpCachingFanartProvider
 from mythbox.filecache import FileCache, HttpResolver
-from mythbox.mythtv.domain import TVProgram, Program
+from mythbox.mythtv.domain import TVProgram, Program, RecordedProgram
 from mythbox.util import run_async, safe_str
+import mythbox.mythtv.protocol as protocol
+
+import datetime
 import logging
 import os
 import random
 import shutil
 import tempfile
 import time
-import unittest
+import unittest2
 
 
 log = logging.getLogger('mythbox.unittest')
 
 
-class ChainDecoratorTest(unittest.TestCase):
+class ChainDecoratorTest(unittest2.TestCase):
 
     class Link1(object):
         @chain
@@ -67,7 +70,7 @@ class ChainDecoratorTest(unittest.TestCase):
         link2.nextProvider = None
         
         result = link1.foo('blah')
-        self.assertEquals("Wow!", result)
+        self.assertEqual("Wow!", result)
 
     def test_chain_When_decorated_func_returns_value_Then_return_value(self):
         link1 = ChainDecoratorTest.Link1()
@@ -77,20 +80,20 @@ class ChainDecoratorTest(unittest.TestCase):
         link2.nextProvider = link1
         
         result = link2.foo('blah')
-        self.assertEquals("Wow!", result)
+        self.assertEqual("Wow!", result)
 
     def test_chain_When_decorated_func_returns_none_and_nextProvider_none_Then_return_none(self):
         link1 = ChainDecoratorTest.Link1()
         link1.nextProvider = None
         result = link1.foo('blah')
-        self.assertTrue(result is None)
+        self.assertIsNone(result)
 
     def test_chain_When_decorated_func_returns_empty_list_Then_return_nextProviders_result(self):
         link3 = ChainDecoratorTest.Link3()
         link4 = ChainDecoratorTest.Link4()
         link3.nextProvider = link4
         result = link3.foo()
-        self.assertEquals('Wee!', result[0])
+        self.assertEqual('Wee!', result[0])
 
     def test_chain_When_decorated_func_returns_non_empty_list_Then_return_non_empty_list(self):
         link3 = ChainDecoratorTest.Link3()
@@ -98,16 +101,16 @@ class ChainDecoratorTest(unittest.TestCase):
         link3.nextProvider = None
         link4.nextProvider = link3
         result = link4.foo()
-        self.assertEquals('Wee!', result[0])
+        self.assertEqual('Wee!', result[0])
         
     def test_chain_When_decorated_func_returns_empty_list_and_nextProvider_none_Then_return_empty_list(self):
         link3 = ChainDecoratorTest.Link3()
         link3.nextProvider = None
         result = link3.foo()
-        self.assertTrue(len(result) == 0)
+        self.assertListEqual([], result)
 
 
-class BaseFanartProviderTestCase(unittest.TestCase):
+class BaseFanartProviderTestCase(unittest2.TestCase):
     
     movies = [
         u'The Shawshank Redemption',
@@ -208,7 +211,7 @@ class ImdbFanartProviderTest(BaseFanartProviderTestCase):
         # Verify
         log.debug('Poster URL = %s' % posterUrl)
         try:
-            self.assertEquals('http', posterUrl[0:4])
+            self.assertEqual('http', posterUrl[0:4])
         except TypeError, te:
             # IMDB is down or not working. pass test with warning
             # Symptom: TypeError: unsubscriptable object
@@ -223,7 +226,7 @@ class ImdbFanartProviderTest(BaseFanartProviderTestCase):
         posterUrl = provider.getRandomPoster(program)
         
         # Verify
-        self.assertTrue(posterUrl is None)
+        self.assertIsNone(posterUrl)
 
     def test_getPosters_When_program_is_a_movie_Then_returns_fanart(self):
         # Setup
@@ -236,18 +239,12 @@ class ImdbFanartProviderTest(BaseFanartProviderTestCase):
         # Verify
         log.debug('Poster URLs = %s' % posters)
         for p in posters:
-            self.assertEquals('http', p[0:4])
+            self.assertEqual('http', p[0:4])
 
     def test_getPosters_When_program_is_not_movie_Then_returns_empty_list(self):
-        # Setup
         program = TVProgram({'title':'Seinfeld', 'category_type':'series'}, translator=Mock())
         provider = ImdbFanartProvider(nextProvider=None)
-        
-        # Test
-        posters = provider.getPosters(program)
-        
-        # Verify
-        self.assertTrue(len(posters) == 0)
+        self.assertListEqual([], provider.getPosters(program))
         
 
 class TvdbFanartProviderTest(BaseFanartProviderTestCase):
@@ -255,11 +252,9 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
     def setUp(self):
         self.platform = Mock()
         self.sandbox = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.sandbox, ignore_errors=True)
         when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
             
-    def tearDown(self):
-        shutil.rmtree(self.sandbox, ignore_errors=True)
-    
     def getPrograms(self):
         return self.getTvShows()
     
@@ -299,19 +294,13 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         
         # Verify
         log.debug('Poster URL = %s' % posterUrl)
-        try: self.assertEquals("http", posterUrl[0:4])
+        try: self.assertEqual("http", posterUrl[0:4])
         except TypeError: pass  # HACK: In case tvdb.com unreachable
 
     def test_getRandomPoster_When_program_is_movie_Then_returns_None(self):
-        # Setup
         program = TVProgram({'title':'Departed', 'category_type':'movie'}, translator=Mock())
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
-        
-        # Test
-        posterUrl = provider.getRandomPoster(program)
-        
-        # Verify
-        self.assertTrue(posterUrl is None)
+        self.assertIsNone(provider.getRandomPoster(program))
 
     def test_getPosters_When_program_is_not_movie_Then_returns_posters(self):
         # Setup
@@ -324,18 +313,12 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         # Verify
         log.debug('Poster URLs = %s' % posterUrls)
         for posterUrl in posterUrls:
-            self.assertEquals("http", posterUrl[0:4])
+            self.assertEqual("http", posterUrl[0:4])
  
     def test_getPosters_When_program_is_movie_Then_returns_empty_list(self):
-        # Setup
         program = TVProgram({'title':'Departed', 'category_type':'movie'}, translator=Mock())
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
-        
-        # Test
-        posterUrls = provider.getPosters(program)
-        
-        # Verify
-        self.assertTrue(len(posterUrls) == 0)
+        self.assertListEqual([], provider.getPosters(program))
 
     def test_getPosters_When_program_the_office_Then_returns_first_result_which_is_wrong_fixme(self):
         # Setup
@@ -348,7 +331,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         # Verify
         log.debug('Poster URLs = %s' % posterUrls)
         for posterUrl in posterUrls:
-            self.assertEquals("http", posterUrl[0:4])
+            self.assertEqual("http", posterUrl[0:4])
 
     def test_getPosters_When_title_has_funny_chars_Then_dont_fail_miserably(self):
         # Setup
@@ -361,7 +344,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         # Verify
         log.debug('Posters = %s' % posters)
         for p in posters:
-            self.assertEquals('http', p[0:4])
+            self.assertEqual('http', p[0:4])
 
     def test_getPosters_When_pounded_by_many_threads_looking_up_same_program_Then_doesnt_fail_miserably(self):
         
@@ -387,6 +370,27 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
 
         self.assertFalse(self.fail)
         
+    def test_getSeasonAndEpisode_Success(self):
+        # Setup
+        data = [''] * protocol.Protocol57().recordSize()
+        data[0]  = u'The Real World'
+        data[11] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
+        data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
+        data[38] = 1  # has original air date
+        data[37] = '2010-07-14'
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        provider = TvdbFanartProvider(self.platform, nextProvider=None)
+        
+        # Test
+        season, episode = provider.getSeasonAndEpisode(program)
+        
+        # Verify
+        self.assertEqual('24', season)
+        self.assertEqual('3', episode)
+        
+    def test_getSeasonAndEpisode_Fail(self):
+        pass
+        
 
 class TheMovieDbFanartProviderTest(BaseFanartProviderTestCase):
 
@@ -410,21 +414,15 @@ class TheMovieDbFanartProviderTest(BaseFanartProviderTestCase):
         # Verify
         log.debug('Poster URL = %s' % posterUrl)
         try:
-            self.assertEquals('http', posterUrl[0:4])
+            self.assertEqual('http', posterUrl[0:4])
         except TypeError:
             # HACK: so unit test doesn't fail when TMDB.com is down
             pass
         
     def test_getRandomPoster_When_program_is_not_movie_Then_returns_None(self):
-        # Setup
         program = TVProgram({'title': 'Seinfeld', 'category_type':'series'}, translator=Mock())
         provider = TheMovieDbFanartProvider(nextProvider=None)
-        
-        # Test
-        posterUrl = provider.getRandomPoster(program)
-        
-        # Verify
-        self.assertTrue(posterUrl is None)
+        self.assertIsNone(provider.getRandomPoster(program))
 
     def test_getPosters_When_program_is_movie_Then_returns_posters(self):
         # Setup
@@ -437,18 +435,12 @@ class TheMovieDbFanartProviderTest(BaseFanartProviderTestCase):
         # Verify
         log.debug('Posters = %s' % posters)
         for p in posters:
-            self.assertEquals('http', p[0:4])
+            self.assertEqual('http', p[0:4])
 
     def test_getPosters_When_program_is_not_movie_Then_returns_empty_list(self):
-        # Setup
         program = TVProgram({'title': 'Seinfeld', 'category_type':'series'}, translator=Mock())
         provider = TheMovieDbFanartProvider(nextProvider=None)
-        
-        # Test
-        posters = provider.getPosters(program)
-        
-        # Verify
-        self.assertTrue(len(posters) == 0)
+        self.assertListEqual([], provider.getPosters(program))
 
 
 class GoogleImageSearchProviderTest(BaseFanartProviderTestCase):
@@ -474,7 +466,7 @@ class GoogleImageSearchProviderTest(BaseFanartProviderTestCase):
         log.debug('Poster path = %s' % posterUrl)
 
         # HACK: so unit test doesn't fail when google is unreachable
-        try: self.assertEquals('http', posterUrl[0:4])
+        try: self.assertEqual('http', posterUrl[0:4])
         except TypeError: pass
         
     def test_getPosters_works(self):
@@ -488,7 +480,7 @@ class GoogleImageSearchProviderTest(BaseFanartProviderTestCase):
         # Verify
         log.debug('Posters = %s' % posters)
         for p in posters:
-            self.assertEquals('http', p[0:4])
+            self.assertEqual('http', p[0:4])
 
     def test_getPosters_When_title_has_funny_chars_Then_dont_fail_miserably(self):
         # Setup
@@ -501,22 +493,20 @@ class GoogleImageSearchProviderTest(BaseFanartProviderTestCase):
         # Verify
         log.debug('Posters = %s' % posters)
         for p in posters:
-            self.assertEquals('http', p[0:4])
+            self.assertEqual('http', p[0:4])
 
 
-class HttpCachingFanartProviderTest(unittest.TestCase):
+class HttpCachingFanartProviderTest(unittest2.TestCase):
 
     def setUp(self):
         self.nextProvider = Mock()
         self.dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.dir, ignore_errors=True)
         self.httpCache = FileCache(self.dir, HttpResolver())
         self.program = TVProgram({'title': 'Not Important', 'category_type':'series'}, translator=Mock())
         self.provider = HttpCachingFanartProvider(self.httpCache, self.nextProvider)
+        self.addCleanup(self.provider.close)
 
-    def tearDown(self):
-        self.provider.close()
-        shutil.rmtree(self.dir, ignore_errors=True)
-        
     def test_getPosters_When_next_provider_returns_posters_Then_cache_and_return_first_poster_and_add_remaining_to_work_queue(self):
         httpUrls = [
             'http://www.gstatic.com/hostedimg/1f4337d461f1431c_large',
@@ -535,7 +525,7 @@ class HttpCachingFanartProviderTest(unittest.TestCase):
         
         # Verify
         log.debug('Posters= %s' % posters)
-        self.assertEquals(1, len(posters))
+        self.assertEqual(1, len(posters))
         
         while len(posters) < len(httpUrls):
             time.sleep(1)
@@ -551,28 +541,22 @@ class HttpCachingFanartProviderTest(unittest.TestCase):
         
         # Verify
         log.debug('Posters= %s' % posters)
-        self.assertEquals('logo.gif', posters[0])
+        self.assertEqual('logo.gif', posters[0])
 
     def test_getPosters_When_next_link_in_chain_doesnt_find_posters_Then_dont_cache_anything(self):
-        # Setup
         when(self.nextProvider).getPosters(any(Program)).thenReturn([])
-        
-        # Test
-        posters = self.provider.getPosters(self.program)
-        
-        # Verify
-        self.assertTrue(len(posters) == 0)
+        self.assertListEqual([], self.provider.getPosters(self.program))
 
         
-class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
+class OneStrikeAndYoureOutFanartProviderTest(unittest2.TestCase):
 
     def setUp(self):
         self.delegate = Mock()
         self.nextProvider = Mock()
         self.platform = Mock()
         self.sandbox = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.sandbox)
         when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
-        import datetime
         self.program = TVProgram({
             'title': 'Two Fat Ladies', 
             'category_type':'series',
@@ -584,9 +568,6 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
             },
             translator=Mock())
     
-    def tearDown(self):
-        shutil.rmtree(self.sandbox)
-        
     def test_getRandomPoster_When_not_struck_out_and_delegate_returns_none_Then_strike_out_and_return_nextProviders_result(self):
         # Setup
         provider = OneStrikeAndYoureOutFanartProvider(self.platform, self.delegate, self.nextProvider)
@@ -597,8 +578,8 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
         poster = provider.getRandomPoster(self.program)
         
         # Verify
-        self.assertEquals('blah.png', poster)
-        self.assertTrue(self.program.title() in provider.struckOut.values())
+        self.assertEqual('blah.png', poster)
+        self.assertIn(self.program.title(), provider.struckOut.values())
         
     def test_getRandomPoster_When_not_struck_out_and_delegate_returns_poster_Then_return_poster(self):
         # Setup
@@ -609,8 +590,8 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
         poster = provider.getRandomPoster(self.program)
         
         # Verify
-        self.assertEquals('blah.png', poster)
-        self.assertFalse(self.program.title() in provider.struckOut.values())
+        self.assertEqual('blah.png', poster)
+        self.assertNotIn(self.program.title(), provider.struckOut.values())
         verifyZeroInteractions(self.nextProvider)
 
     def test_getRandomPoster_When_struck_out_Then_skip_delegate_and_return_nextProviders_result(self):
@@ -623,8 +604,8 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
         poster = provider.getRandomPoster(self.program)
         
         # Verify
-        self.assertEquals('blah.png', poster)
-        self.assertTrue(self.program.title() in provider.struckOut.values())
+        self.assertEqual('blah.png', poster)
+        self.assertIn(self.program.title(), provider.struckOut.values())
         verifyZeroInteractions(self.delegate)
 
     def test_getPosters_When_not_struck_out_and_delegate_returns_empty_list_Then_strike_out_and_return_nextProviders_result(self):
@@ -637,8 +618,8 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
         posters = provider.getPosters(self.program)
         
         # Verify
-        self.assertEquals('blah.png', posters[0])
-        self.assertTrue(self.program.title() in provider.struckOut.values())
+        self.assertEqual('blah.png', posters[0])
+        self.assertIn(self.program.title(), provider.struckOut.values())
         
         
     def test_getPosters_When_not_struck_out_and_delegate_returns_posters_Then_return_posters(self):
@@ -650,8 +631,8 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
         posters = provider.getPosters(self.program)
         
         # Verify
-        self.assertEquals('blah.png', posters[0])
-        self.assertFalse(self.program.title() in provider.struckOut.values())
+        self.assertEqual('blah.png', posters[0])
+        self.assertNotIn(self.program.title(), provider.struckOut.values())
         verifyZeroInteractions(self.nextProvider)
 
     def test_getPosters_When_struck_out_Then_skip_delegate_and_return_nextProviders_result(self):
@@ -664,8 +645,8 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
         posters = provider.getPosters(self.program)
         
         # Verify
-        self.assertEquals('blah.png', posters[0])
-        self.assertTrue(self.program.title() in provider.struckOut.values())
+        self.assertEqual('blah.png', posters[0])
+        self.assertIn(self.program.title(), provider.struckOut.values())
         verifyZeroInteractions(self.delegate)
 
     def test_clear_When_struckout_not_empty_Then_empties_struckout_and_forwards_to_delegate(self):
@@ -677,7 +658,7 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
         provider.clear()
         
         # Verify
-        self.assertTrue(len(provider.struckOut) == 0)
+        self.assertFalse(len(provider.struckOut))
         verify(self.delegate, times=1).clear()
         
     def test_constructor_When_delegate_is_none_Then_raise_exception(self):
@@ -688,7 +669,7 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
             log.debug('SUCCESS: got exception on null delegate')
 
 
-class SpamSkippingFanartProviderTest(unittest.TestCase):
+class SpamSkippingFanartProviderTest(unittest2.TestCase):
         
     def setUp(self):
         self.spam = TVProgram({'title': 'Paid Programming', 'category_type':'series'}, translator=Mock())
@@ -697,11 +678,11 @@ class SpamSkippingFanartProviderTest(unittest.TestCase):
         self.provider = SpamSkippingFanartProvider(nextProvider=self.next)  
             
     def test_getPosters_When_spam_Then_returns_no_posters(self):
-        self.assertEquals(0, len(self.provider.getPosters(self.spam)))
+        self.assertListEqual([], self.provider.getPosters(self.spam))
         
     def test_getPosters_When_not_spam_Then_forwards_to_next(self):
         when(self.next).getPosters(any()).thenReturn(['blah.png'])
-        self.assertEquals('blah.png', self.provider.getPosters(self.notSpam)[0])
+        self.assertEqual('blah.png', self.provider.getPosters(self.notSpam)[0])
      
     def test_hasPosters_When_spam_Then_true(self):
         self.assertTrue(self.provider.hasPosters(self.spam))
@@ -711,18 +692,16 @@ class SpamSkippingFanartProviderTest(unittest.TestCase):
         self.assertFalse(self.provider.hasPosters(self.notSpam))
 
 
-class SuperFastFanartProviderTest(unittest.TestCase):
+class SuperFastFanartProviderTest(unittest2.TestCase):
     
     def setUp(self):
         self.sandbox = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.sandbox, ignore_errors=True)
         self.nextProvider = Mock()
         self.platform = Mock()
         when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
         self.program = TVProgram({'title': 'Two Fat Ladies', 'category_type':'series'}, translator=Mock())
         self.provider = SuperFastFanartProvider(self.platform, self.nextProvider)
-
-    def tearDown(self):
-        shutil.rmtree(self.sandbox, ignore_errors=True)
 
     @staticmethod
     def programs(cnt):
@@ -745,10 +724,11 @@ class SuperFastFanartProviderTest(unittest.TestCase):
         self.provider.close()
         filesize = os.path.getsize(self.provider.pfilename)
         log.debug('Pickle file size = %d' % filesize)
-        self.assertTrue(filesize > 0)
+        self.assertGreater(filesize, 0)
         
     def test_cache_consistent_across_sessions(self):
         sandbox = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, sandbox, ignore_errors=True)
         nextProvider = Mock()
         platform = Mock()
         when(platform).getScriptDataDir().thenReturn(sandbox)
@@ -769,7 +749,6 @@ class SuperFastFanartProviderTest(unittest.TestCase):
             httpUrls = provider2.getPosters(p)
             self.assertTrue(4, len(httpUrls))
         provider2.close()
-        shutil.rmtree(sandbox, ignore_errors=True)
     
     def test_getRandomPoster_When_poster_not_in_cache_and_returned_by_next_in_chain_Then_cache_locally_and_return_poster(self):
         # Setup
@@ -782,8 +761,8 @@ class SuperFastFanartProviderTest(unittest.TestCase):
         
         # Verify
         log.debug('Poster path = %s' % posterPath)
-        self.assertEquals('logo.gif', posterPath)
-        self.assertTrue(key in self.provider.imagePathsByKey)
+        self.assertEqual('logo.gif', posterPath)
+        self.assertIn(key, self.provider.imagePathsByKey)
 
     def test_getRandomPoster_When_next_link_in_chain_doesnt_find_poster_Then_dont_cache_anything(self):
         # Setup
@@ -796,42 +775,42 @@ class SuperFastFanartProviderTest(unittest.TestCase):
         
         # Verify
         self.assertTrue(posterPath is None)
-        self.assertFalse(key in self.provider.imagePathsByKey)
+        self.assertNotIn(key, self.provider.imagePathsByKey)
 
     def test_getPosters_When_posters_not_in_cache_and_returned_by_next_in_chain_Then_cache_locally_and_return_posters(self):
         # Setup
         when(self.nextProvider).getPosters(any(Program)).thenReturn(['logo.gif'])
         key = self.provider.createKey('getPosters', self.program)
-        self.assertFalse(key in self.provider.imagePathsByKey)
+        self.assertNotIn(key, self.provider.imagePathsByKey)
                         
         # Test
         posters = self.provider.getPosters(self.program)
         
         # Verify
         log.debug('Posters = %s' % posters)
-        self.assertEquals('logo.gif', posters[0])
-        self.assertTrue(key in self.provider.imagePathsByKey)
+        self.assertEqual('logo.gif', posters[0])
+        self.assertIn(key, self.provider.imagePathsByKey)
 
     def test_getPosters_When_next_link_in_chain_doesnt_find_posters_Then_dont_cache_anything(self):
         # Setup
         when(self.nextProvider).getPosters(any(Program)).thenReturn([])
         key = self.provider.createKey('getPosters', self.program)
-        self.assertFalse(key in self.provider.imagePathsByKey)
+        self.assertNotIn(key, self.provider.imagePathsByKey)
                         
         # Test
         posters = self.provider.getPosters(self.program)
         
         # Verify
-        self.assertTrue(len(posters) == 0)
-        self.assertFalse(key in self.provider.imagePathsByKey)
+        self.assertListEqual([], posters)
+        self.assertNotIn(key, self.provider.imagePathsByKey)
 
     def test_createKey_When_program_title_contains_unicode_chars_Then_dont_blow_up(self):
         program = TVProgram({'title': u'madeleine (Grabación Manual)', 'category_type':'series'}, translator=Mock())
         key = self.provider.createKey('getPosters', program)
-        self.assertTrue(len(key) > 0)
+        self.assertGreater(len(key), 0)
 
 
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')
-    unittest.main()
+    unittest2.main(verbosity=3)

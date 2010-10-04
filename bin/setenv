@@ -20,4 +20,5 @@ resources/lib/mysql-connector-python:\
 resources/lib/htmltestrunner:\
 resources/lib/python-twitter:\
 resources/lib/twisted:\
-resources/lib/zope.interface
+resources/lib/zope.interface:\
+resources/lib/unittest2

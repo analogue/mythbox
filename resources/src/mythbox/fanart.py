@@ -33,7 +33,7 @@ import urllib
 import Queue
 
 from decorator import decorator
-from mythbox.util import synchronized, safe_str, run_async, max_threads
+from mythbox.util import synchronized, safe_str, run_async, max_threads, timed
 from mythbox.bus import Event
 from tvdb_api import Tvdb
 
@@ -66,6 +66,9 @@ class BaseFanartProvider(object):
         else:
             return None
 
+    def getSeasonAndEpisode(self, program):
+        raise Exception, 'Abstract method'
+    
     def clear(self):
         if self.nextProvider:
             self.nextProvider.clear()
@@ -83,6 +86,8 @@ class NoOpFanartProvider(BaseFanartProvider):
     def getRandomPoster(self, program):
         return None
     
+    def getSeasonAndEpisode(self, program):
+        return None, None
 
 class PersistentFanartProvider(BaseFanartProvider):
     """Abstract base class which persists a dict (pcache) to disk across sessions"""
@@ -157,7 +162,10 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
             if not posters:
                 self.strikeOut(key, program)
         return posters
-    
+
+    def getSeasonAndEpisode(self, program):
+        return self.delegate.getSeasonAndEpisode(program)
+
     def clear(self):
         super(OneStrikeAndYoureOutFanartProvider, self).clear()
         self.delegate.clear()
@@ -189,6 +197,9 @@ class SpamSkippingFanartProvider(BaseFanartProvider):
             return True
         return self.nextProvider.hasPosters(program)
         
+    def getSeasonAndEpisode(self, program):
+        return self.nextProvider.getSeasonAndEpisode(program)
+       
         
 class SuperFastFanartProvider(PersistentFanartProvider):
     
@@ -216,6 +227,9 @@ class SuperFastFanartProvider(PersistentFanartProvider):
         key = '%s-%s' % (methodName, safe_str(program.title()))
         return key
 
+    def getSeasonAndEpisode(self, program):
+        return self.nextProvider.getSeasonAndEpisode(program)
+        
         
 class HttpCachingFanartProvider(BaseFanartProvider):
     """Caches images retrieved via http on the local filesystem"""
@@ -295,6 +309,9 @@ class HttpCachingFanartProvider(BaseFanartProvider):
         super(HttpCachingFanartProvider, self).close()
         self.workThread.join()
         
+    def getSeasonAndEpisode(self, program):
+        return self.nextProvider.getSeasonAndEpisode(program)
+
 
 class ImdbFanartProvider(BaseFanartProvider):
 
@@ -304,6 +321,7 @@ class ImdbFanartProvider(BaseFanartProvider):
 
     @chain
     @max_threads(2)
+    @timed
     def getPosters(self, program):
         posters = []
         if program.isMovie():
@@ -320,6 +338,9 @@ class ImdbFanartProvider(BaseFanartProvider):
                 log.error('IMDB error looking up %s: %s' % (safe_str(program.title()), safe_str(str(e))))
         return posters
     
+    def getSeasonAndEpisode(self, program):
+        return None,None
+
 
 class TvdbFanartProvider(BaseFanartProvider):
     
@@ -336,8 +357,9 @@ class TvdbFanartProvider(BaseFanartProvider):
             language=None, 
             search_all_languages=False, 
             apikey='E2032A158BE34568')
-    
+
     @chain
+    @timed    
     def getPosters(self, program):
         posters = []
         if not program.isMovie():
@@ -368,6 +390,21 @@ class TvdbFanartProvider(BaseFanartProvider):
     def _queryTvDb(self, title):
         return self.tvdb[title]['_banners']['poster']
 
+    def getSeasonAndEpisode(self, program):
+        if program.isMovie(): 
+            return None, None
+        
+        show = self.tvdb[program.title()]
+        originalAirDate = program.originalAirDate()
+        log.debug('original air date %r' % originalAirDate)
+        episodes = show.airedOn(originalAirDate)
+
+        if not episodes:
+            return None, None
+        
+        episode = episodes.pop()
+        return episode['seasonnumber'], episode['episodenumber']
+
 
 class TheMovieDbFanartProvider(BaseFanartProvider):
     
@@ -378,6 +415,7 @@ class TheMovieDbFanartProvider(BaseFanartProvider):
     
     @chain
     @max_threads(2)
+    @timed
     def getPosters(self, program):
         posters = []
         if program.isMovie():
@@ -427,6 +465,7 @@ class GoogleImageSearchProvider(BaseFanartProvider):
     
     @chain
     @max_threads(2)
+    @timed
     def getPosters(self, program):
         posters = []
         try:
@@ -464,7 +503,11 @@ class FanArt(object):
         self.provider = NoOpFanartProvider()
         self.configure(self.settings)
         bus.register(self)
-        
+    
+    def getSeasonAndEpisode(self, program):
+        '''Return pair of strings'''
+        return self.provider.getSeasonAndEpisode(program)
+    
     def getRandomPoster(self, program):
         """
         @type program: Program 
