@@ -218,7 +218,6 @@ class HomeWindow(BaseWindow):
             pool.pools['dbPool'].stopReaping = True
             
             if hasPendingWorkers():
-                showPopup('Please wait', 'Closing connections...', 3000)
                 waitForWorkersToDie(30.0) # in seconds
         except:
             log.exception('Waiting for worker threads to die')
