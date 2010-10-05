@@ -519,10 +519,8 @@ class TvRageProvider(NoOpFanartProvider):
         
         try:
             show = tvrage.api.Show(program.title())
-        except TypeError:
+        except tvrage.api.ShowNotFound:
             log.debug('TVRage: Show not found - %r' % program.title())
-            # TODO: Workaround for show not found
-            #       http://bitbucket.org/ckreutzer/python-tvrage/issue/2/retrieving-a-non-existant-show-does-not-fail
             return None, None
         
         oad = program.originalAirDate()
@@ -536,6 +534,7 @@ class TvRageProvider(NoOpFanartProvider):
                 
         # TODO: try some other method if search by original air date comes up blank
         return None, None
+
 
 class FanArt(object):
     """One stop shop for fanart"""
