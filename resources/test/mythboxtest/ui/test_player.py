@@ -20,7 +20,7 @@ import logging
 import os
 import tempfile
 import time
-import unittest
+import unittest2
 
 from mockito import Mock, when, verify, any, times
 from mythbox.mythtv.domain import CommercialBreak
@@ -30,20 +30,20 @@ from mythbox.ui.player import EdlCommercialSkipper, PositionTracker, TrackerSamp
 log = logging.getLogger('mythbox.unittest')
 
 
-class PositionTrackerTest(unittest.TestCase):
+class PositionTrackerTest(unittest2.TestCase):
 
     def test_constructor(self):
         player = Mock()
         tracker = PositionTracker(player)
-        self.assertEquals(0.0, tracker.getLastPosition())
-        self.assertTrue(len(tracker.getHistory(2)) == 0)
+        self.assertEqual(0.0, tracker.getLastPosition())
+        self.assertEqual(0, len(tracker.getHistory(2)))
 
     def test_getHistory_howFarBack_bounds(self):
         player = Mock()
         tracker = PositionTracker(player)
-        self.assertTrue(len(tracker.getHistory(2)) == 0)
-        self.assertTrue(len(tracker.getHistory(0)) == 0)
-        self.assertTrue(len(tracker.getHistory(999)) == 0)
+        self.assertEqual(0, len(tracker.getHistory(2)))
+        self.assertEqual(0, len(tracker.getHistory(0)))
+        self.assertEqual(0, len(tracker.getHistory(999)))
         
     def test_functional(self):
         # Setup
@@ -61,10 +61,10 @@ class PositionTrackerTest(unittest.TestCase):
         time.sleep(0.5)
         
         # Verify
-        self.assertTrue(tracker.getLastPosition() <= playDuration)
-        self.assertTrue((playDuration - 1) < tracker.getLastPosition())
+        self.assertLessEqual(tracker.getLastPosition(), playDuration)
+        self.assertLess(playDuration - 1, tracker.getLastPosition())
         for i in range(1, PositionTracker.HISTORY_SECS):
-            self.assertTrue(i * (1000/SLEEP_MILLIS) <= len(tracker.getHistory(i)))
+            self.assertLessEqual(i * (1000/SLEEP_MILLIS), len(tracker.getHistory(i)))
 
 
 class MockPlayer(object):
@@ -83,34 +83,7 @@ class MockPlayer(object):
         return time.time() - self.timestamp
 
 
-class MythPlayerTest(unittest.TestCase):
-    
-    def test_playRecording(self):
-        pass
-    
-#        # Setup
-#        player = MythPlayer(mythThumbnailCache=Mock(), translator=Mock())
-#        program = Mock()
-#        conn = Mock()
-#        
-#        when(program).title().thenReturn('vangelis')
-#        when(program).hasCommercials().thenReturn(False)
-#        #commBreaks = [CommercialBreak(100, 200)]
-#        #when(program).getCommercials().thenReturn(commBreaks)
-#        when(program).fullTitle().thenReturn('the return')
-#        when(program).getBookmark().thenReturn(0)
-#        when(program).getLocalPath().thenReturn('/usr/movie.mpg')
-#        
-#        self.assertEquals(0, program.getBookmark())
-#        self.assertEquals('the return', program.fullTitle())
-#    
-#        # Test
-#        player.playRecording(program)
-#        
-#        # Verify
-            
-
-class EdlCommercialSkipperTest(unittest.TestCase):
+class EdlCommercialSkipperTest(unittest2.TestCase):
     
     def test_constructor_SkipFileCreatedForRecordingWithCommercials(self):
         # Setup
@@ -123,17 +96,17 @@ class EdlCommercialSkipperTest(unittest.TestCase):
         when(program).getLocalPath().thenReturn(os.path.join(tempfile.gettempdir(), 'movie.mpg'))
 
         # Test
-        EdlCommercialSkipper(player, program)
+        EdlCommercialSkipper(player, program, Mock())
         
         # Verify
         edlFile = os.path.join(tempfile.gettempdir(), 'movie.edl')
+        self.addCleanup(os.remove, edlFile)
         self.assertTrue(os.path.isfile(edlFile))
         f = open(edlFile, 'r')
-        self.assertEquals('100.00 200.00 0', f.readline().strip())
-        self.assertEquals('1000.23 1100.99 0', f.readline().strip())
-        self.assertEquals('5000.12 6000.46 0', f.readline().strip())
+        self.assertEqual('100.00 200.00 0', f.readline().strip())
+        self.assertEqual('1000.23 1100.99 0', f.readline().strip())
+        self.assertEqual('5000.12 6000.46 0', f.readline().strip())
         f.close()
-        os.remove(edlFile)
 
     def test_constructor_SkipFileNotCreatedForRecordingWithNoCommercials(self):
         # Setup
@@ -143,25 +116,20 @@ class EdlCommercialSkipperTest(unittest.TestCase):
         when(program).getLocalPath().thenReturn(os.path.join(tempfile.gettempdir(), 'movie2.mpg'))
 
         # Test
-        EdlCommercialSkipper(player, program)
+        EdlCommercialSkipper(player, program, Mock())
         
         # Verify
         edlFile = os.path.join(tempfile.gettempdir(), 'movie2.edl')
         self.assertFalse(os.path.isfile(edlFile))
 
 
-class BookmarkerTest(unittest.TestCase):
-    
-    def test_constructor(self):
-        # TODO
-        pass
-    
-
-class TrackingCommercialSkipperTest(unittest.TestCase):
+class TrackingCommercialSkipperTest(unittest2.TestCase):
     
     def setUp(self):
-        self.translator = Mock()
         self.tracker = Mock()
+        
+        self.translator = Mock()
+        when(self.translator).get(any()).thenReturn('some %s string')
         
         self.player = Mock()
         when(self.player).getTracker().thenReturn(self.tracker)
@@ -171,7 +139,6 @@ class TrackingCommercialSkipperTest(unittest.TestCase):
         
     def test_RecordingWithNoCommBreaksDoesNothing(self):
         # Setup
-        log.debug('Running no comm breaks test...')
         when(self.player).isPlaying().thenReturn(True)
         when(self.program).getCommercials().thenReturn([])
         when(self.player).getTime().thenReturn(500)
@@ -188,7 +155,6 @@ class TrackingCommercialSkipperTest(unittest.TestCase):
 
     def test_PlayerNeverEntersAnyCommBreaks(self):
         # Setup
-        log.debug('Running never enters comm breaks test...')
         when(self.player).isPlaying().thenReturn(True)
         when(self.program).getCommercials().thenReturn([CommercialBreak(100, 200), CommercialBreak(600, 700)])
         when(self.player).getTime().thenReturn(500)
@@ -205,7 +171,6 @@ class TrackingCommercialSkipperTest(unittest.TestCase):
 
     def test_PlayerEntersCommBreakCloseToBeginningSkipsCommercial(self):
         # Setup
-        log.debug('Running enters comm break test...')
         when(self.player).isPlaying().thenReturn(True)
         when(self.program).getCommercials().thenReturn([CommercialBreak(500, 2500)])
         
@@ -228,34 +193,8 @@ class TrackingCommercialSkipperTest(unittest.TestCase):
         # Verify
         verify(self.player, times(1)).seekTime(any())
 
-#    def test_PlayerEntersMidPointInCommBreakDoesntSkipCommercial(self):
-#        # Setup
-#        log.debug('Running enters midpoint comm break test...')
-#        when(self.player).isPlaying().thenReturn(True)
-#        when(self.program).getCommercials().thenReturn([CommercialBreak(1000, 2000)])
-#        
-#        # player in middle of commercial
-#        when(self.player).getTime().thenReturn(1500)
-#        
-#        # mock a valid tracker history
-#        trackerHistory = []
-#        for x in range(1490, 1500):
-#            trackerHistory.append(TrackerSample(time.time() + (x-1490), x))
-#        when(self.tracker).getHistory(any()).thenReturn(trackerHistory)
-#        
-#        # Test
-#        skipper = TrackingCommercialSkipper(self.player, self.program, self.translator)
-#        skipper.onPlayBackStarted()
-#        time.sleep(1)
-#        when(self.player).isPlaying().thenReturn(False)
-#        skipper.onPlayBackStopped()
-#        
-#        # Verify
-#        verify(self.player, times(0)).seekTime(any())
-        
     def test_PlayerSkippingAroundWhenEntersCommBreakDoesntSkipCommercial(self):
         # Setup
-        log.debug('Running enters comm break and user not skipping around test...')
         when(self.player).isPlaying().thenReturn(True)
         when(self.program).getCommercials().thenReturn([CommercialBreak(500, 600)])
         
@@ -282,4 +221,4 @@ class TrackingCommercialSkipperTest(unittest.TestCase):
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')
-    unittest.main()
+    unittest2.main()
