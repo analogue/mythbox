@@ -58,6 +58,7 @@ class Platform(object):
             'odict', 
             'elementtree', 
             'tvdb_api', 
+            'tvrage',
             'themoviedb', 
             'IMDbPY', 
             'simplejson', 

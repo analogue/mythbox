@@ -21,7 +21,7 @@ from mockito import Mock, when, verify, any, verifyZeroInteractions
 from mythbox.fanart import chain, ImdbFanartProvider, TvdbFanartProvider, \
     TheMovieDbFanartProvider, GoogleImageSearchProvider, SuperFastFanartProvider, \
     OneStrikeAndYoureOutFanartProvider, SpamSkippingFanartProvider, \
-    HttpCachingFanartProvider
+    HttpCachingFanartProvider, TvRageProvider
 from mythbox.filecache import FileCache, HttpResolver
 from mythbox.mythtv.domain import TVProgram, Program, RecordedProgram
 from mythbox.util import run_async, safe_str
@@ -54,12 +54,12 @@ class ChainDecoratorTest(unittest2.TestCase):
     
     class Link3(object):
         @chain
-        def foo(self):
+        def foo(self, p1):
             return []
     
     class Link4(object):
         @chain
-        def foo(self):
+        def foo(self, p1):
             return ['Wee!']
         
     def test_chain_When_decorated_func_returns_none_Then_return_nextProviders_result(self):
@@ -92,7 +92,7 @@ class ChainDecoratorTest(unittest2.TestCase):
         link3 = ChainDecoratorTest.Link3()
         link4 = ChainDecoratorTest.Link4()
         link3.nextProvider = link4
-        result = link3.foo()
+        result = link3.foo('blah')
         self.assertEqual('Wee!', result[0])
 
     def test_chain_When_decorated_func_returns_non_empty_list_Then_return_non_empty_list(self):
@@ -100,14 +100,47 @@ class ChainDecoratorTest(unittest2.TestCase):
         link4 = ChainDecoratorTest.Link4()
         link3.nextProvider = None
         link4.nextProvider = link3
-        result = link4.foo()
+        result = link4.foo('blah')
         self.assertEqual('Wee!', result[0])
         
     def test_chain_When_decorated_func_returns_empty_list_and_nextProvider_none_Then_return_empty_list(self):
         link3 = ChainDecoratorTest.Link3()
         link3.nextProvider = None
-        result = link3.foo()
+        result = link3.foo('blah')
         self.assertListEqual([], result)
+
+
+    class SequenceWithValues(object):
+        @chain
+        def foo(self, p1):
+            return "Wow", "Wee"
+
+    class SequenceWithNones(object):
+        @chain
+        def foo(self, p1):
+            return None, None
+
+    def test_chain_When_decorated_func_returns_sequence_with_values_Then_return_sequence(self):
+        link1 = ChainDecoratorTest.SequenceWithValues()
+        link2 = ChainDecoratorTest.SequenceWithNones()
+        
+        link1.nextProvider = link2
+        link2.nextProvider = None
+        
+        r1, r2 = link1.foo('blah')
+        self.assertEqual('Wow', r1)
+        self.assertEqual('Wee', r2)
+
+    def test_chain_When_decorated_func_returns_sequence_with_nones_Then_return_nextproviders_result(self):
+        link1 = ChainDecoratorTest.SequenceWithNones()
+        link2 = ChainDecoratorTest.SequenceWithValues()
+        
+        link1.nextProvider = link2
+        link2.nextProvider = None
+        
+        r1, r2 = link1.foo('blah')
+        self.assertEqual('Wow', r1)
+        self.assertEqual('Wee', r2)
 
 
 class BaseFanartProviderTestCase(unittest2.TestCase):
@@ -374,7 +407,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         # Setup
         data = [''] * protocol.Protocol57().recordSize()
         data[0]  = u'The Real World'
-        data[11] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
+        data[11] = time.mktime(datetime.datetime(2008, 11, 4, 22, 45, 00).timetuple())
         data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
         data[38] = 1  # has original air date
         data[37] = '2010-07-14'
@@ -388,8 +421,41 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.assertEqual('24', season)
         self.assertEqual('3', episode)
         
-    def test_getSeasonAndEpisode_Fail(self):
-        pass
+    def test_getSeasonAndEpisode_When_episode_not_found_Then_returns_none(self):
+        # Setup
+        data = [''] * protocol.Protocol57().recordSize()
+        data[0]  = u'MasterChef'
+        data[11] = time.mktime(datetime.datetime(2008, 11, 4, 22, 45, 00).timetuple())
+        data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
+        data[38] = 1  # has original air date
+        data[37] = '2010-08-03'
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        provider = TvdbFanartProvider(self.platform, nextProvider=None)
+        
+        # Test
+        season, episode = provider.getSeasonAndEpisode(program)
+        
+        # Verify
+        self.assertIsNone(season)
+        self.assertIsNone(episode)
+
+    def test_getSeasonAndEpisode_When_show_not_found_Then_returns_none(self):
+        # Setup
+        data = [''] * protocol.Protocol57().recordSize()
+        data[0]  = u'This Show Does Not Exist'
+        data[11] = time.mktime(datetime.datetime(2008, 11, 4, 22, 45, 00).timetuple())
+        data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
+        data[38] = 1  # has original air date
+        data[37] = '2010-08-03'
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        provider = TvdbFanartProvider(self.platform, nextProvider=None)
+        
+        # Test
+        season, episode = provider.getSeasonAndEpisode(program)
+        
+        # Verify
+        self.assertIsNone(season)
+        self.assertIsNone(episode)
         
 
 class TheMovieDbFanartProviderTest(BaseFanartProviderTestCase):
@@ -808,6 +874,46 @@ class SuperFastFanartProviderTest(unittest2.TestCase):
         program = TVProgram({'title': u'madeleine (Grabación Manual)', 'category_type':'series'}, translator=Mock())
         key = self.provider.createKey('getPosters', program)
         self.assertGreater(len(key), 0)
+
+
+class TvRageProviderTest(unittest2.TestCase):
+    
+    def test_getSeasonAndEpisode_Success(self):
+        # Setup
+        data = [''] * protocol.Protocol57().recordSize()
+        data[0]  = u'The Real World'
+        # flag as non-movie
+        data[11] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple()) 
+        data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
+        data[38] = 1  # has original air date
+        data[37] = '2010-07-14'
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        provider = TvRageProvider()
+        
+        # Test
+        season, episode = provider.getSeasonAndEpisode(program)
+        
+        # Verify
+        self.assertEqual('24', season)
+        self.assertEqual('3', episode)
+
+    def test_getSeasonAndEpisode_When_show_not_found_Then_returns_none(self):
+        # Setup
+        data = [''] * protocol.Protocol57().recordSize()
+        data[0]  = u'Crap Crappity Crapola'
+        data[11] = time.mktime(datetime.datetime(2008, 11, 4, 22, 45, 00).timetuple())
+        data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
+        data[38] = 1  # has original air date
+        data[37] = '2010-08-03'
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        provider = TvRageProvider()
+        
+        # Test
+        season, episode = provider.getSeasonAndEpisode(program)
+        
+        # Verify
+        self.assertIsNone(season)
+        self.assertIsNone(episode)
 
 
 if __name__ == '__main__':

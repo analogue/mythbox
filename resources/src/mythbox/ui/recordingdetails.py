@@ -44,6 +44,7 @@ class RecordingDetailsWindow(BaseWindow):
         self.platform = kwargs['platform']
         self.mythThumbnailCache = kwargs['mythThumbnailCache']
         self.mythChannelIconCache = kwargs['mythChannelIconCache']
+        self.fanArt = kwargs['fanArt']
         self.isDeleted = False
         self.initialized = False
         self.win = None
@@ -216,8 +217,9 @@ class RecordingDetailsWindow(BaseWindow):
     def render(self):
         self.renderDetail()
         self.renderThumbnail()
-        self.renderChannel()     # async
-        self.renderCommBreaks()  # async
+        self.renderChannel()          # async
+        self.renderCommBreaks()       # async
+        self.renderSeasonAndEpisode() # async
     
     def renderDetail(self):
         s = self.program
@@ -288,3 +290,11 @@ class RecordingDetailsWindow(BaseWindow):
                 else:                                    
                     commBreaks = job.formattedJobStatus()
         self.setWindowProperty('commBreaks', commBreaks)
+
+    @run_async
+    @catchall
+    @coalesce
+    def renderSeasonAndEpisode(self):
+        season, episode = self.fanArt.getSeasonAndEpisode(self.program)
+        if season and episode:
+            self.setWindowProperty('channel', 'S%s E%s' % (season, episode))

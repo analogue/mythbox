@@ -17,6 +17,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+import datetime
 import logging
 import md5
 import os
@@ -28,6 +29,8 @@ import shutil
 import simplejson as json
 import threading
 import tmdb
+import tvdb_api
+import tvrage.api
 import urllib2
 import urllib
 import Queue
@@ -35,7 +38,6 @@ import Queue
 from decorator import decorator
 from mythbox.util import synchronized, safe_str, run_async, max_threads, timed
 from mythbox.bus import Event
-from tvdb_api import Tvdb
 
 log = logging.getLogger('mythbox.fanart')
 
@@ -45,6 +47,15 @@ def chain(func, *args, **kwargs):
     provider = args[0]
     result = func(*args, **kwargs)
     if not result and provider.nextProvider:
+        nfunc = getattr(provider.nextProvider, func.__name__)
+        return nfunc(*args[1:], **kwargs)
+    elif isinstance(result, tuple) and provider.nextProvider:
+        print 'sequence detected in chain'
+        # don't chain result tuple with non-none values
+        for e in result:
+            if e is not None:
+                print 'but not chaining'
+                return result 
         nfunc = getattr(provider.nextProvider, func.__name__)
         return nfunc(*args[1:], **kwargs)
     else:
@@ -67,7 +78,8 @@ class BaseFanartProvider(object):
             return None
 
     def getSeasonAndEpisode(self, program):
-        raise Exception, 'Abstract method'
+        if self.nextProvider:
+            return self.nextProvider.getSeasonAndEpisode(program)
     
     def clear(self):
         if self.nextProvider:
@@ -163,6 +175,7 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
                 self.strikeOut(key, program)
         return posters
 
+    @chain
     def getSeasonAndEpisode(self, program):
         return self.delegate.getSeasonAndEpisode(program)
 
@@ -347,7 +360,7 @@ class TvdbFanartProvider(BaseFanartProvider):
     def __init__(self, platform, nextProvider=None):
         BaseFanartProvider.__init__(self, nextProvider)
         self.tvdbCacheDir = os.path.join(platform.getScriptDataDir(), 'tvdbFanartProviderCache')
-        self.tvdb = Tvdb(interactive=False, 
+        self.tvdb = tvdb_api.Tvdb(interactive=False, 
             select_first=True, 
             debug=False, 
             cache=self.tvdbCacheDir, 
@@ -390,20 +403,24 @@ class TvdbFanartProvider(BaseFanartProvider):
     def _queryTvDb(self, title):
         return self.tvdb[title]['_banners']['poster']
 
+    @chain
     def getSeasonAndEpisode(self, program):
+        # TODO: try some other method if search by original air date comes up blank
         if program.isMovie(): 
             return None, None
-        
-        show = self.tvdb[program.title()]
-        originalAirDate = program.originalAirDate()
-        log.debug('original air date %r' % originalAirDate)
-        episodes = show.airedOn(originalAirDate)
 
-        if not episodes:
+        try:
+            show = self.tvdb[program.title()]
+            originalAirDate = program.originalAirDate()
+            episodes = show.airedOn(originalAirDate)
+            episode = episodes.pop()
+            return episode['seasonnumber'], episode['episodenumber']
+        except (tvdb_api.tvdb_episodenotfound, tvdb_api.tvdb_shownotfound):
+            log.debug('TVDB: Show not found - %r' % program.title())
             return None, None
-        
-        episode = episodes.pop()
-        return episode['seasonnumber'], episode['episodenumber']
+        except (tvdb_api.tvdb_error):
+            log.exception(program.title())
+            return None, None
 
 
 class TheMovieDbFanartProvider(BaseFanartProvider):
@@ -493,6 +510,33 @@ class GoogleImageSearchProvider(BaseFanartProvider):
         return posters
         
 
+class TvRageProvider(NoOpFanartProvider):
+
+    @chain
+    def getSeasonAndEpisode(self, program):
+        if program.isMovie(): 
+            return None, None
+        
+        try:
+            show = tvrage.api.Show(program.title())
+        except TypeError:
+            log.debug('TVRage: Show not found - %r' % program.title())
+            # TODO: Workaround for show not found
+            #       http://bitbucket.org/ckreutzer/python-tvrage/issue/2/retrieving-a-non-existant-show-does-not-fail
+            return None, None
+        
+        oad = program.originalAirDate()
+        d = datetime.date(int(oad[0:4]), int(oad[5:7]), int(oad[8:10]))
+        for sn in xrange(1, show.seasons+1):
+            season = show.season(sn)
+            for en, episode in season.items():
+                if episode.airdate == d:
+                    log.debug('TVRage: Found %r' % program.title())
+                    return str(sn), str(en)
+                
+        # TODO: try some other method if search by original air date comes up blank
+        return None, None
+
 class FanArt(object):
     """One stop shop for fanart"""
     
@@ -534,8 +578,10 @@ class FanArt(object):
         p = None
         if settings.getBoolean('fanart_google'): p = GoogleImageSearchProvider(p)
         if settings.getBoolean('fanart_imdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, ImdbFanartProvider(), p)
-        if settings.getBoolean('fanart_tmdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, TheMovieDbFanartProvider(), p)        
-        if settings.getBoolean('fanart_tvdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, TvdbFanartProvider(self.platform), p)
+        if settings.getBoolean('fanart_tmdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, TheMovieDbFanartProvider(), p)
+        if settings.getBoolean('fanart_tvdb')  :
+            p = OneStrikeAndYoureOutFanartProvider(self.platform, TvRageProvider(), p) # TODO: Separate out 
+            p = OneStrikeAndYoureOutFanartProvider(self.platform, TvdbFanartProvider(self.platform), p)
                         
         p = HttpCachingFanartProvider(self.httpCache, p)
         self.sffp = p = SuperFastFanartProvider(self.platform, p)

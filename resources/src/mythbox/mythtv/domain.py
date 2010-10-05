@@ -350,11 +350,6 @@ class Program(object):
         """
         @return: 3:30 PM, 3:00 PM, 12:00 AM 
         """
-#        st = self.starttimeAsTime()
-#        sh = st.strftime('%I').lstrip('0')
-#        sm = st.strftime(':%M %p')
-#        return '%s%s' % (sh, sm)
-    
         dt = datetime.datetime.fromtimestamp(self.starttimets())
         sh = dt.strftime('%I').lstrip('0')
         sm = dt.strftime(':%M %p')

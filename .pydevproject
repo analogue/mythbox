@@ -23,6 +23,8 @@
 <path>/xbmc-mythtv2/resources/lib/python-twitter</path>
 <path>/xbmc-mythtv2/resources/lib/twisted</path>
 <path>/xbmc-mythtv2/resources/lib/zope.interface</path>
+<path>/xbmc-mythtv2/resources/lib/unittest2</path>
+<path>/xbmc-mythtv2/resources/lib/tvrage</path>
 </pydev_pathproperty>
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">Default</pydev_property>
 </pydev_project>
