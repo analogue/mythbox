@@ -32,9 +32,7 @@ from urllib2 import urlopen, URLError
 from datetime import date
 from time import mktime, strptime
 
-class ShowHasEnded(Exception): pass
-class NoNewEpisodesAnnounced(Exception): pass
-class FinaleMayNotBeAnnouncedYet(Exception): pass
+from exceptions import ShowHasEnded, FinaleMayNotBeAnnouncedYet, ShowNotFound
 
 
 class Episode(object):
@@ -98,7 +96,7 @@ class Season(dict):
         if not self.is_current:
             return self[len(self.keys())]
         else:
-            raise FinaleMayNotBeAnnouncedYet, 'this is the current season...'
+            raise FinaleMayNotBeAnnouncedYet('this is the current season...')
 
 
 class Show(object):
@@ -124,8 +122,10 @@ class Show(object):
         self.started = 0
         self.ended = 0
         self.seasons = 0
-
+        
         show = feeds.search(self.shortname, node='show')
+        if not show:
+            raise ShowNotFound(name)
         # dynamically mapping the xml tags to properties:
         for elem in show:
             if not elem.tag == 'seasons': # we'll set this later 
@@ -177,7 +177,7 @@ class Show(object):
         if not self.ended: # still running
             return self.episodes[self.seasons]
         else:
-            raise ShowHasEnded, self.name
+            raise ShowHasEnded(self.name)
 
     @property
     def next_episode(self):
@@ -185,7 +185,7 @@ class Show(object):
         try:
             return self.upcoming_episodes.next()
         except StopIteration:
-            raise NoNewEpisodesAnnounced, self.name
+            raise NoNewEpisodesAnnounced(self.name)
 
     @property
     def upcoming_episodes(self):

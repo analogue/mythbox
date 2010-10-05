@@ -21,10 +21,11 @@ For `pip` you have to replace **'easy_install'** with **'pip install'**. Also yo
 Documentation
 -------------
 
-The `tvrage` package consists of two modules
+The `tvrage` package consists of three modules
 
 - the tvrage.feeds module provides a wrapper function for each of tvrage's XML-feeds
 - the tvrage.api module provides an clean and object oriented interface on top of those services
+- the tvrage.quickinfo module is a simple pythonic wrapper for tvrage's quickinfo api. Values are returned as python dictionaries rather than dedicated objects for tv shows and episodes 
 
 Fetching XML data
 +++++++++++++++++
@@ -222,6 +223,7 @@ Using the Quickinfo Feed
 ++++++++++++++++++++++++
 
 The modul `tvrage.quickinfo` provides easy access to the tvrage's `quickinfo feed`_.
+
 .. _quickinfo feed: http://services.tvrage.com/info.php?page=quickinfo
 
 You can fetch meta data about a tv show alone::

@@ -27,6 +27,7 @@
 
 from urllib2 import urlopen, URLError, quote
 from util import _fetch
+from exceptions import ShowNotFound
 
 BASE_URL = 'http://services.tvrage.com/tools/quickinfo.php'
 
@@ -39,7 +40,9 @@ def fetch(show, exact=False, ep=None):
         query_string = query_string + '&ep=' + quote(ep)
     resp = _fetch(BASE_URL + query_string).read()
     show_info = {}
-    if not 'No Show Results Were Found For' in resp:
+    if 'No Show Results Were Found For' in resp:
+        raise ShowNotFound(show)
+    else:    
         data = resp.replace('<pre>', '').splitlines()
         for line in data:
             k, v = line.split('@')

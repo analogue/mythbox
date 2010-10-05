@@ -30,6 +30,8 @@
 import unittest
 import quickinfo
 
+from exceptions import ShowNotFound
+
 class QuickInfoTest(unittest.TestCase):
     
     def test_showinfo(self):
@@ -60,6 +62,13 @@ class QuickInfoTest(unittest.TestCase):
         assert show_ep['Episode Info'] == ['01x01', 'Rose', '26/Mar/2005']
         assert show_ep['Episode URL'] == \
             'http://www.tvrage.com/DoctorWho_2005/episodes/52117'
+        
+    def test_non_existant_show_raises_proper_exception(self):
+        try:
+            quickinfo.fetch('yaddayadda')
+        except Exception, e:
+            assert isinstance(e, ShowNotFound)
+            assert e.value == 'yaddayadda'
 
 if __name__ == '__main__':
     unittest.main()

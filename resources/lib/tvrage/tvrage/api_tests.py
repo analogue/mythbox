@@ -30,7 +30,8 @@
 import unittest
 
 from datetime import date
-from api import Show, ShowHasEnded, FinaleMayNotBeAnnouncedYet
+from api import Show
+from exceptions import ShowHasEnded, FinaleMayNotBeAnnouncedYet, ShowNotFound
 
 class ShowTest(unittest.TestCase):
 
@@ -86,6 +87,13 @@ class ShowTest(unittest.TestCase):
         ep = Show('Torchwood').latest_episode
         assert ep.airdate <= today
         assert ep.title == 'Children of Earth (5)'
+        
+    def test_non_existant_show_raises_proper_exception(self):
+        try:
+            Show('yaddayadda')
+        except Exception, e:
+            assert isinstance(e, ShowNotFound)
+            assert e.value == 'yaddayadda'
 
 
 class SeasonTest(unittest.TestCase):
