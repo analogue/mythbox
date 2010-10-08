@@ -494,7 +494,7 @@
         <animation effect="slide" start="-400,0" end="0,0" time="300" tween="quadratic" easing="out" condition="!Skin.HasSetting(Animate_Skin)">WindowOpen</animation>
         <animation effect="slide" end="-400,0" start="0,0" time="300" tween="quadratic" easing="out" condition="!Skin.HasSetting(Animate_Skin)">WindowClose</animation>
         
-        <control type="grouplist" id="2000">
+        <control type="group" id="2000">
             <description>Buttons</description>
             <posx>0</posx>
             <posy>122</posy>
@@ -503,8 +503,44 @@
             <ondown>2000</ondown>
             <onleft>600</onleft>
             <onright>600</onright>
+            
+            <control type="button" id="251">
+                <description>Sort by button</description>
+                <posx>0</posx>
+                <posy>0</posy>
+                <width>285</width>
+                <label>$INFO[Window.Property(sortBy)]</label>
+                <align>left</align>
+                <textoffsetx>40</textoffsetx>
+                <texturefocus>button_focus.png</texturefocus>
+                <texturenofocus>button_nofocus.png</texturenofocus>
+                <pulseonselect>true</pulseonselect>
+                <onleft>600</onleft>
+                <onright>252</onright>
+                <onup>250</onup>
+                <ondown>250</ondown>
+            </control>
+            
+            <control type="togglebutton" id="252">
+                <description>Sort asc</description>
+                <posx>250</posx>
+                <posy>10</posy>
+                <label>-</label>
+                <texturefocus>mb-scroll-up-focus.png</texturefocus>
+                <texturenofocus>mb-scroll-up.png</texturenofocus>
+                <alttexturefocus>mb-scroll-down-focus.png</alttexturefocus>
+                <alttexturenofocus>mb-scroll-down.png</alttexturenofocus>                
+                <usealttexture>substring(Window.Property(sortAscending),true)</usealttexture>
+                <onleft>251</onleft>
+                <onright>600</onright>
+                <onup>250</onup>
+                <ondown>250</ondown>
+            </control>  
+            
             <control type="button" id="250">
                 <description>Refresh button</description>
+                <posx>0</posx>
+                <posy>40</posy>
                 <label>SCRIPT210</label>
                 <width>285</width>
                 <align>left</align>
@@ -512,6 +548,10 @@
                 <texturefocus>button_focus.png</texturefocus>
                 <texturenofocus>button_nofocus.png</texturenofocus>
                 <pulseonselect>true</pulseonselect>
+                <onup>251</onup>
+                <ondown>251</ondown>
+                <onleft>600</onleft>
+                <onright>600</onright>
                 <enable>!substring(Window.Property(busy),true)</enable>
             </control>
         </control>

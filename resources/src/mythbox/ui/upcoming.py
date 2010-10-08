@@ -24,17 +24,27 @@ import os
 import xbmcgui
 import mythbox.msg as m
 
-from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.conn import inject_conn
+from mythbox.mythtv.db import inject_db
+from mythbox.mythtv.domain import Channel
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import BaseWindow, window_busy, Action
 from mythbox.util import catchall_ui, lirc_hack, timed, run_async, catchall, ui_locked, coalesce, ui_locked2
 
 log = logging.getLogger('mythbox.ui')
 
+ID_PROGRAMS_LISTBOX = 600
+ID_REFRESH_BUTTON = 250
+ID_SORT_BY_BUTTON = 251
+ID_SORT_ASCENDING_TOGGLE = 252
+
 ONE_DAY = datetime.timedelta(days=1)
 ONE_WEEK = datetime.timedelta(weeks=1)
 
+SORT_BY = odict.odict([
+    ('Date',   {'translation_id': m.DATE,    'sorter' : lambda x: x.starttimeAsTime() }), 
+    ('Title',  {'translation_id': m.TITLE,   'sorter' : lambda x: '%s %s' % (x.title(), x.starttimeAsTime())}),
+    ('Channel',{'translation_id': m.CHANNEL, 'sorter' : lambda x: Channel.sortableChannelNumber(x.getChannelNumber(), 0)})])
 
 class UpcomingRecordingsWindow(BaseWindow):
     
@@ -52,6 +62,8 @@ class UpcomingRecordingsWindow(BaseWindow):
         self.tunersById = None                   # {int:Tuner}
         self.listItemsByProgram = odict.odict()  # {Program:ListItem}
         self.programsByListItem = odict.odict()  # {ListItem:Program}
+        self.sortBy = self.settings.get('upcoming_sort_by')
+        self.sortAscending = self.settings.getBoolean('upcoming_sort_ascending')
         self.closed = False
         
     @catchall_ui
@@ -65,11 +77,21 @@ class UpcomingRecordingsWindow(BaseWindow):
     @catchall_ui
     @lirc_hack    
     def onClick(self, controlId):
-        source = self.getControl(controlId)
-        if source == self.programsListBox:
+        if controlId == ID_PROGRAMS_LISTBOX:
             self.onEditSchedule()
-        elif source == self.refreshButton:
+        elif controlId == ID_REFRESH_BUTTON:
             self.refresh()
+        elif controlId == ID_SORT_BY_BUTTON:
+            keys = SORT_BY.keys()
+            self.sortBy = keys[(keys.index(self.sortBy) + 1) % len(keys)] 
+            self.applySort()
+        elif controlId == ID_SORT_ASCENDING_TOGGLE:
+            self.sortAscending = not self.sortAscending
+            self.applySort()
+    
+    def applySort(self):
+        self.programs.sort(key=SORT_BY[self.sortBy]['sorter'], reverse=self.sortAscending)
+        self.render()
              
     def onFocus(self, controlId):
         pass
@@ -103,8 +125,10 @@ class UpcomingRecordingsWindow(BaseWindow):
     @lirc_hack            
     def onAction(self, action):
         #log.debug('Key got hit: %s   Current focus: %s' % (ui.toString(action), self.getFocusId()))
-        if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
+        if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR,):
             self.closed = True
+            self.settings.put('upcoming_sort_by', self.sortBy)
+            self.settings.put('upcoming_sort_ascending', '%s' % self.sortAscending)
             self.close()
 
     @inject_db
@@ -127,7 +151,7 @@ class UpcomingRecordingsWindow(BaseWindow):
         self.cacheChannels()
         self.cacheTuners()
         self.programs = self.conn().getUpcomingRecordings()
-        self.render()
+        self.applySort()
         
     @inject_conn
     @ui_locked
@@ -141,34 +165,38 @@ class UpcomingRecordingsWindow(BaseWindow):
         @ui_locked2
         def buildListItems():
             previous = None
-            for i, program in enumerate(self.programs):
+            for i, p in enumerate(self.programs):
                 listItem = xbmcgui.ListItem()
-                airdate = self.formattedAirDate(previous, program)
-                self.setListItemProperty(listItem, 'airdate', airdate)    
-                self.setListItemProperty(listItem, 'title', program.title())
-                self.setListItemProperty(listItem, 'description', program.formattedDescription())
-                self.setListItemProperty(listItem, 'category', program.category())
-                self.setListItemProperty(listItem, 'startTime', program.formattedStartTime())
-                self.setListItemProperty(listItem, 'duration', program.formattedDuration())
-                self.setListItemProperty(listItem, 'channelName', program.getChannelName())
-                self.setListItemProperty(listItem, 'channelNumber', program.getChannelNumber())
-                self.setListItemProperty(listItem, 'callSign', program.getCallSign())
+                self.setListItemProperty(listItem, 'airdate', self.formattedAirDate(previous, p))    
+                self.setListItemProperty(listItem, 'title', p.title())
+                self.setListItemProperty(listItem, 'description', p.formattedDescription())
+                self.setListItemProperty(listItem, 'category', p.category())
+                self.setListItemProperty(listItem, 'startTime', p.formattedStartTime())
+                self.setListItemProperty(listItem, 'duration', p.formattedDuration())
+                self.setListItemProperty(listItem, 'channelName', p.getChannelName())
+                self.setListItemProperty(listItem, 'channelNumber', p.getChannelNumber())
+                self.setListItemProperty(listItem, 'callSign', p.getCallSign())
                 self.setListItemProperty(listItem, 'poster', 'loading.gif')
                 self.setListItemProperty(listItem, 'index', str(i + 1))
                 
-                tuner = self.tunersById[program.getTunerId()]
+                tuner = self.tunersById[p.getTunerId()]
                 self.setListItemProperty(listItem, 'tuner', '%s %s' % (tuner.tunerType, tuner.tunerId))
                 
                 listItems.append(listItem)
-                self.listItemsByProgram[program] = listItem
-                self.programsByListItem[listItem] = program
-                previous = program
+                self.listItemsByProgram[p] = listItem
+                self.programsByListItem[listItem] = p
+                previous = p
 
         buildListItems()
         self.programsListBox.reset()
         self.programsListBox.addItems(listItems)
+        self.renderNav()
         self.renderChannelIcons()
         self.renderPosters()        
+
+    def renderNav(self):
+        self.setWindowProperty('sortBy', self.translator.get(m.SORT) + ': ' + self.translator.get(SORT_BY[self.sortBy]['translation_id']))
+        self.setWindowProperty('sortAscending', ['false', 'true'][self.sortAscending])
         
     @run_async
     @timed
@@ -187,19 +215,20 @@ class UpcomingRecordingsWindow(BaseWindow):
     @coalesce
     def renderPosters(self):
         for (program, listItem) in self.listItemsByProgram.items():
-            if self.closed: return
+            if self.closed: 
+                return
             posterPath = self.fanArt.getRandomPoster(program)
-            if posterPath:
-                self.setListItemProperty(listItem, 'poster', posterPath)
-            elif self.channelsById[program.getChannelId()].getIconPath():
-                self.setListItemProperty(listItem, 'poster', self.mythChannelIconCache.get(self.channelsById[program.getChannelId()]))
-            else:
-                self.setListItemProperty(listItem, 'poster', 'mythbox.png')
+            if posterPath is None:
+                if self.channelsById[program.getChannelId()].getIconPath():
+                    posterPath = self.mythChannelIconCache.get(self.channelsById[program.getChannelId()])
+                else:
+                    posterPath = 'mythbox.png'
+            self.setListItemProperty(listItem, 'poster', posterPath)
 
     def formattedAirDate(self, previous, current):
         result = u''
         airDate = current.starttimeAsTime().date()
-        if not previous or previous.starttimeAsTime().date() < airDate:
+        if not previous or previous.starttimeAsTime().date() != airDate:
             today = datetime.date.today()
             if airDate == today:
                 result = self.translator.get(m.TODAY)

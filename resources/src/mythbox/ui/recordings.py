@@ -38,9 +38,9 @@ ID_SORT_ASCENDING_TOGGLE = 252
 ID_RECORDING_GROUP_BUTTON = 253
 
 SORT_BY = odict.odict([
-    ('Date',           {'translation_id': 850, 'sorter' : lambda x: x.starttimeAsTime() }), 
-    ('Title',          {'translation_id': 851, 'sorter' : lambda x: '%s%s' % (x.title(), x.originalAirDate())}), 
-    ('Orig. Air Date', {'translation_id': 852, 'sorter' : lambda x: x.originalAirDate()})])
+    ('Date',           {'translation_id': m.DATE, 'sorter' : lambda x: x.starttimeAsTime() }), 
+    ('Title',          {'translation_id': m.TITLE, 'sorter' : lambda x: '%s%s' % (x.title(), x.originalAirDate())}), 
+    ('Orig. Air Date', {'translation_id': m.ORIG_AIR_DATE, 'sorter' : lambda x: x.originalAirDate()})])
 
 
 class RecordingsWindow(BaseWindow):
@@ -79,7 +79,6 @@ class RecordingsWindow(BaseWindow):
     @catchall_ui
     @lirc_hack    
     def onClick(self, controlId):
-        #source = self.getControl(controlId)
         if controlId == ID_PROGRAMS_LISTBOX: 
             self.goRecordingDetails()
         elif controlId == ID_REFRESH_BUTTON:
@@ -140,6 +139,8 @@ class RecordingsWindow(BaseWindow):
         # TODO: Recording group filter
         #self.programs = filter(lambda p: p.getRecordingGroup() == self.group, self.programs)
         
+        # NOTE: No aggressive caching on windows since spawning the ffmpeg subprocess
+        #       launches an annoying window
         self.programs.sort(key=SORT_BY[self.sortBy]['sorter'], reverse=self.sortAscending)
         self.preCacheThumbnails()
         

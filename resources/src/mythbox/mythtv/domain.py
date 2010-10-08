@@ -171,7 +171,11 @@ class Channel(object):
                  Returns channelId if all else fails.
         @rtype: int or float
         """
-        c = self.getChannelNumber()
+        return Channel.sortableChannelNumber(self.getChannelNumber(), self.getChannelId())
+    
+    @staticmethod
+    def sortableChannelNumber(channelNumber, alternative):
+        c = channelNumber
         try:
             n = int(c)
         except:
@@ -180,8 +184,8 @@ class Channel(object):
                 c = c.replace('-', '.')
                 n = float(c)
             except:
-                log.warn('Was not able to convert channel number %s into a number' % self.getChannelNumber())
-                n = self.getChannelId()
+                log.warn('Was not able to convert channel number %s into a number' % channelNumber)
+                n = alternative
         return n
         
     def getCallSign(self): 
