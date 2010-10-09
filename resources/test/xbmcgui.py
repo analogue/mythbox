@@ -159,6 +159,24 @@ class WindowDialog(Window):
 
 class WindowXML(Window):
     
+    def __init__(self, xmlFilename, scriptPath, defaultSkin=None, defaultRes=None):
+        """
+        WindowXML(self, xmlFilename, scriptPath[, defaultSkin, defaultRes]) -- Create a new WindowXML script.
+
+        xmlFilename     : string - the name of the xml file to look for.
+        scriptPath      : string - path to script. used to fallback to if the xml doesn't exist in the current skin. (eg os.getcwd())
+        defaultSkin     : [opt] string - name of the folder in the skins path to look in for the xml. (default='Default')
+        defaultRes      : [opt] string - default skins resolution. (default='720p')
+
+        *Note, skin folder structure is eg(resources/skins/Default/720p)
+
+        example:
+           ui = GUI('script-Lyrics-main.xml', os.getcwd(), 'LCARS', 'PAL')
+           ui.doModal()
+           del ui;
+        """
+        pass
+    
     def addItem(self, item, position):
         """
         Add a new item to this Window List.

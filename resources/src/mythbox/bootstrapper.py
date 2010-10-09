@@ -27,26 +27,30 @@ from mythbox.bus import EventBus
 
 class BootStrapper(object):
     
-    def __init__(self):
+    def __init__(self, splash):
         self.log = None
         self.platform = None
         self.stage = 'Initializing'
         self.shell = None
+        self.splash = splash
         
     def run(self):
         try:
-            self.bootstrapLogger()
-            self.bootstrapPlatform()
-            self.bootstrapEventBus()            
-            self.bootstrapCaches()
-            self.bootstrapSettings()
-            self.bootstrapUpdater()
-            self.bootstrapFeeds()
-            self.bootstrapDebugShell()
-            self.bootstrapHomeScreen()
-        except Exception, ex:
-            self.handleFailure(ex)
-        
+            try:
+                self.bootstrapLogger()
+                self.bootstrapPlatform()
+                self.bootstrapEventBus()            
+                self.bootstrapCaches()
+                self.bootstrapSettings()
+                self.bootstrapUpdater()
+                self.bootstrapFeeds()
+                self.bootstrapDebugShell()
+                self.bootstrapHomeScreen()
+            except Exception, ex:
+                self.handleFailure(ex)
+        finally:
+            self.splash.close()
+            
     def handleFailure(self, cause):
         msg = 'MythBox:%s - Error: %s' % (self.stage, cause)
         xbmc.log(msg)
@@ -105,7 +109,7 @@ class BootStrapper(object):
             'fileCache'           : self.fileCache, 
             'httpCache'           : self.httpCache
         }
-        
+
     def bootstrapSettings(self):
         self.stage = 'Initializing Settings'
         from fanart import FanArt
@@ -146,7 +150,7 @@ class BootStrapper(object):
         
     def bootstrapHomeScreen(self):
         from mythbox.ui.home import HomeWindow
-        HomeWindow(
+        home = HomeWindow(
             'mythbox_home.xml', 
             os.getcwd(), 
             settings=self.settings, 
@@ -155,7 +159,9 @@ class BootStrapper(object):
             fanArt=self.fanArt, 
             cachesByName=self.cachesByName,
             bus=self.bus,
-            feedHose=self.feedHose).doModal()
+            feedHose=self.feedHose)
+        self.splash.close()
+        home.doModal()
 
     def onEvent(self, event):
         from bus import Event

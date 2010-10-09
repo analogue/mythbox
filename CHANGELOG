@@ -14,6 +14,7 @@ XX/XX/2010 - MythBox RC2
  - new     : Cache ffmpeg output used for framerate extraction (comm flagging)
  - new     : Added 'Enable Aggressive Caching' to Settings->MythTV to pre-cache framerate and commercial break info
  - new     : Sort Upcoming Recordings by date, title, or channel
+ - new     : Added splash screen
  
 06/08/2010 - MythBox RC1
 =============================
