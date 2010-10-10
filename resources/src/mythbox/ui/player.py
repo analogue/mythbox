@@ -16,6 +16,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+import copy
 import logging
 import os
 import threading
@@ -400,7 +401,11 @@ class TrackingCommercialSkipper(ICommercialSkipper):
         
     def onPlayBackStarted(self):
         log.debug('program in skipper = %s' % self._program.title())
-        self._breaks = self._program.getCommercials()
+        
+        # don't want changes to commbreak.skipped to stick beyond the scope of 
+        # this player instance so use a deepcopy
+        self._breaks = copy.deepcopy(self._program.getCommercials())
+        
         # Has a value when video position falls in a comm break
         self._currentBreak = None  
 
@@ -431,26 +436,26 @@ class TrackingCommercialSkipper(ICommercialSkipper):
         """Method run in a separate thread to skip over commercials"""
         try:
             if len(self._breaks) == 0:
-                log.debug('Recording %s has no comm breaks, exiting comm tracker' % self._program.title())
+                log.debug('Recording %s has no comm breaks, exiting comm tracker' % safe_str(self._program.title()))
                 return
             
             while self._player.isPlaying():
                 pos = self._player.getTime()
-                if self._isInBreak(pos):
+                if self._isInBreak(pos) and not self._currentBreak.skipped:
                     log.debug('entered comm break = %s' % self._currentBreak)
                     if self._isCloseToStartOfCommercial(pos) and not self._wasUserSkippingAround(pos): 
                         log.debug('Comm skip activated!')
                         showPopup(self._program.title(), self.translator.get(m.SKIPPING_COMMERCIAL) % formatSeconds(self._currentBreak.duration()), 3000)
                         self._player.seekTime(self._currentBreak.end)
                         self._waitForPlayerToPassCommercialBreak()
+                        self._currentBreak.skipped = True
+                        
                     if self._landedInCommercial(pos):
-                        log.debug("\n\n\n\t\t\tI landed in comm break and want to skip forward\n\n\n")  
+                        log.debug("Landed in comm break and want to skip forward")  
                         showPopup(self._program.title(), self.translator.get(m.FORWARDING_THROUGH) % formatSeconds(self._currentBreak.duration()), 3000)
                         self._player.seekTime(self._currentBreak.end)
                         self._waitForPlayerToPassCommercialBreak()
-                    else:
-                        pass
-                        #log.debug('Position in comm skip region but not activated')
+                        self._currentBreak.skipped = True
                 xbmc.sleep(SLEEP_MILLIS)
             log.debug('Commercial tracker thread exiting')
         except:

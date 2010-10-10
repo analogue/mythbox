@@ -82,6 +82,7 @@ class RecordingsWindow(BaseWindow):
         if controlId == ID_PROGRAMS_LISTBOX: 
             self.goRecordingDetails()
         elif controlId == ID_REFRESH_BUTTON:
+            self.lastSelected = self.programsListBox.getSelectedPosition()
             self.refresh()
         elif controlId == ID_SORT_BY_BUTTON:
             keys = SORT_BY.keys()

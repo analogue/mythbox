@@ -101,8 +101,8 @@ class StatusException(Exception):
 
 class CommercialBreak(object):
     """
-        Commercial break with a starting and ending position in seconds relative
-        to the start of the recording.
+    Commercial break with a starting and ending position in seconds relative
+    to the start of the recording.
     """
     
     def __init__(self, start, end):
@@ -116,6 +116,7 @@ class CommercialBreak(object):
         assert end > start, 'Starting time of the commercial break cannot be after the end time'
         self.start = start
         self.end = end
+        self.skipped = False
     
     def duration(self):
         """
