@@ -286,7 +286,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.platform = Mock()
         self.sandbox = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.sandbox, ignore_errors=True)
-        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
+        when(self.platform).getCacheDir().thenReturn(self.sandbox)
             
     def getPrograms(self):
         return self.getTvShows()
@@ -622,7 +622,7 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest2.TestCase):
         self.platform = Mock()
         self.sandbox = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.sandbox)
-        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
+        when(self.platform).getCacheDir().thenReturn(self.sandbox)
         self.program = TVProgram({
             'title': 'Two Fat Ladies', 
             'category_type':'series',
@@ -637,6 +637,7 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest2.TestCase):
     def test_getRandomPoster_When_not_struck_out_and_delegate_returns_none_Then_strike_out_and_return_nextProviders_result(self):
         # Setup
         provider = OneStrikeAndYoureOutFanartProvider(self.platform, self.delegate, self.nextProvider)
+        key = provider.createKey('getPosters', self.program)
         when(self.delegate).getPosters(any()).thenReturn([])
         when(self.nextProvider).getPosters(any()).thenReturn(['blah.png'])
         
@@ -645,7 +646,7 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest2.TestCase):
         
         # Verify
         self.assertEqual('blah.png', poster)
-        self.assertIn(self.program.title(), provider.struckOut.values())
+        self.assertIn(self.program.title(), provider.struckOut[key].values())
         
     def test_getRandomPoster_When_not_struck_out_and_delegate_returns_poster_Then_return_poster(self):
         # Setup
@@ -663,7 +664,8 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest2.TestCase):
     def test_getRandomPoster_When_struck_out_Then_skip_delegate_and_return_nextProviders_result(self):
         # Setup
         provider = OneStrikeAndYoureOutFanartProvider(self.platform, self.delegate, self.nextProvider)
-        provider.strikeOut(provider.createKey('getPosters', self.program), self.program)
+        key = provider.createKey('getPosters', self.program)
+        provider.strikeOut(key, self.program)
         when(self.nextProvider).getPosters(any()).thenReturn(['blah.png'])
         
         # Test
@@ -671,12 +673,13 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest2.TestCase):
         
         # Verify
         self.assertEqual('blah.png', poster)
-        self.assertIn(self.program.title(), provider.struckOut.values())
+        self.assertIn(self.program.title(), provider.struckOut[key].values())
         verifyZeroInteractions(self.delegate)
 
     def test_getPosters_When_not_struck_out_and_delegate_returns_empty_list_Then_strike_out_and_return_nextProviders_result(self):
         # Setup
         provider = OneStrikeAndYoureOutFanartProvider(self.platform, self.delegate, self.nextProvider)
+        key = provider.createKey('getPosters', self.program)
         when(self.delegate).getPosters(any()).thenReturn([])
         when(self.nextProvider).getPosters(any()).thenReturn(['blah.png'])
         
@@ -685,8 +688,7 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest2.TestCase):
         
         # Verify
         self.assertEqual('blah.png', posters[0])
-        self.assertIn(self.program.title(), provider.struckOut.values())
-        
+        self.assertIn(self.program.title(), provider.struckOut[key].values())
         
     def test_getPosters_When_not_struck_out_and_delegate_returns_posters_Then_return_posters(self):
         # Setup
@@ -704,7 +706,8 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest2.TestCase):
     def test_getPosters_When_struck_out_Then_skip_delegate_and_return_nextProviders_result(self):
         # Setup
         provider = OneStrikeAndYoureOutFanartProvider(self.platform, self.delegate, self.nextProvider)
-        provider.strikeOut(provider.createKey('getPosters', self.program), self.program)
+        key = provider.createKey('getPosters', self.program)
+        provider.strikeOut(key, self.program)
         when(self.nextProvider).getPosters(any()).thenReturn(['blah.png'])
         
         # Test
@@ -712,7 +715,7 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest2.TestCase):
         
         # Verify
         self.assertEqual('blah.png', posters[0])
-        self.assertIn(self.program.title(), provider.struckOut.values())
+        self.assertIn(self.program.title(), provider.struckOut[key].values())
         verifyZeroInteractions(self.delegate)
 
     def test_clear_When_struckout_not_empty_Then_empties_struckout_and_forwards_to_delegate(self):
@@ -765,7 +768,7 @@ class SuperFastFanartProviderTest(unittest2.TestCase):
         self.addCleanup(shutil.rmtree, self.sandbox, ignore_errors=True)
         self.nextProvider = Mock()
         self.platform = Mock()
-        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
+        when(self.platform).getCacheDir().thenReturn(self.sandbox)
         self.program = TVProgram({'title': 'Two Fat Ladies', 'category_type':'series'}, translator=Mock())
         self.provider = SuperFastFanartProvider(self.platform, self.nextProvider)
 
@@ -797,7 +800,7 @@ class SuperFastFanartProviderTest(unittest2.TestCase):
         self.addCleanup(shutil.rmtree, sandbox, ignore_errors=True)
         nextProvider = Mock()
         platform = Mock()
-        when(platform).getScriptDataDir().thenReturn(sandbox)
+        when(platform).getCacheDir().thenReturn(sandbox)
         when(nextProvider).getPosters(any(Program)).thenReturn(['http://a.com/a.gif', 'http://b.com/b.gif', 'http://c.com/c.gif', 'http://d.com/d.gif'])
         provider = SuperFastFanartProvider(platform, nextProvider)
 

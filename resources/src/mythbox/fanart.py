@@ -147,10 +147,12 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
     """
     
     def __init__(self, platform, delegate, nextProvider=None):
-        PersistentFanartProvider.__init__(self, nextProvider,  
-            os.path.join(platform.getScriptDataDir(), 'onestrike.pickle'))
         if not delegate:
             raise Exception('delegate cannot be None')
+        oneStrikeDir = os.path.join(platform.getCacheDir(), 'onestrike')
+        if not os.path.exists(oneStrikeDir):
+            os.mkdir(oneStrikeDir)
+        PersistentFanartProvider.__init__(self, nextProvider, os.path.join(oneStrikeDir, '%s.pickle' % delegate.__class__.__name__))
         self.delegate = delegate
         self.struckOut = self.pcache
 
@@ -159,11 +161,17 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
         
     @synchronized
     def hasStruckOut(self, key):
+        # TODO: use timestamp to expire struckOut period so metadata doesn't become too stale
         return key in self.struckOut
     
     @synchronized
     def strikeOut(self, key, program):
-        self.struckOut[key] = program.title()
+        if key in self.struckOut:
+            bucket = self.struckout[key]
+        else:
+            bucket = {'title':program.title()}
+            self.struckOut[key] = bucket
+        bucket['timestamp'] = datetime.datetime.now()
     
     @chain
     def getPosters(self, program):
@@ -217,8 +225,10 @@ class SpamSkippingFanartProvider(BaseFanartProvider):
 class SuperFastFanartProvider(PersistentFanartProvider):
     
     def __init__(self, platform, nextProvider=None):
-        PersistentFanartProvider.__init__(self, nextProvider,  
-            os.path.join(platform.getScriptDataDir(), 'sffp.pickle'))
+        cacheDir = os.path.join(platform.getCacheDir(), 'superfast')
+        if not os.path.exists(cacheDir):
+            os.mkdir(cacheDir)
+        PersistentFanartProvider.__init__(self, nextProvider, os.path.join(cacheDir, 'superfast.pickle'))
         self.imagePathsByKey = self.pcache
 
     def getPosters(self, program):
@@ -359,7 +369,7 @@ class TvdbFanartProvider(BaseFanartProvider):
     
     def __init__(self, platform, nextProvider=None):
         BaseFanartProvider.__init__(self, nextProvider)
-        self.tvdbCacheDir = os.path.join(platform.getScriptDataDir(), 'tvdbFanartProviderCache')
+        self.tvdbCacheDir = os.path.join(platform.getCacheDir(), 'tvdb')
         self.tvdb = tvdb_api.Tvdb(interactive=False, 
             select_first=True, 
             debug=False, 

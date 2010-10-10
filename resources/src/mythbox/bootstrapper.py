@@ -83,6 +83,9 @@ class BootStrapper(object):
         self.log.debug('Default Check interval: %s' % sys.getcheckinterval())
         sys.setcheckinterval(0)
         self.log.debug('New Check interval: %s' % sys.getcheckinterval())
+        cacheDir = self.platform.getCacheDir()
+        if not os.path.exists(cacheDir):
+            os.mkdir(cacheDir)
         self.log.info('Mythbox Platform Initialized')
 
     def bootstrapEventBus(self):
@@ -92,21 +95,19 @@ class BootStrapper(object):
         self.stage = 'Initializing Caches'
         
         from mythbox.util import NativeTranslator
-        from mythbox.filecache import FileCache, FileSystemResolver, HttpResolver, MythThumbnailFileCache
+        from mythbox.filecache import FileCache, HttpResolver, MythThumbnailFileCache
         from mythbox.mythtv.resolver import MythChannelIconResolver, MythThumbnailResolver 
         from os.path import join
         
-        dataDir = self.platform.getScriptDataDir()
+        cacheDir = self.platform.getCacheDir()
         self.translator = NativeTranslator(self.platform.getScriptDir())
-        self.mythThumbnailCache = MythThumbnailFileCache(join(dataDir, 'mythThumbnailCache'), MythThumbnailResolver(), self.bus)
-        self.mythChannelIconCache = FileCache(join(dataDir, 'mythChannelIconCache'), MythChannelIconResolver())
-        self.fileCache = FileCache(join(dataDir, 'networkCache'), FileSystemResolver())
-        self.httpCache = FileCache(join(dataDir, 'httpCache'), HttpResolver())
+        self.mythThumbnailCache = MythThumbnailFileCache(join(cacheDir, 'thumbnail'), MythThumbnailResolver(), self.bus)
+        self.mythChannelIconCache = FileCache(join(cacheDir, 'channel'), MythChannelIconResolver())
+        self.httpCache = FileCache(join(cacheDir, 'http'), HttpResolver())
 
         self.cachesByName = {
             'mythThumbnailCache'  : self.mythThumbnailCache, 
             'mythChannelIconCache': self.mythChannelIconCache, 
-            'fileCache'           : self.fileCache, 
             'httpCache'           : self.httpCache
         }
 

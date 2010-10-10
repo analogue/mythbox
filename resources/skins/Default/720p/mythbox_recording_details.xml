@@ -58,7 +58,10 @@
             
             <control type="label"><description>air date</description><label>SCRIPT612</label></control>
             <control type="label"><description>channel</description><label>SCRIPT613</label></control>
+            <!--
             <control type="label"><description>category</description><label>SCRIPT614</label></control>
+            -->
+            <control type="label"><description>episode</description><label>Episode</label></control>
         </control>
 
         <control type="grouplist" id="3001">
@@ -107,10 +110,18 @@
                 <textcolor>0xffddddff</textcolor>
                 <info>Window.Property(channel)</info>
             </control>
+            <!-- 
             <control type="label" id="4005">
                 <description>Category</description>
                 <textcolor>0xffddddff</textcolor>
                 <info>Window.Property(category)</info>
+                <visible>false</visible>
+            </control>
+            -->
+            <control type="label" id="4006">
+                <description>Episode</description>
+                <textcolor>0xffddddff</textcolor>
+                <info>Window.Property(episode)</info>
             </control>
         </control>
 

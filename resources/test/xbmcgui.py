@@ -159,7 +159,7 @@ class WindowDialog(Window):
 
 class WindowXML(Window):
     
-    def __init__(self, xmlFilename, scriptPath, defaultSkin=None, defaultRes=None):
+    def __init__(self, *args, **kwargs):
         """
         WindowXML(self, xmlFilename, scriptPath[, defaultSkin, defaultRes]) -- Create a new WindowXML script.
 

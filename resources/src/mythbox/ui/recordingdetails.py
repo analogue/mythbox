@@ -219,7 +219,7 @@ class RecordingDetailsWindow(BaseWindow):
         self.renderThumbnail()
         self.renderChannel()          # async
         self.renderCommBreaks()       # async
-        self.renderSeasonAndEpisode() # async
+        self.renderSeasonAndEpisode(self.program) # async
     
     def renderDetail(self):
         s = self.program
@@ -229,6 +229,7 @@ class RecordingDetailsWindow(BaseWindow):
         self.setWindowProperty('channel', s.formattedChannel())
         self.setWindowProperty('description', s.formattedDescription())
         self.setWindowProperty('category', s.category())
+        self.setWindowProperty('episode', '...')
         self.setWindowProperty('fileSize', s.formattedFileSize())
         self.setWindowProperty('autoExpire', (('No', 'Yes')[s.isAutoExpire()]))
         self.setWindowProperty('commBreaks', self.translator.get(m.LOADING))       
@@ -294,7 +295,14 @@ class RecordingDetailsWindow(BaseWindow):
     @run_async
     @catchall
     @coalesce
-    def renderSeasonAndEpisode(self):
-        season, episode = self.fanArt.getSeasonAndEpisode(self.program)
-        if season and episode:
-            self.setWindowProperty('channel', 'S%s E%s' % (season, episode))
+    def renderSeasonAndEpisode(self, boundProgram):
+        season, episode = None, None
+        try:
+            season, episode = self.fanArt.getSeasonAndEpisode(boundProgram)
+        finally:
+            log.error('Season %s %s Episode %s %s %s' % (season, type(season), episode, type(episode), season and episode))
+            if boundProgram == self.program:
+                self.setWindowProperty('episode', ['-', '%sx%s' % (season, episode)][bool(season) and bool(episode)])
+            else:
+                log.error('Program changed during course execution...recursing...')
+                self.renderSeasonAndEpisode(self.program)

@@ -96,6 +96,9 @@ class Platform(object):
         """
         return xbmc.translatePath("T:\\script_data") + os.sep + os.path.basename(self.getScriptDir())
 
+    def getCacheDir(self):
+        return os.path.join(self.getScriptDataDir(), 'cache')
+    
     def getHostname(self):
         try:
             return socket.gethostname()
