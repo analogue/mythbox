@@ -50,11 +50,11 @@ def chain(func, *args, **kwargs):
         nfunc = getattr(provider.nextProvider, func.__name__)
         return nfunc(*args[1:], **kwargs)
     elif isinstance(result, tuple) and provider.nextProvider:
-        print 'sequence detected in chain'
+        #print 'sequence detected in chain'
         # don't chain result tuple with non-none values
         for e in result:
             if e is not None:
-                print 'but not chaining'
+                #print 'but not chaining'
                 return result 
         nfunc = getattr(provider.nextProvider, func.__name__)
         return nfunc(*args[1:], **kwargs)
@@ -80,6 +80,8 @@ class BaseFanartProvider(object):
     def getSeasonAndEpisode(self, program):
         if self.nextProvider:
             return self.nextProvider.getSeasonAndEpisode(program)
+        else:
+            return None,None
     
     def clear(self):
         if self.nextProvider:

@@ -8,10 +8,11 @@ Features:
   - Create and update recording schedules
   - View upcoming recordings 
   - Enhanced program guide
-  - TV show and movie fanart downloaded from tvdb, tmdb, imdb, and google image search
-  - View MythTV stats (tuners, jobs, loadavg, etc)
+  - TV show and movie metadata (fanart, episodes, etc) downloaded from tvdb, tvrage, tmdb, imdb, and google image search
+  - View tuner and job queue info
   - Compatible with MythTV 0.21, 0.22, and 0.23
-  - Add your own Twitter feeds
+  - Add your own public Twitter feeds
+  - Move comm flagging jobs to the front of the queue
 
 Requirements
 ================

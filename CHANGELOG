@@ -2,24 +2,27 @@
 =============================
   New  
     - Added Sort feature to the Upcoming Recordings screen
-    - Added splash screen
+    - Issue 93 - Added splash screen
     - FFmpeg output is cached for framerate extraction used by comm flagging
     - Added 'Enable Aggressive Caching' to Settings->MythTV to pre-cache framerate and commercial break info
-    - Added TVRage as a provider of TV show metadata (used for season & episode)
     - Added Season and Episode to the Recording Details screen when available
+    - Added TVRage as a provider of TV show metadata (used for season & episode)
     - Commercial breaks are only skipped once during playback (restarting playback in 'Play' only mode is no longer necessary if the comm break info is incorrect)
     - Issue 97 - Myth TV hostname and port are now queried directly from the database. Changed to read-only on the Settings->MythTV screen
     - Issue 106 - More responsive fanart lookup based on the current list selection in the Watch TV screen
     - Issue 109 - Enabled navigation from the MythBox Settings screen to the XBMC Settings screen 
     - Issue 114 - Added slave backend hostname to the comm flag status on the Home screen
     - Issue 118 - MythTV 0.23-1 compatibility (Protocol 57)
-    
+    - Issue 121 - German translation updates (thanks to linuxluemmel)
+     
   Fixed
+    - Issue 96 - Translations updated (ready for non-English contributions)
     - Issue 98 - IP addresses are used throughout the codebase. No more host not found errors.
     - Issue 107 - Database connections are now closed when idle and reconnect on demand. 
     - Issue 108 - Focus changes to Play+Skip button in Recording Details screen after user has already switched focus to another button
     - Issue 117 - Selecting the currently playing program in the TV Guide launched the Create Schedule window instead of starting Live TV 
     - Last focused recording was not restored correctly after a Refresh in the Recordings screen
+ 
  
 06/08/2010 - MythBox RC1
 =============================
