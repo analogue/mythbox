@@ -130,16 +130,9 @@ Q11. What sort of MythTV setup do you use with MythBox? My setup doesn't seem
 
      It is quite possible that you may be having problems getting MythBox to work
      if your setup is significantly different from mine.
-     
-     Master Backend (Athlon 4800+)
-        Ubuntu Karmic (32bit)
-        SiliconDust HDHomeRun - 2xATSC  (OTA Chicago)
-        Intel Gigabit Ethernet
-        Recording dirs mounted via NFS
-        2 comm flagging slots
-             
-     FrontEnd + Slave Backend (Acer Aspire Revo/NVidia ION)
-        Ubuntu Karmic (32bit)
+
+     FrontEnd + Slave Backend (Acer Aspire Revo - Atom 1.6Ghz - NVidia ION - 2GB)
+        Ubuntu Lucid (32bit)
         Hauppauge HD-PVR (capturing @ 1280x720x60fps) 
         DirecTV HD receiver
         Gigabit Ethernet
@@ -147,7 +140,14 @@ Q11. What sort of MythTV setup do you use with MythBox? My setup doesn't seem
         50" Plasma (1920x1080)
         HP MCE Remote
         XBMC 9.11 + VDPAU playback
-        
+     
+     Master Backend (Athlon 4800+)
+        Ubuntu Lucid (32bit)
+        SiliconDust HDHomeRun - 2xATSC  (OTA Chicago)
+        Intel Gigabit Ethernet
+        Recording dirs mounted via NFS
+        2 comm flagging slots
+             
      Slave Backend (Athlon 4600+)
        Ubuntu Lucid (32bit)
        2 comm flagging slots
@@ -216,5 +216,6 @@ Q17. What is the plan to support the new Confluence skin released in XBMC 9.11?
 ---------------------------------------------------------------------------------
 Q18. What happened to all the translations? Everything seems to be in English.
 
-     Once out of beta, translations will be updated. 
+     The english translations are now stable. Contact me if would like to contribute
+     translations for additional languages. 
               
