@@ -46,7 +46,15 @@ class Platform(object):
 
     def __init__(self):
         # os.getcwd() can and does change @ runtime. retain and use initial value
-        self.cwd = os.getcwd() 
+        self.cwd = os.getcwd()
+        
+        datadir = self.getScriptDataDir()
+        if not os.path.exists(datadir): 
+            os.mkdir(datadir)
+        
+        cachedir = self.getCacheDir()
+        if not os.path.exists(cachedir): 
+            os.mkdir(cachedir)
         
     def addLibsToSysPath(self):
         """
