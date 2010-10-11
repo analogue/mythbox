@@ -232,7 +232,7 @@ class RecordingDetailsWindow(BaseWindow):
         self.setWindowProperty('episode', '...')
         self.setWindowProperty('fileSize', s.formattedFileSize())
         self.setWindowProperty('autoExpire', (('No', 'Yes')[s.isAutoExpire()]))
-        self.setWindowProperty('commBreaks', self.translator.get(m.LOADING))       
+        self.setWindowProperty('commBreaks', '...') # self.translator.get(m.LOADING))       
         self.setWindowProperty('index', str(self.programIterator.index() + 1))
         self.setWindowProperty('numRecordings', str(self.programIterator.size()))
 
@@ -300,9 +300,9 @@ class RecordingDetailsWindow(BaseWindow):
         try:
             season, episode = self.fanArt.getSeasonAndEpisode(boundProgram)
         finally:
-            log.error('Season %s %s Episode %s %s %s' % (season, type(season), episode, type(episode), season and episode))
+            #log.error('Season %s %s Episode %s %s %s' % (season, type(season), episode, type(episode), season and episode))
             if boundProgram == self.program:
                 self.setWindowProperty('episode', ['-', '%sx%s' % (season, episode)][bool(season) and bool(episode)])
             else:
-                log.error('Program changed during course execution...recursing...')
+                log.debug('Program changed since spawning...recursing...')
                 self.renderSeasonAndEpisode(self.program)

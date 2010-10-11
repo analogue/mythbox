@@ -124,6 +124,7 @@ class MythSettings(object):
             'fanart_tvdb'               : 'True',
             'fanart_tmdb'               : 'True',
             'fanart_imdb'               : 'True',
+            'fanart_tvrage'             : 'True',
             'fanart_google'             : 'True',
             'feeds_twitter'             : 'mythboxfeed',
             'lirc_hack'                 : 'False',

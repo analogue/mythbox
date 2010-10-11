@@ -426,10 +426,10 @@ class TvdbFanartProvider(BaseFanartProvider):
             episode = episodes.pop()
             return episode['seasonnumber'], episode['episodenumber']
         except (tvdb_api.tvdb_episodenotfound, tvdb_api.tvdb_shownotfound):
-            log.debug('TVDB: Show not found - %r' % program.title())
+            log.debug('TVDB: Show not found - %r' % safe_str(program.title()))
             return None, None
         except (tvdb_api.tvdb_error):
-            log.exception(program.title())
+            log.exception(safe_str(program.title()))
             return None, None
 
 
@@ -541,8 +541,9 @@ class TvRageProvider(NoOpFanartProvider):
                 if episode.airdate == d:
                     log.debug('TVRage: Found %r' % program.title())
                     return str(sn), str(en)
-                
+        
         # TODO: try some other method if search by original air date comes up blank
+        log.debug('TVRage: No episode found matching airdate %s in %s seasons' % (oad, show.seasons))    
         return None, None
 
 
@@ -588,9 +589,8 @@ class FanArt(object):
         if settings.getBoolean('fanart_google'): p = GoogleImageSearchProvider(p)
         if settings.getBoolean('fanart_imdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, ImdbFanartProvider(), p)
         if settings.getBoolean('fanart_tmdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, TheMovieDbFanartProvider(), p)
-        if settings.getBoolean('fanart_tvdb')  :
-            p = OneStrikeAndYoureOutFanartProvider(self.platform, TvRageProvider(), p) # TODO: Separate out 
-            p = OneStrikeAndYoureOutFanartProvider(self.platform, TvdbFanartProvider(self.platform), p)
+        if settings.getBoolean('fanart_tvrage'): p = OneStrikeAndYoureOutFanartProvider(self.platform, TvRageProvider(), p) 
+        if settings.getBoolean('fanart_tvdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, TvdbFanartProvider(self.platform), p)
                         
         p = HttpCachingFanartProvider(self.httpCache, p)
         self.sffp = p = SuperFastFanartProvider(self.platform, p)
@@ -599,6 +599,5 @@ class FanArt(object):
     
     def onEvent(self, event):
         if event['id'] == Event.SETTING_CHANGED:
-            if event['tag'] in ('fanart_tvdb', 'fanart_tmdb', 'fanart_imdb', 'fanart_google',):
+            if event['tag'] in ('fanart_tvdb', 'fanart_tmdb', 'fanart_imdb', 'fanart_google', 'fanart_tvrage',):
                 self.configure(self.settings)
-                

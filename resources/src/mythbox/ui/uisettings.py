@@ -170,9 +170,10 @@ class SettingsWindow(BaseWindow):
             self.register(Setting(self.settings, 'mysql_password', str, None, self.getControl(305)))
     
             # Fanart Settings
-            self.register(Setting(self.settings, 'fanart_tvdb', bool, None, self.getControl(401)))
-            self.register(Setting(self.settings, 'fanart_tmdb', bool, None, self.getControl(402)))
-            self.register(Setting(self.settings, 'fanart_imdb', bool, None, self.getControl(403)))
+            self.register(Setting(self.settings, 'fanart_tvdb',   bool, None, self.getControl(401)))
+            self.register(Setting(self.settings, 'fanart_tvrage', bool, None, self.getControl(406)))
+            self.register(Setting(self.settings, 'fanart_tmdb',   bool, None, self.getControl(402)))
+            self.register(Setting(self.settings, 'fanart_imdb',   bool, None, self.getControl(403)))
             self.register(Setting(self.settings, 'fanart_google', bool, None, self.getControl(404)))
     
             # Advanced Settings
