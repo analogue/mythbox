@@ -365,7 +365,7 @@
     </control>
 
     <control type="label">
-        <posx>195r</posx>
+        <posx>70r</posx>
         <posy>50r</posy>
         <!--<width>200</width>-->
         <height>35</height>
