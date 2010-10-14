@@ -1,47 +1,35 @@
 #!/bin/bash
 #
-# Packages mythbox for distribution as a tarball.
+# Packages mythbox for distribution as an addon zip file.
 #
 find . -name "*.pyc" | xargs rm -fv
 find . -name "*.pyo" | xargs rm -fv
 
-export rev='1.0RC2'
-echo Packaging $rev 
+#export rev='1.0RC2'
+export rev=$1
+echo Packaging script.mythbox.1.0.$rev
 
-rm -rfv target
+rm -rf target
 mkdir -p target/script.mythbox
 cp -r * target/script.mythbox/
 cd target
-zip -r script.mythbox.$rev.zip script.mythbox
-exit
+sed -i "s/version=\"1\.0\.RC2\"/version=\"1\.0\.${rev}\"/g" script.mythbox/addon.xml
  
-tar czf mythbox_stage.tar.gz \
-    --exclude=*.log \
-    --exclude=*.gz \
-    --exclude=*.*~ \
-    --exclude=".hg" \
-    --exclude=".project" \
-    --exclude=".hgignore" \
-    --exclude=".pydevproject" \
-    --exclude=".settings" \
-    --exclude=ondemandconfig.ini \
-    --exclude=doc \
-    --exclude="trac" \
-    --exclude="addon" \
-    --exclude="mythbox_report.html" \
-    --exclude="./bin" \
-    --exclude="./resources/test" \
-    --exclude="./resources/itest" \
-    --transform s/^./MythBox/g .
-
-mkdir -p target
-cd target
-tar xf ../mythbox_stage.tar.gz
-rm ../mythbox_stage.tar.gz
-find . -print0 | xargs -r0 touch
-#sed --in-place "s/^__svn_revision__.*/__svn_revision__ = ${rev}/g" MythBox/default.py
-
-tar czf ../mythbox-${rev}.tar.gz *
-cd ..
-rm -rf target
-
+zip --quiet \
+    --recurse-paths \
+    script.mythbox.1.0.$rev.zip \
+    script.mythbox \
+    --exclude="script.mythbox/*.log" \
+    --exclude="script.mythbox/*.gz" \
+    --exclude="script.mythbox/*.*~" \
+    --exclude="script.mythbox/doc/*" \
+    --exclude="script.mythbox/trac/*" \
+    --exclude="script.mythbox/ondemandconfig.ini" \
+    --exclude="script.mythbox/addon/*" \
+    --exclude="script.mythbox/mythbox_report.html" \
+    --exclude="script.mythbox/bin/*" \
+    --exclude="script.mythbox/resources/test/*" \
+    --exclude="script.mythbox/resources/itest/*" \
+    --exclude="script.mythbox/target/*"
+        
+echo Done
