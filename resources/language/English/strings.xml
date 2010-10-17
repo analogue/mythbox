@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 
+<!-- 
+To submit translations for your native language
+
+1. Create a copy of this file
+2. Replace all english terms with your native equivalent
+3. Email the file to analogue@yahoo.com or create an issue on the googlecode issue tracker.
+-->
+
 <strings>
   <string id="0">Myth TV</string>
   <string id="1">Watch TV</string>
