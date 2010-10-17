@@ -4,7 +4,7 @@ xx/xx/2010 - MythBox 1.0.0
     - Issue 125 - Added Frech translations (thanks ddekani)
    
   Fixed
-    - 
+    - Issue 124 - Fixed parsing another variation of ffmpeg output
     
 
 10/11/2010 - MythBox RC2

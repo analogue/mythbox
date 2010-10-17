@@ -6,3 +6,4 @@ syntax: regexp
 ^mythbox\.log$
 ^mythbox_report\.html$
 ^target$
+.*tar\.gz$
