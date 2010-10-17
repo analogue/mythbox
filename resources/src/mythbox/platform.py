@@ -47,14 +47,15 @@ class Platform(object):
     def __init__(self):
         # os.getcwd() can and does change @ runtime. retain and use initial value
         self.cwd = os.getcwd()
+        self._scriptDataDir = None
         
         datadir = self.getScriptDataDir()
         if not os.path.exists(datadir): 
-            os.mkdir(datadir)
+            os.makedirs(datadir)
         
         cachedir = self.getCacheDir()
         if not os.path.exists(cachedir): 
-            os.mkdir(cachedir)
+            os.makedirs(cachedir)
         
     def addLibsToSysPath(self):
         """
@@ -102,8 +103,10 @@ class Platform(object):
         windows: c:\Documents and Settings\[user]\Application Data\XBMC\UserData\script_data\MythBox
         mac    : ~/Library/Application Support/XBMC/UserData/script_data/MythBox
         """
-        return xbmc.translatePath("T:\\script_data") + os.sep + os.path.basename(self.getScriptDir())
-
+        if self._scriptDataDir is None:
+            self._scriptDataDir = xbmc.translatePath("T:\\script_data") + os.sep + os.path.basename(self.getScriptDir())
+        return self._scriptDataDir
+    
     def getCacheDir(self):
         return os.path.join(self.getScriptDataDir(), 'cache')
     

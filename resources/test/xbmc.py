@@ -20,7 +20,7 @@
 import os
 import socket
 import time
-
+import tempfile 
 
 def getIPAddress():
     return socket.gethostbyname(socket.gethostname())
@@ -372,7 +372,7 @@ def translatePath(path):
     example:
       - fpath = xbmc.translatePath('special://masterprofile/script_data')
     """
-    return path
+    return tempfile.mkdtemp()
 
     
 class PlayList(object):
