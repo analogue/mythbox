@@ -260,8 +260,14 @@ To submit translations for your native language
   <string id="310">[B]Tuner[/B]</string>
   <string id="311">[B]Status[/B]</string>
   <string id="312">[B]Job[/B]</string>
-
-
+  
+  <string id="313">Commercial flagging</string>
+  <string id="314">Transcoding</string>
+  <string id="315">processing</string>
+  <string id="316">Waiting to commercial flag</string>
+  <string id="317">Waiting to transcode</string>
+  <string id="318">Waiting to run %s on %s</string>
+    
   <!-- Watch Recordings Screen -->
   <string id="500">[B]Recordings[/B]</string>
 
@@ -288,6 +294,8 @@ To submit translations for your native language
   <string id="631">Loading...</string>
   <string id="632">None</string>
   <string id="633">Queued %d of %d</string>
+  <string id="634">Completed %s at %s fps</string>
+  <string id="635">on</string>
   
   <!-- Watch TV Screen -->
   <string id="700">[B]Watch TV[/B]</string>

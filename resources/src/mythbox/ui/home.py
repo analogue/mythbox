@@ -18,11 +18,10 @@
 #
 import logging
 import os
-import sys
 
 import xbmc
 import xbmcgui
-import mythbox.msg as msg
+import mythbox.msg as m
 
 from mythbox import pool
 from mythbox.bus import Event
@@ -32,8 +31,8 @@ from mythbox.mythtv.enums import JobStatus, JobType
 from mythbox.mythtv.conn import inject_conn, inject_db, ConnectionFactory
 from mythbox.settings import SettingsException
 from mythbox.ui.player import MythPlayer, TrackingCommercialSkipper
-from mythbox.ui.toolkit import *
-from mythbox.util import catchall_ui, catchall, lirc_hack, run_async, coalesce 
+from mythbox.ui.toolkit import BaseWindow, Action, window_busy, showPopup
+from mythbox.util import catchall_ui, catchall, lirc_hack, run_async, coalesce, safe_str 
 from mythbox.util import hasPendingWorkers, waitForWorkersToDie, formatSize
 
 log = logging.getLogger('mythbox.ui')
@@ -47,20 +46,18 @@ class HomeWindow(BaseWindow):
     
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
+        self.dependencies = kwargs
         self.settings     = kwargs['settings']
         self.translator   = kwargs['translator']
         self.platform     = kwargs['platform']
         self.fanArt       = kwargs['fanArt']
-        self.cachesByName = kwargs['cachesByName']
         self.bus          = kwargs['bus']
         self.feedHose     = kwargs['feedHose']
+        self.mythThumbnailCache = kwargs['cachesByName']['mythThumbnailCache']
+        self.mythChannelIconCache = kwargs['cachesByName']['mythChannelIconCache']
+        self.httpCache = kwargs['cachesByName']['httpCache']
         self.win = None
         self.lastFocusId = None
-        
-        self.mythThumbnailCache = self.cachesByName['mythThumbnailCache']
-        self.mythChannelIconCache = self.cachesByName['mythChannelIconCache']
-        self.httpCache = self.cachesByName['httpCache']
-
         self.bus.register(self)
         
     def onFocus(self, controlId):
@@ -109,7 +106,8 @@ class HomeWindow(BaseWindow):
             self.shutdown()
             self.close()
         elif action.getId() in (Action.CONTEXT_MENU,) and self.lastFocusId in (ID_COVERFLOW_GROUP, ID_COVERFLOW_WRAPLIST):
-            selection = xbmcgui.Dialog().select('context menu', ['Delete', 'Re-record'])
+            program = self.recordings[self.coverFlow.getSelectedPosition()]
+            selection = xbmcgui.Dialog().select(program.title(), [self.translator.get(m.DELETE), self.translator.get(m.RERECORD)])
             if selection == 0:
                 self.deleteRecording()
             elif selection == 1:
@@ -124,7 +122,7 @@ class HomeWindow(BaseWindow):
     def deleteRecording(self):
         yes = True
         if self.settings.isConfirmOnDelete():
-            yes = xbmcgui.Dialog().yesno(self.translator.get(msg.CONFIRMATION), self.translator.get(msg.ASK_DELETE_RECORDING))
+            yes = xbmcgui.Dialog().yesno(self.translator.get(m.CONFIRMATION), self.translator.get(m.ASK_DELETE_RECORDING))
             
         if yes:
             program = self.recordings[self.coverFlow.getSelectedPosition()]
@@ -135,7 +133,7 @@ class HomeWindow(BaseWindow):
     def rerecordRecording(self):
         yes = True
         if self.settings.isConfirmOnDelete():
-            yes = xbmcgui.Dialog().yesno(self.translator.get(msg.CONFIRMATION), self.translator.get(msg.ASK_RERECORD_RECORDING))
+            yes = xbmcgui.Dialog().yesno(self.translator.get(m.CONFIRMATION), self.translator.get(m.ASK_RERECORD_RECORDING))
             
         if yes:
             program = self.recordings[self.coverFlow.getSelectedPosition()]
@@ -159,7 +157,7 @@ class HomeWindow(BaseWindow):
             self.settings.verify()
             self.settingsOK = True
         except SettingsException, se:
-            showPopup('Settings Error', str(se), 7000)
+            showPopup(self.translator.get(m.ERROR), str(se), 7000)
             self.goSettings()
             try:
                 self.settings.verify() # TODO: optimize unnecessary re-verify
@@ -184,9 +182,9 @@ class HomeWindow(BaseWindow):
     def dumpBackendInfo(self):
         backends = [self.db().getMasterBackend()]
         backends.extend(self.db().getSlaveBackends())
-        log.warn('Backend info')
+        log.info('Backend info')
         for b in backends:
-            log.warn('\t' + str(b))
+            log.info('\t' + str(b))
             
     def shutdown(self):
         self.setBusy(True)
@@ -233,20 +231,12 @@ class HomeWindow(BaseWindow):
         try:
             log.info('Goodbye!')
             logging.shutdown()
-            #sys.modules.clear()  -- crashes XBMC
         except Exception, e:
             xbmc.log('%s' % str(e))            
         
     def goWatchTv(self):
         from mythbox.ui.livetv import LiveTvWindow 
-        LiveTvWindow(
-            'mythbox_livetv.xml', 
-            os.getcwd(), 
-            settings=self.settings, 
-            translator=self.translator, 
-            mythChannelIconCache=self.mythChannelIconCache, 
-            fanArt=self.fanArt, 
-            platform=self.platform).doModal()
+        LiveTvWindow('mythbox_livetv.xml', os.getcwd(), **self.dependencies).doModal()
 
     @window_busy
     def goPlayRecording(self):
@@ -257,58 +247,23 @@ class HomeWindow(BaseWindow):
             
     def goWatchRecordings(self):
         from mythbox.ui.recordings import RecordingsWindow
-        RecordingsWindow(
-            'mythbox_recordings.xml', 
-            os.getcwd(), 
-            settings=self.settings, 
-            translator=self.translator, 
-            platform=self.platform, 
-            fanArt=self.fanArt, 
-            cachesByName=self.cachesByName).doModal()
+        RecordingsWindow('mythbox_recordings.xml', os.getcwd(), **self.dependencies).doModal()
         
     def goTvGuide(self):
         from tvguide import TvGuideWindow 
-        TvGuideWindow(
-            'mythbox_tvguide.xml', 
-            os.getcwd(), 
-            settings=self.settings, 
-            translator=self.translator, 
-            platform=self.platform, 
-            fanArt=self.fanArt, 
-            cachesByName=self.cachesByName).doModal()
+        TvGuideWindow('mythbox_tvguide.xml', os.getcwd(), **self.dependencies).doModal() 
     
     def goRecordingSchedules(self):
         from schedules import SchedulesWindow 
-        SchedulesWindow(
-            'mythbox_schedules.xml', 
-            os.getcwd(), 
-            settings=self.settings, 
-            translator=self.translator, 
-            platform=self.platform, 
-            fanArt=self.fanArt, 
-            cachesByName=self.cachesByName).doModal()
+        SchedulesWindow('mythbox_schedules.xml', os.getcwd(), **self.dependencies).doModal()
             
     def goUpcomingRecordings(self):
         from upcoming import UpcomingRecordingsWindow
-        UpcomingRecordingsWindow(
-            'mythbox_upcoming.xml', 
-            os.getcwd(), 
-            settings=self.settings, 
-            translator=self.translator, 
-            platform=self.platform, 
-            fanArt=self.fanArt, 
-            cachesByName=self.cachesByName).doModal()
+        UpcomingRecordingsWindow('mythbox_upcoming.xml', os.getcwd(), **self.dependencies).doModal()
         
     def goSettings(self):
         from uisettings import SettingsWindow
-        SettingsWindow(
-            'mythbox_settings.xml', 
-            os.getcwd(), 
-            settings=self.settings, 
-            translator=self.translator, 
-            platform=self.platform, 
-            fanArt=self.fanArt, 
-            cachesByName=self.cachesByName).doModal()
+        SettingsWindow('mythbox_settings.xml', os.getcwd(), **self.dependencies).doModal() 
 
     @window_busy
     def refresh(self):
@@ -342,7 +297,7 @@ class HomeWindow(BaseWindow):
                 pass
             
         for i, r in enumerate(self.recordings[:MAX_COVERFLOW]):
-            log.debug('Coverflow %d/%d: %s' % (i+1, MAX_COVERFLOW, r.title()))
+            log.debug('Coverflow %d/%d: %s' % (i+1, MAX_COVERFLOW, safe_str(r.title())))
             listItem = self.coverItems[i] 
             self.setListItemProperty(listItem, 'title', r.title())
             self.setListItemProperty(listItem, 'description', r.description())
@@ -383,8 +338,8 @@ class HomeWindow(BaseWindow):
                     return cmp(r1.starttimeAsTime(), r2.starttimeAsTime())
                 
             def idleTunersLast(t1, t2):
-                t1Idle = t1.listItem.getProperty('status').startswith('Idle')
-                t2Idle = t2.listItem.getProperty('status').startswith('Idle')
+                t1Idle = t1.listItem.getProperty('status').startswith('Idle') # TODO: use translation
+                t2Idle = t2.listItem.getProperty('status').startswith('Idle') # TODO: use translation
 
                 if t1Idle and t2Idle:
                     return nextToRecordFirst(t1,t2)
@@ -403,23 +358,24 @@ class HomeWindow(BaseWindow):
     @inject_db
     @coalesce
     def renderJobs(self):
+        t = self.translator.get
         running = self.db().getJobs(program=None, jobType=None, jobStatus=JobStatus.RUNNING)
         queued = self.db().getJobs(program=None, jobType=None, jobStatus=JobStatus.QUEUED)
         listItems = []
 
         def getTitle(job):
-            if j.getProgram(): 
-                return j.getProgram().title()
+            if job.getProgram(): 
+                return job.getProgram().title()
             else:
-                return 'Unknown'
+                return t(m.UNKNOWN)
 
         def getJobStats(job):
             if job.jobStatus == JobStatus.QUEUED:
                 position, numJobs = job.getPositionInQueue() 
-                return 'Queued %d of %d' % (position, numJobs)
+                return t(m.QUEUED_N_OF_M) % (position, numJobs)
             elif job.jobStatus == JobStatus.RUNNING:
                 try:
-                    return 'Completed %d%% at %2.0f fps' % (job.getPercentComplete(), job.getCommFlagRate())
+                    return t(m.COMPLETED_N_AT_M_FPS) % ('%d%%' % job.getPercentComplete(), '%2.0f' % job.getCommFlagRate())
                 except StatusException:
                     return job.comment
             else:                                    
@@ -427,10 +383,7 @@ class HomeWindow(BaseWindow):
         
         def getHostInfo(job):
             commFlagBackend = self.db().toBackend(job.hostname)
-            if commFlagBackend.slave:
-                return ' on %s' % commFlagBackend.hostname
-            else:
-                return ''
+            return [u'', u' %s %s' % (t(m.ON), commFlagBackend.hostname)][commFlagBackend.slave] 
             
         i = 1    
         for j in running:
@@ -439,11 +392,11 @@ class HomeWindow(BaseWindow):
             title = getTitle(j)
             
             if j.jobType == JobType.COMMFLAG:
-                status = 'Commercial flagging %s%s. %s' % (title, getHostInfo(j), getJobStats(j))
+                status = u'%s %s%s. %s' % (t(m.COMM_FLAGGING), title, getHostInfo(j), getJobStats(j))
             elif j.jobType == JobType.TRANSCODE: 
-                status = 'Transcoding %s' % title
+                status = u'%s %s' % (t(m.TRANSCODING), title)
             else: 
-                status = '%s processing %s' % (j.formattedJobType(), title)
+                status = u'%s %s %s' % (j.formattedJobType(), t(m.PROCESSING), title)
                 
             self.setListItemProperty(listItem, 'status', status)
             listItems.append(listItem)
@@ -455,11 +408,11 @@ class HomeWindow(BaseWindow):
             title = getTitle(j)
 
             if j.jobType == JobType.COMMFLAG: 
-                status = 'Waiting to commercial flag %s' % title
+                status = u'%s %s' % (t(m.WAITING_COMM_FLAG), title)
             elif j.jobType == JobType.TRANSCODE: 
-                status = 'Waiting to transcode %s' % title
+                status = u'%s %s' % (t(m.WAITING_TRANSCODE), title)
             else: 
-                status = 'Waiting to run %s on %s' % (j.formattedJobType(), title)
+                status = t(m.WAITING_TO_RUN_JOB) % (j.formattedJobType(), title)
                 
             self.setListItemProperty(listItem, 'status', status)
             listItems.append(listItem)

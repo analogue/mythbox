@@ -256,7 +256,7 @@ class LiveTvWindow(BaseWindow):
          
         self.settings = kwargs['settings']
         self.translator = kwargs['translator']
-        self.mythChannelIconCache = kwargs['mythChannelIconCache']
+        self.mythChannelIconCache = kwargs['cachesByName']['mythChannelIconCache']
         self.platform = kwargs['platform']
         self.fanArt = kwargs['fanArt']
 
