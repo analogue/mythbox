@@ -114,7 +114,7 @@ class RecordingsWindow(BaseWindow):
                 try:
                     self.mythThumbnailCache.get(program)
                 except:
-                    log.exception('Thumbnail generation for recording %s failed' % program.title())
+                    log.exception('Thumbnail generation for recording %s failed' % safe_str(program.title()))
 
     @run_async
     @coalesce

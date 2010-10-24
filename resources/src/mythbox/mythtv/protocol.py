@@ -66,10 +66,10 @@ class Protocol40(BaseProtocol):
     def buildAnnounceFileTransferCommand(self, hostname, filePath):
         return ["ANN FileTransfer %s" % hostname, filePath]        
 
-    def getLiveTvBrain(self, settings):
+    def getLiveTvBrain(self, settings, translator):
         from mythbox.ui.livetv import MythLiveTvBrain
-        return MythLiveTvBrain(settings)
-    
+        return MythLiveTvBrain(settings, translator)
+
 
 class Protocol41(Protocol40):
     

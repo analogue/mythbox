@@ -86,7 +86,7 @@ class SchedulesWindow(BaseWindow):
     def goEditSchedule(self):
         self.lastSelected = self.schedulesListBox.getSelectedPosition()
         editScheduleDialog = ScheduleDialog(
-            "mythbox_schedule_dialog.xml", 
+            'mythbox_schedule_dialog.xml',
             os.getcwd(), 
             forceFallback=True,
             schedule=self.schedules[self.schedulesListBox.getSelectedPosition()], 

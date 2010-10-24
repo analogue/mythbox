@@ -367,7 +367,8 @@ class TunerTest(unittest.TestCase):
     def setUp(self):
         self.db = Mock()
         self.conn = Mock()
-        self.tuner = Tuner(4, 'mrbun', 1000, 6000, 'HDHOMERUN', self.conn, self.db)
+        self.translator = Mock()
+        self.tuner = Tuner(4, 'mrbun', 1000, 6000, 'HDHOMERUN', self.conn, self.db, self.translator)
         
     def test_toString(self):
         log.debug('tuner = %s'%self.tuner)

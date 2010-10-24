@@ -314,15 +314,15 @@
   <string id="1004">[B]Canal[/B]</string>
   <string id="1005">[B]Syntoniseur[/B]</string>
   
-  <string id='1010'>Le programme n'a pas de planification d'enregistrement associée</string>
-  <string id='1011'>Planification de l'enregistrement %d non trouvée</string>
-  <string id='1012'>Aujourd'hui</string>
-  <string id='1013'>Demain</string>  
+  <string id="1010">Le programme n'a pas de planification d'enregistrement associée</string>
+  <string id="1011">Planification de l'enregistrement %d non trouvée</string>
+  <string id="1012">Aujourd'hui</string>
+  <string id="1013">Demain</string>
 
   <!-- Create/Edit schedule dialog -->
   <string id="1100">Nouvelle Planification d'Enregistrement</string>
   <string id="1101">Editer La Planification d'Enregistrement</string>
-  
+
   <string id="1102">Enregistrement</string>
   <string id="1103">Priorité</string>
   <string id="1104">Vérifier les duplications avec</string>

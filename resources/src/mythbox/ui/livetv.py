@@ -22,14 +22,15 @@ import threading
 import xbmcgui
 import xbmc
 import collections
+import mythbox.msg as m
 
 from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.conn import inject_conn
 from mythbox.mythtv.domain import Channel
 from mythbox.mythtv.conn import ServerException
 from mythbox.ui.player import MythPlayer, NoOpCommercialSkipper
-from mythbox.ui.toolkit import *
-from mythbox.util import catchall, catchall_ui, timed, run_async, lirc_hack, ui_locked, coalesce, ui_locked2
+from mythbox.ui.toolkit import Action, BaseWindow, window_busy
+from mythbox.util import catchall, catchall_ui, run_async, lirc_hack, ui_locked, coalesce, ui_locked2
 from odict import odict
 
 log = logging.getLogger('mythbox.ui')
@@ -37,8 +38,9 @@ log = logging.getLogger('mythbox.ui')
 
 class BaseLiveTvBrain(object):
 
-    def __init__(self, settings):
-        self.settings = settings          
+    def __init__(self, settings, translator):
+        self.settings = settings
+        self.translator = translator          
         self.tuner = None
 
     def watchLiveTV(self, channel):
@@ -54,7 +56,7 @@ class BaseLiveTvBrain(object):
         # 1. Check at least one tuner available
         numFreeTuners = self.conn().getNumFreeTuners()
         if numFreeTuners <= 0:
-            raise ServerException('All tuner(s) are busy.')
+            raise ServerException(self.translator.get(m.ALL_TUNERS_BUSY))
         
         # 2. Make sure available tuner can watch requested channel
         tuners = self.conn().getTuners()
@@ -63,7 +65,7 @@ class BaseLiveTvBrain(object):
                 log.debug("Found tuner %s to view channel %s" % (tuner.tunerId, channel.getChannelNumber()))
                 return tuner
             
-        raise ServerException('Tuner(s) with channel %s are all busy.' % channel.getChannelNumber())
+        raise ServerException(self.translator.get(m.TUNERS_WITH_CHANNEL_BUSY) % channel.getChannelNumber())
         
 
 class MythLiveTvBrain(BaseLiveTvBrain):
@@ -71,8 +73,8 @@ class MythLiveTvBrain(BaseLiveTvBrain):
     Orchestrates live tv using XBMC's built in myth:// URL support
     """
 
-    def __init__(self, settings):
-        BaseLiveTvBrain.__init__(self, settings)
+    def __init__(self, settings, translator):
+        BaseLiveTvBrain.__init__(self, settings, translator)
 
     def watchLiveTV(self, channel):
         try:
@@ -82,7 +84,7 @@ class MythLiveTvBrain(BaseLiveTvBrain):
             #del livePlayer # induce GC so on* callbacks unregistered
             return self.tuner
         except ServerException, se:
-            xbmcgui.Dialog().ok('Info', str(se))
+            xbmcgui.Dialog().ok(self.translator.get(m.INFO), str(se))
 
 
 class MythLiveTvPlayer(xbmc.Player):
@@ -115,8 +117,8 @@ class FileLiveTvBrain(BaseLiveTvBrain):
     """
     Orchestrates live tv using the livetv recording available on the filesystem
     """
-    def __init__(self, settings):
-        BaseLiveTvBrain.__init__(self, settings)
+    def __init__(self, settings, translator):
+        BaseLiveTvBrain.__init__(self, settings, translator)
             
     def watchLiveTV(self, channel):
         """
@@ -340,13 +342,13 @@ class LiveTvWindow(BaseWindow):
     def watchSelectedChannel(self):
         self.lastSelected = self.channelsListBox.getSelectedPosition()
         channel = self.listItem2Channel(self.channelsListBox.getSelectedItem())
-        brain = self.conn().protocol.getLiveTvBrain(self.settings)
+        brain = self.conn().protocol.getLiveTvBrain(self.settings, self.translator)
         
         try:
             brain.watchLiveTV(channel)
         except Exception, e:
             log.error(e)
-            xbmcgui.Dialog().ok('Error', '', str(e))
+            xbmcgui.Dialog().ok(self.translator.get(m.ERROR), '', str(e))
 
     @inject_db
     def loadChannels(self):

@@ -129,7 +129,7 @@ To submit translations for your native language
   
   
   <string id="106">Do you want to automatically skip commercials?</string>
-  <string id="107">TV Guide (this screen is being rewritten)</string>
+  <string id="107">TV Guide</string>
   <string id="108">No Data</string>
   <string id="109">Protocol version error: %s</string>
   <string id="110">Recording Schedules</string>
@@ -268,6 +268,15 @@ To submit translations for your native language
   <string id="317">Waiting to transcode</string>
   <string id="318">Waiting to run %s on %s</string>
     
+  <string id="319">Idle</string>
+  <string id="320">Next recording %s starts at %s</string>
+  <string id="321">Watching %s on %s. Show ends at %s.</string> 
+  <string id="322">Watching prerecorded video</string>    
+  <string id="323">Watching and recording %s on %s until %s</string>
+  <string id="324">Recording %s on %s until %s</string>
+  <string id="325">Busy</string>
+  <string id="326">Unknown tuner status %d</string>
+      
   <!-- Watch Recordings Screen -->
   <string id="500">[B]Recordings[/B]</string>
 
@@ -296,9 +305,16 @@ To submit translations for your native language
   <string id="633">Queued %d of %d</string>
   <string id="634">Completed %s at %s fps</string>
   <string id="635">on</string>
+  <string id="636">Recording %s not found.</string>
+  <string id="637">%s at %s fps</string>
+  <string id="638">Recording %s of %s</string>
+  
   
   <!-- Watch TV Screen -->
   <string id="700">[B]Watch TV[/B]</string>
+  <string id="701">All tuner(s) are busy.</string>
+  <string id="702">Tuner(s) with channel %s are all busy.</string>
+
 
   <!-- Player -->
   <string id="750">Resuming at %s</string>
@@ -307,6 +323,7 @@ To submit translations for your native language
 
   <!-- TV Guide Screen -->
   <string id="800">[B]TV Guide[/B]</string>
+  <string id="801">No program guide information available.</string>
 
 
   <!-- Recordings Screen -->
@@ -331,10 +348,10 @@ To submit translations for your native language
   <string id="1004">[B]Channel[/B]</string>
   <string id="1005">[B]Tuner[/B]</string>
   
-  <string id='1010'>Program has no associated recording schedule</string>
-  <string id='1011'>Recording schedule %d not found</string>
-  <string id='1012'>Today</string>
-  <string id='1013'>Tomorrow</string>  
+  <string id="1010">Program has no associated recording schedule</string>
+  <string id="1011">Recording schedule %d not found</string>
+  <string id="1012">Today</string>
+  <string id="1013">Tomorrow</string>  
 
   <!-- Create/Edit schedule dialog -->
   <string id="1100">New Recording Schedule</string>

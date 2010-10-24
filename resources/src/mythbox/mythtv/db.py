@@ -416,7 +416,8 @@ class MythDatabase(object):
                     int(row['channel_timeout']),
                     row['cardtype'],
                     conn=None,
-                    db=self))  # TODO: Should be None. self is for unit tests
+                    db=self,   # TODO: Should be None. self is for unit tests
+                    translator=self.translator)) 
         return self._tuners
 
     @timed

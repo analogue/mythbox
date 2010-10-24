@@ -345,8 +345,8 @@ class Program(object):
         Returns air times as a formattted string for display purposes
         """
         value = ""
-        value += self.starttimeAsTime().strftime("%A %b %d, %I:%M%p")
-        value += " - " + self.endtimeAsTime().strftime("%I:%M%p")
+        value += self.starttimeAsTime().strftime("%A %b %d, %-I:%M%p")
+        value += " - " + self.endtimeAsTime().strftime("%-I:%M%p")
         if abs(self.starttimeAsTime() - self.endtimeAsTime()) > datetime.timedelta(days = 1):
             value += " +1"
         return value
@@ -356,7 +356,7 @@ class Program(object):
         @return: 3:30 PM, 3:00 PM, 12:00 AM 
         """
         dt = datetime.datetime.fromtimestamp(self.starttimets())
-        sh = dt.strftime('%I').lstrip('0')
+        sh = dt.strftime('%-I')
         sm = dt.strftime(':%M %p')
         return '%s%s' % (sh, sm)
 
@@ -377,14 +377,14 @@ class Program(object):
         @return: Something like  3:30 - 4:30:pm, 3 - 4pm, or 3 - 4:40pm 
         """
         st = self.starttimeAsTime()
-        sh = st.strftime('%I').lstrip('0')
+        sh = st.strftime('%-I')
         if short:
             sm = [st.strftime(':%M'), ''][st.minute == 0]
         else:
             sm = st.strftime(':%M')
         
         et = self.endtimeAsTime()
-        eh = et.strftime('%I').lstrip('0')
+        eh = et.strftime('%-I')
         if short:
             em = [et.strftime(':%M'), ''][et.minute == 0] + et.strftime('%p')
         else:
@@ -396,16 +396,12 @@ class Program(object):
         """
         @return: Something like 11/07
         """
-        #return datetime.date.strftime(self.starttimeAsTime().date(), '%m/%d')
-        #return datetime.datetime.strftime(datetime.datetime.fromtimestamp(self.starttimets()), '%m/%d')
-
         dt = datetime.datetime.fromtimestamp(self.starttimets())
         return '%2.2d/%2.2d' % (dt.month, dt.day)
     
     def formattedChannel(self):
         """
         @return: channel number and callsign
-        @rtype: string
         """
         s = ''
         s += self.getChannelNumber()
@@ -427,7 +423,6 @@ class Program(object):
     def formattedOriginalAirDate(self):
         """
         @return: original air date or the localized string for no airdate
-        @rtype: string
         """
         try:
             if self.originalAirDate():
@@ -441,12 +436,11 @@ class Program(object):
     def formattedDescription(self):
         """
         @return: description upto 200 chars long
-        @rtype: string
         """
         if self.description():
             value = self.description()
         else:
-            value = self.translator.get(46)
+            value = self.translator.get(m.NOT_AVAILABLE)
         return value[:200]
 
     def __repr__(self):
@@ -1046,14 +1040,12 @@ class RecordedProgram(Program):
     def formattedFileSize(self):
         """
         @return: filesize with MB or GB suffix
-        @rtype: str
         """
         return formatSize(self.getFileSize(), True)
         
     def formattedRecordingStatus(self):
         """
         @return: Recording status converted to a ui friendly string
-        @rtype: string
         """
         return self.translator.get(RecordingStatus.translations[self.getRecordingStatus()])
         
@@ -1185,11 +1177,11 @@ class Schedule(object):
         return datetime.datetime(int(sd[0:4]), int(sd[4:6]), int(sd[6:8]), 0, 0)
         
     def formattedChannel(self):
-        text = ""
+        text = u''
         if self.getChannelNumber():
             text += self.getChannelNumber()
         if self.getCallSign():
-            text += " - " + self.getCallSign()
+            text += u' - ' + self.getCallSign()
         return text
 
     def formattedDuplicateMethod(self):
@@ -1199,7 +1191,7 @@ class Schedule(object):
         return self.translator.get(CheckForDupesIn.translations[self.getCheckForDupesIn()])
     
     def formattedStartDate(self):
-        value = ""
+        value = u''
         value += self.startdateAsTime().strftime("%a, %b %d")
         return value
     
@@ -1229,26 +1221,20 @@ class Schedule(object):
         return text
     
     def formattedScheduleType(self):
-        """
-        @rtype: string
-        """
         return self.translator.get(ScheduleType.translations[self.getScheduleType()])
     
     def formattedScheduleTypeDescription(self):
-        """
-        @rtype: string
-        """
         return self.translator.get(ScheduleType.long_translations[self.getScheduleType()])
     
     def fullTitle(self):
         """
         @return: Title and subtitle
         """
-        fullTitle = ''
+        fullTitle = u''
         if self.title():
             fullTitle += self.title()
         if self.subtitle() and not sre.match('^\s+$', self.subtitle()):
-            fullTitle += " - " + self.subtitle()
+            fullTitle += u' - ' + self.subtitle()
         return fullTitle
 
 
@@ -1747,7 +1733,7 @@ class Tuner(object):
     """MythTV Tuner (aka encoder, recorder, card). Maps to the mythtv capturecard 
     database table."""
 
-    def __init__(self, tunerId, hostname, signalTimeout, channelTimeout, tunerType='', conn=None, db=None):
+    def __init__(self, tunerId, hostname, signalTimeout, channelTimeout, tunerType='', conn=None, db=None, translator=None):
         """
         @param tunerId: unique tunerid as int
         @param hostname: physical hostname where tuner is located as string
@@ -1762,7 +1748,7 @@ class Tuner(object):
         self.tunerType = tunerType  # HDHOMERUN, HDPVR, etc
         self._conn = conn
         self._db = db
-        
+        self.translator = translator
         self._channels = None
         self._backend = None
         
@@ -1907,6 +1893,7 @@ class Tuner(object):
 
     @inject_conn
     def formattedTunerStatus(self):
+        t = self.translator.get
         tunerStatus = self.getTunerStatus()
         tvState = self.conn().protocol.tvState()
         
@@ -1915,32 +1902,32 @@ class Tuner(object):
         
         if tvState.OK == tunerStatus:
             next = self.getNextScheduledRecording() 
-            status = 'Idle'
+            status = t(m.IDLE) + u'. '
             if next:
-                status = '%s. Next recording %s starts at %s' % (status, next.title(), next.formattedStartTime())
+                status += t(m.NEXT_RECORDING_STARTS_AT) % (next.title(), next.formattedStartTime())
         elif tvState.Error == tunerStatus:
-            status = 'Unknown'
+            status = t(m.UNKNOWN)
         elif tvState.WatchingLiveTV == tunerStatus: 
-            status = 'Watching %s on %s. Show ends at %s.'%(
+            status = t(m.WATCHING_AND_ENDS_AT) %(
                 recording.title(), 
                 recording.getChannelName(), 
-                time.strftime('%I:%M%p', time.localtime(float(recording.recendtime()))))
+                time.strftime('%-I:%M %p', time.localtime(float(recording.recendtime()))))
         elif tvState.WatchingPreRecorded == tunerStatus:
-            status = 'Watching prerecorded video'
+            status = t(m.WATCHING_PRERECORDED)
         elif tvState.WatchingRecording == tunerStatus:
-            status = 'Watching and recording %s on %s until %s'%(
+            status = t(m.WATCHING_AND_RECORDING_UNTIL) % (
                 recording.title(), 
                 recording.getChannelName(), 
-                time.strftime('%I:%M%p', time.localtime(float(recording.recendtime()))))
+                time.strftime('%-I:%M %p', time.localtime(float(recording.recendtime()))))
         elif tvState.RecordingOnly == tunerStatus: 
-            status = 'Recording %s on %s until %s'%(
+            status = t(m.RECORDING_ON_UNTIL) % (
                 recording.title(), 
                 recording.getChannelName(),
-                time.strftime('%I:%M%p', time.localtime(float(recording.recendtime()))))                    
+                time.strftime('%-I:%M %p', time.localtime(float(recording.recendtime()))))                    
         elif tvState.ChangingState == tunerStatus:
-            status = 'Busy'
+            status = t(m.BUSY)
         else: 
-            status = 'Unknown status %d' % tunerStatus
+            status = t(m.UNKNOWN_TUNER_STATUS) % tunerStatus
         return status
     
     @inject_conn    
@@ -2024,15 +2011,9 @@ class Job(object):
                program.starttimeAsTime() == self.startTime
             
     def formattedJobType(self):
-        """
-        @rtype: str
-        """
         return self.translator.get(JobType.translations[self.jobType])
     
     def formattedJobStatus(self):
-        """
-        @rtype: str
-        """
         return self.translator.get(JobStatus.translations[self.jobStatus])
     
     @inject_conn

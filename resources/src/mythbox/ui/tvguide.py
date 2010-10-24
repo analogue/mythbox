@@ -199,7 +199,7 @@ class TvGuideWindow(ui.BaseWindow):
                 self.prevFocus = self.gridCells[0].control
                 self.setFocus(self.prevFocus)
             else:
-                raise Exception, "No program information available."
+                raise Exception, self.translator.get(m.NO_EPG_DATA)
 
     @catchall_ui
     @lirc_hack            
@@ -380,7 +380,7 @@ class TvGuideWindow(ui.BaseWindow):
         if program is None:
             cell.nodata = True
             cell.starttime = None
-            cell.title = self.translator.get(108) # 'No data'
+            cell.title = self.translator.get(m.NO_DATA)
             category = None
         else:
             cell.nodata = False
@@ -664,9 +664,6 @@ class TvGuideWindow(ui.BaseWindow):
         Method to draw all the dynamic controls that represent the program
         guide information.
         """
-        #title = self.translator.get(107)
-        #title += ": %s - %s" % (self.startTime.strftime("%x %X"), self.endTime.strftime("%x %X"))
-        #self.controls['title'].control.setLabel(title)
         self.renderChannels()
         self.renderHeader()
         self._renderPrograms()
@@ -877,9 +874,9 @@ class TvGuideWindow(ui.BaseWindow):
             if i == 0:
                 c.setLabel(label='', label2=t.strftime('%a %m/%d'))
             else: 
-                label = t.strftime("%I").lstrip('0') + t.strftime(":%M %p") 
+                label = t.strftime('%-I') + t.strftime(':%M %p') 
                 if t.day != lastDay:
-                    label += "+1"
+                    label += '+1'
                 t += timedelta(minutes=30)
                 lastDay = t.day
                 c.setLabel(label)

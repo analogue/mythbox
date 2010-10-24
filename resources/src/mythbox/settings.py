@@ -20,6 +20,7 @@ import logging
 import os
 import socket
 import string
+import mythbox.msg as m
 
 from mythbox.bus import Event, EventBus
 from mythbox.mythtv.db import MythDatabase
@@ -188,7 +189,7 @@ class MythSettings(object):
         """
         for tag in self.defaults.keys():
             if self.get(tag) is None:
-                raise SettingsException('%s %s' % (self.translator.get(34), tag))
+                raise SettingsException('%s %s' % (self.translator.get(m.MISSING_SETTINGS_TAG), tag))
         
         MythSettings.verifyMySQLHost(self.get('mysql_host'))
         MythSettings.verifyMySQLPort(self.get('mysql_port'))

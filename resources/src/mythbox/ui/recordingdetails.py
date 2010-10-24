@@ -27,7 +27,7 @@ from mythbox.mythtv.domain import StatusException
 from mythbox.mythtv.enums import JobType, JobStatus
 from mythbox.ui.player import MythPlayer, NoOpCommercialSkipper, TrackingCommercialSkipper
 from mythbox.ui.schedules import ScheduleDialog
-from mythbox.ui.toolkit import *
+from mythbox.ui.toolkit import Action, BaseWindow, window_busy
 from mythbox.util import safe_str, catchall, catchall_ui, run_async, lirc_hack, coalesce
 
 log = logging.getLogger('mythbox.ui')
@@ -147,16 +147,16 @@ class RecordingDetailsWindow(BaseWindow):
     @inject_db
     def editSchedule(self):
         if self.program.getScheduleId() is None:
-            xbmcgui.Dialog().ok(self.translator.get(m.INFO), self.translator.get(m.ERR_SCHEDULE_NOT_FOUND))
+            xbmcgui.Dialog().ok(self.translator.get(m.INFO), self.translator.get(m.ERR_NO_RECORDING_SCHEDULE))
             return
     
         schedules = self.db().getRecordingSchedules(scheduleId=self.program.getScheduleId())
         if len(schedules) == 0:
-            xbmcgui.Dialog().ok(self.translator.get(m.INFO), self.translator.get(m.ERR_SCHEDULE_NOT_FOUND))
+            xbmcgui.Dialog().ok(self.translator.get(m.INFO), self.translator.get(m.ERR_SCHEDULE_NOT_FOUND) % self.program.getScheduleId())
             return 
 
         editScheduleDialog = ScheduleDialog(
-            "mythbox_schedule_dialog.xml", 
+            'mythbox_schedule_dialog.xml', 
             os.getcwd(), 
             forceFallback=True,
             schedule=schedules[0], 
@@ -211,7 +211,7 @@ class RecordingDetailsWindow(BaseWindow):
             self.program = refreshedProgram
             self.render()
         else:
-            raise Exception, 'Program %s not found.' % self.program.title() 
+            raise Exception, self.translator.get(m.RECORDING_NOT_FOUND) % self.program.title() 
 
     @window_busy
     def render(self):
@@ -232,10 +232,8 @@ class RecordingDetailsWindow(BaseWindow):
         self.setWindowProperty('episode', '...')
         self.setWindowProperty('fileSize', s.formattedFileSize())
         self.setWindowProperty('autoExpire', (('No', 'Yes')[s.isAutoExpire()]))
-        self.setWindowProperty('commBreaks', '...') # self.translator.get(m.LOADING))       
-        self.setWindowProperty('index', str(self.programIterator.index() + 1))
-        self.setWindowProperty('numRecordings', str(self.programIterator.size()))
-
+        self.setWindowProperty('commBreaks', '...')     
+        self.setWindowProperty('recordingNofM', self.translator.get(m.RECORDING_N_OF_M) % (str(self.programIterator.index() + 1), str(self.programIterator.size())))  
 
     @run_async
     @catchall        
@@ -284,8 +282,7 @@ class RecordingDetailsWindow(BaseWindow):
                         self.firstInQueueButton.setEnabled(True)
                 elif job.jobStatus == JobStatus.RUNNING:
                     try:
-                        # TODO: Add ETA 
-                        commBreaks = '%d%% at %2.0f fps' % (job.getPercentComplete(), job.getCommFlagRate())
+                        commBreaks = self.translator.get(m.N_AT_M_FPS) % ('%d%%' % job.getPercentComplete(), '%2.0f' % job.getCommFlagRate())
                     except StatusException:
                         commBreaks = job.comment
                 else:                                    
@@ -300,7 +297,6 @@ class RecordingDetailsWindow(BaseWindow):
         try:
             season, episode = self.fanArt.getSeasonAndEpisode(boundProgram)
         finally:
-            #log.error('Season %s %s Episode %s %s %s' % (season, type(season), episode, type(episode), season and episode))
             if boundProgram == self.program:
                 self.setWindowProperty('episode', ['-', '%sx%s' % (season, episode)][bool(season) and bool(episode)])
             else:

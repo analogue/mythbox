@@ -373,7 +373,7 @@
         <aligny>center</aligny>
         <font>font12</font>
         <textcolor>ffffffff</textcolor>
-        <label>Recording $INFO[Window.Property(index)] of $INFO[Window.Property(numRecordings)]</label>
+        <label>$INFO[Window.Property(recordingNofM)]</label>
         <animation effect="fade" time="200">WindowOpen</animation>
         <animation effect="fade" time="200">WindowClose</animation>
     </control>
