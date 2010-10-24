@@ -609,7 +609,8 @@ except:
     class NativeTranslator(object):
         
         def __init__(self, scriptPath, defaultLanguage=None, *args, **kwargs):
-            pass
+            import xbmcaddon
+            self.addon = xbmcaddon.Addon('script.mythbox')
             
         def get(self, id):
             """
@@ -624,7 +625,7 @@ except:
             if type(id) is str:
                 return id
             else:
-                return xbmc.getLocalizedString(id)
+                return self.addon.getLocalizedString(id)
         
         def toList(self, someMap):
             """
