@@ -308,6 +308,11 @@ class HomeWindow(BaseWindow):
                 if not cover:
                     cover = 'mythbox-logo.png'
             self.setListItemProperty(listItem, 'thumb', cover)
+            # WORKAROUND: 
+            #    Image associated with 'thumb' property won't update
+            #    unless we 'poke' the list item by calling setThumbnailImage(...)
+            #    with a bogus image
+            listItem.setThumbnailImage('OverlayHD.png') 
         log.debug('<<< renderCoverFlow end')
         
     @run_async
