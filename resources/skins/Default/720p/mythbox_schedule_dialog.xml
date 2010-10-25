@@ -1,5 +1,4 @@
 <window id="3010">
-    <type>dialog</type>
     <defaultcontrol>201</defaultcontrol>
     <animation effect="fade" time="200">WindowOpen</animation>
     <animation effect="fade" time="200">WindowClose</animation>

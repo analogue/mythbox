@@ -191,9 +191,7 @@ class ScheduleDialog(BaseDialog):
         
     @catchall
     def onInit(self):
-        #log.debug('onInit %s' % self.win)
-        #log.debug('dlg id = %s' % xbmcgui.getCurrentWindowDialogId())
-        self.win = xbmcgui.Window(xbmcgui.getCurrentWindowId())
+        self.win = xbmcgui.Window(xbmcgui.getCurrentWindowDialogId())
         
         self.enabledCheckBox = self.getControl(212)
         self.autoCommFlagCheckBox = self.getControl(205)
