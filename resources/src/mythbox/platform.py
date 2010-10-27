@@ -21,6 +21,9 @@ import os
 import socket
 import sys
 import xbmc
+import xbmcaddon
+import urllib
+import stat
 
 log = logging.getLogger('mythbox.core')
 
@@ -44,11 +47,17 @@ def getPlatform():
 
 class Platform(object):
 
-    def __init__(self):
-        # os.getcwd() can and does change @ runtime. retain and use initial value
-        self.cwd = os.getcwd()
+    def __init__(self, *args, **kwargs):
+        try:
+            self.addon = xbmcaddon.Addon('script.mythbox')
+            self.cwd = self.addon.getAddonInfo('path')
+        except:
+            self.addon = None
+            # os.getcwd() can and does change @ runtime. retain and use initial value
+            self.cwd = os.getcwd()
+            
         self._scriptDataDir = None
-        
+
         datadir = self.getScriptDataDir()
         if not os.path.exists(datadir): 
             os.makedirs(datadir)
@@ -56,11 +65,11 @@ class Platform(object):
         cachedir = self.getCacheDir()
         if not os.path.exists(cachedir): 
             os.makedirs(cachedir)
-        
+            
+        #self.requireFFMpeg()
+
     def addLibsToSysPath(self):
-        """
-        Add 3rd party libs in ${scriptdir}/resources/lib to the PYTHONPATH
-        """
+        '''Add 3rd party libs in ${scriptdir}/resources/lib to the PYTHONPATH'''
         libs = [
             'pyxcoder', 
             'decorator', 
@@ -86,25 +95,31 @@ class Platform(object):
         return "N/A"
     
     def getScriptDir(self):
-        """
+        '''
         @return: directory that this xbmc script resides in.
         
-        linux  : ~/.xbmc/scripts/MythBox
-        windows: c:\Documents and Settings\[user]\Application Data\XBMC\scripts\MythBox
-        mac    : ~/Library/Application Support/XBMC/scripts/MythBox
-        """
-        return self.cwd
+        linux  : ~/.xbmc/addons/script.mythbox
+        windows: c:\Documents and Settings\[user]\Application Data\XBMC\addons\script.mythbox
+        mac    : ~/Library/Application Support/XBMC/addons/script.mythbox
+        '''
+        try:
+            return self.addon.getAddonInfo('path')
+        except:
+            return self.cwd
     
     def getScriptDataDir(self):
-        """
+        '''
         @return: directory for storing user settings for this xbmc script.
         
-        linux  : ~/.xbmc/userdata/script_data/MythBox
-        windows: c:\Documents and Settings\[user]\Application Data\XBMC\UserData\script_data\MythBox
-        mac    : ~/Library/Application Support/XBMC/UserData/script_data/MythBox
-        """
+        linux  : ~/.xbmc/userdata/addon_data/script.mythbox
+        windows: c:\Documents and Settings\[user]\Application Data\XBMC\UserData\addon_data\script.mythbox
+        mac    : ~/Library/Application Support/XBMC/UserData/addon_data/script.mythbox
+        '''
         if self._scriptDataDir is None:
-            self._scriptDataDir = xbmc.translatePath("T:\\script_data") + os.sep + os.path.basename(self.getScriptDir())
+            try:
+                self._scriptDataDir = xbmc.translatePath(self.addon.getAddonInfo('profile'))
+            except:
+                self._scriptDataDir = xbmc.translatePath("T:\\script_data") + os.sep + os.path.basename(self.getScriptDir())
         return self._scriptDataDir
     
     def getCacheDir(self):
@@ -141,9 +156,38 @@ script data dir = %s
         # TODO: Fix when we support multiple skins
         return os.path.join(self.getScriptDir(), 'resources', 'skins', 'Default', 'media', mediaFile)
         
+    def showPopup(self, title, text, millis=10000):
+        # filter all commas out of text since they delimit args
+        title = title.replace(',', ';')
+        text = text.replace(',', ';')
+        s = 'XBMC.Notification(%s,%s,%s)'  % (title, text, millis)
+        xbmc.executebuiltin(s)
+
+    def requireFFMpeg(self, path):
+        if os.path.exists(path) and os.path.isfile(path):
+            return
+
+        dir, exe = os.path.split(path)
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        
+        self.showPopup('Downloading FFMPEG', 'This may take a couple mins...hang tight', millis=10000)
+        filename, headers = urllib.urlretrieve(self.ffmpegUrl, path)
+            
+        if os.path.exists(path) and os.path.isfile(path):
+            os.chmod(path, stat.S_IRWXG|stat.S_IRWXO|stat.S_IRWXU)
+            self.showPopup('Downloading FFMPEG', 'All done!', millis=10000)
+            return
+        
+        raise Exception, 'FFMpeg could not be downloaded'
+
 
 class UnixPlatform(Platform):
 
+    def __init__(self, *args, **kwargs):
+        Platform.__init__(self, *args, **kwargs)
+        self.ffmpegUrl = '/usr/bin/ffmpeg'
+        
     def getName(self):
         return "unix"
     
@@ -153,29 +197,46 @@ class UnixPlatform(Platform):
     def getFFMpegPath(self):
         return '/usr/bin/ffmpeg'
 
+#    def getFFMpegPath(self):
+#        path = os.path.join(self.getScriptDataDir(), 'ffmpeg')
+#        self.requireFFMpeg(path)
+#        return path
+
     def getDefaultRecordingsDir(self):
         return '/var/lib/mythtv/recordings'
     
 
 class WindowsPlatform(Platform):
 
+    def __init__(self, *args, **kwargs):
+        Platform.__init__(self, *args, **kwargs)
+        self.ffmpegUrl = 'http://mythbox.googlecode.com/hg/resources/bin/win32/ffmpeg.exe'
+    
     def getName(self):
         return "windows"
 
     def getFFMpegPath(self):
-        return os.path.join(self.getScriptDir(), 'resources', 'bin', 'win32', 'ffmpeg.exe')
-
+        path = os.path.join(self.getScriptDataDir(), 'ffmpeg.exe')
+        self.requireFFMpeg(path)
+        return path
+    
     def getDefaultRecordingsDir(self):
         return 'c:\\change\\me'
 
-
+        
 class MacPlatform(Platform):
 
+    def __init__(self, *args, **kwargs):
+        Platform.__init__(self, *args, **kwargs)
+        self.ffmpegUrl = 'http://mythbox.googlecode.com/hg/resources/bin/osx/ffmpeg'
+        
     def getName(self):
         return 'mac'
 
     def getFFMpegPath(self):
-        return os.path.join(self.getScriptDir(), 'resources', 'bin', 'osx', 'ffmpeg')
+        path = os.path.join(self.getScriptDataDir(), 'ffmpeg')
+        self.requireFFMpeg(path)
+        return path
 
     def getDefaultRecordingsDir(self):
         return '/change/me'
