@@ -311,7 +311,7 @@ class TvGuideWindow(ui.BaseWindow):
     @inject_conn
     def watchLiveTv(self, program):
         channel = filter(lambda c: c.getChannelId() == program.getChannelId(), self.channels).pop()
-        brain = self.conn().protocol.getLiveTvBrain(self.settings)
+        brain = self.conn().protocol.getLiveTvBrain(self.settings, self.translator)
         try:
             brain.watchLiveTV(channel)
         except Exception, e:

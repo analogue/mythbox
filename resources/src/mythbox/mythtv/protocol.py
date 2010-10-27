@@ -48,7 +48,7 @@ class BaseProtocol(object):
     def buildAnnounceFileTransferCommand(self, hostname, filePath):
         raise Exception, 'Abstract method'
     
-    def getLiveTvBrain(self, settings):
+    def getLiveTvBrain(self, settings, translator):
         raise Exception, 'Abstract method'
 
 
