@@ -29,6 +29,7 @@ zip --quiet \
     --exclude="script.mythbox/doc/*" \
     --exclude="script.mythbox/mythbox_report.html" \
     --exclude="script.mythbox/ondemandconfig.ini" \
+    --exclude="script.mythbox/resources/bin/*" \
     --exclude="script.mythbox/resources/itest/*" \
     --exclude="script.mythbox/resources/lib/elementtree/docs/*" \
     --exclude="script.mythbox/resources/lib/elementtree/samples/*" \
