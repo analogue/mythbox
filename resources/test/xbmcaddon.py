@@ -12,7 +12,9 @@ class Addon(object):
      |  example:
      |   - self.Addon = xbmcaddon.Addon(id='script.recentlyadded')    
     '''
-
+    def __init__(self, id):
+        pass
+    
     def getAddonInfo(self, id):
         '''
         Returns the value of an addon property as a string
