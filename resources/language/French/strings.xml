@@ -251,7 +251,12 @@
   <string id="310">[B]Syntoniseur[/B]</string>
   <string id="311">[B]État[/B]</string>
   <string id="312">[B]Travail[/B]</string>
-
+  <string id="313">Balisage de la publicité</string>
+  <string id="314">Transcodage en cours</string>
+  <string id="315">Traitement en cours</string>
+  <string id="316">En attente du balisage de la publicité</string>
+  <string id="317">En attente de transcodage</string>
+  <string id="318">En attente de démarrage de %s sur %s</string> 
 
   <!-- Watch Recordings Screen -->
   <string id="500">[B]Enregistrements[/B]</string>
@@ -279,7 +284,9 @@
   <string id="631">Chargement...</string>
   <string id="632">Aucun</string>
   <string id="633">Liste %d de %d</string>
-  
+  <string id="634">%s terminé à %s fps</string>
+  <string id="635">sur</string>
+
   <!-- Watch TV Screen -->
   <string id="700">[B]Regarder TV[/B]</string>
 
