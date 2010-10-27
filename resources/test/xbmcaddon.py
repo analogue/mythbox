@@ -50,7 +50,15 @@ class Addon(object):
         >>> a.getAddonInfo('type')
         'xbmc.python.script'
         '''
-        pass
+        d = {
+             'type':'xbmc.python.script',
+             'summary': 'script summary',
+             'name': 'MythBox',
+             'id': 'script.mythbox',
+             'profile': 'special://profile/addon_data/script.mythbox/',
+             'path':'/tmp/script.mythbox'
+        }
+        return d.get('id', 'TODO')
 
     def getLocalizedString(self, id):
         '''
@@ -63,7 +71,7 @@ class Addon(object):
          |      example:
          |        - locstr = self.Addon.getLocalizedString(id=6)
         '''
-        return ''
+        return 'TODO'
      
     def getSetting(self, id):
         '''
