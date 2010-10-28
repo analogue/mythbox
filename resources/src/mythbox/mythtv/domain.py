@@ -934,7 +934,7 @@ class RecordedProgram(Program):
                     self._localPath = str(localPath) # scrub unicode
                     return self._localPath
             from mythbox.mythtv.conn import ClientException
-            raise ClientException("Can't find recording %s in %s" % (fileOnly, ', '.join(self.settings.getRecordingDirs()))) 
+            raise ClientException("Recording %s not found in %s. Check Settings > Myth TV > Local Recording Dirs" % (fileOnly, ', '.join(self.settings.getRecordingDirs()))) 
 
     def getBareFilename(self):
         """
