@@ -379,7 +379,7 @@ def catchall(func, *args, **kw):
         return func(*args, **kw)
     except Exception, ex:
         log.error(sys.exc_info())
-        log.exception('CATCHALL: Caught exception %s on method %s' % (str(ex), func))
+        log.exception('CATCHALL: Caught exception %s on method %s' % (str(ex), func.__name__))
 
 
 @decorator
@@ -392,8 +392,18 @@ def catchall_ui(func, *args, **kw):
         return func(*args, **kw)
     except Exception, ex:
         log.error(sys.exc_info())
-        log.exception('CATCHALL_UI: Caught %s exception %s on method %s' % (type(ex), str(ex), func))
-        xbmcgui.Dialog().ok('Error: CATCHALL', 'Exception: %s' % str(ex), 'Function: %s' % str(func))
+        log.exception('CATCHALL_UI: Caught %s exception %s on method %s' % (type(ex), str(ex), func.__name__))
+        msg1 = str(ex)
+        msg2 = ''
+        msg3 = ''
+        n = 45
+        if len(msg1) > n:
+            msg2 = msg1[n:]
+            msg1 = msg1[:n]
+        if len(msg2) > n:
+            msg3 = msg2[n:]
+            msg2 = msg2[:n]
+        xbmcgui.Dialog().ok('Error: %s' % func.__name__, msg1, msg2, msg3)
 
 
 def synchronized(func):

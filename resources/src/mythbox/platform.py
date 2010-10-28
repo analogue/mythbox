@@ -21,7 +21,6 @@ import os
 import socket
 import sys
 import xbmc
-import xbmcaddon
 import urllib
 import stat
 
@@ -49,6 +48,7 @@ class Platform(object):
 
     def __init__(self, *args, **kwargs):
         try:
+            import xbmcaddon
             self.addon = xbmcaddon.Addon('script.mythbox')
             self.cwd = self.addon.getAddonInfo('path')
         except:
