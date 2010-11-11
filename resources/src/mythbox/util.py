@@ -43,6 +43,13 @@ elog = logging.getLogger('mythbox.event')
 threadlocals = {}   
 
 
+def requireDir(dir):
+    '''Create dir with missing path segments and return for chaining'''
+    if not os.path.exists(dir):
+        os.mkdir(dir)
+    return dir
+
+    
 def formatSize(sizeKB, gb=False):
     size = float(sizeKB)
     if size > 1024*1000 and gb:

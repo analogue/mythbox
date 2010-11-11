@@ -171,27 +171,6 @@ class MythSettingsTest(unittest.TestCase):
             os.getcwd() + os.pathsep + 
             tempfile.gettempdir() + os.pathsep + 
             os.getcwd())
-        
-    def test_verifyFFMpeg_OK(self):
-        platform = getPlatform()
-        if (type(platform) == UnixPlatform):
-            try:
-                MythSettings.verifyFFMpeg('/bin/true', platform)
-            except SettingsException:
-                self.fail("expected /bin/true to be a valid executable")
-        else:
-            log.warn('Test not supported on this platform: %s' % platform)
-
-    def test_verifyFFMpeg_ThrowsExceptionOnNonExistentExecutable(self):
-        platform = getPlatform()
-        if (type(platform) == UnixPlatform):
-            try:
-                MythSettings.verifyFFMpeg('/bin/bogus_exe_name', platform)
-                self.fail("expected failure on invalid exe name")
-            except SettingsException, ex:
-                log.debug('PASS: %s' % ex)
-        else:
-            log.warn('Test not supported on this platform: %s' % platform)
             
     def test_verifyMySQLUser_OK(self):
         MythSettings.verifyMySQLUser('someUser')

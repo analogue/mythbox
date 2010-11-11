@@ -737,6 +737,51 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest2.TestCase):
         except Exception, e:
             log.debug('SUCCESS: got exception on null delegate')
 
+    def test_getSeasonAndEpisode_When_not_struck_out_and_delegate_returns_empty_tuple_Then_strike_out_and_return_nextProviders_result(self):
+        # Setup
+        provider = OneStrikeAndYoureOutFanartProvider(self.platform, self.delegate, self.nextProvider)
+        key = provider.createKey('getSeasonAndEpisode', self.program)
+        when(self.delegate).getSeasonAndEpisode(any()).thenReturn((None,None,))
+        when(self.nextProvider).getSeasonAndEpisode(any()).thenReturn(('1','2',))
+        
+        # Test
+        season, episode = provider.getSeasonAndEpisode(self.program)
+        
+        # Verify
+        self.assertEqual('1', season)
+        self.assertEqual('2', episode)
+        self.assertIn(self.program.title(), provider.struckOut[key].values())
+
+    def test_getSeasonAndEpisode_When_struck_out_Then_skip_delegate_and_return_nextProviders_result(self):
+        # Setup
+        provider = OneStrikeAndYoureOutFanartProvider(self.platform, self.delegate, self.nextProvider)
+        key = provider.createKey('getSeasonAndEpisode', self.program)
+        provider.strikeOut(key, self.program)
+        when(self.nextProvider).getSeasonAndEpisode(any()).thenReturn(('1','2'))
+        
+        # Test
+        season, episode = provider.getSeasonAndEpisode(self.program)
+        
+        # Verify
+        self.assertEqual('1', season)
+        self.assertEqual('2', episode)
+        self.assertIn(self.program.title(), provider.struckOut[key].values())
+        verifyZeroInteractions(self.delegate)
+
+    def test_getSeasonAndEpisode_When_not_struck_out_and_delegate_returns_season_and_episode_Then_return_season_and_episode(self):
+        # Setup
+        provider = OneStrikeAndYoureOutFanartProvider(self.platform, self.delegate, self.nextProvider)
+        when(self.delegate).getSeasonAndEpisode(any()).thenReturn(('1','2',))
+        
+        # Test
+        season, episode = provider.getSeasonAndEpisode(self.program)
+        
+        # Verify
+        self.assertEqual('1', season)
+        self.assertEqual('2', episode)
+        self.assertNotIn(self.program.title(), provider.struckOut.values())
+        verifyZeroInteractions(self.nextProvider)
+
 
 class SpamSkippingFanartProviderTest(unittest2.TestCase):
         
@@ -880,6 +925,12 @@ class SuperFastFanartProviderTest(unittest2.TestCase):
 
 
 class TvRageProviderTest(unittest2.TestCase):
+
+    def setUp(self):
+        self.sandbox = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.sandbox, ignore_errors=True)
+        self.platform = Mock()
+        when(self.platform).getCacheDir().thenReturn(self.sandbox)
     
     def test_getSeasonAndEpisode_Success(self):
         # Setup
@@ -891,7 +942,7 @@ class TvRageProviderTest(unittest2.TestCase):
         data[38] = 1  # has original air date
         data[37] = '2010-07-14'
         program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
-        provider = TvRageProvider()
+        provider = TvRageProvider(self.platform)
         
         # Test
         season, episode = provider.getSeasonAndEpisode(program)
@@ -909,7 +960,7 @@ class TvRageProviderTest(unittest2.TestCase):
         data[38] = 1  # has original air date
         data[37] = '2010-08-03'
         program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
-        provider = TvRageProvider()
+        provider = TvRageProvider(self.platform)
         
         # Test
         season, episode = provider.getSeasonAndEpisode(program)
@@ -917,6 +968,27 @@ class TvRageProviderTest(unittest2.TestCase):
         # Verify
         self.assertIsNone(season)
         self.assertIsNone(episode)
+
+    def test_getSeasonAndEpisode_try_to_cache_output(self):
+        # Setup
+        data = [''] * protocol.Protocol57().recordSize()
+        data[0]  = u'Seinfeld'
+        # flag as non-movie
+        data[11] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple()) 
+        data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
+        data[38] = 1  # has original air date
+        data[37] = '1989-07-05'
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        provider = TvRageProvider(self.platform)
+        
+        # Test
+        for i in xrange(100):
+            # TODO Verify hitting cache < 1sec per invocation.
+            #      Since tvrage api is not injected, cannot mock
+            season, episode = provider.getSeasonAndEpisode(program)
+            # Verify
+            self.assertEqual('1', season)
+            self.assertEqual('1', episode)
 
 
 if __name__ == '__main__':

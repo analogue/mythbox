@@ -236,7 +236,7 @@ class RecordedProgramTest(unittest.TestCase):
             self.data[8] = "myth://192.168.1.11:6543/movie_29.97_fps.mpg" # filename 
             self.data[16] = "localhost" # hostname
             when(self.settings).getRecordingDirs().thenReturn([os.path.join(os.getcwd(), 'resources', 'test')])
-            when(self.settings).get('paths_ffmpeg').thenReturn('ffmpeg')
+            when(self.platform).getFFMpegPath().thenReturn('ffmpeg')
             when(self.platform).getScriptDataDir().thenReturn(datadir)
             
             # Should invoke ffmpeg

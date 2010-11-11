@@ -205,8 +205,9 @@
                 <label2></label2>
             </control>
 
+            <!--  
             <control type="button" id="209">
-                <description>ffmpeg exe path</description>
+                <description>empty spot</description>
                 <label>SCRIPT414</label>
                 <width>950</width>
                 <height>35</height>
@@ -219,7 +220,8 @@
                 <focusedcolor>ffffffff</focusedcolor>
                 <label2></label2>
             </control>
-
+            -->
+            
             <control type="image" id="210">
                 <description>separator image</description>
                 <width>950</width>
@@ -527,8 +529,9 @@
             <animation effect="fade" time="200">VisibleChange</animation>
 	    </control>
 
+        <!--
 	    <control type="button">
-	      	<description>ffmpeg help</description>
+	      	<description>empty help</description>
 	      	<posx>300</posx>
 	      	<posy>580</posy>
 	      	<height>50</height>
@@ -542,7 +545,8 @@
 			<texturenofocus>-</texturenofocus>
             <animation effect="fade" time="200">VisibleChange</animation>
 	    </control>
-
+        -->
+         
         <control type="button">
             <description>aggressive caching help1</description>
             <posx>300</posx>

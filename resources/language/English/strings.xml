@@ -24,8 +24,8 @@ To submit translations for your native language
   <string id="12">User</string>
   <string id="13">Password</string>
   <string id="14">Recording Directories</string>
-  <string id="15">FFMpeg Path</string>
-  <string id="16">Local Copy Path</string> <!-- delete -->
+  <string id="15"></string>
+  <string id="16"></string>
   <string id="17">Save</string>
   <string id="18">Myth TV - Settings</string>
   <string id="19">Myth TV - MySQL Settings</string>
@@ -397,7 +397,7 @@ To submit translations for your native language
   <string id="411">Master Backend Hostname</string>
   <string id="412">Master Backend Port</string>
   <string id="413">Local Recording Directory(s)</string>
-  <string id="414">FFMpeg Executable Path</string>
+  <string id="414"></string>
   <string id="415">Confirm on Delete</string>
   <string id="416">Location of MythTV recordings on the local filesystem (mounted storage group dirs if your backend is remote).</string>
   <string id="417">Multiple directories can be separated with a colon on Linux/Mac or a semi-colon on Windows.</string>

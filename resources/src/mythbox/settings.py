@@ -56,8 +56,6 @@ class MythSettings(object):
             pass
         self.bus = bus
 
-    def getFFMpegPath(self): return self.get('paths_ffmpeg')
- 
     def isConfirmOnDelete(self): return self.getBoolean('confirm_on_delete')
     
     def isAggressiveCaching(self): return self.getBoolean('aggressive_caching')
@@ -117,7 +115,6 @@ class MythSettings(object):
             'mysql_password'            : 'change_me',
             'mysql_encoding_override'   : 'latin1',
             'paths_recordedprefix'      : self.platform.getDefaultRecordingsDir(),
-            'paths_ffmpeg'              : self.platform.getFFMpegPath(),
             'aggressive_caching'        : 'False',
             'recorded_view_by'          : '2', 
             'upcoming_view_by'          : '2',
@@ -199,7 +196,6 @@ class MythSettings(object):
         self.verifyMythTVConnectivity()
         
         MythSettings.verifyRecordingDirs(self.get('paths_recordedprefix'))
-        MythSettings.verifyFFMpeg(self.get('paths_ffmpeg'), self.platform)
         MythSettings.verifyBoolean(self.get('confirm_on_delete'), 'Confirm on delete must be True or False')
         MythSettings.verifyBoolean(self.get('aggressive_caching'), 'Aggressive Caching must be True or False')
         slog.debug('verified settings')
@@ -229,28 +225,10 @@ class MythSettings(object):
         for tag in self.defaults.keys():
             sb += '%s = %s\n' % (tag, [self.get(tag), '<EMPTY>'][self.get(tag) is None]) 
         return sb
-            
-    @staticmethod
-    def verifyFFMpeg(filepath, p): # =platform.getPlatform()
-        MythSettings.verifyString(filepath, "Enter the absolute path of your ffmpeg executable")
-        
-        if not os.path.exists(filepath):
-            raise SettingsException("ffmpeg executable '%s' does not exist." % filepath)
-        
-        if not os.path.isfile(filepath):
-            raise SettingsException("ffmpeg executable '%s' is not a file" % filepath)
-        
-        ptype = type(p)
-        if ptype in (WindowsPlatform,):
-            pass
-        elif ptype in (UnixPlatform, MacPlatform):
-            if not os.access(filepath, os.X_OK):
-                raise SettingsException("ffmpeg executable '%s' is not chmod +x" % filepath)
-        else:
-            raise SettingsException('Verifying FFMPEG - unsupported platform: %s' % ptype)
     
     @staticmethod    
     def verifyRecordingDirs(recordingDirs):
+        # TODO: Check for empty recordings dir
         MythSettings.verifyString(recordingDirs, "Enter one or more '%s' separated MythTV recording directories" % os.pathsep)
         for dir in recordingDirs.split(os.pathsep):
             if not os.path.exists(dir):

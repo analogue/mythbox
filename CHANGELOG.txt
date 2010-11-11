@@ -2,6 +2,8 @@ xx/xx/2010 - MythBox 1.0.0
 =============================
   New
     - Issue 125 - Added Frech translations (thanks ddekani)
+    - TVRage metadata caching for Season & Episode
+    - FFMpeg binary for Mac and Windows unbundled from installation zip and also removed from Settings screen. Now downloads on demand.
    
   Fixed
     - Issue 124 - Fixed parsing another variation of ffmpeg output

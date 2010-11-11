@@ -65,8 +65,6 @@ class Platform(object):
         cachedir = self.getCacheDir()
         if not os.path.exists(cachedir): 
             os.makedirs(cachedir)
-            
-        #self.requireFFMpeg()
 
     def addLibsToSysPath(self):
         '''Add 3rd party libs in ${scriptdir}/resources/lib to the PYTHONPATH'''

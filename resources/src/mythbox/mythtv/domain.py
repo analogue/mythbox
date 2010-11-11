@@ -966,7 +966,7 @@ class RecordedProgram(Program):
                 os.makedirs(ffmpeg_cache_dir)
                 
             ffmpegParser = FFMPEG(
-                ffmpeg=self.settings.get('paths_ffmpeg'),
+                ffmpeg=self._platform.getFFMpegPath(),
                 closeFDs=(type(self._platform) != WindowsPlatform),  # WORKAROUND: close_fds borked on windows
                 windows=(type(self._platform) == WindowsPlatform),   # WORKAROUND: let pyxcoder know we're on windows
                 tempdir=ffmpeg_cache_dir)
@@ -985,7 +985,7 @@ class RecordedProgram(Program):
                 log.error("""Could not determine FPS for file %s so defaulting to %s FPS.
                              Make sure you have the ffmpeg executable in your path. 
                              Commercial skipping may be inaccurate""" % (self._fps, self.getLocalPath()))
-                showPopup('Error', 'FFMpeg could not determine framerate. Comm skip may be inaccurate')
+                showPopup(self.translator.get(m.ERROR), 'FFMpeg could not determine framerate. Comm skip may be inaccurate')
         return self._fps
 
     @timed
@@ -1004,7 +1004,7 @@ class RecordedProgram(Program):
         #
         if not self._fps:
             ffmpegParser = FFMPEG(
-                ffmpeg=self.settings.get('paths_ffmpeg'),
+                ffmpeg=self._platform.getFFMpegPath(),
                 closeFDs=(type(self._platform) != WindowsPlatform),
                 windows=(type(self._platform) == WindowsPlatform))  
                 # WORKAROUND: close_fds borked on windows
@@ -1034,7 +1034,7 @@ class RecordedProgram(Program):
                 log.error("""Could not determine FPS for file %s so defaulting to %s FPS.
                              Make sure you have the ffmpeg executable in your path. 
                              Commercial skipping may be inaccurate""" % (self._fps, self.getLocalPath()))
-                showPopup('Error', 'FFMpeg could not determine framerate. Comm skip may be inaccurate')
+                showPopup(self.translator.get(m.ERROR), 'FFMpeg could not determine framerate. Comm skip may be inaccurate')
         return self._fps
 
     def formattedFileSize(self):

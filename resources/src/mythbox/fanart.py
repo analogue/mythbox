@@ -36,7 +36,7 @@ import urllib
 import Queue
 
 from decorator import decorator
-from mythbox.util import synchronized, safe_str, run_async, max_threads, timed
+from mythbox.util import synchronized, safe_str, run_async, max_threads, timed, requireDir
 from mythbox.bus import Event
 
 log = logging.getLogger('mythbox.fanart')
@@ -151,9 +151,7 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
     def __init__(self, platform, delegate, nextProvider=None):
         if not delegate:
             raise Exception('delegate cannot be None')
-        oneStrikeDir = os.path.join(platform.getCacheDir(), 'onestrike')
-        if not os.path.exists(oneStrikeDir):
-            os.mkdir(oneStrikeDir)
+        oneStrikeDir = requireDir(os.path.join(platform.getCacheDir(), 'onestrike'))
         PersistentFanartProvider.__init__(self, nextProvider, os.path.join(oneStrikeDir, '%s.pickle' % delegate.__class__.__name__))
         self.delegate = delegate
         self.struckOut = self.pcache
@@ -187,7 +185,13 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
 
     @chain
     def getSeasonAndEpisode(self, program):
-        return self.delegate.getSeasonAndEpisode(program)
+        season, episode = None, None
+        key = self.createKey('getSeasonAndEpisode', program)
+        if not self.hasStruckOut(key):
+            season, episode = self.delegate.getSeasonAndEpisode(program)
+            if season is None or episode is None:
+                self.strikeOut(key, program)
+        return season, episode 
 
     def clear(self):
         super(OneStrikeAndYoureOutFanartProvider, self).clear()
@@ -227,9 +231,7 @@ class SpamSkippingFanartProvider(BaseFanartProvider):
 class SuperFastFanartProvider(PersistentFanartProvider):
     
     def __init__(self, platform, nextProvider=None):
-        cacheDir = os.path.join(platform.getCacheDir(), 'superfast')
-        if not os.path.exists(cacheDir):
-            os.mkdir(cacheDir)
+        cacheDir = requireDir(os.path.join(platform.getCacheDir(), 'superfast'))
         PersistentFanartProvider.__init__(self, nextProvider, os.path.join(cacheDir, 'superfast.pickle'))
         self.imagePathsByKey = self.pcache
 
@@ -371,7 +373,7 @@ class TvdbFanartProvider(BaseFanartProvider):
     
     def __init__(self, platform, nextProvider=None):
         BaseFanartProvider.__init__(self, nextProvider)
-        self.tvdbCacheDir = os.path.join(platform.getCacheDir(), 'tvdb')
+        self.tvdbCacheDir = requireDir(os.path.join(platform.getCacheDir(), 'tvdb'))
         self.tvdb = tvdb_api.Tvdb(interactive=False, 
             select_first=True, 
             debug=False, 
@@ -408,7 +410,7 @@ class TvdbFanartProvider(BaseFanartProvider):
     def clear(self):
         super(TvdbFanartProvider, self).clear()        
         shutil.rmtree(self.tvdbCacheDir, ignore_errors=True)
-        os.makedirs(self.tvdbCacheDir)
+        requireDir(self.tvdbCacheDir)
 
     # tvdb site rejects queries if > 2 per originating IP
     @max_threads(2)
@@ -524,17 +526,71 @@ class GoogleImageSearchProvider(BaseFanartProvider):
 
 class TvRageProvider(NoOpFanartProvider):
 
+    def __init__(self, platform, nextProvider=None):
+        self.cacheDir = requireDir(os.path.join(platform.getCacheDir(), 'tvrage'))
+        self.nextProvider = nextProvider
+        self.memcache = {}
+
+    def clear(self):
+        self.memcache.clear()
+        shutil.rmtree(self.cacheDir, ignore_errors=True)
+        requireDir(self.cacheDir)         
+
+    def load(self, program):
+        '''Load tvrage.api.Show from memory or disk cache'''
+        if program.title() in self.memcache.keys():
+            return self.memcache[program.title()]
+        
+        fname = os.path.join(self.cacheDir, safe_str(program.title()))
+        if not os.path.exists(fname):
+            return None
+        f = open(fname, 'rb')
+        try:
+            show = pickle.load(f)
+            self.memcache[program.title()] = show
+        finally: 
+            f.close()
+        return show
+    
+    def save(self, program, show):
+        '''Save tvrage.api.Show to memory/disk cache'''
+        f = open(os.path.join(self.cacheDir, safe_str(program.title())), 'wb')
+        try:
+            self.memcache[program.title()] = show
+            pickle.dump(show, f)
+        finally:
+            f.close()
+        
     @chain
     def getSeasonAndEpisode(self, program):
         if program.isMovie(): 
             return None, None
-        
+
+        show = self.load(program)
+
+        if show is None:
+            return self.queryTvRage(program)        
+        else:
+            season, episode = self.searchForEpisode(program, show)
+            if season is None or episode is None:
+                # not found in cached show, get fresh data if show has not been cancelled
+                if show.status == 'Canceled/Ended':
+                    return None, None
+                else:
+                    return self.queryTvRage(program)
+            else:
+                return season, episode
+                
+    def queryTvRage(self, program):
         try:
             show = tvrage.api.Show(program.title())
+            self.save(program, show)
+            return self.searchForEpisode(program, show)
         except tvrage.api.ShowNotFound:
             log.debug('TVRage: Show not found - %r' % program.title())
             return None, None
-        
+                    
+    def searchForEpisode(self, program, show):        
         oad = program.originalAirDate()
         d = datetime.date(int(oad[0:4]), int(oad[5:7]), int(oad[8:10]))
         for sn in xrange(1, show.seasons+1):
@@ -591,8 +647,8 @@ class FanArt(object):
         if settings.getBoolean('fanart_google'): p = GoogleImageSearchProvider(p)
         if settings.getBoolean('fanart_imdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, ImdbFanartProvider(), p)
         if settings.getBoolean('fanart_tmdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, TheMovieDbFanartProvider(), p)
-        if settings.getBoolean('fanart_tvrage'): p = OneStrikeAndYoureOutFanartProvider(self.platform, TvRageProvider(), p) 
         if settings.getBoolean('fanart_tvdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, TvdbFanartProvider(self.platform), p)
+        if settings.getBoolean('fanart_tvrage'): p = OneStrikeAndYoureOutFanartProvider(self.platform, TvRageProvider(self.platform), p) 
                         
         p = HttpCachingFanartProvider(self.httpCache, p)
         self.sffp = p = SuperFastFanartProvider(self.platform, p)
