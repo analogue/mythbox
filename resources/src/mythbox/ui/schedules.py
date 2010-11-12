@@ -191,8 +191,11 @@ class ScheduleDialog(BaseDialog):
         
     @catchall
     def onInit(self):
-        self.win = xbmcgui.Window(xbmcgui.getCurrentWindowDialogId())
-        
+        if self.platform.isDharma():
+            self.win = xbmcgui.Window(xbmcgui.getCurrentWindowDialogId())
+        else:
+            self.win = xbmcgui.Window(xbmcgui.getCurrentWindowId())
+            
         self.enabledCheckBox = self.getControl(212)
         self.autoCommFlagCheckBox = self.getControl(205)
         self.autoExpireCheckBox = self.getControl(207)

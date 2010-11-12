@@ -132,6 +132,13 @@ class Platform(object):
     def isUnix(self):
         return False
     
+    def isDharma(self):
+        try:
+            from xbmc import executeJSONRPC
+            return True
+        except:
+            return False
+        
     def __repr__(self):
         bar = "=" * 80
         s = bar + \

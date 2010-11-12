@@ -140,7 +140,7 @@ class BootStrapper(object):
     def bootstrapDebugShell(self):
         # only startup debug shell on my mythboxen
         import socket
-        if socket.gethostname() in ('htpc', 'faraday', 'athena', 'zeus'):
+        if socket.gethostname() in ('htpc2', 'faraday', 'zeus'):
             try:
                 from mythbox.shell import DebugShell
                 globals()['bootstrapper'] = self
