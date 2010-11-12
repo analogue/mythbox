@@ -74,7 +74,10 @@ class Translator(object):
             strValue = None
 
             strId = int(n.getAttribute("id"))
-            strValue = n.childNodes[0].nodeValue 
+            try:
+                strValue = n.childNodes[0].nodeValue 
+            except IndexError, ie:
+                pass  # handle <string id="nn" />
             
             # only add it if an id has been specified
             if strId >= 0:
