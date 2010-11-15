@@ -298,37 +298,14 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably()
         
     def test_getRandomPoster_When_program_is_not_movie_Then_returns_poster(self):
-        # Setup
         program = TVProgram({'title':'Seinfeld', 'category_type':'series'}, translator=Mock())
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
-        
-        # Test    def test_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
-        programs = map(lambda t: TVProgram({'title': t, 'category_type':'movie'}, translator=Mock()), self.movies)
-        provider = TheMovieDbFanartProvider(nextProvider=None)
-        
-        @run_async
-        def work(p):
-            posters = provider.getPosters(p)
-            if not posters:
-                self.fail = True
-            for poster in posters:
-                log.debug('%s - %s' % (p.title(), poster))
-
-        self.fail = False
-        threads = [] 
-        for p in programs:
-            threads.append(work(p))
-        for t in threads:
-            t.join()
-            
-        self.assertFalse(self.fail)
-
         posterUrl = provider.getRandomPoster(program)
-        
-        # Verify
         log.debug('Poster URL = %s' % posterUrl)
-        try: self.assertEqual("http", posterUrl[0:4])
-        except TypeError: pass  # HACK: In case tvdb.com unreachable
+        try: 
+            self.assertEqual("http", posterUrl[0:4])
+        except TypeError: 
+            pass  # HACK: In case tvdb.com unreachable
 
     def test_getRandomPoster_When_program_is_movie_Then_returns_None(self):
         program = TVProgram({'title':'Departed', 'category_type':'movie'}, translator=Mock())
