@@ -207,7 +207,7 @@ def setThumbnailImage(playlistItem, imagePath):
     if imagePath is None:
         log.warn('playlist.setThumbnailImage(None) called')
     else:
-        playlistItem.setThumbnail(imagePath)
+        playlistItem.setThumbnailImage(imagePath)
 
 
 class WindowMixin(object):
