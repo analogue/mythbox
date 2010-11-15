@@ -24,6 +24,7 @@ import time
 import xbmc
 import xbmcgui
 import mythbox.msg as m
+import mythbox.ui.toolkit as toolkit
 
 from mythbox.ui.toolkit import showPopup
 from mythbox.util import formatSeconds, BoundedEvictingQueue, safe_str
@@ -159,8 +160,8 @@ class MythPlayer(xbmc.Player):
                 
         playlistItem.setInfo("video", {"Genre" : self._program.category(), "Studio" : self._program.formattedChannel(), "Title": title, "Plot": self._program.formattedDescription()} )
         #playlistItem.setProperty('AspectRatio', '1.85 : 1')
-        playlistItem.setIconImage(self.mythThumbnailCache.get(self._program))
-        playlistItem.setThumbnailImage(self.mythThumbnailCache.get(self._program))
+        toolkit.setIconImage(playlistItem, self.mythThumbnailCache.get(self._program))
+        toolkit.setThumbnailImage(playlistItem, self.mythThumbnailCache.get(self._program))
             
         mlog.debug("< _buildPlayList")
         return playlistItem

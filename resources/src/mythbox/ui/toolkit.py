@@ -196,6 +196,20 @@ def window_busy(func, *args, **kwargs):
     return result
 
 
+def setIconImage(playlistItem, imagePath):
+    if imagePath is None:
+        log.warn('playlist.setIconImage(None) called')
+    else:
+        playlistItem.setIconImage(imagePath)
+
+
+def setThumbnailImage(playlistItem, imagePath):
+    if imagePath is None:
+        log.warn('playlist.setThumbnailImage(None) called')
+    else:
+        playlistItem.setThumbnail(imagePath)
+
+
 class WindowMixin(object):
     
     def setListItemProperty(self, listItem, name, value):
