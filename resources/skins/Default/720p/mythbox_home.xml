@@ -524,7 +524,7 @@
             <label>SCRIPT300</label>
             <width>285</width>
             <align>left</align>
-            <textoffsetx>40</textoffsetx>
+            <textoffsetx>33</textoffsetx>
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <enabled>true</enabled>
@@ -537,7 +537,7 @@
             <label>SCRIPT301</label>
             <width>285</width>
             <align>left</align>
-            <textoffsetx>40</textoffsetx>
+            <textoffsetx>33</textoffsetx>
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
@@ -549,7 +549,7 @@
             <label>SCRIPT302</label>
             <width>285</width>
             <align>left</align>
-            <textoffsetx>40</textoffsetx>
+            <textoffsetx>33</textoffsetx>
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
@@ -561,7 +561,7 @@
             <label>SCRIPT303</label>
             <width>285</width>
             <align>left</align>
-            <textoffsetx>40</textoffsetx>
+            <textoffsetx>33</textoffsetx>
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
@@ -573,7 +573,7 @@
             <label>SCRIPT304</label>
             <width>285</width>
             <align>left</align>
-            <textoffsetx>40</textoffsetx>
+            <textoffsetx>32</textoffsetx> <!-- scrolls if > 32 -->
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
@@ -585,7 +585,7 @@
             <label>SCRIPT305</label>
             <width>285</width>
             <align>left</align>
-            <textoffsetx>40</textoffsetx>
+            <textoffsetx>33</textoffsetx>
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
@@ -597,7 +597,7 @@
             <label>SCRIPT210</label>
             <width>285</width>
             <align>left</align>
-            <textoffsetx>40</textoffsetx>
+            <textoffsetx>33</textoffsetx>
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
