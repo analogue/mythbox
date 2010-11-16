@@ -8,7 +8,8 @@ xx/xx/2010 - MythBox 1.0.0
   Fixed
     - Issue 124 - Fixed parsing another variation of ffmpeg output
     - Issue 130 - Unable to play a recording when the cache lookup for a thumbnail fails
-    
+    - Issue 131 - Hours in timestamps are not displayed correctly on Macs
+
 
 10/11/2010 - MythBox RC2
 =============================

@@ -874,7 +874,7 @@ class TvGuideWindow(ui.BaseWindow):
             if i == 0:
                 c.setLabel(label='', label2=t.strftime('%a %m/%d'))
             else: 
-                label = t.strftime('%-I') + t.strftime(':%M %p') 
+                label = ('%d' % int(t.strftime('%I'))) + t.strftime(':%M %p') 
                 if t.day != lastDay:
                     label += '+1'
                 t += timedelta(minutes=30)

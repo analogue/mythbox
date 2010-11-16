@@ -345,8 +345,8 @@ class Program(object):
         Returns air times as a formattted string for display purposes
         """
         value = ""
-        value += self.starttimeAsTime().strftime("%A %b %d, %-I:%M%p")
-        value += " - " + self.endtimeAsTime().strftime("%-I:%M%p")
+        value += self.starttimeAsTime().strftime("%A %b %d, %I:%M%p")
+        value += " - " + self.endtimeAsTime().strftime("%I:%M%p")
         if abs(self.starttimeAsTime() - self.endtimeAsTime()) > datetime.timedelta(days = 1):
             value += " +1"
         return value
@@ -356,9 +356,9 @@ class Program(object):
         @return: 3:30 PM, 3:00 PM, 12:00 AM 
         """
         dt = datetime.datetime.fromtimestamp(self.starttimets())
-        sh = dt.strftime('%-I')
+        sh = dt.strftime('%I')
         sm = dt.strftime(':%M %p')
-        return '%s%s' % (sh, sm)
+        return '%d%s' % (int(sh), sm)
 
     def formattedDuration(self):
         """
@@ -377,14 +377,14 @@ class Program(object):
         @return: Something like  3:30 - 4:30:pm, 3 - 4pm, or 3 - 4:40pm 
         """
         st = self.starttimeAsTime()
-        sh = st.strftime('%-I')
+        sh = '%d' % int(st.strftime('%I'))
         if short:
             sm = [st.strftime(':%M'), ''][st.minute == 0]
         else:
             sm = st.strftime(':%M')
         
         et = self.endtimeAsTime()
-        eh = et.strftime('%-I')
+        eh = '%d' % int(et.strftime('%I'))
         if short:
             em = [et.strftime(':%M'), ''][et.minute == 0] + et.strftime('%p')
         else:
@@ -1907,29 +1907,35 @@ class Tuner(object):
                 status += t(m.NEXT_RECORDING_STARTS_AT) % (next.title(), next.formattedStartTime())
         elif tvState.Error == tunerStatus:
             status = t(m.UNKNOWN)
-        elif tvState.WatchingLiveTV == tunerStatus: 
+        elif tvState.WatchingLiveTV == tunerStatus:
             status = t(m.WATCHING_AND_ENDS_AT) %(
                 recording.title(), 
                 recording.getChannelName(), 
-                time.strftime('%-I:%M %p', time.localtime(float(recording.recendtime()))))
+                self.time2string(recording.recendtime()))
         elif tvState.WatchingPreRecorded == tunerStatus:
             status = t(m.WATCHING_PRERECORDED)
         elif tvState.WatchingRecording == tunerStatus:
             status = t(m.WATCHING_AND_RECORDING_UNTIL) % (
                 recording.title(), 
                 recording.getChannelName(), 
-                time.strftime('%-I:%M %p', time.localtime(float(recording.recendtime()))))
+                self.time2string(recording.recendtime()))
         elif tvState.RecordingOnly == tunerStatus: 
             status = t(m.RECORDING_ON_UNTIL) % (
                 recording.title(), 
                 recording.getChannelName(),
-                time.strftime('%-I:%M %p', time.localtime(float(recording.recendtime()))))                    
+                self.time2string(recording.recendtime()))                    
         elif tvState.ChangingState == tunerStatus:
             status = t(m.BUSY)
         else: 
             status = t(m.UNKNOWN_TUNER_STATUS) % tunerStatus
         return status
-    
+
+    def time2string(self, t):
+        '''Workaround for strftime(%-I) -- hour without the leading zero not working on macs'''
+        lt = time.localtime(float(t))
+        h = '%d' % int(time.strftime('%I', lt)) 
+        return '%s%s' % (h, time.strftime(':%M %p', lt))                    
+            
     @inject_conn    
     def getNextScheduledRecording(self):
         """
