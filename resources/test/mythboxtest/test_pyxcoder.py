@@ -34,12 +34,12 @@ class FFMPEGMetadataParserTest(unittest.TestCase):
         self.assertEqual('29.97', self.parser.metadata.frame_rate)
 
     def test_parse_video_line_ota(self):
-        input = 'Stream #0.0[0x31]: Video: mpeg2video, yuv420p, 1280x720 [PAR 1:1 DAR 16:9], 65000 kb/s, 59.94 tbr, 90k tbn, 119.88 tbc' 
+        input = 'Stream #0.0[0x31]: Video: mpeg2video, yuv420p, 1280x720 [PAR 1:1 DAR 16:9], 65000 kb/s, 59.94 tbr, 90k tbn, 119.88 tbc'
         self.parser.parse_video_stream(input)
         self.assertEqual('59.94', self.parser.metadata.frame_rate)
 
     def test_parse_video_line_hdpvr(self):
-        input = 'Stream #0.0[0x1011]: Video: h264, yuv420p, 1280x720 [PAR 1:1 DAR 16:9], 59.94 tbr, 90k tbn, 119.88 tbc' 
+        input = 'Stream #0.0[0x1011]: Video: h264, yuv420p, 1280x720 [PAR 1:1 DAR 16:9], 59.94 tbr, 90k tbn, 119.88 tbc'
         self.parser.parse_video_stream(input)
         self.assertEqual('59.94', self.parser.metadata.frame_rate)
 
@@ -52,6 +52,12 @@ class FFMPEGMetadataParserTest(unittest.TestCase):
         input = 'Stream #0.0[0x31]: Video: mpeg2video, yuv420p, 1280x720, 80000 kb/s, 59.94 fps(r)' 
         self.parser.parse_video_stream(input)
         self.assertEqual('59.94', self.parser.metadata.frame_rate)
+
+    def test_parse_video_line_maverick_amd64(self):
+        input = 'Stream #0.0[0x1011]: Video: h264, yuv420p, 1280x720 [PAR 1:1 DAR 16:9], 59.96 fps, 59.94 tbr, 90k tbn, 119.88 tbc' 
+        self.parser.parse_video_stream(input)
+        self.assertEqual('59.94', self.parser.metadata.frame_rate)
+        
 
 if __name__ == '__main__':
     import logging.config
