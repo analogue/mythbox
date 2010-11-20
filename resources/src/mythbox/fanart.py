@@ -347,7 +347,7 @@ class ImdbFanartProvider(BaseFanartProvider):
         self.imdb = imdb.IMDb(accessSystem=None)
 
     @chain
-    @max_threads(2)
+    @max_threads(1)
     @timed
     def getPosters(self, program):
         posters = []
