@@ -46,7 +46,7 @@ threadlocals = {}
 def requireDir(dir):
     '''Create dir with missing path segments and return for chaining'''
     if not os.path.exists(dir):
-        os.mkdir(dir)
+        os.makedirs(dir)
     return dir
 
     
