@@ -31,7 +31,7 @@ from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, \
     ScheduleType, Upcoming
 from mythbox.platform import WindowsPlatform
 from mythbox.ui.toolkit import showPopup
-from mythbox.util import timed, formatSeconds, formatSize, synchronized
+from mythbox.util import timed, formatSeconds, formatSize, synchronized, requireDir
 from odict import odict
 
 log = logging.getLogger('mythbox.core')
@@ -961,9 +961,8 @@ class RecordedProgram(Program):
         """
         if not self._fps:
             
-            ffmpeg_cache_dir=os.path.join(self._platform.getScriptDataDir(), 'cache', 'ffmpeg') 
-            if not os.path.exists(ffmpeg_cache_dir):
-                os.makedirs(ffmpeg_cache_dir)
+            ffmpeg_cache_dir=os.path.join(self._platform.getScriptDataDir(), 'cache', 'ffmpeg')
+            requireDir(ffmpeg_cache_dir) 
                 
             ffmpegParser = FFMPEG(
                 ffmpeg=self._platform.getFFMpegPath(),
@@ -980,12 +979,25 @@ class RecordedProgram(Program):
             log.debug('ffmpeg metadata for %s = %s' % (self.getLocalPath(), metadata))
             if metadata:
                 self._fps = float(metadata.frame_rate)
+                
+                # Hack for FFMPEG returning incorrect framerate (59.94 instead of 29.97) for 1080i HDPVR recordings
+                try:
+                    hdpvr1080i = {'format': 'mpegts', 'pixel_format': 'yuv420p', 'frame_rate': '59.94', 'video_codec': ': h264', 'dimension': '1920x1080 [PAR 1:1 DAR 16:9]'}
+                    if  metadata.format       == hdpvr1080i['format'] and       \
+                        metadata.pixel_format == hdpvr1080i['pixel_format'] and \
+                        metadata.frame_rate   == hdpvr1080i['frame_rate'] and   \
+                        metadata.video_codec  == hdpvr1080i['video_codec'] and  \
+                        metadata.dimension    == hdpvr1080i['dimension']:
+                        log.debug('HDPVR 1080i recording detected. Defaulting to 29.97 fps')
+                        self._fps = 29.97
+                except:
+                    log.exception('HDPVR 1080i detection code blew up. FPS remains at %s' % self._fps)
             else:
                 self._fps = 29.97
                 log.error("""Could not determine FPS for file %s so defaulting to %s FPS.
                              Make sure you have the ffmpeg executable in your path. 
                              Commercial skipping may be inaccurate""" % (self._fps, self.getLocalPath()))
-                showPopup(self.translator.get(m.ERROR), 'FFMpeg could not determine framerate. Comm skip may be inaccurate')
+                showPopup(self.translator.get(m.ERROR), 'FFMPEG error - comm skips may be incorrect')
         return self._fps
 
     @timed
