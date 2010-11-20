@@ -152,14 +152,18 @@ class MythPlayer(xbmc.Player):
         title = self._program.fullTitle()
         comms = self._program.getCommercials()
         if len(comms) > 0:
-            title += '(%s breaks - ' % len(comms)
-            for i, b in enumerate(self._program.getCommercials()):
-                if i > 0: title += ', '
-                title += formatSeconds(b.start)
-            title += ')'
+            title += '(%s breaks - %s)' % (len(comms), ', '.join(map(lambda c: formatSeconds(c.start), comms)))
                 
-        playlistItem.setInfo("video", {"Genre" : self._program.category(), "Studio" : self._program.formattedChannel(), "Title": title, "Plot": self._program.formattedDescription()} )
+        playlistItem.setInfo(
+            "video", {
+                "Genre"  : self._program.category(), 
+                "Studio" : self._program.formattedChannel(), 
+                "Title"  : title, 
+                "Plot"   : self._program.formattedDescription()
+            })
+        
         #playlistItem.setProperty('AspectRatio', '1.85 : 1')
+        # TODO: playlistItem.setProperty('StartOffset', '256.4')
         toolkit.setIconImage(playlistItem, self.mythThumbnailCache.get(self._program))
         toolkit.setThumbnailImage(playlistItem, self.mythThumbnailCache.get(self._program))
             
