@@ -215,7 +215,7 @@ class SettingsWindow(BaseWindow):
         
     def renderAbout(self):
         import default
-        contents = "%s\n\n%s\n\n%s\n\n%s" % (default.__scriptname__, default.__author__, default.__url__, default.__version__)
+        contents = "%s\n\n%s\n\n%s\n\n%s" % (default.__scriptname__, default.__author__, default.__url__, self.platform.getVersion())
         self.setWindowProperty('AboutText', contents)
 
     @window_busy

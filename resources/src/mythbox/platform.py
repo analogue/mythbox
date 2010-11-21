@@ -138,7 +138,13 @@ class Platform(object):
             return True
         except:
             return False
-        
+
+    def getVersion(self):
+        if self.isDharma():
+            return self.addon.getAddonInfo('version')
+        else:
+            return "1.0.RC3"
+            
     def __repr__(self):
         bar = "=" * 80
         s = bar + \

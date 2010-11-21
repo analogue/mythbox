@@ -164,8 +164,10 @@ class MythPlayer(xbmc.Player):
         
         #playlistItem.setProperty('AspectRatio', '1.85 : 1')
         # TODO: playlistItem.setProperty('StartOffset', '256.4')
-        toolkit.setIconImage(playlistItem, self.mythThumbnailCache.get(self._program))
-        toolkit.setThumbnailImage(playlistItem, self.mythThumbnailCache.get(self._program))
+        from mythbox.platform import getPlatform
+        if not getPlatform().isDharma():        
+            toolkit.setThumbnailImage(playlistItem, self.mythThumbnailCache.get(self._program))
+            toolkit.setIconImage(playlistItem, self.mythThumbnailCache.get(self._program))
             
         mlog.debug("< _buildPlayList")
         return playlistItem
