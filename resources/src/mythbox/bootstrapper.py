@@ -24,7 +24,6 @@ import xbmcgui
 
 from mythbox.bus import EventBus
 
-
 class BootStrapper(object):
     
     def __init__(self, splash):
@@ -84,8 +83,8 @@ class BootStrapper(object):
         sys.setcheckinterval(0)
         self.log.debug('New Check interval: %s' % sys.getcheckinterval())
         cacheDir = self.platform.getCacheDir()
-        if not os.path.exists(cacheDir):
-            os.mkdir(cacheDir)
+        from mythbox.util import requireDir
+        requireDir(cacheDir)
         self.log.info('Mythbox Platform Initialized')
 
     def bootstrapEventBus(self):

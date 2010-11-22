@@ -5,15 +5,15 @@
 find . -name "*.pyc" | xargs rm -fv
 find . -name "*.pyo" | xargs rm -fv
 
-#export rev='1.0RC2'
+
 export rev=$1
 echo Packaging script.mythbox.1.0.$rev
 
 rm -rf target
 mkdir -p target/script.mythbox
-cp -r * target/script.mythbox/
+cp -r * target/script.mythbox/  2>/dev/null
 cd target
-sed -i "s/version=\"1\.0\.RC2\"/version=\"1\.0\.${rev}\"/g" script.mythbox/addon.xml
+sed -i "s/version_tag/1\.0\.${rev}/g" script.mythbox/addon.xml
  
 zip --quiet \
     --recurse-paths \

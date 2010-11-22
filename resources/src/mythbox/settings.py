@@ -25,6 +25,7 @@ import mythbox.msg as m
 from mythbox.bus import Event, EventBus
 from mythbox.mythtv.db import MythDatabase
 from mythbox.platform import WindowsPlatform, MacPlatform, UnixPlatform
+from mythbox.util import requireDir
 from xml.dom import minidom
 
 slog = logging.getLogger('mythbox.settings')
@@ -161,10 +162,7 @@ class MythSettings(object):
                     
     def save(self):
         settingsDir = self.platform.getScriptDataDir()
-        
-        if not os.path.exists(settingsDir):
-            slog.debug('Creating mythbox settings dir %s' % self.platform.getScriptDataDir())
-            os.makedirs(settingsDir)
+        requireDir(settingsDir)
 
         dom = minidom.parseString('<mythtv></mythtv>')
         for key in self.d.keys():

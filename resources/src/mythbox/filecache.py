@@ -24,7 +24,7 @@ import urllib
 import threading
 
 from mythbox.bus import Event
-from mythbox.util import sync_instance, safe_str, SynchronizedDict
+from mythbox.util import sync_instance, safe_str, SynchronizedDict, requireDir
 
 log = logging.getLogger('mythbox.cache')
 
@@ -66,9 +66,7 @@ class FileCache(object):
         self.resolver = resolver
         self.locksByResource = SynchronizedDict()
         
-        if not os.path.exists(rootDir):
-            os.makedirs(rootDir)
-            log.debug('Created cache root dir %s' % rootDir)
+        requireDir(rootDir)
         if not os.path.isdir(rootDir):
             raise Exception, 'File cache root dir already exists as a file: %s' % rootDir
 
@@ -140,7 +138,7 @@ class FileCache(object):
             
     def clear(self):
         shutil.rmtree(self.rootDir, True)
-        os.makedirs(self.rootDir)
+        requireDir(self.rootDir)
         self.locksByResource.clear()
         
 

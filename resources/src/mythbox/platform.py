@@ -44,6 +44,13 @@ def getPlatform():
     return __instance
 
 
+def requireDir(dir):
+    '''Create dir with missing path segments and return for chaining'''
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    return dir
+
+
 class Platform(object):
 
     def __init__(self, *args, **kwargs):
@@ -57,14 +64,8 @@ class Platform(object):
             self.cwd = os.getcwd()
             
         self._scriptDataDir = None
-
-        datadir = self.getScriptDataDir()
-        if not os.path.exists(datadir): 
-            os.makedirs(datadir)
-        
-        cachedir = self.getCacheDir()
-        if not os.path.exists(cachedir): 
-            os.makedirs(cachedir)
+        requireDir(self.getScriptDataDir())
+        requireDir(self.getCacheDir())
 
     def addLibsToSysPath(self):
         '''Add 3rd party libs in ${scriptdir}/resources/lib to the PYTHONPATH'''
@@ -179,8 +180,7 @@ script data dir = %s
             return
 
         dir, exe = os.path.split(path)
-        if not os.path.exists(dir):
-            os.makedirs(dir)
+        requireDir(dir)
         
         self.showPopup('Downloading FFMPEG', 'This may take a couple mins...hang tight', millis=10000)
         filename, headers = urllib.urlretrieve(self.ffmpegUrl, path)
