@@ -21,6 +21,7 @@ import os
 import socket
 import sys
 import xbmc
+import xbmcgui
 import urllib
 import stat
 
@@ -205,13 +206,14 @@ class UnixPlatform(Platform):
     def isUnix(self):
         return True
         
-    def getFFMpegPath(self):
-        return '/usr/bin/ffmpeg'
-
-#    def getFFMpegPath(self):
-#        path = os.path.join(self.getScriptDataDir(), 'ffmpeg')
-#        self.requireFFMpeg(path)
-#        return path
+    def getFFMpegPath(self, prompt=False):
+        f = '/usr/bin/ffmpeg'
+        if os.path.exists(f) and os.path.isfile(f):
+            return f
+        else:
+            if prompt:
+                xbmcgui.Dialog().ok('Error', 'Please install ffmpeg.', 'Ubuntu/Debian: apt-get install ffmpeg')
+            raise Exception, 'ffmpeg not installed'
 
     def getDefaultRecordingsDir(self):
         return '/var/lib/mythtv/recordings'

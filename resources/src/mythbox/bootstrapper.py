@@ -32,6 +32,7 @@ class BootStrapper(object):
         self.stage = 'Initializing'
         self.shell = None
         self.splash = splash
+        self.failSilent = False
         
     def run(self):
         try:
@@ -46,7 +47,8 @@ class BootStrapper(object):
                 self.bootstrapDebugShell()
                 self.bootstrapHomeScreen()
             except Exception, ex:
-                self.handleFailure(ex)
+                if not self.failSilent:
+                    self.handleFailure(ex)
         finally:
             self.splash.close()
             
@@ -85,8 +87,15 @@ class BootStrapper(object):
         cacheDir = self.platform.getCacheDir()
         from mythbox.util import requireDir
         requireDir(cacheDir)
+        
+        try:
+            self.platform.getFFMpegPath(prompt=True)
+        except Exception, e:
+            self.failSilent = True
+            raise e
+        
         self.log.info('Mythbox Platform Initialized')
-
+        
     def bootstrapEventBus(self):
         self.bus = EventBus()
         
