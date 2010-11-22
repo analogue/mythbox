@@ -23,7 +23,7 @@ from mythbox.util import run_async
 
 log = logging.getLogger('mythbox.core')
 
-URL_MYTHBOX_UPDATE = 'http://mythbox-xbmc.dyndns.org/updatesRC2'
+URL_MYTHBOX_UPDATE = 'http://mythbox-xbmc.dyndns.org/updatesRC3'
 
 class UpdateChecker(object):
     
