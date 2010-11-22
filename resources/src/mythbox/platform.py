@@ -159,7 +159,7 @@ script data dir = %s
         s += bar
         return s
     
-    def getFFMpegPath(self):
+    def getFFMpegPath(self, prompt=False):
         return ''
 
     def getDefaultRecordingsDir(self):
@@ -228,7 +228,7 @@ class WindowsPlatform(Platform):
     def getName(self):
         return "windows"
 
-    def getFFMpegPath(self):
+    def getFFMpegPath(self, prompt=False):
         path = os.path.join(self.getScriptDataDir(), 'ffmpeg.exe')
         self.requireFFMpeg(path)
         return path
@@ -246,7 +246,7 @@ class MacPlatform(Platform):
     def getName(self):
         return 'mac'
 
-    def getFFMpegPath(self):
+    def getFFMpegPath(self, prompt=False):
         path = os.path.join(self.getScriptDataDir(), 'ffmpeg')
         self.requireFFMpeg(path)
         return path
