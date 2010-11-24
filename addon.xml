@@ -6,9 +6,13 @@
     provider-name="analogue@yahoo.com">
     <requires>
         <import addon="xbmc.python" version="1.0" />
+        <import addon="script.module.beautifulsoup"/>
+        <import addon="script.module.elementtree"/>
+        <import addon="script.module.simplejson"/>
     </requires>
-    <extension point="xbmc.python.script" library="default.py" />
-    <provides>executable</provides>
+    <extension point="xbmc.python.script" library="default.py">
+        <provides>video</provides>
+    </extension>
     <extension point="xbmc.addon.metadata">
         <platform>all</platform>
         <summary lang="en">MythBox for XBMC</summary>

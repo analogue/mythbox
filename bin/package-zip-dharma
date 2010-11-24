@@ -1,0 +1,56 @@
+#!/bin/bash
+#
+# Packages mythbox for distribution as an addon zip file.
+#
+find . -name "*.pyc" | xargs rm -fv
+find . -name "*.pyo" | xargs rm -fv
+
+
+export rev=$1
+export fname=script.mythbox.1.0.$rev-dharma.zip
+echo Packaging $fname
+
+rm -rf target/script.mythbox
+mkdir -p target/script.mythbox
+cp -r * target/script.mythbox/  2>/dev/null
+cd target
+sed -i "s/version_tag/1\.0\.${rev}/g" script.mythbox/addon.xml
+ 
+zip --quiet \
+    --recurse-paths \
+    $fname \
+    script.mythbox \
+    --exclude="script.mythbox/default.tbn" \
+    --exclude="script.mythbox/*.*~" \
+    --exclude="script.mythbox/*.gz" \
+    --exclude="script.mythbox/*.zip" \
+    --exclude="script.mythbox/*.log" \
+    --exclude="script.mythbox/.*" \
+    --exclude="script.mythbox/.settings/*" \
+    --exclude="script.mythbox/addon/*" \
+    --exclude="script.mythbox/bin/*" \
+    --exclude="script.mythbox/doc/*" \
+    --exclude="script.mythbox/mythbox_report.html" \
+    --exclude="script.mythbox/ondemandconfig.ini" \
+    --exclude="script.mythbox/resources/bin/*" \
+    --exclude="script.mythbox/resources/itest/*" \
+    --exclude="script.mythbox/resources/lib/BeautifulSoup/*" \
+    --exclude="script.mythbox/resources/lib/elementtree/*" \
+    --exclude="script.mythbox/resources/lib/htmltestrunner/*" \
+    --exclude="script.mythbox/resources/lib/IMDbPY/bin/*" \
+    --exclude="script.mythbox/resources/lib/IMDbPY/docs/*" \
+    --exclude="script.mythbox/resources/lib/mockito/*" \
+    --exclude="script.mythbox/resources/lib/mysql-connector-python/examples/*" \
+    --exclude="script.mythbox/resources/lib/mysql-connector-python/py3k/*" \
+    --exclude="script.mythbox/resources/lib/mysql-connector-python/tests/*" \
+    --exclude="script.mythbox/resources/lib/simplejson/*" \
+    --exclude="script.mythbox/resources/lib/threadpool/*" \
+    --exclude="script.mythbox/resources/lib/tvdb_api/tests/*" \
+    --exclude="script.mythbox/resources/lib/twisted/*" \
+    --exclude="script.mythbox/resources/lib/unittest2/*" \
+    --exclude="script.mythbox/resources/lib/zope.interface/*" \
+    --exclude="script.mythbox/resources/test/*" \
+    --exclude="script.mythbox/target/*" \
+    --exclude="script.mythbox/trac/*"
+
+echo Done
