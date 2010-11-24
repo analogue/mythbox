@@ -583,26 +583,48 @@ class TvRageProvider(NoOpFanartProvider):
                 
     def queryTvRage(self, program):
         try:
-            show = tvrage.api.Show(program.title())
+            show = self.indexEpisodes(tvrage.api.Show(program.title()))
             self.save(program, show)
             return self.searchForEpisode(program, show)
         except tvrage.api.ShowNotFound:
             log.debug('TVRage: Show not found - %r' % program.title())
             return None, None
                     
-    def searchForEpisode(self, program, show):        
-        oad = program.originalAirDate()
-        d = datetime.date(int(oad[0:4]), int(oad[5:7]), int(oad[8:10]))
+    def indexEpisodes(self, show):
+        '''Throw all episodes into a map for fast lookup and attach to show object so the index is persisted'''
+        show.seasonsAndEpisodes = {}  # key = original air date, value = (season, episode)
         for sn in xrange(1, show.seasons+1):
             season = show.season(sn)
             for en, episode in season.items():
-                if episode.airdate == d:
-                    log.debug('TVRage: Found %r' % program.title())
-                    return str(sn), str(en)
+                show.seasonsAndEpisodes[episode.airdate] = (str(sn), str(en))
+        return show
+    
+    def searchForEpisode(self, program, show):        
+        oad = program.originalAirDate()
+        d = datetime.date(int(oad[0:4]), int(oad[5:7]), int(oad[8:10]))
+        try:
+            if d in show.seasonsAndEpisodes:
+                return show.seasonsAndEpisodes[d]
+            else:
+                log.debug('TVRage: No episode found matching airdate %s in %s episodes' % (oad, len(show.seasonsAndEpisodes)))
+                return None, None
+        except:
+            # backwards compatibility for pickled shows w/o index. return None,None to force re-query
+            return None, None
         
-        # TODO: try some other method if search by original air date comes up blank
-        log.debug('TVRage: No episode found matching airdate %s in %s seasons' % (oad, show.seasons))    
-        return None, None
+#    def searchForEpisode(self, program, show):        
+#        oad = program.originalAirDate()
+#        d = datetime.date(int(oad[0:4]), int(oad[5:7]), int(oad[8:10]))
+#        for sn in xrange(1, show.seasons+1):
+#            season = show.season(sn)
+#            for en, episode in season.items():
+#                if episode.airdate == d:
+#                    log.debug('TVRage: Found %r' % program.title())
+#                    return str(sn), str(en)
+#        
+#        # TODO: try some other method if search by original air date comes up blank
+#        log.debug('TVRage: No episode found matching airdate %s in %s seasons' % (oad, show.seasons))    
+#        return None, None
 
 
 class FanArt(object):
