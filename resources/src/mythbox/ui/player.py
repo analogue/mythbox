@@ -166,8 +166,9 @@ class MythPlayer(xbmc.Player):
         # TODO: playlistItem.setProperty('StartOffset', '256.4')
         from mythbox.platform import getPlatform
         if not getPlatform().isDharma():        
-            toolkit.setThumbnailImage(playlistItem, self.mythThumbnailCache.get(self._program))
-            toolkit.setIconImage(playlistItem, self.mythThumbnailCache.get(self._program))
+            if self.mythThumbnailCache.get(self._program) != None:
+                toolkit.setThumbnailImage(playlistItem, self.mythThumbnailCache.get(self._program))
+                toolkit.setIconImage(playlistItem, self.mythThumbnailCache.get(self._program))
             
         mlog.debug("< _buildPlayList")
         return playlistItem

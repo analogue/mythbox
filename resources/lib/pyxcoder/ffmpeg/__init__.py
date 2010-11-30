@@ -29,6 +29,10 @@ class FFMPEG:
             # 
             # If output exists from a previous run, use it
             #
+	    if not os.path.exists(outfile): #give it a second incase it just isn't there yet...
+	        import time
+	        time.sleep(0.5)
+
             if os.path.exists(outfile):
                 print 'Using cached ffmpeg output for %s' % input_filename
             else:

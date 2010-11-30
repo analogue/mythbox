@@ -17,11 +17,10 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
-from mythbox.mythtv.enums import TVState, TVState44 
+from mythbox.mythtv.enums import TVState, TVState44, TVState58
 
 # MythTV Protcol Constants
 initVersion = 8
-clientVersion = 40
 separator = "[]:[]"
 serverVersion = None
 
@@ -51,6 +50,13 @@ class BaseProtocol(object):
     def getLiveTvBrain(self, settings, translator):
         raise Exception, 'Abstract method'
 
+    def recordFields(self):
+        return Exception, 'Abstract method'
+
+    def emptyRecordFields(self):
+        return []
+    def protocolToken(self):
+        return ""
 
 class Protocol40(BaseProtocol):
     
@@ -153,13 +159,53 @@ class Protocol57(Protocol56):
     def version(self):
         return 57
 
+    def recordSize(self):
+        return 41
+
+    def recordFields(self):
+        return ['title','subtitle','description','category','chanid','channum','callsign','channame','filename','filesize','starttime','endtime','findid','hostname','sourceid','cardid','inputid','recpriority','recstatus','recordid','rectype','dupin','dupmethod','recstartts','recendts','programflags','recgroup','outputfilters','seriesid','programid','lastmodified','stars','airdate','playgroup','recpriority2','parentid','storagegroup','audio_props','video_props','subtitle_type','year']
+    
+    def buildAnnounceFileTransferCommand(self, hostname, filePath):
+        return ["ANN FileTransfer %s 0" % hostname, filePath, 'Default']
 
 class Protocol23056(Protocol57):
     
     def version(self):
         return 23056
     
+class Protocol58(Protocol57):
+    def tvState(self):
+        return TVState58
 
+    def version(self):
+        return 58
+    
+class Protocol59(Protocol58):
+   def version(self):
+        return 59    
+
+class Protocol60(Protocol59):
+   def version(self):
+        return 60
+   def buildAnnounceFileTransferCommand(self, hostname, filePath):
+        return ["ANN FileTransfer %s 0 1 10000" % hostname, filePath, 'Default']
+
+class Protocol61(Protocol60):
+   def version(self):
+        return 61
+
+class Protocol62(Protocol61):
+    def version(self):
+        return 62
+    def protocolToken(self):
+        return "78B5631E"
+
+class Protocol63(Protocol62):
+    def version(self):
+        return 63
+    def protocolToken(self):
+        return "3875641D"
+    
 # Current rev in mythversion.h
 protocols = {
     40: Protocol40(),
@@ -175,5 +221,11 @@ protocols = {
     50: Protocol50(),  # 0.22
     56: Protocol56(),  # 0.23
     57: Protocol57(),  # 0.23.1
+    58: Protocol58(),  # 0.24
+    59: Protocol59(),  # 0.24
+    60: Protocol60(),  # 0.24
+    61: Protocol61(),  # 0.24
+    62: Protocol62(),  # 0.24
+    63: Protocol63(),  # 0.24
     23056: Protocol23056()  # mythbuntu weirdness
 }    
