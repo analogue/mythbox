@@ -911,14 +911,14 @@ class TvRageProviderTest(unittest2.TestCase):
     
     def test_getSeasonAndEpisode_Success(self):
         # Setup
-        data = [''] * protocol.Protocol57().recordSize()
+        data = [''] * protocol.Protocol56().recordSize()
         data[0]  = u'The Real World'
         # flag as non-movie
         data[11] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple()) 
         data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
         data[38] = 1  # has original air date
         data[37] = '2010-07-14'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=protocol.Protocol56(), conn=Mock())
         provider = TvRageProvider(self.platform)
         
         # Test
@@ -928,6 +928,44 @@ class TvRageProviderTest(unittest2.TestCase):
         self.assertEqual('24', season)
         self.assertEqual('3', episode)
 
+    def test_getSeasonAndEpisode_Success_HouseHunters(self):
+        # Setup
+        data = [''] * protocol.Protocol56().recordSize()
+        data[0]  = u'House Hunters'
+        # flag as non-movie
+        data[11] = time.mktime(datetime.datetime(2010, 12, 2, 22, 45, 00).timetuple()) 
+        data[12] = time.mktime(datetime.datetime(2010, 12, 2, 23, 45, 00).timetuple())
+        data[38] = 1  # has original air date
+        data[37] = '2008-11-02'
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=protocol.Protocol56(), conn=Mock())
+        provider = TvRageProvider(self.platform)
+        
+        # Test
+        season, episode = provider.getSeasonAndEpisode(program)
+        
+        # Verify
+        self.assertEqual('30', season)
+        self.assertEqual('2', episode)
+
+    def test_getSeasonAndEpisode_dont_blowup_when_a_season_is_missing(self):
+        # Setup
+        data = [''] * protocol.Protocol56().recordSize()
+        data[0]  = u'The Daily Show With Jon Stewart'
+        # flag as non-movie
+        data[11] = time.mktime(datetime.datetime(2010, 12, 2, 22, 45, 00).timetuple()) 
+        data[12] = time.mktime(datetime.datetime(2010, 12, 2, 23, 45, 00).timetuple())
+        data[38] = 1  # has original air date
+        data[37] = '2005-01-04'
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=protocol.Protocol56(), conn=Mock())
+        provider = TvRageProvider(self.platform)
+        
+        # Test -- Season 3 for The Daily Show with Jon Stewart is missing
+        season, episode = provider.getSeasonAndEpisode(program)
+        
+        # Verify
+        self.assertIsNotNone(season)
+        self.assertIsNotNone(episode)
+
     def test_getSeasonAndEpisode_When_show_not_found_Then_returns_none(self):
         # Setup
         data = [''] * protocol.Protocol57().recordSize()
@@ -936,7 +974,7 @@ class TvRageProviderTest(unittest2.TestCase):
         data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
         data[38] = 1  # has original air date
         data[37] = '2010-08-03'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=protocol.Protocol56(), conn=Mock())
         provider = TvRageProvider(self.platform)
         
         # Test
@@ -955,7 +993,7 @@ class TvRageProviderTest(unittest2.TestCase):
         data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
         data[38] = 1  # has original air date
         data[37] = '1989-07-05'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=protocol.Protocol56(), conn=Mock())
         provider = TvRageProvider(self.platform)
         
         # Test

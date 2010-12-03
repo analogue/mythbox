@@ -1,3 +1,10 @@
+xx/xx/2010 - MythBox 1.0.x
+=============================
+  New
+  
+  Fixed
+    - TVRage metadata with missing seasons caused lookup failures 
+    
 11/25/2010 - MythBox 1.0.0
 =============================
   New

@@ -594,9 +594,12 @@ class TvRageProvider(NoOpFanartProvider):
         '''Throw all episodes into a map for fast lookup and attach to show object so the index is persisted'''
         show.seasonsAndEpisodes = {}  # key = original air date, value = (season, episode)
         for sn in xrange(1, show.seasons+1):
-            season = show.season(sn)
-            for en, episode in season.items():
-                show.seasonsAndEpisodes[episode.airdate] = (str(sn), str(en))
+            try:
+                season = show.season(sn)
+                for en, episode in season.items():
+                    show.seasonsAndEpisodes[episode.airdate] = (str(sn), str(en))
+            except KeyError:
+                pass # For cases where an entire season is missing, keep going...
         return show
     
     def searchForEpisode(self, program, show):        
