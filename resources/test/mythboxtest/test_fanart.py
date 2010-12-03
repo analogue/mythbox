@@ -1005,6 +1005,25 @@ class TvRageProviderTest(unittest2.TestCase):
             self.assertEqual('1', season)
             self.assertEqual('1', episode)
 
+    def test_getSeasonAndEpisode_When_match_not_found_using_original_airdate_Then_match_by_subtitle(self):
+        # Setup
+        data = [''] * protocol.Protocol56().recordSize()
+        data[0]  = u'WCG Ultimate Gamer'
+        data[1]  = u'In The Crosshairs'  # title to match on
+        # flag as non-movie
+        data[11] = time.mktime(datetime.datetime(2010, 12, 2, 22, 45, 00).timetuple()) 
+        data[12] = time.mktime(datetime.datetime(2010, 12, 2, 23, 45, 00).timetuple())
+        data[38] = 1  # has original air date
+        data[37] = '2010-09-20'  # TVRage shows date as 2010-09-16
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=protocol.Protocol56(), conn=Mock())
+        provider = TvRageProvider(self.platform)
+        
+        # Test
+        season, episode = provider.getSeasonAndEpisode(program)
+        
+        # Verify
+        self.assertEqual('2', season)
+        self.assertEqual('5', episode)
 
 if __name__ == '__main__':
     import logging.config

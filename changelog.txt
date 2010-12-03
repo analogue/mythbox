@@ -1,6 +1,7 @@
 xx/xx/2010 - MythBox 1.0.x
 =============================
   New
+    - TVRage season and episode matching now uses the program's subtitle when the original air date search fails
   
   Fixed
     - TVRage metadata with missing seasons caused lookup failures 

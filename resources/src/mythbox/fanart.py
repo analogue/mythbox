@@ -610,25 +610,28 @@ class TvRageProvider(NoOpFanartProvider):
                 return show.seasonsAndEpisodes[d]
             else:
                 log.debug('TVRage: No episode found matching airdate %s in %s episodes' % (oad, len(show.seasonsAndEpisodes)))
-                return None, None
+                return self.searchBySubtitle(program, show)
         except:
             # backwards compatibility for pickled shows w/o index. return None,None to force re-query
             return None, None
         
-#    def searchForEpisode(self, program, show):        
-#        oad = program.originalAirDate()
-#        d = datetime.date(int(oad[0:4]), int(oad[5:7]), int(oad[8:10]))
-#        for sn in xrange(1, show.seasons+1):
-#            season = show.season(sn)
-#            for en, episode in season.items():
-#                if episode.airdate == d:
-#                    log.debug('TVRage: Found %r' % program.title())
-#                    return str(sn), str(en)
-#        
-#        # TODO: try some other method if search by original air date comes up blank
-#        log.debug('TVRage: No episode found matching airdate %s in %s seasons' % (oad, show.seasons))    
-#        return None, None
-
+    def searchBySubtitle(self, program, show):
+        subtitle = program.subtitle()
+        if subtitle is None or len(subtitle) == 0:
+            return None, None
+        
+        for sn in xrange(1, show.seasons+1):
+            try:
+                season = show.season(sn)
+                for en, episode in season.items():
+                    if episode.title.lower() == subtitle.lower():
+                        return str(sn), str(episode.number)
+            except KeyError:
+                log.debug('Key error')
+                pass # For cases where an entire season is missing, keep going...
+    
+        log.debug('TVRage: No episode of %s found matching subtitle %s' % (safe_str(program.title()), safe_str(subtitle)))        
+        return None, None
 
 class FanArt(object):
     """One stop shop for fanart"""
