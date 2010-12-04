@@ -287,6 +287,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.sandbox = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.sandbox, ignore_errors=True)
         when(self.platform).getCacheDir().thenReturn(self.sandbox)
+        self.protocol = protocol.Protocol56()
             
     def getPrograms(self):
         return self.getTvShows()
@@ -382,13 +383,13 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         
     def test_getSeasonAndEpisode_Success(self):
         # Setup
-        data = [''] * protocol.Protocol57().recordSize()
+        data = [''] * self.protocol.recordSize()
         data[0]  = u'The Real World'
         data[11] = time.mktime(datetime.datetime(2008, 11, 4, 22, 45, 00).timetuple())
         data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
         data[38] = 1  # has original air date
         data[37] = '2010-07-14'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=self.protocol, conn=Mock())
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
         
         # Test
@@ -400,13 +401,13 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         
     def test_getSeasonAndEpisode_When_episode_not_found_Then_returns_none(self):
         # Setup
-        data = [''] * protocol.Protocol57().recordSize()
+        data = [''] * self.protocol.recordSize()
         data[0]  = u'MasterChef'
         data[11] = time.mktime(datetime.datetime(2008, 11, 4, 22, 45, 00).timetuple())
         data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
         data[38] = 1  # has original air date
         data[37] = '2010-08-03'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=self.protocol, conn=Mock())
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
         
         # Test
@@ -418,13 +419,13 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
 
     def test_getSeasonAndEpisode_When_show_not_found_Then_returns_none(self):
         # Setup
-        data = [''] * protocol.Protocol57().recordSize()
+        data = [''] * self.protocol.recordSize()
         data[0]  = u'This Show Does Not Exist'
         data[11] = time.mktime(datetime.datetime(2008, 11, 4, 22, 45, 00).timetuple())
         data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
         data[38] = 1  # has original air date
         data[37] = '2010-08-03'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=self.protocol, conn=Mock())
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
         
         # Test

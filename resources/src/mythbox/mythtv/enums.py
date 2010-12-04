@@ -313,6 +313,7 @@ class TVState44(object):
     #
     ChangingState = 7
 
+
 class TVState58(object):
     """
     Protocol version 58 onwards TVState
@@ -353,7 +354,7 @@ class TVState58(object):
     WatchingDVD = 4
 
     #
-    # Watching BD is the state when we are watching a DVD 
+    # Watching BD is the state when we are watching a Bluray Disc 
     #
     WatchingBD = 5
         
@@ -376,6 +377,7 @@ class TVState58(object):
     # of changing the state.
     #
     ChangingState = 8
+
 
 class JobStatus(object):  
     """ 

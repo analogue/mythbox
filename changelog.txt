@@ -1,6 +1,7 @@
 xx/xx/2010 - MythBox 1.0.x
 =============================
   New
+    - Support for MythTV 0.24 (thx mitch capper)
     - TVRage season and episode matching now uses the program's subtitle when the original air date search fails
   
   Fixed

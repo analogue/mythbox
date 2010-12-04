@@ -611,45 +611,41 @@ class RecordedProgram(Program):
     """
     _rec_program_dict = {}
     _rec_program_dict_empty = {}
-    def __init__(self, data, settings, translator, platform, conn=None):
-        """
+    
+    def __init__(self, data, settings, translator, platform, protocol, conn=None):
+        '''
         @param data: list of fields from mythbackend. libs/libmythtv/programinfo.cpp in the mythtv source 
                      describes the ordering of these fields.
-        @type data: list
-        @type settings: MythSettings
-        @type translator: Translator
-        @type platform: Platform
-        @type conn: Connection
-        @param conn: Non-null for unit tests only
-        """
+        @param conn: Non-null for unit tests only otherwise inject via @inject_conn
+        '''
         Program.__init__(self, translator)
         self._data = data[:]
-        self._conn = conn
         self.settings = settings
         self._platform = platform
+        self.protocol = protocol
+        self._conn = conn
+        
         self._fps = None
         self._commercials = None
         self._localPath = None
-        for index, item in enumerate(self.conn().protocol.recordFields()):
+        
+        for index, item in enumerate(self.protocol.recordFields()):
             self._rec_program_dict[item] = index
-        for index, item in enumerate(self.conn().protocol.emptyRecordFields()):
+        
+        for index, item in enumerate(self.protocol.emptyRecordFields()):
             self._rec_program_dict_empty[item] = index
-	    
-	
 
     def getField(self, fieldName):
         return self._data[self.getFieldPos(fieldName)]
 
     def getFieldPos(self, fieldName):
         if fieldName in self._rec_program_dict:
-                return self._rec_program_dict[fieldName]
+            return self._rec_program_dict[fieldName]
         elif fieldName in self._rec_program_dict_empty:
-                return ""
+            return ""
         else:
-                from mythbox.mythtv.conn import ClientException
-                raise ClientException("Can't get position of fieldName %s in RecordingInfo as does not exist" % (fieldName)) 
-
-
+            from mythbox.mythtv.conn import ClientException
+            raise ClientException("Can't get position of fieldName %s in RecordingInfo as does not exist" % (fieldName)) 
 
     def isMovie(self):
         """
@@ -726,9 +722,8 @@ class RecordedProgram(Program):
         @rtype: string
         @note: myth://some/dir/on/backend/000_111122223333.mpg
         """
-	import re
-        return re.sub(r'myth://.+?/','/', str(self.getField('filename'))) # str scrubs unicode, remove the full path as not needed any more
-     
+        # str scrubs unicode, remove the full path as not needed any more
+        return re.sub(r'myth://.+?/','/', str(self.getField('filename'))) 
      
     def starttimets(self):
         """
@@ -928,8 +923,11 @@ class RecordedProgram(Program):
         """
         @return: filesize in KB
         @rtype: int
-        """   
-        from mythbox.mythtv.conn import decodeLongLong 
+        """
+        return self.protocol.getFileSize(self)
+       
+        from mythbox.mythtv.conn import decodeLongLong
+        return (decodeLongLong(int(self._data[10]), int(self._data[9])) / 1024.0)
         return (int(self.getField("filesize")) / 1024.0)
     
     def getLocalPath(self):

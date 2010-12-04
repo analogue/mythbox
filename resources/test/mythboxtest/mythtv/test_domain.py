@@ -22,7 +22,7 @@ import os
 import shutil
 import tempfile
 import time
-import unittest
+import unittest2
 
 from mockito import Mock, when, verify, any
 from mythbox.settings import MythSettings
@@ -40,7 +40,7 @@ from mythbox.platform import Platform
 log = logging.getLogger('mythbox.unittest')
 
 
-class ModuleFunctionsTest(unittest.TestCase):
+class ModuleFunctionsTest(unittest2.TestCase):
     
     def test_ctime2MythTime_MinDateStringReturnsMinDate(self):
         t = ctime2MythTime('0')
@@ -93,13 +93,13 @@ class ModuleFunctionsTest(unittest.TestCase):
         self.assertEquals(99999999L, s)
 
 
-class CheckForDupesUsingTest(unittest.TestCase):
+class CheckForDupesUsingTest(unittest2.TestCase):
     
     def test_access_to_static_constants_works(self):
         self.assertEquals(145, CheckForDupesUsing.translations[CheckForDupesUsing.NONE])
         
 
-class ProgramTest(unittest.TestCase):
+class ProgramTest(unittest2.TestCase):
 
     def setUp(self):
         self.translator = Mock()
@@ -109,7 +109,7 @@ class ProgramTest(unittest.TestCase):
         self.assertFalse(p is None)
 
 
-class ChannelTest(unittest.TestCase):
+class ChannelTest(unittest2.TestCase):
     
     def test_constructor(self):
         channel = Channel({'chanid':9, 'channum':'23_1', 'callsign':'WXYZ', 'name':'NBC9', 'icon':'nbc.jpg', 'cardid':4})
@@ -142,7 +142,7 @@ class ChannelTest(unittest.TestCase):
         self.assertEquals(9, number)
 
 
-class TVProgramTest(unittest.TestCase):
+class TVProgramTest(unittest2.TestCase):
 
     def setUp(self):
         self.data = { 
@@ -174,23 +174,24 @@ class TVProgramTest(unittest.TestCase):
         self.assertEquals('20081121140000', p.starttime())
 
 
-class RecordedProgramTest(unittest.TestCase):
+class RecordedProgramTest(unittest2.TestCase):
 
     def setUp(self):
         self.conn = Mock()
         self.settings = Mock()
         self.translator = Mock()
         self.platform = Mock()
-        self.data = ["0"] * protocol.Protocol40().recordSize()
+        self.protocol = protocol.Protocol40()
+        self.data = ["0"] * self.protocol.recordSize()
             
     def test_hasBookmark_False(self):
-        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         p.setProgramFlags(FlagMask.FL_AUTOEXP)
         self.assertFalse(p.isBookmarked())
         self.assertTrue(p.isAutoExpire())
     
     def test_hasBookmark_True(self):
-        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         p.setProgramFlags(FlagMask.FL_BOOKMARK | FlagMask.FL_AUTOEXP)
         self.assertTrue(p.isBookmarked())
         self.assertTrue(p.isAutoExpire())
@@ -203,7 +204,7 @@ class RecordedProgramTest(unittest.TestCase):
         
     def test_hasCommercials_True(self):
         self.data[29] = FlagMask.FL_COMMFLAG | FlagMask.FL_AUTOEXP
-        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         commBreaks = []
         commBreaks.append(CommercialBreak(120,180))
         when(self.conn).getCommercialBreaks(p).thenReturn(commBreaks)
@@ -213,7 +214,7 @@ class RecordedProgramTest(unittest.TestCase):
 
     def test_hasCommercials_False(self):
         self.data[29] = FlagMask.FL_COMMFLAG | FlagMask.FL_AUTOEXP
-        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         commBreaks = []
         when(self.conn).getCommercialBreaks(p).thenReturn(commBreaks)
         log.debug('comms = %s' % len(p.getCommercials()))
@@ -221,7 +222,7 @@ class RecordedProgramTest(unittest.TestCase):
 
     def test_getCommercials_ReturnsOneCommercial(self):
         self.data[29] = FlagMask.FL_COMMFLAG | FlagMask.FL_AUTOEXP
-        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         commBreaks = []
         commBreaks.append(CommercialBreak(120,180))
         when(self.conn).getCommercialBreaks(p).thenReturn(commBreaks)
@@ -240,11 +241,11 @@ class RecordedProgramTest(unittest.TestCase):
             when(self.platform).getScriptDataDir().thenReturn(datadir)
             
             # Should invoke ffmpeg
-            p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+            p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
             self.assertEquals(29.97, p.getFrameRate())
             
             # TODO: Verify ffmpeg executable not invoked again (separate instance of a RecordedProgram)
-            p2 = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+            p2 = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
             self.assertEquals(29.97, p2.getFrameRate())            
         finally:
             shutil.rmtree(datadir, True)
@@ -252,45 +253,45 @@ class RecordedProgramTest(unittest.TestCase):
     def test_eq_True_self(self):
         self.data[4]  = "99"
         self.data[11] = 999999 
-        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         self.assertEquals(p, p)
 
     def test_eq_True_same_channelId_and_startttime(self):
         self.data[4]  = "99"    # channelId
         self.data[11] = 999999  # starttime
-        p1 = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
-        p2 = RecordedProgram(self.data[:], self.settings, self.translator, self.platform, self.conn) 
+        p1 = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
+        p2 = RecordedProgram(self.data[:], self.settings, self.translator, self.platform, self.protocol, self.conn) 
         self.assertEquals(p1, p2)
         self.assertEquals(p2, p1)
 
     def test_eq_False_different_channelId_and_startttime(self):
         self.data[4]  = "99"    # channelId
         self.data[11] = 999999  # starttime
-        p1 = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+        p1 = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         
         d2 = ["0"] * protocol.Protocol40().recordSize()
         d2[4] = "101"
         d2[11] = 777777
-        p2 = RecordedProgram(d2, self.settings, self.translator, self.platform, self.conn) 
+        p2 = RecordedProgram(d2, self.settings, self.translator, self.platform, self.protocol, self.conn) 
         self.assertNotEquals(p1, p2)
         self.assertNotEquals(p2, p1)
 
     def test_eq_False_different_channelId_same_startttime(self):
         self.data[4]  = "99"    # channelId
         self.data[11] = 999999  # starttime
-        p1 = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+        p1 = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         
         d2 = ["0"] * protocol.Protocol40().recordSize()
         d2[4] = "101"
         d2[11] = self.data[11]
-        p2 = RecordedProgram(d2, self.settings, self.translator, self.platform, self.conn) 
+        p2 = RecordedProgram(d2, self.settings, self.translator, self.platform, self.protocol, self.conn) 
         self.assertNotEquals(p1, p2)
         self.assertNotEquals(p2, p1)
 
     def test_formattedAirTime(self):
         self.data[11] = self.socketTime(21, 0, 0)   # 9:00pm
         self.data[12] = self.socketTime(21, 30, 0)  # 9:30pm
-        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+        p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         self.assertEquals('9:00 - 9:30PM', p.formattedAirTime(short=False))
         self.assertEquals('9 - 9:30PM', p.formattedAirTime(short=True))
         self.assertEquals('9 - 9:30PM', p.formattedAirTime())
@@ -298,27 +299,27 @@ class RecordedProgramTest(unittest.TestCase):
     def test_getDuration_When_duration_is_half_hour_Then_return_30mins(self):
         self.data[11] = self.socketTime(18, 30, 0)  # starttime = 6:30pm
         self.data[12] = self.socketTime(19, 0, 0)   # end time  = 7:00pm
-        d = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn).getDuration()
+        d = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn).getDuration()
         log.debug('Duration = %d' % d)
         self.assertEquals(30, d)
 
     def test_getDuration_When_2_hour_duration_spans_midnight_into_next_day_Then_return_120mins(self):
         self.data[11] = self.socketDateTime(2009, 10, 10, 23, 0, 0)  # starttime = 10/10/2009 11pm
         self.data[12] = self.socketDateTime(2009, 10, 11, 1, 0, 0)   # end time  = 10/11/2009 1am
-        d = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn).getDuration()
+        d = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn).getDuration()
         log.debug('Duration = %d' % d)
         self.assertEquals(120, d)
         
     def test_getDuration_When_start_and_end_times_same_Then_return_0mins(self):
         self.data[11] = self.socketTime(18, 30, 0)  # starttime = 6:30pm
         self.data[12] = self.socketTime(18, 30, 0)  # end time  = 6:30pm
-        d = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn).getDuration()
+        d = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn).getDuration()
         log.debug('Duration = %d' % d)
         self.assertEquals(0, d)
 
     def test_formattedStartTime_1pm(self):
         self.data[11] = self.socketTime(13, 0, 0)
-        s = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn).formattedStartTime()
+        s = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn).formattedStartTime()
         log.debug('startime = %s' % s)
         self.assertEquals('1:00 PM', s)
         
@@ -336,21 +337,21 @@ class RecordedProgramTest(unittest.TestCase):
         for d in data:
             self.data[11] = d['start']
             self.data[12] = d['end']
-            s = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn).formattedDuration()
+            s = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn).formattedDuration()
             log.debug('Duration = %s' % s)
             self.assertEquals(d['expected'], s)
       
     def test_originalAirDate_When_missing_Returns_None(self):
         self.data[38] = 0
         self.data[37] = ''
-        rp = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
-        self.assertTrue(rp.originalAirDate() is None)
+        rp = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         self.assertFalse(rp.hasOriginalAirDate())
+        self.assertEquals('', rp.originalAirDate())
         
     def test_originalAirDate_When_available_Returns_date_as_string(self):
         self.data[38] = 1
         self.data[37] = '2008-10-10'
-        rp = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.conn)
+        rp = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         self.assertEquals('2008-10-10', rp.originalAirDate())
         self.assertTrue(rp.hasOriginalAirDate())
             
@@ -362,7 +363,7 @@ class RecordedProgramTest(unittest.TestCase):
         return time.mktime(datetime.datetime.combine(datetime.date(year, month, day), datetime.time(h,m,s)).timetuple())
         
 
-class TunerTest(unittest.TestCase):
+class TunerTest(unittest2.TestCase):
 
     def setUp(self):
         self.db = Mock()
@@ -477,7 +478,7 @@ class TunerTest(unittest.TestCase):
 #            pass # SUCCESS
 
 
-class CommercialBreakTest(unittest.TestCase):
+class CommercialBreakTest(unittest2.TestCase):
     
     def test_constructor(self):
         commercial = CommercialBreak(100, 200)
@@ -502,7 +503,7 @@ class CommercialBreakTest(unittest.TestCase):
         self.assertFalse(commercial.isDuring(350))
 
 
-class RecordingScheduleTest(unittest.TestCase):
+class RecordingScheduleTest(unittest2.TestCase):
     
     def test_starttime_DataFromNativeMySQL(self):
         data = {'starttime': datetime.timedelta(seconds=(1 * 60 * 60) + (2 * 60) + 3)}
@@ -542,13 +543,14 @@ class RecordingScheduleTest(unittest.TestCase):
         self.assertEquals(CheckForDupesIn.PREVIOUS_RECORDINGS, schedule.getCheckForDupesIn())
 
 
-class JobTest(unittest.TestCase):
+class JobTest(unittest2.TestCase):
 
     def setUp(self):
         import util_mock
         p = Platform()
         langInfo = util_mock.XBMCLangInfo(p)
         self.translator = util_mock.Translator(p, langInfo)
+        self.protocol = protocol.Protocol56()
 
     def test_moveToFrontOfQueue_Raises_Exeption_When_Job_Not_Queued(self):
         job = self.createJob(jobStatus=JobStatus.FINISHED)
@@ -739,10 +741,10 @@ class JobTest(unittest.TestCase):
         job.startTime = datetime.datetime(2009, 12, 5, 10, 20, 00)
         job.channelId = 1999
         
-        data = [''] * protocol.Protocol40().recordSize()
+        data = [''] * self.protocol.recordSize()
         data[4]  = 1999
         data[11] = time.mktime(datetime.datetime(2009, 12, 5, 10, 20, 00).timetuple()) 
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=self.protocol, conn=Mock())
         
         # Test & verify
         self.assertTrue(job.isJobFor(program))
@@ -753,10 +755,10 @@ class JobTest(unittest.TestCase):
         job.startTime = datetime.datetime(2008, 11, 4, 23, 45, 00)
         job.channelId = 1999
         
-        data = [''] * protocol.Protocol40().recordSize()
+        data = [''] * self.protocol.recordSize()
         data[4]  = 1999
         data[11] = time.mktime(datetime.datetime(2009, 12, 5, 10, 20, 00).timetuple()) 
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=self.protocol, conn=Mock())
         
         # Test & verify
         self.assertFalse(job.isJobFor(program))
@@ -767,10 +769,10 @@ class JobTest(unittest.TestCase):
         job.startTime = datetime.datetime(2008, 11, 4, 23, 45, 00)
         job.channelId = 200
         
-        data = [''] * protocol.Protocol40().recordSize()
+        data = [''] * self.protocol.recordSize()
         data[4]  = 1999
         data[11] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple()) 
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=self.protocol, conn=Mock())
         
         # Test & verify
         self.assertFalse(job.isJobFor(program))
@@ -818,7 +820,7 @@ class JobTest(unittest.TestCase):
             db=db)        
 
 
-class MythUrlTest(unittest.TestCase):
+class MythUrlTest(unittest2.TestCase):
 
     def test_When_url_has_hostname_Then_parse_successful(self):
         url = MythUrl('myth://twiggy:6543/var/lib/recordings/000_111222333444.mpg')
@@ -839,7 +841,7 @@ class MythUrlTest(unittest.TestCase):
         self.assertTrue(url.port() is None)
 
         
-class BackendTest(unittest.TestCase):
+class BackendTest(unittest2.TestCase):
 
     def test_eq_True_by_reference(self):
         be = Backend('htpc', '127.0.0.1', '6543', True)
@@ -867,5 +869,4 @@ class BackendTest(unittest.TestCase):
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')
-    unittest.main()
-    
+    unittest2.main()

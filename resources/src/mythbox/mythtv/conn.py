@@ -149,6 +149,7 @@ class Connection(object):
         self.settings = settings
         self.translator = translator
         self.platform = platform
+        self.protocol = None
         self.bus = bus
         self._db = db
         self.db_init()
@@ -189,7 +190,7 @@ class Connection(object):
             raise ProtocolException('Unsupported protocol: %s' % protocol.serverVersion)
 
         serverVersion = self.negotiateProtocol(s, protocol.serverVersion, self.protocol.protocolToken())
-	
+
         if announce:
             if announce == 'Playback':
                 self.annPlayback(s)
@@ -341,7 +342,7 @@ class Connection(object):
         """
         reply = self._sendRequest(self.cmdSock, ['QUERY_RECORDER %d' % tuner.tunerId, 'GET_CURRENT_RECORDING'])
         from mythbox.mythtv.domain import RecordedProgram
-        program = RecordedProgram(reply, self.settings, self.translator, self.platform, self)
+        program = RecordedProgram(reply, self.settings, self.translator, self.platform, self.protocol, [self, None][self._db is None])
         return program
         
     @inject_db
@@ -352,7 +353,7 @@ class Connection(object):
         @rtype: int
         @todo: Change return type to Tuner or None
         @todo: Rename to getTunerWatchingOrRecording(...)
-        """ 
+        """
         tuners = self.db().getTuners()
         for tuner in tuners:
             tvState = int(self._sendRequest(self.cmdSock, ['QUERY_REMOTEENCODER %d'%tuner.tunerId, 'GET_STATE'])[0])
@@ -669,7 +670,8 @@ class Connection(object):
                     self.settings, 
                     self.translator,
                     self.platform,
-                    self))
+                    self.protocol,
+                    [self, None][self._db is None]))
             offset += self.protocol.recordSize()
         return scheduledRecordings
 
@@ -731,7 +733,8 @@ class Connection(object):
                     self.settings, 
                     self.translator,
                     self.platform,
-                    self)
+                    self.protocol,
+                    [self, None][self._db is None])
             if program.getRecordingStatus() in filter:
                 upcoming.append(program)
             offset += self.protocol.recordSize()
@@ -745,12 +748,18 @@ class Connection(object):
         reply = self._sendRequest(self.cmdSock, ['QUERY_RECORDINGS Play'])   
         numPrograms = int(reply.pop(0))
         programs = [] 
-        offset =0
+        offset = 0
         recordSize = self.protocol.recordSize()
         from mythbox.mythtv.domain import RecordedProgram
         for i in xrange(numPrograms):
             # use of self._db intentional 
-            programs.append(RecordedProgram(reply[offset:offset+recordSize], self.settings, self.translator, self.platform, self)) 
+            programs.append(RecordedProgram(
+                reply[offset:offset+recordSize], 
+                self.settings, 
+                self.translator, 
+                self.platform,
+                self.protocol, 
+                [self, None][self._db is None])) 
             offset += recordSize
         programs = filter(lambda p: p.getRecordingGroup() != 'LiveTV', programs)
         programs.sort(key=RecordedProgram.starttimeAsTime, reverse=True)
@@ -780,7 +789,7 @@ class Connection(object):
         for i in xrange(numRows):
             response = reply[offset:offset+self.protocol.recordSize()]
             # use of self._db intentional
-            p = RecordedProgram(response, self.settings, self.translator, self.platform, self)
+            p = RecordedProgram(response, self.settings, self.translator, self.platform, self.protocol, [self, None][self._db is None])
             if  recordingGroup.upper() in ('ALL GROUPS', p.getRecordingGroup().upper(),) and \
                 title.upper() in ('ALL SHOWS', p.title().upper(),):
                 programs.append(p) 
@@ -801,7 +810,7 @@ class Connection(object):
         reply = self._sendRequest(self.cmdSock, [query])
         from mythbox.mythtv.domain import RecordedProgram
         if self._isOk(reply):
-            return RecordedProgram(reply[1:], self.settings, self.translator, self.platform, self)
+            return RecordedProgram(reply[1:], self.settings, self.translator, self.platform, self.protocol, [self, None][self._db is None])
         else:
             log.debug('Program not found')
             return None

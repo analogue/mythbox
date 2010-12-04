@@ -20,7 +20,7 @@ import datetime
 import logging
 import mythbox.mythtv.protocol as protocol
 import time
-import unittest
+import unittest2
 import util_mock
 
 from mockito import Mock
@@ -33,13 +33,14 @@ from mythbox.util import OnDemandConfig
 log = logging.getLogger('mythbox.unittest')
 
 
-class MythDatabaseTest(unittest.TestCase):
+class MythDatabaseTest(unittest2.TestCase):
 
     def setUp(self):
         self.platform = Platform()
         self.langInfo = util_mock.XBMCLangInfo(self.platform)
         self.translator = util_mock.Translator(self.platform, self.langInfo)
         self.settings = MythSettings(self.platform, self.translator)
+        self.protocol = protocol.Protocol56()
         privateConfig = OnDemandConfig()
         self.settings.put('mysql_host', privateConfig.get('mysql_host'))
         self.settings.put('mysql_port', privateConfig.get('mysql_port'))
@@ -182,10 +183,10 @@ class MythDatabaseTest(unittest.TestCase):
             log.warn('No jobs in database to test with. Test skipped...')
             return 
         job = jobs[-1]  # last job
-        data = [''] * protocol.Protocol40().recordSize()
+        data = [''] * self.protocol.recordSize()
         data[4]  = job.channelId
         data[11] = time.mktime(job.startTime.timetuple()) 
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=self.protocol, conn=Mock())
     
         # Test
         jobs = self.db.getJobs(program=program)
@@ -221,10 +222,10 @@ class MythDatabaseTest(unittest.TestCase):
             log.warn('No jobs in database to test with. Test skipped...')
             return 
         job = jobs[-1] # last job
-        data = [''] * protocol.Protocol40().recordSize()
+        data = [''] * self.protocol.recordSize()
         data[4]  = job.channelId
         data[11] = time.mktime(job.startTime.timetuple()) 
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), conn=Mock())
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=self.protocol, conn=Mock())
     
         # Test
         jobs = self.db.getJobs(program=program, jobType=job.jobType)
@@ -252,4 +253,4 @@ class MythDatabaseTest(unittest.TestCase):
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')
-    unittest.main()        
+    unittest2.main()        

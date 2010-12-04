@@ -19,7 +19,7 @@
 import logging
 import os
 import tempfile
-import unittest
+import unittest2
 
 from mockito import Mock
 from mythbox.bus import EventBus
@@ -34,7 +34,7 @@ from mythbox.util import OnDemandConfig
 
 log = logging.getLogger('mythbox.unittest')
 
-class FunctionsTest(unittest.TestCase):
+class FunctionsTest(unittest2.TestCase):
     
     def test_createChainId(self):
         chainId = createChainId()
@@ -71,7 +71,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertEquals(0xffffffff, highWord)
 
 
-class ConnectionTest(unittest.TestCase):
+class ConnectionTest(unittest2.TestCase):
 
     def setUp(self):
         self.platform = getPlatform()
@@ -96,7 +96,7 @@ class ConnectionTest(unittest.TestCase):
     def test_negotiateProtocol_ReturnsServerProtocolVersion(self):
         sock = self.conn.connect(announce=None)
         try:
-            version = self.conn.negotiateProtocol(sock, protocol.initVersion)
+            version = self.conn.negotiateProtocol(sock, protocol.initVersion, protocol.initToken)
             log.debug('Server Protcol = %s'%version)
             self.assertTrue(version > 0)
         finally:
@@ -401,4 +401,4 @@ class ConnectionTest(unittest.TestCase):
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')
-    unittest.main()
+    unittest2.main()
