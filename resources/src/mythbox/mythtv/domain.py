@@ -925,10 +925,6 @@ class RecordedProgram(Program):
         @rtype: int
         """
         return self.protocol.getFileSize(self)
-       
-        from mythbox.mythtv.conn import decodeLongLong
-        return (decodeLongLong(int(self._data[10]), int(self._data[9])) / 1024.0)
-        return (int(self.getField("filesize")) / 1024.0)
     
     def getLocalPath(self):
         """
