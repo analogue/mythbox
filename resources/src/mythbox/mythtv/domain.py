@@ -723,8 +723,9 @@ class RecordedProgram(Program):
         @note: myth://some/dir/on/backend/000_111122223333.mpg
         """
         # str scrubs unicode, remove the full path as not needed any more
-        return re.sub(r'myth://.+?/','/', str(self.getField('filename'))) 
-     
+        #return re.sub(r'myth://.+?/','/', str(self.getField('filename'))) 
+        return str(self.getField('filename')) # str scrubs unicode
+
     def starttimets(self):
         """
         @rtype: int

@@ -189,7 +189,8 @@ class Connection(object):
         except KeyError:
             raise ProtocolException('Unsupported protocol: %s' % protocol.serverVersion)
 
-        serverVersion = self.negotiateProtocol(s, protocol.serverVersion, self.protocol.protocolToken())
+        #serverVersion = 
+        self.negotiateProtocol(s, protocol.serverVersion, self.protocol.protocolToken())
 
         if announce:
             if announce == 'Playback':
@@ -238,10 +239,10 @@ class Connection(object):
         serverVersion  = int(reply[1])
         wirelog.debug('negotiateProtocol: %s %s -> %s %s' % (clientVersion, versionToken, serverResponse, serverVersion))
         
-        if (serverVersion < clientVersion):
-            pe = ProtocolException('Protocol mismatch - Server protocol version: %s  Client protocol version: %s'%(serverVersion, clientVersion))
-            pe.protocolVersion = serverVersion
-            raise pe   
+        #if (serverVersion < clientVersion):
+        #    pe = ProtocolException('Protocol mismatch - Server protocol version: %s  Client protocol version: %s'%(serverVersion, clientVersion))
+        #    pe.protocolVersion = serverVersion
+        #    raise pe   
         return serverVersion
 
     @timed
@@ -526,14 +527,14 @@ class Connection(object):
         @return: True if successful, False otherwise 
         """
         msg = program.data()[:]
-        
-        # clear out fields - this is based on what mythweb does
-        # mythtv-0.16
-        if self.protocol.version() > 60 and self.protocol.version() != 23056:
-            msg.insert(0, 'QUERY_GENPIXMAP2')
-            msg.insert(1, 'do_not_care')
-        else:
-            msg.insert(0, 'QUERY_GENPIXMAP')
+        for token in reversed(self.protocol.genPixMapCommand()):
+            msg.insert(0, token)
+            
+        #if self.protocol.version() > 60 and self.protocol.version() != 23056:
+        #    msg.insert(0, 'QUERY_GENPIXMAP2')
+        #    msg.insert(1, 'do_not_care')
+        #else:
+        #    msg.insert(0, 'QUERY_GENPIXMAP')
 
         # extra data
         #if width and height:
@@ -585,51 +586,51 @@ class Connection(object):
         
         # clear out fields - this is based on what mythweb does
         # mythtv-0.16
-        msg[0] = ' '    # title
-        msg[1] = ' '    # subtitle
-        msg[2] = ' '    # description
-        msg[3] = ' '    # category
-                        # chanid
-        msg[5] = ' '    # channum
-        msg[6] = ' '    # chansign
-        msg[7] = ' '    # channame
-                        # filename
-        msg[9] = '0'    # upper 32 bits
-        msg[10] = '0'   # lower 32 bits
-                        # starttime
-                        # endtime
-        msg[13] = '0'   # conflicting
-        msg[14] = '1'   # recording
-        msg[15] = '0'   # duplicate
-                        # hostname
-        msg[17] = '-1'  # sourceid
-        msg[18] = '-1'  # getTunerId
-        msg[19] = '-1'  # inputid
-        msg[20] = ' '   # recpriority
-        msg[21] = ' '   # recstatus - really int
-        msg[22] = ' '   # recordid
-        msg[23] = ' '   # rectype
-        msg[24] = '15'  # dupin
-        msg[25] = '6'   # dupmethod
-                        # recstarttime
-                        # recendtime
-        msg[28] = ' '   # repeat
-        msg[29] = ' '   # program flags
-        msg[30] = ' '   # recgroup
-        msg[31] = ' '   # commfree
-        msg[32] = ' '   # chanoutputfilters
-                        # seriesid
-                        # programid
-                        # dummy lastmodified
-                        
-        msg[36] = '0'   # dummy stars
-                        # dummy org airdate
-        msg[38] = '0'   # hasAirDate
-        msg[39] = '0'   # playgroup
-        msg[40] = '0'   # recpriority2
-        msg[41] = '0'   # parentid
-                        # storagegroup
-        msg.append('')  # trailing separator
+#        msg[0] = ' '    # title
+#        msg[1] = ' '    # subtitle
+#        msg[2] = ' '    # description
+#        msg[3] = ' '    # category
+#                        # chanid
+#        msg[5] = ' '    # channum
+#        msg[6] = ' '    # chansign
+#        msg[7] = ' '    # channame
+#                        # filename
+#        msg[9] = '0'    # upper 32 bits
+#        msg[10] = '0'   # lower 32 bits
+#                        # starttime
+#                        # endtime
+#        msg[13] = '0'   # conflicting
+#        msg[14] = '1'   # recording
+#        msg[15] = '0'   # duplicate
+#                        # hostname
+#        msg[17] = '-1'  # sourceid
+#        msg[18] = '-1'  # getTunerId
+#        msg[19] = '-1'  # inputid
+#        msg[20] = ' '   # recpriority
+#        msg[21] = ' '   # recstatus - really int
+#        msg[22] = ' '   # recordid
+#        msg[23] = ' '   # rectype
+#        msg[24] = '15'  # dupin
+#        msg[25] = '6'   # dupmethod
+#                        # recstarttime
+#                        # recendtime
+#        msg[28] = ' '   # repeat
+#        msg[29] = ' '   # program flags
+#        msg[30] = ' '   # recgroup
+#        msg[31] = ' '   # commfree
+#        msg[32] = ' '   # chanoutputfilters
+#                        # seriesid
+#                        # programid
+#                        # dummy lastmodified
+#                        
+#        msg[36] = '0'   # dummy stars
+#                        # dummy org airdate
+#        msg[38] = '0'   # hasAirDate
+#        msg[39] = '0'   # playgroup
+#        msg[40] = '0'   # recpriority2
+#        msg[41] = '0'   # parentid
+#                        # storagegroup
+#        msg.append('')  # trailing separator
         msg.insert(0, 'QUERY_PIXMAP_LASTMODIFIED')
 
         # if a slave backend, establish a new connection otherwise reuse existing connection to master backend.

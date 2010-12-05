@@ -98,7 +98,10 @@ class Protocol40(BaseProtocol):
     def getFileSize(self, program):
         from mythbox.mythtv.conn import decodeLongLong
         return decodeLongLong(int(program.getField('fs_low')), int(program.getField('fs_high'))) / 1024.0
-        
+
+    def genPixMapCommand(self):
+        return ['QUERY_GENPIXMAP']        
+
 
 class Protocol41(Protocol40):
     
@@ -249,6 +252,9 @@ class Protocol60(Protocol59):
     
     def buildAnnounceFileTransferCommand(self, hostname, filePath):
         return ["ANN FileTransfer %s 0 1 10000" % hostname, filePath, 'Default']
+
+    def genPixMapCommand(self):
+        return ['QUERY_GENPIXMAP2', 'do_not_care']
 
 
 class Protocol61(Protocol60):
