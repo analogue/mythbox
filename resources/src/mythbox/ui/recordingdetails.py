@@ -206,7 +206,7 @@ class RecordingDetailsWindow(BaseWindow):
 
     @inject_conn
     def refresh(self):
-        refreshedProgram = self.conn().getRecording(self.program.getChannelId(), self.program.starttime())
+        refreshedProgram = self.conn().getRecording(self.program.getChannelId(), self.program.recstarttime()) #self.program.starttime())
         if refreshedProgram:
             self.program = refreshedProgram
             self.render()

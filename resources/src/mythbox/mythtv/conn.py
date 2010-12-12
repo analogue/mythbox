@@ -802,6 +802,7 @@ class Connection(object):
         @type startTime: str or datetime.datetime
         @return: RecordedProgram or None if not found 
         """
+        log.debug(startTime)
         if isinstance(startTime, datetime.datetime):
             from mythbox.mythtv.domain import dbTime2MythTime
             startTime = dbTime2MythTime(startTime)
@@ -820,7 +821,8 @@ class Connection(object):
         Return the frame number of the bookmark as a long for the passed in program or 
         zero if no bookmark is found.
         """
-        command = 'QUERY_BOOKMARK %s %s' %(program.getChannelId(), program.starttimets())
+        #command = 'QUERY_BOOKMARK %s %s' %(program.getChannelId(), program.starttimets())
+        command = 'QUERY_BOOKMARK %s %s' %(program.getChannelId(), program.recstarttimets())
         reply = self._sendRequest(self.cmdSock, [command])
         bookmarkFrame = decodeLongLong(int(reply[1]), int(reply[0])) 
         log.debug('bookmarkFrame = int %s int %s => long %s' %(reply[0], reply[1], bookmarkFrame))
@@ -833,7 +835,8 @@ class Connection(object):
         Raises ServerException on failure.
         """
         lowWord, highWord = encodeLongLong(frameNumber)
-        command = 'SET_BOOKMARK %s %s %s %s' %(program.getChannelId(), program.starttimets(), highWord, lowWord)
+        #command = 'SET_BOOKMARK %s %s %s %s' %(program.getChannelId(), program.starttimets(), highWord, lowWord)
+        command = 'SET_BOOKMARK %s %s %s %s' %(program.getChannelId(), program.recstarttimets(), highWord, lowWord)
         reply = self._sendRequest(self.cmdSock, [command])
         
         if reply[0] == 'OK':

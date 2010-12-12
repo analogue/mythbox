@@ -172,12 +172,12 @@ class ConnectionTest(unittest2.TestCase):
 
     def test_getRecording_Found(self):
         expected = self.getRecordings().pop()
-        actual = self.conn.getRecording(expected.getChannelId(), expected.starttime())
+        actual = self.conn.getRecording(expected.getChannelId(), expected.recstarttime())
         self.assertEquals(expected, actual)
         
     def test_getRecording_NotFound(self):
         recording = self.getRecordings().pop()
-        actual = self.conn.getRecording(32, recording.starttime())
+        actual = self.conn.getRecording(32, recording.recstarttime())
         self.assertTrue(actual is None)
     
     def test_getUpcomingRecordings_When_no_args_Then_returns_only_programs_that_will_be_recorded(self):
@@ -345,9 +345,12 @@ class ConnectionTest(unittest2.TestCase):
         if not self.conn.getThumbnailCreationTime(recording, recording.hostname()): # generate thumbnail if necessary
             log.debug('Generating thumbnail...')
             self.conn.generateThumbnail(recording, recording.hostname())
-            recording = self.conn.getRecording(recording.getChannelId(), recording.starttimeAsTime())
+            recording = self.conn.getRecording(recording.getChannelId(), recording.recstarttime())
             
-        backendPath = recording.getBareFilename() + '.640x360.png'
+        backendPath = recording.getBareFilename()
+        if self.conn.protocol.genPixMapPreviewFilename(recording) != '<EMPTY>':
+            backendPath += '.640x360'
+        backendPath += '.png'
         destPath = os.path.join(tempfile.gettempdir(), recording.getBareFilename() + ".png")
         
         # Test

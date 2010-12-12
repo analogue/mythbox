@@ -744,7 +744,7 @@ class RecordedProgram(Program):
         @note: internal type is an int aka time.time() 
         """
         if self.starttimets() < 0:
-            return ctime2MythTime(self.recstarttime())
+            return ctime2MythTime(self.recstarttimets())
         else:
             return ctime2MythTime(self.starttimets())
     
@@ -799,13 +799,20 @@ class RecordedProgram(Program):
     
     def rectype(self):
         return self.getField('rectype')
+
+    def recstarttimets(self):
+        '''
+        @return: Scheduled start time of this program according to the tv guide data.
+        @note: int ctime
+        '''
+        return int(self.getField('recstartts'))
     
     def recstarttime(self):
-        """
+        '''
         @return: Scheduled start time of this program according to the tv guide data.
-        @todo: rename to scheduledStartTime()
-        """
-        return self.getField('recstartts')
+        @note: str myth format
+        '''
+        return ctime2MythTime(self.recstarttimets())
     
     def recendtime(self):
         """
