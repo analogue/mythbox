@@ -239,10 +239,10 @@ class Connection(object):
         serverVersion  = int(reply[1])
         wirelog.debug('negotiateProtocol: %s %s -> %s %s' % (clientVersion, versionToken, serverResponse, serverVersion))
         
-        #if (serverVersion < clientVersion):
-        #    pe = ProtocolException('Protocol mismatch - Server protocol version: %s  Client protocol version: %s'%(serverVersion, clientVersion))
-        #    pe.protocolVersion = serverVersion
-        #    raise pe   
+        if (serverResponse  != 'ACCEPT'):
+            pe = ProtocolException('Protocol Exception, Server responded to our version request with: %s instead of ACCEPT - Server protocol version: %s  Client protocol version: %s'%(serverResponse, serverVersion, clientVersion))
+            pe.protocolVersion = serverVersion
+            raise pe   
         return serverVersion
 
     @timed
@@ -1124,7 +1124,11 @@ class Connection(object):
             if retMsg.upper() == 'OK':
                 return 'OK'
             wirelog.debug('retMsg: [%d] %s' % (len(retMsg), retMsg))
-            n = int(retMsg)
+
+	    n = 0
+	    if len(retMsg) > 0:
+                n = int(retMsg)
+
             #wirelog.debug("reply len: %d" % n)
             i = 0
             while i < n:

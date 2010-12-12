@@ -280,7 +280,14 @@ class Protocol63(Protocol62):
     def protocolToken(self):
         return "3875641D"
 
+class Protocol64(Protocol63):
     
+    def version(self):
+        return 64
+    
+    def protocolToken(self):
+        return "8675309J"
+
 # Current rev in mythversion.h
 protocols = {
     40: Protocol40(),
@@ -302,5 +309,6 @@ protocols = {
     60: Protocol60(),  # 0.24
     61: Protocol61(),  # 0.24
     62: Protocol62(),  # 0.24
-    63: Protocol63()   # 0.24
+    63: Protocol63(),  # 0.24
+    64: Protocol64()   # 0.24
 }    
