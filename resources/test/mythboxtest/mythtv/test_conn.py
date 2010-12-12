@@ -93,23 +93,20 @@ class ConnectionTest(unittest2.TestCase):
     def tearDown(self):
         self.conn.close()
 
-    def test_negotiateProtocol_ReturnsServerProtocolVersion(self):
+    def test_getServerVersion(self):
         sock = self.conn.connect(announce=None)
         try:
-            version = self.conn.negotiateProtocol(sock, protocol.initVersion, protocol.initToken)
+            version = self.conn.getServerVersion()
             log.debug('Server Protcol = %s'%version)
             self.assertTrue(version > 0)
         finally:
             sock.close()
 
     def test_negotiateProtocol_RaisesProtocolException_When_ClientVersion_NotSupported_By_Server(self):
-        # TODO: re-enable when mythbuntu starts rejecting invalid protocol numbers
-        return
-    
         sock = self.conn.connect(announce=None)
         try:
             try:
-                self.conn.negotiateProtocol(sock, 100)
+                self.conn.negotiateProtocol(sock, clientVersion=8, versionToken='')
                 self.fail('Should have thrown ProtocolException')
             except ProtocolException, pe:
                 log.debug('PASS: %s', pe)
