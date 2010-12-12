@@ -530,20 +530,19 @@ class Connection(object):
         for token in reversed(self.protocol.genPixMapCommand()):
             msg.insert(0, token)
             
-        #if self.protocol.version() > 60 and self.protocol.version() != 23056:
-        #    msg.insert(0, 'QUERY_GENPIXMAP2')
-        #    msg.insert(1, 'do_not_care')
-        #else:
-        #    msg.insert(0, 'QUERY_GENPIXMAP')
-
         # extra data
         #if width and height:
         msg.append('s')
         timeLow, timeHigh = encodeLongLong(180)
         msg.append('%d' % timeHigh)
         msg.append('%d' % timeLow)
-        #msg.append('<EMPTY>')
-        msg.append(program.getBareFilename() + '.640x360.png')
+        
+        # WORKAROUND:
+        #    Specifying output file as non <EMPTY> in 0.24 seems to break preview generation.
+        #    mythpreviewgen seems to think the local dir is '/' and can't write to it in the call
+        #    to IsLocal() in myth. Letting myth generate its own filename works, though.
+        msg.append(self.protocol.genPixMapPreviewFilename(program))
+        
         msg.append('%d' % 640)
         msg.append('%d' % 360)
         

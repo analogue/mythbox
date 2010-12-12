@@ -102,6 +102,9 @@ class Protocol40(BaseProtocol):
     def genPixMapCommand(self):
         return ['QUERY_GENPIXMAP']        
 
+    def genPixMapPreviewFilename(self, program):
+        return program.getBareFilename() + '.640x360.png'
+
 
 class Protocol41(Protocol40):
     
@@ -256,6 +259,8 @@ class Protocol60(Protocol59):
     def genPixMapCommand(self):
         return ['QUERY_GENPIXMAP2', 'do_not_care']
 
+    def genPixMapPreviewFilename(self, program):
+        return '<EMPTY>'
 
 class Protocol61(Protocol60):
     
