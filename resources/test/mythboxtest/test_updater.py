@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -17,14 +17,14 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 import logging
-import unittest
+import unittest2 as unittest
 
 from mockito import Mock, when
 from mythbox.updater import UpdateChecker
 
 log = logging.getLogger('mythbox.unittest')
 
-# =============================================================================
+
 class UpdateCheckerTest(unittest.TestCase):
     
     def test_isUpateAvailable(self):
@@ -34,7 +34,7 @@ class UpdateCheckerTest(unittest.TestCase):
         update = checker.isUpdateAvailable()
         log.debug('update available: %s' % update)
 
-# =============================================================================
+
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')

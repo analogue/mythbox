@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -17,12 +17,11 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 import logging
-import unittest
+import unittest2 as unittest
 import feedparser
 
 log = logging.getLogger('mythbox.unittest')
 
-# =============================================================================
 class FeedParserTest(unittest.TestCase):
     
     def test_mythbox_atom_feed(self):
@@ -61,7 +60,7 @@ class FeedParserTest(unittest.TestCase):
         
         self.assertEquals(u'MythBox for XBMC', d.feed.title)
         
-# =============================================================================
+
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')

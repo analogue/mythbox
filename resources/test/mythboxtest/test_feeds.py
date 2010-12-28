@@ -17,7 +17,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 import logging
-import unittest
+import unittest2 as unittest
 
 from mockito import Mock, when, any
 from mythbox.feeds import TwitterFeed, FeedHose

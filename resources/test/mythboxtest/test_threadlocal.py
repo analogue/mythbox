@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2009 analogue@yahoo.com
+#  Copyright (C) 2010 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -18,7 +18,7 @@
 #
 import logging
 import time
-import unittest
+import unittest2 as unittest
 import util_mock
 
 from mythbox import pool
@@ -29,7 +29,7 @@ from mythbox.util import run_async, OnDemandConfig
 
 log = logging.getLogger('mythbox.unittest')
 
-# =========================================================================
+
 class SafeDbClient(object):
     
     def __init__(self):
@@ -60,7 +60,7 @@ class SafeDbClient(object):
     def innerNestedAccessToDb(self):
         self.db().getJobs()
 
-# =========================================================================
+
 class OtherDbClient(object):
     
     @inject_db
@@ -69,7 +69,7 @@ class OtherDbClient(object):
         groups = self.db().getRecordingGroups()
         log.debug('groups = %d' % len(groups))
 
-# =============================================================================
+
 class ThreadLocalTest(unittest.TestCase):
     
     def setUp(self):
@@ -139,7 +139,7 @@ class ThreadLocalTest(unittest.TestCase):
         self.assertEquals(1, self.dbPool.size())
         self.dbPool.shrink()
     
-# =============================================================================    
+
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')

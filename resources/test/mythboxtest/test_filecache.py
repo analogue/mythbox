@@ -22,7 +22,7 @@ import random
 import shutil
 import tempfile
 import time
-import unittest
+import unittest2 as unittest
 import string
 
 from mythbox.filecache import FileResolver, FileSystemResolver, FileCache
@@ -43,10 +43,8 @@ class FileResolverTest(unittest.TestCase):
         
         for s in samples:
             r.hash(s)
-            
         
         
-# =============================================================================
 class DelayedFileResolver(FileSystemResolver):
 
     def __init__(self):
@@ -58,7 +56,7 @@ class DelayedFileResolver(FileSystemResolver):
         time.sleep(1)
         return super(DelayedFileResolver, self).store(fileUrl, dest)
 
-# =============================================================================
+
 class FileCacheTest(unittest.TestCase):
     
     def setUp(self):
@@ -166,7 +164,7 @@ class FileCacheTest(unittest.TestCase):
         fd.close()
         return fileUrl
 
-# =============================================================================
+
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')
