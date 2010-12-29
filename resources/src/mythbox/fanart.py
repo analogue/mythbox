@@ -208,19 +208,19 @@ class SpamSkippingFanartProvider(BaseFanartProvider):
     have fanart.
     """
     
-    SPAM = ['Paid Programming', 'No Data'] 
+    SPAM = ['Paid Programming', 'No Data', 'SIGN OFF'] 
     
     def __init__(self, nextProvider=None):
         BaseFanartProvider.__init__(self, nextProvider)
     
     def getPosters(self, program):
-        if (program.title() in SpamSkippingFanartProvider.SPAM):
+        if (program.title() in self.SPAM):
             return []
         if self.nextProvider:
             return self.nextProvider.getPosters(program)
                 
     def hasPosters(self, program):
-        if (program.title() in SpamSkippingFanartProvider.SPAM):
+        if (program.title() in self.SPAM):
             return True
         return self.nextProvider.hasPosters(program)
         
@@ -279,7 +279,7 @@ class HttpCachingFanartProvider(BaseFanartProvider):
             try:
                 if not self.workQueue.empty():
                     log.debug('Work queue size: %d' % self.workQueue.qsize())
-                workUnit = self.workQueue.get(block=True, timeout=5)
+                workUnit = self.workQueue.get(block=True, timeout=1)
                 results = workUnit['results']
                 httpUrl = workUnit['httpUrl']
                 filePath = self.tryToCache(httpUrl)
