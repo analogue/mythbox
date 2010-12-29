@@ -6,7 +6,7 @@ xx/xx/2010 - MythBox 1.0.1
   
   Fixed
     - Issue 136 - mythbox.log moved to standard log dir on Mac OSX
-    - Issue 142 - settings.xml parsing failed when removing mythboxfeed
+    - Issue 141 - settings.xml parsing failed when removing mythboxfeed
     - TVRage metadata with missing seasons caused lookup failures 
     - Resuming from last position now works for ad-hoc recordings
     - Thumbnail generation for 0.24 backends fixed
