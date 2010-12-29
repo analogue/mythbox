@@ -156,7 +156,11 @@ class MythSettings(object):
                 results = mythtv.getElementsByTagName(tag)
                 if len(results) > 0:
                     #print results[0].toxml()
-                    self.d[tag] = string.strip(results[0].firstChild.nodeValue)
+                    if hasattr(results[0].firstChild, 'nodeValue'):
+                        self.d[tag] = string.strip(results[0].firstChild.nodeValue)
+                    else:
+                        # empty nodes default to empty string instead of None
+                        self.d[tag] = ''
                 else:
                     slog.error('no tag found for %s ' % tag)
                     

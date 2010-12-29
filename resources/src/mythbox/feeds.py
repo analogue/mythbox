@@ -16,6 +16,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+import string
 import twitter
 
 from mythbox.bus import Event
@@ -32,7 +33,7 @@ class FeedHose(object):
         
     def initFeeds(self):
         self.feeds = []
-        twits = self.settings.get('feeds_twitter').split(',')
+        twits = filter(lambda twit: len(string.strip(twit)) > 0, self.settings.get('feeds_twitter').split(','))
         for twit in twits:
             self.feeds.append(TwitterFeed(twit))
         
