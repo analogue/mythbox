@@ -22,6 +22,8 @@ import socket
 import time
 import tempfile 
 
+abortRequested = False
+
 def getIPAddress():
     return socket.gethostbyname(socket.gethostname())
 

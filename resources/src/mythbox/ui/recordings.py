@@ -19,6 +19,7 @@
 import logging
 import odict
 import os
+import xbmc
 import xbmcgui
 import mythbox.msg as m
 
@@ -109,7 +110,7 @@ class RecordingsWindow(BaseWindow):
         if self.allPrograms:
             log.debug('Precaching %d thumbnails' % len(self.allPrograms))
             for program in self.allPrograms[:]:  # work on copy since async
-                if self.closed: 
+                if self.closed or xbmc.abortRequested: 
                     return
                 try:
                     self.mythThumbnailCache.get(program)
@@ -122,7 +123,7 @@ class RecordingsWindow(BaseWindow):
         if self.allPrograms:
             log.debug('Precaching %d comm breaks' % len(self.allPrograms))
             for program in self.programs:
-                if self.closed: 
+                if self.closed or xbmc.abortRequested: 
                     return
                 try:
                     if program.isCommFlagged():
@@ -164,6 +165,7 @@ class RecordingsWindow(BaseWindow):
         self.renderNav()
         self.renderPrograms()
         self.renderPosters()
+        self.renderEpisodeColumn()
         
     def renderNav(self):
         self.setWindowProperty('sortBy', self.translator.get(m.SORT) + ': ' + self.translator.get(SORT_BY[self.sortBy]['translation_id']))
@@ -236,13 +238,31 @@ class RecordingsWindow(BaseWindow):
     @coalesce
     def renderPosters(self):
         for (listItem, program) in self.programsByListItem.items()[:]:
-            if self.closed: 
+            if self.closed or xbmc.abortRequested: 
                 return
             try:
                 self.lookupPoster(listItem, program)
             except:
                 log.exception('Program = %s' % program)
-                
+
+    @run_async
+    @timed
+    @catchall
+    @coalesce
+    def renderEpisodeColumn(self):
+        results = odict.odict()
+        for (listItem, program) in self.programsByListItem.items()[:]:
+            if self.closed or xbmc.abortRequested: 
+                return
+            try:
+                season, episode = self.fanArt.getSeasonAndEpisode(program)
+                if season and episode:
+                    results[listItem] = '%sx%s' % (season, episode)
+                    self.setListItemProperty(listItem, 'episode', results[listItem])
+                    listItem.setThumbnailImage('OverlayHD.png')  # HACK: to force lisitem update 
+            except:
+                log.exception('Rendering season and episode for program %s' % program.fullTitle())
+        
     def goRecordingDetails(self):
         self.lastSelected = self.programsListBox.getSelectedPosition()
         selectedItem = self.programsListBox.getSelectedItem()
