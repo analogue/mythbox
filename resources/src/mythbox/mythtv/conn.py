@@ -32,7 +32,7 @@ from mythbox.mythtv import protocol
 from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.enums import TVState, Upcoming
 from mythbox.mythtv.protocol import ProtocolException
-from mythbox.util import timed, threadlocals, timed_cache
+from mythbox.util import timed, threadlocals, timed_cache, safe_str
 
 log     = logging.getLogger('mythbox.core')     # mythtv core logger
 wirelog = logging.getLogger('mythbox.wire')     # wire level protocol logger
@@ -489,7 +489,7 @@ class Connection(object):
             self.bus.publish({'id':Event.RECORDING_DELETED, 'source': self, 'program':program})
         else:
             raise ServerException, reply[0]
-        log.debug('Deleted recording %s with response %s' % (program.title(), rc))
+        log.debug('Deleted recording %s with response %s' % (safe_str(program.title()), rc))
         return rc
 
     @timed
@@ -510,7 +510,7 @@ class Connection(object):
             rc2 = int(reply[0])
         else:
             raise ServerException, reply[0]
-        log.debug('Allowed re-record of %s with response %s' %(program.title(), rc2))
+        log.debug('Allowed re-record of %s with response %s' %(safe_str(program.title()), rc2))
         return rc1
 
     @timed
@@ -719,8 +719,8 @@ class Connection(object):
         upcoming = []
         reply = self._sendRequest(self.cmdSock, ['QUERY_GETALLPENDING', '2'])
         
-        log.debug('getUpcomingRecordings reply begin= %s' % reply[:80])
-        log.debug('getUpcomingRecordings reply end  = %s' % reply[-80:])
+        log.debug('getUpcomingRecordings reply begin= %s' % safe_str(reply[:80]))
+        log.debug('getUpcomingRecordings reply end  = %s' % safe_str(reply[-80:]))
         
         numRows = int(reply[1])
         offset = 2
@@ -888,7 +888,7 @@ class Connection(object):
             from mythbox.mythtv.domain import frames2seconds, CommercialBreak
             commBreaks.append(CommercialBreak(frames2seconds(frameStart, fps), frames2seconds(frameEnd, fps)))
                         
-        log.debug('%s commercials in %s' %(len(commBreaks), program.title()))
+        log.debug('%s commercials in %s' %(len(commBreaks), safe_str(program.title())))
         return commBreaks
         
     def getDiskUsage(self):
@@ -1016,7 +1016,7 @@ class Connection(object):
         schedule is not specified, all recording schedules will be rescheduled
         by the backend.
         """
-        log.debug('rescheduleNotify(schedule= %s)' % schedule)
+        log.debug('rescheduleNotify(schedule= %s)' % safe_str(schedule))
         scheduleId = 0
         if schedule:
             scheduleId = schedule.getScheduleId()
@@ -1138,7 +1138,7 @@ class Connection(object):
                 i = len(reply)
                 wirelog.debug("total read = %d" % i)
 
-            wirelog.debug('read  <- %s' % reply[:80])
+            wirelog.debug('read  <- %s' % safe_str(reply[:80]))
             return reply.split(protocol.separator)
         except:
             log.exception('Error reading message: %s' % retMsg)
@@ -1176,7 +1176,7 @@ class Connection(object):
     
     def _sendMsg(self, s, req):
         msg = self._buildMsg(req)
-        wirelog.debug('write -> %s' % msg[:80])
+        wirelog.debug('write -> %s' % safe_str(msg[:80]))
         s.send(msg)
             
     def _sendRequest(self, s, msg):

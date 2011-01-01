@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -28,7 +28,7 @@ from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.domain import RecordingSchedule
 from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, EpisodeFilter, ScheduleType
 from mythbox.ui.toolkit import BaseDialog, BaseWindow, window_busy, Action 
-from mythbox.util import catchall_ui, lirc_hack, catchall, run_async, ui_locked, coalesce, ui_locked2
+from mythbox.util import catchall_ui, lirc_hack, catchall, run_async, ui_locked, coalesce, ui_locked2, safe_str
 
 log = logging.getLogger('mythbox.ui')
 
@@ -142,7 +142,7 @@ class SchedulesWindow(BaseWindow):
                         if channelIcon:
                             self.setListItemProperty(listItem, 'channelIcon', channelIcon)
                 except:
-                    log.exception('context: schedule = %s' % s)
+                    log.exception('context: schedule = %s' % safe_str(s))
                 
                 listItems.append(listItem)
                 self.listItemsBySchedule[s] = listItem
@@ -170,7 +170,7 @@ class SchedulesWindow(BaseWindow):
                             posterPath = self.mythChannelIconCache.get(channel)
                 except:
                     posterPath = self.platform.getMediaPath('mythbox.png')
-                    log.exception('Schedule = %s' % schedule)
+                    log.exception('Schedule = %s' % safe_str(schedule))
             finally:
                 self.setListItemProperty(listItem, 'poster', posterPath)
                 
