@@ -193,7 +193,7 @@ class BootStrapper(object):
     def bootstrapUpdater(self):
         self.stage = 'Initializing Updater'
         from mythbox.updater import UpdateChecker
-        UpdateChecker(self.platform).isUpdateAvailable()
+        UpdateChecker(self.platform).run()
 
     def bootstrapFeeds(self):
         from mythbox.feeds import FeedHose
