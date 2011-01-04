@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -633,8 +633,9 @@ class TvRageProvider(NoOpFanartProvider):
         log.debug('TVRage: No episode of %s found matching subtitle %s' % (safe_str(program.title()), safe_str(subtitle)))        
         return None, None
 
+
 class FanArt(object):
-    """One stop shop for fanart"""
+    '''One stop shop for fanart and program metadata not originating from mythtv'''
     
     def __init__(self, platform, httpCache, settings, bus):
         self.platform = platform
