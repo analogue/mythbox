@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 #  Copyright (C) 2005 Tom Warkentin <tom@ixionstudios.com>
 #
 #  This program is free software; you can redistribute it and/or
@@ -342,7 +342,7 @@ class TvGuideWindow(ui.BaseWindow):
                 schedule = ScheduleFromProgram(program, self.translator)
                 createScheduleDialog = ScheduleDialog(
                     'mythbox_schedule_dialog.xml',
-                    os.getcwd(),
+                    self.platform.getScriptDir(),
                     forceFallback=True,
                     schedule=schedule,
                     translator=self.translator,

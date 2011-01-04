@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -113,7 +113,7 @@ class UpcomingRecordingsWindow(BaseWindow):
         
         ScheduleDialog(
             'mythbox_schedule_dialog.xml', 
-            os.getcwd(), 
+            self.platform.getScriptDir(), 
             forceFallback=True,
             schedule=schedules[0], 
             translator=self.translator,

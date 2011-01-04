@@ -87,7 +87,7 @@ class SchedulesWindow(BaseWindow):
         self.lastSelected = self.schedulesListBox.getSelectedPosition()
         editScheduleDialog = ScheduleDialog(
             'mythbox_schedule_dialog.xml',
-            os.getcwd(), 
+            self.platform.getScriptDir(), 
             forceFallback=True,
             schedule=self.schedules[self.schedulesListBox.getSelectedPosition()], 
             translator=self.translator,
@@ -142,7 +142,7 @@ class SchedulesWindow(BaseWindow):
                         if channelIcon:
                             self.setListItemProperty(listItem, 'channelIcon', channelIcon)
                 except:
-                    log.exception('context: schedule = %s' % safe_str(s))
+                    log.warn('Schedule for %s refers to non-existant channel with id %s' % (safe_str(s.title()), s.getChannelId()))
                 
                 listItems.append(listItem)
                 self.listItemsBySchedule[s] = listItem
@@ -191,11 +191,7 @@ class ScheduleDialog(BaseDialog):
         
     @catchall
     def onInit(self):
-        if self.platform.isDharma():
-            self.win = xbmcgui.Window(xbmcgui.getCurrentWindowDialogId())
-        else:
-            self.win = xbmcgui.Window(xbmcgui.getCurrentWindowId())
-            
+        self.win = xbmcgui.Window(xbmcgui.getCurrentWindowDialogId())
         self.enabledCheckBox = self.getControl(212)
         self.autoCommFlagCheckBox = self.getControl(205)
         self.autoExpireCheckBox = self.getControl(207)

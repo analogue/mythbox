@@ -250,7 +250,7 @@ class HomeWindow(BaseWindow):
         
     def goWatchTv(self):
         from mythbox.ui.livetv import LiveTvWindow 
-        LiveTvWindow('mythbox_livetv.xml', os.getcwd(), **self.dependencies).doModal()
+        LiveTvWindow('mythbox_livetv.xml', self.platform.getScriptDir(), **self.dependencies).doModal()
 
     @window_busy
     def goPlayRecording(self):
@@ -261,23 +261,23 @@ class HomeWindow(BaseWindow):
             
     def goWatchRecordings(self):
         from mythbox.ui.recordings import RecordingsWindow
-        RecordingsWindow('mythbox_recordings.xml', os.getcwd(), **self.dependencies).doModal()
+        RecordingsWindow('mythbox_recordings.xml', self.platform.getScriptDir(), **self.dependencies).doModal()
         
     def goTvGuide(self):
         from tvguide import TvGuideWindow 
-        TvGuideWindow('mythbox_tvguide.xml', os.getcwd(), **self.dependencies).doModal() 
+        TvGuideWindow('mythbox_tvguide.xml', self.platform.getScriptDir(), **self.dependencies).doModal() 
     
     def goRecordingSchedules(self):
         from schedules import SchedulesWindow 
-        SchedulesWindow('mythbox_schedules.xml', os.getcwd(), **self.dependencies).doModal()
+        SchedulesWindow('mythbox_schedules.xml', self.platform.getScriptDir(), **self.dependencies).doModal()
             
     def goUpcomingRecordings(self):
         from upcoming import UpcomingRecordingsWindow
-        UpcomingRecordingsWindow('mythbox_upcoming.xml', os.getcwd(), **self.dependencies).doModal()
+        UpcomingRecordingsWindow('mythbox_upcoming.xml', self.platform.getScriptDir(), **self.dependencies).doModal()
         
     def goSettings(self):
         from uisettings import SettingsWindow
-        SettingsWindow('mythbox_settings.xml', os.getcwd(), **self.dependencies).doModal() 
+        SettingsWindow('mythbox_settings.xml', self.platform.getScriptDir(), **self.dependencies).doModal() 
 
     @window_busy
     def refresh(self):
