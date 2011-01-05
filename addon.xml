@@ -17,7 +17,17 @@
         <platform>all</platform>
         <summary lang="en">MythBox for XBMC</summary>
         <summary lang="fr">MythBox pour XBMC</summary>
-        <description lang="en">MythBox is a MythTV frontend for XBMC</description>
+        <description lang="en">[B]MythBox is a MythTV frontend for XBMC[/B]
+
+        - Watch recordings with commercial skipping
+        - Watch live tv
+        - Create and edit recording schedules
+        - Fan art from tvdb, tvrage, tmdb, imdb, and google image search
+        - Enhanged program guide
+        - Show upcoming recordings
+        - Tuner and job status
+        - Supports MythTV 0.21, 0.22, 0.23, and 0.24 (no live tv with 0.24)
+        </description>
         <description lang="fr">MythBox est un frontal MythTV pour XBMC</description>
     </extension>
 </addon>
