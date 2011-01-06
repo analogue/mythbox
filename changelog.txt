@@ -1,10 +1,11 @@
-xx/xx/2010 - MythBox 1.0.1
+xx/xx/2011 - MythBox 1.0.1
 -----------------------------
   New
     - Issue 132 - Support for MythTV 0.24 except for LiveTV (thx mitch capper)
     - TVRage season and episode matching now uses the program's subtitle when the original air date search fails
     - Czech translations (tnx Pavel Mlčoch)
-    
+    - Readme and FAQ viewable from MythBox > Settings > Readme and FAQ
+        
   Fixed
     - Issue 136 - mythbox.log moved to standard log dir on Mac OSX
     - Issue 141 - settings.xml parsing failed when removing mythboxfeed
