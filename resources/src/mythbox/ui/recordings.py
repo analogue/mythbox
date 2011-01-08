@@ -18,7 +18,7 @@
 #
 import logging
 import odict
-import os
+import time
 import xbmc
 import xbmcgui
 import mythbox.msg as m
@@ -163,11 +163,10 @@ class RecordingsWindow(BaseWindow):
     @ui_locked
     def render(self):
         log.debug('Rendering....')
-        import time
         self.activeRenderToken = time.clock()
         self.renderNav()
         self.renderPrograms()
-        self.renderPosters()
+        self.renderPosters(self.activeRenderToken)
         self.renderEpisodeColumn(self.activeRenderToken)
         
     def renderNav(self):
@@ -236,12 +235,10 @@ class RecordingsWindow(BaseWindow):
             self.setListItemProperty(listItem, 'index', str(i + selectionIndex + 1))
         
     @run_async
-    @timed
     @catchall
-    @coalesce
-    def renderPosters(self):
+    def renderPosters(self, myRenderToken):
         for (listItem, program) in self.programsByListItem.items()[:]:
-            if self.closed or xbmc.abortRequested: 
+            if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken: 
                 return
             try:
                 self.lookupPoster(listItem, program)
