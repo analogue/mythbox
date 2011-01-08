@@ -66,6 +66,7 @@ class RecordingsWindow(BaseWindow):
         self.sortBy = self.settings.get('recordings_sort_by')
         self.sortAscending = self.settings.getBoolean('recordings_sort_ascending')
         self.group = self.settings.get('recordings_recording_group')
+        self.activeRenderToken = None
         
     @catchall_ui
     def onInit(self):
@@ -162,10 +163,12 @@ class RecordingsWindow(BaseWindow):
     @ui_locked
     def render(self):
         log.debug('Rendering....')
+        import time
+        self.activeRenderToken = time.clock()
         self.renderNav()
         self.renderPrograms()
         self.renderPosters()
-        self.renderEpisodeColumn()
+        self.renderEpisodeColumn(self.activeRenderToken)
         
     def renderNav(self):
         self.setWindowProperty('sortBy', self.translator.get(m.SORT) + ': ' + self.translator.get(SORT_BY[self.sortBy]['translation_id']))
@@ -246,13 +249,11 @@ class RecordingsWindow(BaseWindow):
                 log.exception('Program = %s' % program)
 
     @run_async
-    @timed
     @catchall
-    @coalesce
-    def renderEpisodeColumn(self):
+    def renderEpisodeColumn(self, myRenderToken):
         results = odict.odict()
         for (listItem, program) in self.programsByListItem.items()[:]:
-            if self.closed or xbmc.abortRequested: 
+            if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken:
                 return
             try:
                 season, episode = self.fanArt.getSeasonAndEpisode(program)
@@ -261,7 +262,7 @@ class RecordingsWindow(BaseWindow):
                     self.setListItemProperty(listItem, 'episode', results[listItem])
                     listItem.setThumbnailImage('OverlayHD.png')  # HACK: to force lisitem update 
             except:
-                log.exception('Rendering season and episode for program %s' % program.fullTitle())
+                log.exception('Rendering season and episode for program %s' % safe_str(program.title()))
         
     def goRecordingDetails(self):
         self.lastSelected = self.programsListBox.getSelectedPosition()
