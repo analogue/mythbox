@@ -485,26 +485,17 @@ class TheMovieDbFanartProvider(BaseFanartProvider):
 
 class GoogleImageSearchProvider(BaseFanartProvider):
     
-    # safe search on, tall image preferred,   
-    # 2 megapixel quality preferred = &imgsz=2MP
-    # 
-    URL = 'http://ajax.googleapis.com/ajax/services/search/images?v=1.0&safe=on&imgar=t' #&imgtype=photo 
-    REFERRER = 'http://mythbox.googlecode.com' 
-    
     def __init__(self, nextProvider=None):
         BaseFanartProvider.__init__(self, nextProvider)        
     
     @chain
     @max_threads(2)
-    @timed
     def getPosters(self, program):
         posters = []
         try:
-            # TODO: Verify this is no longer an issue -- 
-            #       GOOGLE fanart search:  K�nigreich der Himmel 'ascii' codec can't decode byte 0xc3 in position 1: ordinal not in range(128)
-            searchUrl = '%s&q=%s' % (self.URL, urllib.quote("'%s'"% unicode(program.title()).encode('utf-8')))
-            req = urllib2.Request(searchUrl)
-            req.add_header('Referer', self.REFERRER)
+            url_values = urllib.urlencode({'v':'1.0', 'safe':'on', 'imgar':'t', 'q':program.title()})
+            searchUrl = 'http://ajax.googleapis.com/ajax/services/search/images?' + url_values
+            req = urllib2.Request(searchUrl, headers={'Referer':'http://mythbox.googlecode.com'})
             resp = urllib2.urlopen(req)
             s = resp.readlines()
             obj = json.loads(s[0])
@@ -518,9 +509,8 @@ class GoogleImageSearchProvider(BaseFanartProvider):
             for i,result in enumerate(obj['responseData']['results']):
                 #log.debug('%d googleresult = %s' % (i, result['unescapedUrl']))
                 posters.append(result['unescapedUrl'])
-                
         except Exception, e:
-            log.error('GOOGLE fanart search:  %s %s' % (program.title(), str(e)))
+            log.error('GOOGLE fanart search:  %s %s' % (safe_str(program.title()), str(e)))
         return posters
         
 
@@ -587,7 +577,7 @@ class TvRageProvider(NoOpFanartProvider):
             self.save(program, show)
             return self.searchForEpisode(program, show)
         except tvrage.api.ShowNotFound:
-            log.debug('TVRage: Show not found - %r' % program.title())
+            log.debug('TVRage: Show not found - %s' % safe_str(program.title()))
             return None, None
                     
     def indexEpisodes(self, show):
