@@ -13,6 +13,7 @@ xx/xx/2011 - MythBox 1.0.1
     - TVRage metadata with missing seasons caused lookup failures 
     - Resuming from last position now works for ad-hoc recordings
     - Thumbnail generation for 0.24 backends fixed
+    - Changing sort order or hitting refresh on some windows didn't re-invoke inflight rendering threads 
     
 11/25/2010 - MythBox 1.0.0
 -----------------------------

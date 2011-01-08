@@ -19,7 +19,8 @@
 import copy
 import logging
 import odict
-import os
+import time
+import xbmc
 import xbmcgui
 import mythbox.msg as m
 
@@ -28,7 +29,7 @@ from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.domain import RecordingSchedule
 from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, EpisodeFilter, ScheduleType
 from mythbox.ui.toolkit import BaseDialog, BaseWindow, window_busy, Action 
-from mythbox.util import catchall_ui, lirc_hack, catchall, run_async, ui_locked, coalesce, ui_locked2, safe_str
+from mythbox.util import catchall_ui, lirc_hack, catchall, run_async, ui_locked, ui_locked2, safe_str
 
 log = logging.getLogger('mythbox.ui')
 
@@ -53,6 +54,7 @@ class SchedulesWindow(BaseWindow):
         self.closed = False
         self.lastFocusId = ID_SCHEDULES_LISTBOX
         self.lastSelected = int(self.settings.get('schedules_last_selected'))
+        self.activeRenderToken = None
         
     @catchall
     def onInit(self):
@@ -151,14 +153,14 @@ class SchedulesWindow(BaseWindow):
         self.schedulesListBox.reset()
         self.schedulesListBox.addItems(listItems)
         self.schedulesListBox.selectItem(self.lastSelected)
-        self.renderPosters()
+        self.activeRenderToken = time.clock()
+        self.renderPosters(self.activeRenderToken)
 
     @run_async
     @catchall
-    @coalesce
-    def renderPosters(self):
-        for schedule in self.listItemsBySchedule.keys():
-            if self.closed: 
+    def renderPosters(self, myRenderToken):
+        for schedule in self.listItemsBySchedule.keys()[:]:
+            if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken: 
                 return
             listItem = self.listItemsBySchedule[schedule]
             try:
