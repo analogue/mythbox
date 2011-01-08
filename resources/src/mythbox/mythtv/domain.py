@@ -256,7 +256,7 @@ class Program(object):
 
     def __eq__(self, rhs):
         return \
-            isinstance(rhs, type(self)) and \
+            isinstance(rhs, Program) and \
             self.getChannelId() == rhs.getChannelId() and \
             self.starttime() == rhs.starttime()
 
