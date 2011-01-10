@@ -66,9 +66,10 @@ class FeedEntry(object):
 
 class TwitterFeed(object):
 
-    def __init__(self, user, api=twitterApi):
+    def __init__(self, user, api=twitterApi, sinceDays=14):
         self.user = user
         self.api = twitterApi
+        self.sinceDays = sinceDays
         
     def getEntries(self):
         #  The Status structure exposes the following properties:
@@ -85,26 +86,10 @@ class TwitterFeed(object):
         #    status.relative_created_at # read only
         #    status.user
         
-        entries = []
-        one_month_back = datetime.datetime.now() - datetime.timedelta(days=14)
-        tweets = self.api.GetUserTimeline(user=self.user, count=3, since=self.httpdate(one_month_back))
-        for tweet in tweets:
-            entries.append(FeedEntry(tweet.user.screen_name, tweet.text, tweet.created_at_in_seconds))
-        return entries
-
-    @staticmethod
-    def httpdate(dt):
-        """Return a string representation of a date according to RFC 1123
-        (HTTP/1.1).
-
-        The supplied date must be in UTC.
-
-        """
-        weekday = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][dt.weekday()]
-        month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
-                 "Oct", "Nov", "Dec"][dt.month - 1]
-        return "%s, %02d %s %04d %02d:%02d:%02d GMT" % (weekday, dt.day, month,
-        dt.year, dt.hour, dt.minute, dt.second)
+        drop_tweets_before = datetime.datetime.now() - datetime.timedelta(days=self.sinceDays)
+        tweets = self.api.GetUserTimeline(id=self.user, count=3)
+        tweets = filter(lambda t: datetime.datetime.fromtimestamp(t.created_at_in_seconds) > drop_tweets_before, tweets)
+        return map(lambda t: FeedEntry(t.user.screen_name, t.text, t.created_at_in_seconds), tweets)
 
 
 class RssFeed(object):

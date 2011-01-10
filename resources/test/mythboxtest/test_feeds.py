@@ -47,7 +47,7 @@ class FeedHoseTest(unittest.TestCase):
 class TwitterFeedTest(unittest.TestCase):
 
     def test_getEntries(self):
-        feed = TwitterFeed('mythboxfeed')
+        feed = TwitterFeed('mythboxfeed', sinceDays=99999)
         s = feed.getEntries()
         log.debug('feed text = %s' % s)
         self.assertTrue(s)
