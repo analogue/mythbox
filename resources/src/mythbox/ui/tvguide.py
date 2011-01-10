@@ -24,7 +24,6 @@
 #
 
 import logging
-import os
 import xbmcgui
 import mythbox.msg as m
 import mythbox.ui.toolkit as ui
@@ -36,7 +35,7 @@ from mythbox.mythtv.domain import ScheduleFromProgram, Channel
 from mythbox.mythtv.enums import Upcoming
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import Action, Align, AspectRatio, window_busy
-from mythbox.util import catchall_ui, timed, lirc_hack, catchall, ui_locked2, safe_str
+from mythbox.util import catchall_ui, timed, lirc_hack, catchall, ui_locked2, safe_str, coalesce, run_async
 
 log = logging.getLogger('mythbox.ui')
 
@@ -192,7 +191,7 @@ class TvGuideWindow(ui.BaseWindow):
             
             self.setChannel(int(self.settings.get('tv_guide_last_selected')))
             self.setTime(datetime.now() - timedelta(minutes=30))
-            self.upcoming = self.conn().getUpcomingRecordings(filter=Upcoming.SCHEDULED)
+            self.cacheUpcoming()
             self.initialized = True
 
         self._render()
@@ -204,6 +203,13 @@ class TvGuideWindow(ui.BaseWindow):
                 self.setFocus(self.prevFocus)
             else:
                 raise Exception, self.translator.get(m.NO_EPG_DATA)
+
+    @run_async
+    @coalesce
+    @catchall
+    @inject_conn
+    def cacheUpcoming(self):
+        self.upcoming = self.conn().getUpcomingRecordings(filter=Upcoming.SCHEDULED)
 
     @catchall_ui
     @lirc_hack            
