@@ -1,3 +1,2 @@
 #!/bin/bash
 bin/package-zip-dharma $*
-bin/package-zip-camelot $*

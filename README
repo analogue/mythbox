@@ -18,7 +18,7 @@ Requirements
 ================
   
   All Platforms
-    - XBMC 10.10 (Dharma) or XBMC 9.11 (Camelot)
+    - XBMC 10.10 (Dharma)
     - A working MythTV backend
     - MythTV recordings directory(s) and/or storage groups accessible via the local 
       filesystem (the machine running XBMC) pre-mounted using nfs, samba, afp, etc.   
@@ -51,26 +51,6 @@ Installation
       
       4. Exit the Settings screen & enjoy!
  
-  XBMC 9.11
-    
-      1. Extract mythbox.tar.gz to the following directory:
-         Linux   : ~/.xbmc/scripts 
-         Mac     : ~/Library/Application Support/XBMC/scripts
-         Windows : C:\Documents and Settings\[user]\Application Data\XBMC\scripts
-         Vista   : C:\Users\[user]\AppData\Roaming\XBMC\scripts
-               
-      2. Launch XBMC
-      
-      3. From the main XBMC screen, select Scripts
-      
-      4. From the Scripts screen, select MythBox 
-      
-      5. You'll be sent straight to the Settings screen (with an error message). 
-         Fill in all the settings and click on the 'Test Settings' button until 
-         you get a 'Settings OK' message.
-      
-      6. Exit the Settings screen & enjoy!
-
 
 Keybindings/Remote Control
 ============================================================================

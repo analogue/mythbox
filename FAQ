@@ -187,13 +187,13 @@ Q16. What is the difference between XBMC's myth:// protocol support and MythBox?
      
      Feature                  MythBox        XBMC + myth://
      ==========================================================
-     Commercial skipping      Yes            Yes (since Camelot)
+     Commercial skipping      Yes            Yes
      Watch Live TV            Yes            Yes
      Schedule Recordings      Yes            No 
      Upcoming Recordings      Yes            No
      Enhanced Program Guide   Yes            No 
      Fan art for TV Programs  Yes            No
-     Fan art for Movies       Yes            Yes (since Camelot)
+     Fan art for Movies       Yes            Yes
      Library Mode             No             Yes
      Tuners/Jobs/Load stats   Yes            No
      Detailed Recording Info  Yes            No
