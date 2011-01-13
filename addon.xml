@@ -23,11 +23,21 @@
         - Watch live tv
         - Create and edit recording schedules
         - Fan art from tvdb, tvrage, tmdb, imdb, and google image search
-        - Enhanged program guide
+        - Enhanced program guide
         - Show upcoming recordings
         - Tuner and job status
         - Supports MythTV 0.21, 0.22, 0.23, and 0.24 (no live tv with 0.24)
         </description>
-        <description lang="fr">MythBox est un frontal MythTV pour XBMC</description>
+        <description lang="fr">[B]MythBox est un frontal MythTV pour XBMC[/B]
+
+        - Regarder les enregistrements avec saut de la publicité
+        - Regarder la tv en direct
+        - Créer et éditer des planifications d'enregistrements
+        - Fanart à partir de tvdb, tvrage, tmdb, imdb, et de la recherche d'image google
+        - Guide de programme amélioré
+        - Afficher les enregistrements à venir
+        - Statut du syntoniseur et des travaux
+        - Support de MythTV 0.21, 0.22, 0.23, et 0.24 (pas de tv en direct en 0.24)
+        </description>
     </extension>
 </addon>
