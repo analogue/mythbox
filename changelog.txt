@@ -6,6 +6,7 @@ xx/xx/2011 - MythBox 1.0.1
     - Readme and FAQ viewable from MythBox > Settings > Readme and FAQ
     - Czech translations (tnx Pavel Mlčoch)
     - Swedish translations (tnx Magnus Gustafsson)
+    - Polish translations (tnx Michał Sawicz)
         
   Fixed
     - Issue 136 - mythbox.log moved to standard log dir on Mac OSX
