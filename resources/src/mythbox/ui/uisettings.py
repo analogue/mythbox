@@ -211,7 +211,9 @@ class SettingsWindow(BaseWindow):
             setting.render()
         import default
         self.setWindowProperty('AboutText', "%s\n\n%s\n\n%s\n\n%s" % (default.__scriptname__, default.__author__, default.__url__, self.platform.getVersion()))
-        self.setWindowProperty('ReadmeText', open(os.path.join(self.platform.getScriptDir(), 'README'), 'r').read())
+        self.setWindowProperty('ReadmeText', '%s\n%s' % (
+            open(os.path.join(self.platform.getScriptDir(), 'README'), 'r').read(),
+            open(os.path.join(self.platform.getScriptDir(), 'FAQ'), 'r').read()))
 
     @window_busy
     def testSettings(self):

@@ -422,7 +422,7 @@ class TvGuideWindow(ui.BaseWindow):
 
         if program in self.upcoming:
             # TODO: Decorate cell as an upcoming recording 
-            cell.title = '[B][COLOR=yellow]' + cell.title + '[/COLOR][/B]'
+            cell.title = '[B][COLOR=ffe2ff43]' + cell.title + '[/COLOR][/B]'
             
         # Create a label to hold the name of the program with insets  
         # Label text seems to get truncated correctly...

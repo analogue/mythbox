@@ -3,6 +3,8 @@ xx/xx/2011 - MythBox 1.0.1
   New
     - Issue 132 - Support for MythTV 0.24 except for LiveTV (thx mitch capper)
     - TVRage season and episode matching now uses the program's subtitle when the original air date search fails
+    - Added Episode column to the recordings screen
+    - TV Guide shows upcoming recordings in a different color
     - Readme and FAQ viewable from MythBox > Settings > Readme and FAQ
     - Czech translations (tnx Pavel Mlčoch)
     - Swedish translations (tnx Magnus Gustafsson)
