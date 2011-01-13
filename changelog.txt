@@ -1,4 +1,4 @@
-xx/xx/2011 - MythBox 1.0.1
+1/13/2011 - MythBox 1.0.1
 -----------------------------
   New
     - Issue 132 - Support for MythTV 0.24 except for LiveTV (thx mitch capper)
