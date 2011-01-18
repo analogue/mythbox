@@ -183,7 +183,10 @@ class RecordedProgramTest(unittest2.TestCase):
         self.platform = Mock()
         self.protocol = protocol.Protocol40()
         self.data = ["0"] * self.protocol.recordSize()
-            
+        self.i_channelNumber = self.protocol.recordFields().index('channum')
+        self.i_startTime = self.protocol.recordFields().index('starttime')
+        self.i_endTime = self.protocol.recordFields().index('endtime')
+        
     def test_hasBookmark_False(self):
         p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         p.setProgramFlags(FlagMask.FL_AUTOEXP)
@@ -251,46 +254,46 @@ class RecordedProgramTest(unittest2.TestCase):
             shutil.rmtree(datadir, True)
         
     def test_eq_True_self(self):
-        self.data[4]  = "99"
-        self.data[11] = 999999 
+        self.data[self.i_channelNumber]  = "99"
+        self.data[self.i_startTime] = 999999 
         p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         self.assertEquals(p, p)
 
     def test_eq_True_same_channelId_and_startttime(self):
-        self.data[4]  = "99"    # channelId
-        self.data[11] = 999999  # starttime
+        self.data[self.i_channelNumber]  = "99"
+        self.data[self.i_startTime] = 999999
         p1 = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         p2 = RecordedProgram(self.data[:], self.settings, self.translator, self.platform, self.protocol, self.conn) 
         self.assertEquals(p1, p2)
         self.assertEquals(p2, p1)
 
-    def test_eq_False_different_channelId_and_startttime(self):
-        self.data[4]  = "99"    # channelId
-        self.data[11] = 999999  # starttime
+    def test_eq_False_different_channelNumber_and_startttime(self):
+        self.data[self.i_channelNumber] = '11'
+        self.data[self.i_startTime] = 999999
         p1 = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         
-        d2 = ["0"] * protocol.Protocol40().recordSize()
-        d2[4] = "101"
-        d2[11] = 777777
+        d2 = ["0"] * self.protocol.recordSize()
+        d2[self.i_channelNumber] = "101"
+        d2[self.i_startTime] = 777777
         p2 = RecordedProgram(d2, self.settings, self.translator, self.platform, self.protocol, self.conn) 
         self.assertNotEquals(p1, p2)
         self.assertNotEquals(p2, p1)
 
-    def test_eq_False_different_channelId_same_startttime(self):
-        self.data[4]  = "99"    # channelId
-        self.data[11] = 999999  # starttime
+    def test_eq_False_different_channelNumber_same_startttime(self):
+        self.data[self.i_channelNumber]  = "99"
+        self.data[self.i_startTime] = 999999
         p1 = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         
-        d2 = ["0"] * protocol.Protocol40().recordSize()
-        d2[4] = "101"
-        d2[11] = self.data[11]
+        d2 = ["0"] * self.protocol.recordSize()
+        d2[self.i_channelNumber] = "101"
+        d2[self.i_startTime] = self.data[self.i_startTime]
         p2 = RecordedProgram(d2, self.settings, self.translator, self.platform, self.protocol, self.conn) 
         self.assertNotEquals(p1, p2)
         self.assertNotEquals(p2, p1)
 
     def test_formattedAirTime(self):
-        self.data[11] = self.socketTime(21, 0, 0)   # 9:00pm
-        self.data[12] = self.socketTime(21, 30, 0)  # 9:30pm
+        self.data[self.i_startTime] = self.socketTime(21, 0, 0)   # 9:00pm
+        self.data[self.i_endTime] = self.socketTime(21, 30, 0)  # 9:30pm
         p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         self.assertEquals('9:00 - 9:30PM', p.formattedAirTime(short=False))
         self.assertEquals('9 - 9:30PM', p.formattedAirTime(short=True))
