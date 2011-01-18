@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -186,6 +186,7 @@ class RecordedProgramTest(unittest2.TestCase):
         self.i_channelNumber = self.protocol.recordFields().index('channum')
         self.i_startTime = self.protocol.recordFields().index('starttime')
         self.i_endTime = self.protocol.recordFields().index('endtime')
+        self.i_programFlags = self.protocol.recordFields().index('programflags')
         
     def test_hasBookmark_False(self):
         p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
@@ -206,7 +207,7 @@ class RecordedProgramTest(unittest2.TestCase):
         log.warn("TODO: Write unit test")
         
     def test_hasCommercials_True(self):
-        self.data[29] = FlagMask.FL_COMMFLAG | FlagMask.FL_AUTOEXP
+        self.data[self.i_programFlags] = FlagMask.FL_COMMFLAG | FlagMask.FL_AUTOEXP
         p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         commBreaks = []
         commBreaks.append(CommercialBreak(120,180))
@@ -216,7 +217,7 @@ class RecordedProgramTest(unittest2.TestCase):
         #verify(self.conn).getCommercialBreaks(p)
 
     def test_hasCommercials_False(self):
-        self.data[29] = FlagMask.FL_COMMFLAG | FlagMask.FL_AUTOEXP
+        self.data[self.i_programFlags] = FlagMask.FL_COMMFLAG | FlagMask.FL_AUTOEXP
         p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         commBreaks = []
         when(self.conn).getCommercialBreaks(p).thenReturn(commBreaks)
@@ -224,7 +225,7 @@ class RecordedProgramTest(unittest2.TestCase):
         self.assertFalse(p.hasCommercials())    
 
     def test_getCommercials_ReturnsOneCommercial(self):
-        self.data[29] = FlagMask.FL_COMMFLAG | FlagMask.FL_AUTOEXP
+        self.data[self.i_programFlags] = FlagMask.FL_COMMFLAG | FlagMask.FL_AUTOEXP
         p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         commBreaks = []
         commBreaks.append(CommercialBreak(120,180))
@@ -300,28 +301,28 @@ class RecordedProgramTest(unittest2.TestCase):
         self.assertEquals('9 - 9:30PM', p.formattedAirTime())
         
     def test_getDuration_When_duration_is_half_hour_Then_return_30mins(self):
-        self.data[11] = self.socketTime(18, 30, 0)  # starttime = 6:30pm
-        self.data[12] = self.socketTime(19, 0, 0)   # end time  = 7:00pm
+        self.data[self.i_startTime] = self.socketTime(18, 30, 0)  # starttime = 6:30pm
+        self.data[self.i_endTime] = self.socketTime(19, 0, 0)   # end time  = 7:00pm
         d = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn).getDuration()
         log.debug('Duration = %d' % d)
         self.assertEquals(30, d)
 
     def test_getDuration_When_2_hour_duration_spans_midnight_into_next_day_Then_return_120mins(self):
-        self.data[11] = self.socketDateTime(2009, 10, 10, 23, 0, 0)  # starttime = 10/10/2009 11pm
-        self.data[12] = self.socketDateTime(2009, 10, 11, 1, 0, 0)   # end time  = 10/11/2009 1am
+        self.data[self.i_startTime] = self.socketDateTime(2009, 10, 10, 23, 0, 0)  # starttime = 10/10/2009 11pm
+        self.data[self.i_endTime] = self.socketDateTime(2009, 10, 11, 1, 0, 0)   # end time  = 10/11/2009 1am
         d = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn).getDuration()
         log.debug('Duration = %d' % d)
         self.assertEquals(120, d)
         
     def test_getDuration_When_start_and_end_times_same_Then_return_0mins(self):
-        self.data[11] = self.socketTime(18, 30, 0)  # starttime = 6:30pm
-        self.data[12] = self.socketTime(18, 30, 0)  # end time  = 6:30pm
+        self.data[self.i_startTime] = self.socketTime(18, 30, 0)  # starttime = 6:30pm
+        self.data[self.i_endTime] = self.socketTime(18, 30, 0)  # end time  = 6:30pm
         d = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn).getDuration()
         log.debug('Duration = %d' % d)
         self.assertEquals(0, d)
 
     def test_formattedStartTime_1pm(self):
-        self.data[11] = self.socketTime(13, 0, 0)
+        self.data[self.i_startTime] = self.socketTime(13, 0, 0)
         s = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn).formattedStartTime()
         log.debug('startime = %s' % s)
         self.assertEquals('1:00 PM', s)
@@ -338,8 +339,8 @@ class RecordedProgramTest(unittest2.TestCase):
             {'start' : self.socketTime(18, 30, 0), 'end' : self.socketTime(20, 31, 0), 'expected' : '2 hrs 1 m'}]
         
         for d in data:
-            self.data[11] = d['start']
-            self.data[12] = d['end']
+            self.data[self.i_startTime] = d['start']
+            self.data[self.i_endTime] = d['end']
             s = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn).formattedDuration()
             log.debug('Duration = %s' % s)
             self.assertEquals(d['expected'], s)
