@@ -19,28 +19,28 @@
 import logging
 from mythbox.util import safe_str
 
-class SafeLogger(logging.LoggerAdapter):
-    '''ConsoleLogger cannot handle non-ascii chars and it is a 
-    PITA when the app fails because a log message was not
-    sanitized with util.safe_str(...) before being passed on.
-    Just decorate an existing logger and sanitize before passing
-    on up the chain...
-    '''
-    
-    def __init__(self, logger):
-        logging.LoggerAdapter.__init__(self, logger, None)
-
-    def debug(self, msg, *args, **kwargs):
-        logging.LoggerAdapter.debug(self, safe_str(msg), *args, **kwargs)
-        
-    def info(self, msg, *args, **kwargs):
-        logging.LoggerAdapter.info(self, safe_str(msg), *args, **kwargs)
-
-    def warning(self, msg, *args, **kwargs):
-        logging.LoggerAdapter.warning(self, safe_str(msg), *args, **kwargs)
-
-    def error(self, msg, *args, **kwargs):
-        logging.LoggerAdapter.error(self, safe_str(msg), *args, **kwargs)
-
-    def exception(self, msg, *args, **kwargs):
-        logging.LoggerAdapter.exception(self, safe_str(msg), *args, **kwargs)
+#class SafeLogger(logging.LoggerAdapter):
+#    '''ConsoleLogger cannot handle non-ascii chars and it is a 
+#    PITA when the app fails because a log message was not
+#    sanitized with util.safe_str(...) before being passed on.
+#    Just decorate an existing logger and sanitize before passing
+#    on up the chain...
+#    '''
+#    
+#    def __init__(self, logger):
+#        logging.LoggerAdapter.__init__(self, logger, None)
+#
+#    def debug(self, msg, *args, **kwargs):
+#        logging.LoggerAdapter.debug(self, safe_str(msg), *args, **kwargs)
+#        
+#    def info(self, msg, *args, **kwargs):
+#        logging.LoggerAdapter.info(self, safe_str(msg), *args, **kwargs)
+#
+#    def warning(self, msg, *args, **kwargs):
+#        logging.LoggerAdapter.warning(self, safe_str(msg), *args, **kwargs)
+#
+#    def error(self, msg, *args, **kwargs):
+#        logging.LoggerAdapter.error(self, safe_str(msg), *args, **kwargs)
+#
+#    def exception(self, msg, *args, **kwargs):
+#        logging.LoggerAdapter.exception(self, safe_str(msg), *args, **kwargs)

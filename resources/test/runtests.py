@@ -20,7 +20,7 @@ import unittest
 
 import mythboxtest.test_platform
 import mythboxtest.test_util
-import mythboxtest.test_log
+#import mythboxtest.test_log
 import mythboxtest.mythtv.test_db
 import mythboxtest.mythtv.test_conn
 import mythboxtest.mythtv.test_domain
@@ -43,7 +43,7 @@ def suite():
     mysuite = unittest.TestSuite()
     mysuite.addTest(unittest.findTestCases(mythboxtest.test_platform))
     mysuite.addTest(unittest.findTestCases(mythboxtest.test_util))
-    mysuite.addTest(unittest.findTestCases(mythboxtest.test_log))
+    #mysuite.addTest(unittest.findTestCases(mythboxtest.test_log))
     mysuite.addTest(unittest.findTestCases(mythboxtest.mythtv.test_db))
     mysuite.addTest(unittest.findTestCases(mythboxtest.mythtv.test_conn))
     #import test_domain

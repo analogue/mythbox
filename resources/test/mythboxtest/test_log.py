@@ -19,23 +19,23 @@
 #
 import logging
 import unittest2 as unittest
-from mythbox.log import SafeLogger
+#from mythbox.log import SafeLogger
 
 log = logging.getLogger('mythbox.unittest')
 
-class SafeLoggerTest(unittest.TestCase):
-    
-    def test_messages_sanitized_before_passing_up_the_chain(self):
-        safe_logger = SafeLogger(log)
-        safe_logger.debug('debug hellow world')
-        safe_logger.info('info hello world')
-        safe_logger.warning('warn hello world')
-        safe_logger.error('error hello world')
-        us = u'madeleine (Grabación Manual)'
-        safe_logger.error(us)
-        u2 = u'Königreich der Himmel'
-        safe_logger.error(u2)
-        # what asserts?
+#class SafeLoggerTest(unittest.TestCase):
+#    
+#    def test_messages_sanitized_before_passing_up_the_chain(self):
+#        safe_logger = SafeLogger(log)
+#        safe_logger.debug('debug hellow world')
+#        safe_logger.info('info hello world')
+#        safe_logger.warning('warn hello world')
+#        safe_logger.error('error hello world')
+#        us = u'madeleine (Grabación Manual)'
+#        safe_logger.error(us)
+#        u2 = u'Königreich der Himmel'
+#        safe_logger.error(u2)
+#        # what asserts?
 
 if __name__ == '__main__':
     import logging.config
