@@ -1,4 +1,4 @@
-#Fri Jan 14 13:50:15 CST 2011
+#Thu Jan 20 00:05:25 CST 2011
 eclipse.preferences.version=1
 encoding//resources/lib/BeautifulSoup/BeautifulSoupTests.py=UTF-8
 encoding//resources/lib/mysql-connector-python/examples/config.py=utf-8
@@ -17,7 +17,7 @@ encoding//resources/lib/mysql-connector-python/mysql/connector/protocol.py=utf-8
 encoding//resources/lib/mysql-connector-python/newunits.py=utf-8
 encoding//resources/lib/mysql-connector-python/setup.py=utf-8
 encoding//resources/lib/mysql-connector-python/unittests.py=utf-8
-encoding//resources/lib/odict/odict.py=UTF-8
+encoding//resources/lib/odict/odict.py=utf-8
 encoding//resources/lib/themoviedb/test_tmdb.py=utf-8
 encoding//resources/lib/themoviedb/tmdb.py=utf-8
 encoding//resources/lib/tvdb_api/cache.py=utf-8
