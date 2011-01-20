@@ -326,7 +326,7 @@ class LiveTvWindow(BaseWindow):
             self.lastSelected = self.channelsListBox.getSelectedPosition()
             channel = self.listItem2Channel(self.channelsListBox.getSelectedItem())
             if channel.currentProgram and channel.needsPoster:
-                log.debug("Adding channel %s to front of q" % channel)
+                log.debug('Adding channel %s to front of q' % channel.getChannelNumber())
                 self.workq.append(channel)
 
     def listIndex2Channel(self, i):
@@ -410,7 +410,7 @@ class LiveTvWindow(BaseWindow):
                         channel.needsPoster = True
                         self.setListItemProperty(listItem, 'poster', 'loading.gif')
                 else:
-                    self.setListItemProperty(listItem, 'title', 'No Data')
+                    self.setListItemProperty(listItem, 'title', self.translator.get(m.NO_DATA))
                     
                 listItems.append(listItem)
                 self.listItemsByChannel[channel] = listItem
