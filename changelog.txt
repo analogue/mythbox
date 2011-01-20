@@ -1,3 +1,11 @@
+xx/xx/2011 - MythBox 1.0.2
+-----------------------------
+  New
+    - Issue 148 - Dutch translations (tnx Fred van Zwieten)
+    
+  Fixed
+    - Issue 147 - Changes to the recording schedule do not take effect immediately
+
 1/13/2011 - MythBox 1.0.1
 -----------------------------
   New
