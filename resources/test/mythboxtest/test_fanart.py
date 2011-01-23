@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -34,13 +34,13 @@ import random
 import shutil
 import tempfile
 import time
-import unittest2
+import unittest2 as unittest
 
 
 log = logging.getLogger('mythbox.unittest')
 
 
-class ChainDecoratorTest(unittest2.TestCase):
+class ChainDecoratorTest(unittest.TestCase):
 
     class Link1(object):
         @chain
@@ -143,7 +143,7 @@ class ChainDecoratorTest(unittest2.TestCase):
         self.assertEqual('Wee', r2)
 
 
-class BaseFanartProviderTestCase(unittest2.TestCase):
+class BaseFanartProviderTestCase(unittest.TestCase):
     
     movies = [
         u'The Shawshank Redemption',
@@ -540,7 +540,7 @@ class GoogleImageSearchProviderTest(BaseFanartProviderTestCase):
             self.assertEqual('http', p[0:4])
 
 
-class HttpCachingFanartProviderTest(unittest2.TestCase):
+class HttpCachingFanartProviderTest(unittest.TestCase):
 
     def setUp(self):
         self.nextProvider = Mock()
@@ -592,7 +592,7 @@ class HttpCachingFanartProviderTest(unittest2.TestCase):
         self.assertListEqual([], self.provider.getPosters(self.program))
 
         
-class OneStrikeAndYoureOutFanartProviderTest(unittest2.TestCase):
+class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
 
     def setUp(self):
         self.delegate = Mock()
@@ -761,7 +761,7 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest2.TestCase):
         verifyZeroInteractions(self.nextProvider)
 
 
-class SpamSkippingFanartProviderTest(unittest2.TestCase):
+class SpamSkippingFanartProviderTest(unittest.TestCase):
         
     def setUp(self):
         self.spam = TVProgram({'title': 'Paid Programming', 'category_type':'series'}, translator=Mock())
@@ -784,7 +784,7 @@ class SpamSkippingFanartProviderTest(unittest2.TestCase):
         self.assertFalse(self.provider.hasPosters(self.notSpam))
 
 
-class SuperFastFanartProviderTest(unittest2.TestCase):
+class SuperFastFanartProviderTest(unittest.TestCase):
     
     def setUp(self):
         self.sandbox = tempfile.mkdtemp()
@@ -901,9 +901,11 @@ class SuperFastFanartProviderTest(unittest2.TestCase):
         key = self.provider.createKey('getPosters', program)
         self.assertGreater(len(key), 0)
 
+P = protocol.Protocol56()
+R = P.recordFields()
 
-class TvRageProviderTest(unittest2.TestCase):
-
+class TvRageProviderTest(unittest.TestCase):
+    
     def setUp(self):
         self.sandbox = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.sandbox, ignore_errors=True)
@@ -912,14 +914,14 @@ class TvRageProviderTest(unittest2.TestCase):
     
     def test_getSeasonAndEpisode_Success(self):
         # Setup
-        data = [''] * protocol.Protocol56().recordSize()
-        data[0]  = u'The Real World'
+        data = [''] * P.recordSize()
+        data[R.index('title')]  = u'The Real World'
         # flag as non-movie
-        data[11] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple()) 
-        data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
-        data[38] = 1  # has original air date
-        data[37] = '2010-07-14'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=protocol.Protocol56(), conn=Mock())
+        data[R.index('starttime')] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple()) 
+        data[R.index('endtime')] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
+        data[R.index('hasairdate')] = 1  # has original air date
+        data[R.index('airdate')] = '2010-07-14'
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=P, conn=Mock())
         provider = TvRageProvider(self.platform)
         
         # Test
@@ -931,13 +933,13 @@ class TvRageProviderTest(unittest2.TestCase):
 
     def test_getSeasonAndEpisode_Success_HouseHunters(self):
         # Setup
-        data = [''] * protocol.Protocol56().recordSize()
-        data[0]  = u'House Hunters'
+        data = [''] * R.recordSize()
+        data[R.index('title')]  = u'House Hunters'
         # flag as non-movie
-        data[11] = time.mktime(datetime.datetime(2010, 12, 2, 22, 45, 00).timetuple()) 
-        data[12] = time.mktime(datetime.datetime(2010, 12, 2, 23, 45, 00).timetuple())
-        data[38] = 1  # has original air date
-        data[37] = '2008-11-02'
+        data[R.index('starttime')] = time.mktime(datetime.datetime(2010, 12, 2, 22, 45, 00).timetuple()) 
+        data[R.index('endtime')] = time.mktime(datetime.datetime(2010, 12, 2, 23, 45, 00).timetuple())
+        data[R.index('hasairdate')] = 1  # has original air date
+        data[R.index('airdate')] = '2008-11-02'
         program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=protocol.Protocol56(), conn=Mock())
         provider = TvRageProvider(self.platform)
         
@@ -1026,7 +1028,26 @@ class TvRageProviderTest(unittest2.TestCase):
         self.assertEqual('2', season)
         self.assertEqual('5', episode)
 
+    def test_getSeasonAndEpisode_NBCNightlyNews_returns_None_cuz_TVRage_throws_KeyError(self):
+        # Setup
+        data = [''] * P.recordSize()
+        data[R.index('title')]  = u'NBC Nightly News'
+        # flag as non-movie
+        data[R.index('starttime')] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple()) 
+        data[R.index('endtime')] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
+        data[R.index('hasairdate')] = 1  # has original air date
+        data[R.index('airdate')] = '2010-07-14'
+        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=P, conn=Mock())
+        provider = TvRageProvider(self.platform)
+        
+        # Test
+        season, episode = provider.getSeasonAndEpisode(program)
+        
+        # Verify
+        self.assertIsNone(season)
+        self.assertIsNone(episode)
+
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')
-    unittest2.main(verbosity=3)
+    unittest.main(verbosity=3)

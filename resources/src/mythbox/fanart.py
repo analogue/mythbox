@@ -531,7 +531,7 @@ class TvRageProvider(NoOpFanartProvider):
         if program.title() in self.memcache.keys():
             return self.memcache[program.title()]
         
-        fname = os.path.join(self.cacheDir, safe_str(program.title()))
+        fname = os.path.join(self.cacheDir, safe_str(program.title().replace('/','_')))
         if not os.path.exists(fname):
             return None
         f = open(fname, 'rb')
@@ -544,7 +544,7 @@ class TvRageProvider(NoOpFanartProvider):
     
     def save(self, program, show):
         '''Save tvrage.api.Show to memory/disk cache'''
-        f = open(os.path.join(self.cacheDir, safe_str(program.title())), 'wb')
+        f = open(os.path.join(self.cacheDir, safe_str(program.title().replace('/','_'))), 'wb')
         try:
             self.memcache[program.title()] = show
             pickle.dump(show, f)
@@ -579,7 +579,18 @@ class TvRageProvider(NoOpFanartProvider):
         except tvrage.api.ShowNotFound:
             log.debug('TVRage: Show not found - %s' % safe_str(program.title()))
             return None, None
-                    
+        except KeyError, ke:
+            # TVRage throws KeyError on last line of constructor for incomplete
+            # datasets
+            log.warn('TVRage: KeyError %s - %s' % (safe_str(ke), safe_str(program.title())))
+            return None, None
+        except TypeError, te:
+            #  File "tvrage/api.py", line 145, in __init__
+            #    for season in eplist:
+            #TypeError: iteration over non-sequence
+            log.warn('TVRage: TypeError %s - %s' % (safe_str(te), safe_str(program.title())))
+            return None, None
+        
     def indexEpisodes(self, show):
         '''Throw all episodes into a map for fast lookup and attach to show object so the index is persisted'''
         show.seasonsAndEpisodes = {}  # key = original air date, value = (season, episode)
