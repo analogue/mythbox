@@ -933,7 +933,7 @@ class TvRageProviderTest(unittest.TestCase):
 
     def test_getSeasonAndEpisode_Success_HouseHunters(self):
         # Setup
-        data = [''] * R.recordSize()
+        data = [''] * P.recordSize()
         data[R.index('title')]  = u'House Hunters'
         # flag as non-movie
         data[R.index('starttime')] = time.mktime(datetime.datetime(2010, 12, 2, 22, 45, 00).timetuple()) 
