@@ -523,6 +523,7 @@ class GoogleImageSearchProviderTest(BaseFanartProviderTestCase):
         
         # Verify
         log.debug('Posters = %s' % posters)
+        self.assertTrue(len(posters) > 0)
         for p in posters:
             self.assertEqual('http', p[0:4])
 
@@ -536,6 +537,7 @@ class GoogleImageSearchProviderTest(BaseFanartProviderTestCase):
         
         # Verify
         log.debug('Posters = %s' % posters)
+        self.assertTrue(len(posters) > 0)
         for p in posters:
             self.assertEqual('http', p[0:4])
 
