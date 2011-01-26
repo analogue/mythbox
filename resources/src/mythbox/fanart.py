@@ -493,7 +493,7 @@ class GoogleImageSearchProvider(BaseFanartProvider):
     def getPosters(self, program):
         posters = []
         try:
-            url_values = urllib.urlencode({'v':'1.0', 'safe':'on', 'imgar':'t', 'q':program.title()})
+            url_values = urllib.urlencode({'v':'1.0', 'safe':'on', 'imgar':'t', 'q':program.title()}, doseq=True)
             searchUrl = 'http://ajax.googleapis.com/ajax/services/search/images?' + url_values
             req = urllib2.Request(searchUrl, headers={'Referer':'http://mythbox.googlecode.com'})
             resp = urllib2.urlopen(req)
@@ -510,7 +510,7 @@ class GoogleImageSearchProvider(BaseFanartProvider):
                 #log.debug('%d googleresult = %s' % (i, result['unescapedUrl']))
                 posters.append(result['unescapedUrl'])
         except Exception, e:
-            log.error('GOOGLE fanart search:  %s %s' % (safe_str(program.title()), str(e)))
+            log.exception('GOOGLE fanart search:  %s %s' % (safe_str(program.title()), str(e)))
         return posters
         
 

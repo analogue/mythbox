@@ -36,6 +36,7 @@ import tempfile
 import time
 import unittest2 as unittest
 
+ustr = u'Königreich der Himmel'
 
 log = logging.getLogger('mythbox.unittest')
 
