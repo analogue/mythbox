@@ -48,6 +48,7 @@ zip --quiet \
     --exclude="script.mythbox/resources/lib/tvdb_api/tests/*" \
     --exclude="script.mythbox/resources/lib/twisted/*" \
     --exclude="script.mythbox/resources/lib/unittest2/*" \
+    --exclude="script.mythbox/resources/lib/unittest/*" \
     --exclude="script.mythbox/resources/lib/zope.interface/*" \
     --exclude="script.mythbox/resources/test/*" \
     --exclude="script.mythbox/target/*" \
