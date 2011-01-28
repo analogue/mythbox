@@ -1,3 +1,11 @@
+xx/xx/2011 MythBox 1.0.3
+-----------------------------
+
+  New
+    - Selecting an upcoming recording in the TV Guide allows you to
+      edit its recording schedule
+
+	
 1/25/2011 - MythBox 1.0.2
 -----------------------------
   New

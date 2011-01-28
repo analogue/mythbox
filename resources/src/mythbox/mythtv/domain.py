@@ -263,11 +263,17 @@ class Program(object):
         #   failures if > 1 tuner has the same channel 
         #   (different channelId but same channelNumber)
         #
-        return \
-            isinstance(rhs, Program) and \
-            self.getChannelNumber() == rhs.getChannelNumber() and \
-            self.starttime() == rhs.starttime()
+        return isinstance(rhs, Program) and self.key() == rhs.key()
 
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
+        
+    def __hash__(self):
+        return hash(self.key())
+
+    def key(self):
+        return self.getChannelNumber(), self.starttime()
+        
     def getChannelId(self):
         raise Exception, "Abstract base class"
     

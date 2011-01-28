@@ -43,16 +43,17 @@ log = logging.getLogger('mythbox.ui')
 class ProgramCell(object):
     
     def __init__(self, *args, **kwargs):
-        self.chanid    = None   # string
-        self.program   = None   # Program 
-        self.nodata    = None   # boolean 
-        self.starttime = None   # ??? 
-        self.title     = None   # string 
-        self.start     = None   # int - starting x coordinate 
-        self.end       = None   # int - ending x coord 
-        self.control   = None   # ControlButton 
-        self.label     = None   # ControlLabel
-        self.hdOverlay = None   # ControlImage
+        self.chanid     = None   # string
+        self.program    = None   # Program 
+        self.nodata     = None   # boolean 
+        self.starttime  = None   # ??? 
+        self.title      = None   # string 
+        self.start      = None   # int - starting x coordinate 
+        self.end        = None   # int - ending x coord 
+        self.control    = None   # ControlButton 
+        self.label      = None   # ControlLabel
+        self.hdOverlay  = None   # ControlImage
+        self.scheduleId = None  # int
 
 
 class ChannelCell(object):
@@ -101,6 +102,7 @@ class TvGuideWindow(ui.BaseWindow):
         self.fanArt       = kwargs['fanArt']
         self.cachesByName = kwargs['cachesByName']
         self.upcoming = []  # RecordedProgram[]
+        self.upcomingByProgram = {}
         self.win = None
         
         self.mythThumbnailCache = self.cachesByName['mythThumbnailCache']
@@ -210,6 +212,9 @@ class TvGuideWindow(ui.BaseWindow):
     @inject_conn
     def cacheUpcoming(self):
         self.upcoming = self.conn().getUpcomingRecordings(filter=Upcoming.SCHEDULED)
+        self.upcomingByProgram.clear()
+        for p in self.upcoming:
+            self.upcomingByProgram[p] = p
 
     @catchall_ui
     @lirc_hack            
@@ -330,10 +335,8 @@ class TvGuideWindow(ui.BaseWindow):
             
     @catchall_ui
     @lirc_hack
+    @inject_db
     def onControlHook(self, control):
-        """Method called when a control is selected/clicked."""
-        log.debug('onControlHook()')
-
         actionConsumed = True
         
         id = control.getId()
@@ -348,9 +351,13 @@ class TvGuideWindow(ui.BaseWindow):
                 log.debug('launching livetv')
                 self.watchLiveTv(program)
             else:
-                log.debug('launching schedule details window')
-                schedule = ScheduleFromProgram(program, self.translator)
-                createScheduleDialog = ScheduleDialog(
+                log.debug('launching edit schedule dialog')
+                if c.scheduleId:
+                    schedule = self.db().getRecordingSchedules(scheduleId=c.scheduleId).pop()
+                else:
+                    schedule = ScheduleFromProgram(program, self.translator)
+                
+                d = ScheduleDialog(
                     'mythbox_schedule_dialog.xml',
                     self.platform.getScriptDir(),
                     forceFallback=True,
@@ -359,11 +366,11 @@ class TvGuideWindow(ui.BaseWindow):
                     platform=self.platform,
                     settings=self.settings,
                     mythChannelIconCache=self.mythChannelIconCache)
-                createScheduleDialog.doModal()
+                d.doModal()
                 
-                if createScheduleDialog.shouldRefresh:
+                if d.shouldRefresh:
                     self.cacheUpcoming()
-                    log.debug('schedule saved')
+
         return actionConsumed
 
     def _addGridCell(self, program, cell, relX, relY, width, height):
@@ -421,10 +428,10 @@ class TvGuideWindow(ui.BaseWindow):
 #            if program.starttimeAsTime() < self.startTime:
 #                cell.control.setLabel(label= '<')
 
-        if program in self.upcoming:
-            # TODO: Decorate cell as an upcoming recording 
+        if self.upcomingByProgram.has_key(program):
             cell.title = '[B][COLOR=ffe2ff43]' + cell.title + '[/COLOR][/B]'
-            
+            cell.scheduleId = self.upcomingByProgram[program].getScheduleId()
+        
         # Create a label to hold the name of the program with insets  
         # Label text seems to get truncated correctly...
         cell.label = xbmcgui.ControlLabel(

@@ -156,6 +156,7 @@ class TVProgramTest(unittest2.TestCase):
         }
         self.translator = Mock() 
         self.platform = Platform()
+        self.protocol = protocol.Protocol23056()
         self.settings = MythSettings(self.platform, self.translator)
 
     def test_constructor(self):
@@ -173,6 +174,29 @@ class TVProgramTest(unittest2.TestCase):
         p = TVProgram({'starttime': datetime.datetime(2008, 11, 21, 14)}, self.translator)
         self.assertEquals('20081121140000', p.starttime())
 
+    def socketTime(self, h, m, s):
+        # return raw value that myth passes over socket for today and passed in starttime/endtime (in local timezone)
+        return time.mktime(datetime.datetime.combine(datetime.date.today(), datetime.time(h,m,s)).timetuple())
+
+    def socketDateTime(self, year, month, day, h, m, s):
+        return time.mktime(datetime.datetime.combine(datetime.date(year, month, day), datetime.time(h,m,s)).timetuple())
+
+    def test_eq_Make_sure_bidirectional_equivalence_to_RecordedProgram_works(self):
+        tv = TVProgram(self.data, self.translator)
+        pdata = [u''] * self.protocol.recordSize()
+        pdata[self.protocol.recordFields().index('channum')]  = '23'
+        pdata[self.protocol.recordFields().index('starttime')] = self.socketDateTime(2008, 11, 21, 14, 0, 0) 
+        recorded = RecordedProgram(pdata, Mock(), Mock(), Mock(), self.protocol, Mock())
+        
+        self.assertTrue(tv == recorded)
+        self.assertTrue(recorded == tv)
+        
+        self.assertTrue(tv in [recorded])
+        self.assertTrue(recorded in [tv])
+        
+        self.assertTrue({tv:tv}.has_key(recorded))
+        self.assertTrue({recorded:recorded}.has_key(tv))
+        
 
 class RecordedProgramTest(unittest2.TestCase):
 
