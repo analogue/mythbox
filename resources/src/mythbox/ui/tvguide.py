@@ -925,7 +925,7 @@ class TvGuideWindow(ui.BaseWindow):
         This is used to change pages vertically.
         """
         self.startChan = chanIndex
-        if self.startChan < 0:
+        if self.startChan < 0 or self.startChan > len(self.channels)-1:
             self.startChan = 0
         self.endChan = self.startChan + self.channelsPerPage - 1
         if self.endChan > len(self.channels)-1:
