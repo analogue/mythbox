@@ -19,6 +19,7 @@
 import datetime
 import logging
 import threading
+import time
 import xbmcgui
 import xbmc
 import collections
@@ -269,10 +270,9 @@ class LiveTvWindow(BaseWindow):
         self.closed = False
         self.lastSelected = int(self.settings.get('livetv_last_selected'))
 
-        # Async work queue for fanart lookup        
-        self.cancelRender = False
-        self.renderThread = None
-        self.workq = collections.deque()         # contains Channel elements                         
+        self.activeRenderToken = None
+        self.tvQueue = collections.deque()       # Channels showing a tv program that needs poster lookup
+        self.movieQueue = collections.deque()    # Channels showing a movie that needs poster lookup
         
     @catchall_ui
     def onInit(self):
@@ -292,14 +292,11 @@ class LiveTvWindow(BaseWindow):
 
     @window_busy
     def refresh(self):
-        if self.renderThread:
-            self.cancelRender = True    # induce abandonment of renderThread 
-            self.renderThread.join()
-            self.cancelRender = False
-
         self.loadPrograms()
         self.render()
-        self.renderThread = self.renderPosters()
+        self.activeRenderToken = time.clock()
+        self.renderTvPosters(self.activeRenderToken)    # async
+        self.renderMoviePosters(self.activeRenderToken) # async
     
     @lirc_hack    
     @catchall    
@@ -326,8 +323,8 @@ class LiveTvWindow(BaseWindow):
             self.lastSelected = self.channelsListBox.getSelectedPosition()
             channel = self.listItem2Channel(self.channelsListBox.getSelectedItem())
             if channel.currentProgram and channel.needsPoster:
-                log.debug('Adding channel %s to front of q' % channel.getChannelNumber())
-                self.workq.append(channel)
+                log.debug('Adding %s:%s to poster lookup q' % (channel.getChannelNumber(), safe_str(channel.currentProgram.title())))
+                [self.tvQueue, self.movieQueue][channel.currentProgram.isMovie()].append(channel)
 
     def listIndex2Channel(self, i):
         return self.listItem2Channel(self.channelsListBox.getListItem(i))
@@ -405,7 +402,7 @@ class LiveTvWindow(BaseWindow):
                     
                     if self.fanArt.hasPosters(channel.currentProgram):
                         channel.needsPoster = False
-                        self.lookupPoster(listItem, channel)
+                        self.lookupPoster(listItem, channel, self.activeRenderToken)
                     else:
                         channel.needsPoster = True
                         self.setListItemProperty(listItem, 'poster', 'loading.gif')
@@ -418,28 +415,46 @@ class LiveTvWindow(BaseWindow):
         buildListItems()
         self.channelsListBox.reset()
         self.channelsListBox.addItems(listItems)
-        self.channelsListBox.selectItem(self.lastSelected)
-        self.workq.clear()
-        self.workq.extend(reversed(self.listItemsByChannel.keys()))
-        self.workq.append(self.listIndex2Channel(self.lastSelected))
+        self.channelsListBox.selectItem(min(len(listItems), self.lastSelected))
+        
+        channels = list(reversed(self.listItemsByChannel.keys()[:]))
+        channels.append(self.listIndex2Channel(min(len(listItems), self.lastSelected)))
+        self.tvQueue.clear()
+        self.movieQueue.clear()
+        self.tvQueue.extend([c for c in channels if c.currentProgram and not c.currentProgram.isMovie()])
+        self.movieQueue.extend([c for c in channels if c.currentProgram and c.currentProgram.isMovie()])
         
     @run_async
     @catchall
-    @coalesce
-    def renderPosters(self):
-        while len(self.workq):
-            if self.closed or self.cancelRender: 
+    def renderTvPosters(self, myRenderToken):
+        while len(self.tvQueue):
+            if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken: 
                 return
-            channel  = self.workq.pop()
+            channel  = self.tvQueue.pop()
             try:
                 if channel.currentProgram and channel.needsPoster:
                     listItem = self.listItemsByChannel[channel]
-                    self.lookupPoster(listItem, channel)
+                    self.lookupPoster(listItem, channel, myRenderToken)
                     channel.needsPoster = False
             except:
                 log.exception('channel = %s' % safe_str(channel))
 
-    def lookupPoster(self, listItem, channel):
+    @run_async
+    @catchall
+    def renderMoviePosters(self, myRenderToken):
+        while len(self.movieQueue):
+            if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken: 
+                return
+            channel  = self.movieQueue.pop()
+            try:
+                if channel.currentProgram and channel.needsPoster:
+                    listItem = self.listItemsByChannel[channel]
+                    self.lookupPoster(listItem, channel, myRenderToken)
+                    channel.needsPoster = False
+            except:
+                log.exception('channel = %s' % safe_str(channel))
+
+    def lookupPoster(self, listItem, channel, myRenderToken):
         posterPath = self.fanArt.getRandomPoster(channel.currentProgram)
         if not posterPath:
             if channel.getIconPath():
@@ -448,5 +463,6 @@ class LiveTvWindow(BaseWindow):
                     posterPath =  'mythbox-logo.png'
             else:
                 posterPath = 'mythbox-logo.png'
-        self.setListItemProperty(listItem, 'poster', posterPath)
+        if myRenderToken == self.activeRenderToken:
+            self.setListItemProperty(listItem, 'poster', posterPath)
         
