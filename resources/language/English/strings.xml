@@ -59,7 +59,7 @@ To submit translations for your native language
   <string id="28">Confirmation</string>
   <string id="45">Unknown</string>
   <string id="65">Are you sure you want to delete the recording?</string>
-  <string id="51">Are you sure you want to rerecord the recording?</string>
+  <string id="51">Are you sure you want to re-record the recording?</string>
   
   
   
@@ -331,7 +331,9 @@ To submit translations for your native language
   <string id="850">Date</string>
   <string id="851">Title</string>
   <string id="852">Orig. Air Date</string>
-  <string id="853">Sort</string>  
+  <string id="853">Sort</string>
+  <string id="854">Episodes</string>
+  <string id="855">No recordings found</string>  
   
   <!-- Recording Schedules Screen -->
   <string id="900">[B]Recording Schedules[/B]</string>

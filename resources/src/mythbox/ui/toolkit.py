@@ -54,6 +54,8 @@ class Action(object):
     ACTION_SCROLL_UP        = 111
     ACTION_SCROLL_DOWN      = 112
     CONTEXT_MENU            = 117  # TV Guide on MCE remote
+    HOME                    = 159  # kbd only
+    END                     = 160  # kbd only
 
 
 class Align(object):

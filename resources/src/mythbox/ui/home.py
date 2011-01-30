@@ -260,8 +260,10 @@ class HomeWindow(BaseWindow):
         del p 
             
     def goWatchRecordings(self):
-        from mythbox.ui.recordings import RecordingsWindow
-        RecordingsWindow('mythbox_recordings.xml', self.platform.getScriptDir(), **self.dependencies).doModal()
+        #from mythbox.ui.recordings import RecordingsWindow
+        #RecordingsWindow('mythbox_recordings.xml', self.platform.getScriptDir(), **self.dependencies).doModal()
+        from mythbox.ui.recordings2 import RecordingsWindow
+        RecordingsWindow('mythbox_recordings2.xml', self.platform.getScriptDir(), **self.dependencies).doModal()
         
     def goTvGuide(self):
         from tvguide import TvGuideWindow 
