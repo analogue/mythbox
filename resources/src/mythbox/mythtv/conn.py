@@ -802,7 +802,6 @@ class Connection(object):
         @type startTime: str or datetime.datetime
         @return: RecordedProgram or None if not found 
         """
-        log.debug(startTime)
         if isinstance(startTime, datetime.datetime):
             from mythbox.mythtv.domain import dbTime2MythTime
             startTime = dbTime2MythTime(startTime)

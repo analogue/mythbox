@@ -167,7 +167,7 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
     @synchronized
     def strikeOut(self, key, program):
         if key in self.struckOut:
-            bucket = self.struckout[key]
+            bucket = self.struckOut[key]
         else:
             bucket = {'title':program.title()}
             self.struckOut[key] = bucket

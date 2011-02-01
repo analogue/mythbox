@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -58,6 +58,12 @@ class FFMPEGMetadataParserTest(unittest.TestCase):
         self.parser.parse_video_stream(input)
         self.assertEqual('59.94', self.parser.metadata.frame_rate)
         
+    def test_parse_video_NBC_1080i_ATSC_HDHOMERUN(self):
+        # noticed this is getting tagged as 60fps instead of 30fps -- taken care of in _fps_overrides
+        input = 'Stream #0.0[0x51]: Video: mpeg2video, yuv420p, 1920x1080 [PAR 1:1 DAR 16:9], 24000 kb/s, 63.42 fps, 29.97 tbr, 90k tbn, 59.94 tbc'
+        self.parser.parse_video_stream(input)
+        self.assertEqual('63.42', self.parser.metadata.frame_rate)
+
 
 if __name__ == '__main__':
     import logging.config

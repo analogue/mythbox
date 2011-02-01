@@ -31,7 +31,7 @@ from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, \
     ScheduleType, Upcoming
 from mythbox.platform import WindowsPlatform
 from mythbox.ui.toolkit import showPopup
-from mythbox.util import timed, formatSeconds, formatSize, synchronized, requireDir
+from mythbox.util import timed, formatSeconds, formatSize, synchronized, requireDir, safe_str
 from odict import odict
 
 log = logging.getLogger('mythbox.core')
@@ -626,6 +626,17 @@ class RecordedProgram(Program):
     _rec_program_dict = {}
     _rec_program_dict_empty = {}
     
+    _fps_overrides = {
+        'atsc_1080i' : {
+            'fps'  : 29.97, 
+            'tags' : {'format': 'mpegts', 'pixel_format': 'yuv420p', 'frame_rate': '63.42', 'video_codec': ': mpeg2video', 'dimension': '1920x1080 [PAR 1:1 DAR 16:9]' }
+        },
+        'hdpvr_1080i': {
+            'fps'  : 29.97,
+            'tags' : {'format': 'mpegts', 'pixel_format': 'yuv420p', 'frame_rate': '59.94', 'video_codec': ': h264',       'dimension': '1920x1080 [PAR 1:1 DAR 16:9]'}
+        }
+    }
+    
     def __init__(self, data, settings, translator, platform, protocol, conn=None):
         '''
         @param data: list of fields from mythbackend. libs/libmythtv/programinfo.cpp in the mythtv source 
@@ -1002,7 +1013,8 @@ class RecordedProgram(Program):
                 ffmpeg=self._platform.getFFMpegPath(),
                 closeFDs=(type(self._platform) != WindowsPlatform),  # WORKAROUND: close_fds borked on windows
                 windows=(type(self._platform) == WindowsPlatform),   # WORKAROUND: let pyxcoder know we're on windows
-                tempdir=ffmpeg_cache_dir)
+                tempdir=ffmpeg_cache_dir,
+                log=log)
             
             try:
                 metadata = ffmpegParser.get_metadata(self.getLocalPath())
@@ -1013,19 +1025,17 @@ class RecordedProgram(Program):
             log.debug('ffmpeg metadata for %s = %s' % (self.getLocalPath(), metadata))
             if metadata:
                 self._fps = float(metadata.frame_rate)
-                
-                # Hack for FFMPEG returning incorrect framerate (59.94 instead of 29.97) for 1080i HDPVR recordings
-                try:
-                    hdpvr1080i = {'format': 'mpegts', 'pixel_format': 'yuv420p', 'frame_rate': '59.94', 'video_codec': ': h264', 'dimension': '1920x1080 [PAR 1:1 DAR 16:9]'}
-                    if  metadata.format       == hdpvr1080i['format'] and       \
-                        metadata.pixel_format == hdpvr1080i['pixel_format'] and \
-                        metadata.frame_rate   == hdpvr1080i['frame_rate'] and   \
-                        metadata.video_codec  == hdpvr1080i['video_codec'] and  \
-                        metadata.dimension    == hdpvr1080i['dimension']:
-                        log.debug('HDPVR 1080i recording detected. Defaulting to 29.97 fps')
-                        self._fps = 29.97
-                except:
-                    log.exception('HDPVR 1080i detection code blew up. FPS remains at %s' % self._fps)
+
+                # Hack for FFMPEG returning incorrect or conflicting framerates for specific types of video files
+                for name, profile_data in self._fps_overrides.iteritems():
+                    try:
+                        if len([key for key,value in profile_data['tags'].iteritems() if getattr(metadata, key) == value]) == len(profile_data['tags']):  # all key/value pairs match
+                            old_fps = self._fps
+                            self._fps = profile_data['fps']
+                            log.debug('FPS override %s activated for %s from %s to %s' % (name, safe_str(self.title()), old_fps, self._fps))
+                            break
+                    except:
+                        log.exception('Blew up trying to test for fps overrides')
             else:
                 self._fps = 29.97
                 log.error("""Could not determine FPS for file %s so defaulting to %s FPS.

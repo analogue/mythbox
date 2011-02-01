@@ -5,6 +5,9 @@ xx/xx/2011 MythBox 1.0.3
     - Selecting an upcoming recording in the TV Guide allows you to
       edit its recording schedule
 
+  Fixed
+    - Some 1080i ATSC recordings from a HD Homerun were incorrectly
+      getting commskipped due to incorrect fps detection
 	
 1/25/2011 - MythBox 1.0.2
 -----------------------------
