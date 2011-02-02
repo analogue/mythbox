@@ -627,10 +627,6 @@ class RecordedProgram(Program):
     _rec_program_dict_empty = {}
     
     _fps_overrides = {
-        'atsc_1080i' : {
-            'fps'  : 29.97, 
-            'tags' : {'format': 'mpegts', 'pixel_format': 'yuv420p', 'frame_rate': '63.42', 'video_codec': ': mpeg2video', 'dimension': '1920x1080 [PAR 1:1 DAR 16:9]' }
-        },
         'hdpvr_1080i': {
             'fps'  : 29.97,
             'tags' : {'format': 'mpegts', 'pixel_format': 'yuv420p', 'frame_rate': '59.94', 'video_codec': ': h264',       'dimension': '1920x1080 [PAR 1:1 DAR 16:9]'}
@@ -1042,6 +1038,7 @@ class RecordedProgram(Program):
                              Make sure you have the ffmpeg executable in your path. 
                              Commercial skipping may be inaccurate""" % (self._fps, self.getLocalPath()))
                 showPopup(self.translator.get(m.ERROR), 'FFMPEG error - comm skips may be incorrect')
+            log.debug('FPS = %s' % self._fps)
         return self._fps
 
     @timed

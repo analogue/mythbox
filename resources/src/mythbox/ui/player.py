@@ -228,7 +228,7 @@ class Bookmarker(object):
 
     def _resumeFromBookmark(self):
         bookmarkSecs = self._program.getBookmark()
-        if bookmarkSecs > 0:
+        if bookmarkSecs > 0 and bookmarkSecs < (self._program.getDuration() * 60):
             fb = formatSeconds(bookmarkSecs)
             log.debug('Resuming recording at bookmarked position of %s' % fb)
             showPopup(self._program.title(), self.translator.get(m.RESUMING_AT) % fb)
@@ -237,7 +237,7 @@ class Bookmarker(object):
                 log.debug('Waiting for player time %s to seek past bookmark of %s' %(formatSeconds(self._player.getTime()), fb))
                 xbmc.sleep(SLEEP_MILLIS)
         else:
-            log.debug('Recording has no bookmark')
+            log.debug('Recording has no bookmark or bookmark exceeds program length')
 
     def _saveLastPositionAsBookmark(self):
         lastPos = self._player.getTracker().getLastPosition()
