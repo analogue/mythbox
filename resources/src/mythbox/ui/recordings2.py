@@ -52,7 +52,8 @@ class Group(object):
         self.programs = []
         self.listItems = []
         self.programsByListItem = odict.odict()
-    
+        self.listItemsByProgram = odict.odict()
+        
     def add(self, program):
         if self.title is None:
             self.title = program.title()
@@ -61,6 +62,14 @@ class Group(object):
     def remove(self, program):
         self.programs.remove(program)
 
+
+    def __str__(self):
+        s = """title = %s
+        num programs = %d 
+        num listiems = %d
+        num li map   = %d 
+        num pr map   = %d""" % (safe_str(self.title), len(self.programs), len(self.listItems), len(self.programsByListItem), len(self.listItemsByProgram))
+        return s
     
 class RecordingsWindow(BaseWindow):
         
@@ -79,6 +88,7 @@ class RecordingsWindow(BaseWindow):
         self.activeRenderToken = None
         self.groupsByTitle = odict.odict()       # {unicode:Group}
         self.activeGroup = None
+        self.allGroupTitle = self.translator.get(m.ALL_RECORDINGS)
         
     @catchall_ui
     def onInit(self):
@@ -211,8 +221,7 @@ class RecordingsWindow(BaseWindow):
 
     def renderGroups(self):
         self.groupsByTitle.clear()
-        allGroupTitle = self.translator.get(m.ALL_RECORDINGS)
-        self.groupsByTitle[allGroupTitle] = allGroup = Group(allGroupTitle)
+        self.groupsByTitle[self.allGroupTitle] = allGroup = Group(self.allGroupTitle)
         for p in self.programs:
             if not p.title() in self.groupsByTitle:
                 self.groupsByTitle[p.title()] = Group()
@@ -232,6 +241,7 @@ class RecordingsWindow(BaseWindow):
     def renderPrograms(self):        
         self.activeGroup.listItems = []
         self.activeGroup.programsByListItem = odict.odict()
+        self.activeGroup.listItemsByProgram = odict.odict()
         
         @timed 
         def constructorTime(): 
@@ -239,6 +249,7 @@ class RecordingsWindow(BaseWindow):
                 listItem = xbmcgui.ListItem()
                 self.activeGroup.listItems.append(listItem)
                 self.activeGroup.programsByListItem[listItem] = p
+                self.activeGroup.listItemsByProgram[p] = listItem
         
         @timed 
         @ui_locked2
@@ -276,39 +287,40 @@ class RecordingsWindow(BaseWindow):
             if not posterPath:
                 posterPath = 'mythbox-logo.png'
         self.setListItemProperty(listItem, 'poster', posterPath)
-                
-    def renderProgramDeleted(self, deletedProgram, selectionIndex):
-        # straight render() takes too long..shortcut for removal
+
+    def renderProgramDeleted2(self, deletedProgram, selectionIndex):
+        title = deletedProgram.title()
         self.programs.remove(deletedProgram)
-        
-        #
-        # Take care of activeGroup
-        #
-        self.activeGroup.remove(deletedProgram)
-        
-        deletedProgramsListItem = self.activeGroup.listItems[selectionIndex]
-        #deletedProgramsListItem = self.listItems[selectionIndex]
-        
-        del self.activeGroup.listItems[selectionIndex]
-        #del self.listItems[selectionIndex]
-        
-        del self.activeGroup.programsByListItem[deletedProgramsListItem]
-        
+        for group in [self.groupsByTitle[title], self.groupsByTitle[self.allGroupTitle]]:
+            log.debug('Removing %s from %s' % (safe_str(deletedProgram.fullTitle()), safe_str(group.title)))
+            log.debug(group)
+            group.programs.remove(deletedProgram)
+            
+            # update count in group
+            self.setListItemProperty(group.listItem, 'date', str(len(group.programs)))
+            group.listItem.setThumbnailImage('OverlayHD.png')  # HACK: to force lisitem update 
+
+            # if not rendered before, listItems will not have been realized
+            if group.listItemsByProgram.has_key(deletedProgram):
+                listItem = group.listItemsByProgram[deletedProgram]
+                group.listItems.remove(listItem)
+                del group.programsByListItem[listItem]
+                del group.listItemsByProgram[deletedProgram]
+            else:
+                log.debug('Not fixing up group %s' % safe_str(title))
+
         self.programsListBox.reset()
         self.programsListBox.addItems(self.activeGroup.listItems)
         self.programsListBox.selectItem(selectionIndex)
         for i, listItem in enumerate(self.activeGroup.listItems[selectionIndex:]):
             self.setListItemProperty(listItem, 'index', str(i + selectionIndex + 1))
-        
-        #
-        # Fixup ALL group
-        #
-        
-        
-        #
-        # Fixup Title group
-        #
-        
+                
+        # if last program in group, nuke group
+        if len(self.groupsByTitle[title].programs) == 0:
+            log.debug('Group %s now empty -- removing' % safe_str(title))
+            del self.groupsByTitle[title]
+            self.groupsListbox.reset()
+            self.groupsListbox.addItems([group.listItem for group in self.groupsByTitle.values()])
         
     @run_async
     @catchall
@@ -363,7 +375,7 @@ class RecordingsWindow(BaseWindow):
         win.doModal()
 
         if win.isDeleted:
-            self.renderProgramDeleted(programIterator.current(), programIterator.index())
+            self.renderProgramDeleted2(programIterator.current(), programIterator.index())
         elif programIterator.index() != self.lastSelected:
             self.programsListBox.selectItem(programIterator.index())
                 

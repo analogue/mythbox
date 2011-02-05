@@ -205,13 +205,30 @@ class RecordedProgramTest(unittest2.TestCase):
         self.settings = Mock()
         self.translator = Mock()
         self.platform = Mock()
-        self.protocol = protocol.Protocol40()
+        self.protocol = protocol.Protocol23056()
         self.data = ["0"] * self.protocol.recordSize()
         self.i_channelNumber = self.protocol.recordFields().index('channum')
         self.i_startTime = self.protocol.recordFields().index('starttime')
         self.i_endTime = self.protocol.recordFields().index('endtime')
         self.i_programFlags = self.protocol.recordFields().index('programflags')
         
+    def test_hashable(self):
+        d1 = ["0"] * self.protocol.recordSize()
+        d1[self.i_channelNumber]  = "99"
+        d1[self.i_startTime] = 999999
+        p1 = RecordedProgram(d1, self.settings, self.translator, self.platform, self.protocol, self.conn)
+ 
+        d2 = ["0"] * self.protocol.recordSize()
+        d2[self.i_channelNumber]  = "101"
+        d2[self.i_startTime] = 888888 
+        p2 = RecordedProgram(d2, self.settings, self.translator, self.platform, self.protocol, self.conn)
+
+        mydict = {p1:'p1', p2:'p2'}
+        self.assertTrue(p1 in mydict)
+        self.assertTrue(p2 in mydict)
+        self.assertEqual('p1', mydict[p1])
+        self.assertEqual('p2', mydict[p2])
+         
     def test_hasBookmark_False(self):
         p = RecordedProgram(self.data, self.settings, self.translator, self.platform, self.protocol, self.conn)
         p.setProgramFlags(FlagMask.FL_AUTOEXP)
