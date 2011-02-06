@@ -65,7 +65,8 @@ class Platform(object):
         libs = [
             'pyxcoder', 
             'decorator', 
-            'odict', 
+            'odict',
+            'bidict', 
             'elementtree', 
             'tvdb_api', 
             'tvrage',

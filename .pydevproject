@@ -25,6 +25,7 @@
 <path>/mythbox-dharma/resources/lib/zope.interface</path>
 <path>/mythbox-dharma/resources/lib/unittest2</path>
 <path>/mythbox-dharma/resources/lib/tvrage</path>
+<path>/mythbox-dharma/resources/lib/bidict</path>
 </pydev_pathproperty>
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">Default</pydev_property>
 </pydev_project>

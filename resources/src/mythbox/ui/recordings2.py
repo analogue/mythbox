@@ -16,6 +16,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+import bidict
 import logging
 import odict
 import time
@@ -51,8 +52,8 @@ class Group(object):
         self.title = title
         self.programs = []
         self.listItems = []
-        self.programsByListItem = odict.odict()
-        self.listItemsByProgram = odict.odict()
+        self.programsByListItem = bidict.bidict()
+        #XXX self.listItemsByProgram = odict.odict()
         
     def add(self, program):
         if self.title is None:
@@ -67,8 +68,7 @@ class Group(object):
         s = """title = %s
         num programs = %d 
         num listiems = %d
-        num li map   = %d 
-        num pr map   = %d""" % (safe_str(self.title), len(self.programs), len(self.listItems), len(self.programsByListItem), len(self.listItemsByProgram))
+        num li map   = %d """ % (safe_str(self.title), len(self.programs), len(self.listItems), len(self.programsByListItem))
         return s
     
 class RecordingsWindow(BaseWindow):
@@ -240,8 +240,8 @@ class RecordingsWindow(BaseWindow):
     @timed
     def renderPrograms(self):        
         self.activeGroup.listItems = []
-        self.activeGroup.programsByListItem = odict.odict()
-        self.activeGroup.listItemsByProgram = odict.odict()
+        self.activeGroup.programsByListItem = bidict.bidict()
+        #XXX self.activeGroup.listItemsByProgram = odict.odict()
         
         @timed 
         def constructorTime(): 
@@ -249,7 +249,7 @@ class RecordingsWindow(BaseWindow):
                 listItem = xbmcgui.ListItem()
                 self.activeGroup.listItems.append(listItem)
                 self.activeGroup.programsByListItem[listItem] = p
-                self.activeGroup.listItemsByProgram[p] = listItem
+                #XXX self.activeGroup.listItemsByProgram[p] = listItem
         
         @timed 
         @ui_locked2
@@ -301,11 +301,13 @@ class RecordingsWindow(BaseWindow):
             group.listItem.setThumbnailImage('OverlayHD.png')  # HACK: to force lisitem update 
 
             # if not rendered before, listItems will not have been realized
-            if group.listItemsByProgram.has_key(deletedProgram):
-                listItem = group.listItemsByProgram[deletedProgram]
+            #XXX if group.listItemsByProgram.has_key(deletedProgram):
+            if deletedProgram in group.programsByListItem.inv:
+                #XXX listItem = group.listItemsByProgram[deletedProgram]
+                listItem = group.programsByListItem[:deletedProgram]
                 group.listItems.remove(listItem)
                 del group.programsByListItem[listItem]
-                del group.listItemsByProgram[deletedProgram]
+                #XXX del group.listItemsByProgram[deletedProgram]
             else:
                 log.debug('Not fixing up group %s' % safe_str(title))
 

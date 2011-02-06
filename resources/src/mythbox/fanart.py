@@ -610,7 +610,7 @@ class TvRageProvider(NoOpFanartProvider):
             if d in show.seasonsAndEpisodes:
                 return show.seasonsAndEpisodes[d]
             else:
-                log.debug('TVRage: No episode found matching airdate %s in %s episodes' % (oad, len(show.seasonsAndEpisodes)))
+                log.debug('TVRage: No episode found matching airdate %s in %s episodes of %s' % (oad, len(show.seasonsAndEpisodes), safe_str(program.title())))
                 return self.searchBySubtitle(program, show)
         except:
             # backwards compatibility for pickled shows w/o index. return None,None to force re-query
