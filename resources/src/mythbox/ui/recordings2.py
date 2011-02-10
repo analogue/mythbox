@@ -27,17 +27,16 @@ import mythbox.msg as m
 from mythbox.mythtv.conn import inject_conn
 from mythbox.ui.recordingdetails import RecordingDetailsWindow
 from mythbox.ui.toolkit import window_busy, BaseWindow, Action
-from mythbox.util import catchall_ui, run_async, lirc_hack, timed, catchall, ui_locked, ui_locked2, coalesce,\
-    safe_str
+from mythbox.util import catchall_ui, run_async, timed, catchall, ui_locked, ui_locked2, coalesce, safe_str
 from mythbox.util import CyclingBidiIterator
 
 log = logging.getLogger('mythbox.ui')
 
-ID_GROUPS_LISTBOX = 700
-ID_PROGRAMS_LISTBOX = 600
-ID_REFRESH_BUTTON = 250
-ID_SORT_BY_BUTTON = 251
-ID_SORT_ASCENDING_TOGGLE = 252
+ID_GROUPS_LISTBOX         = 700
+ID_PROGRAMS_LISTBOX       = 600
+ID_REFRESH_BUTTON         = 250
+ID_SORT_BY_BUTTON         = 251
+ID_SORT_ASCENDING_TOGGLE  = 252
 ID_RECORDING_GROUP_BUTTON = 253
 
 SORT_BY = odict.odict([
@@ -53,7 +52,7 @@ class Group(object):
         self.programs = []
         self.listItems = []
         self.programsByListItem = bidict.bidict()
-        #XXX self.listItemsByProgram = odict.odict()
+        self.episodesDone = False
         
     def add(self, program):
         if self.title is None:
@@ -63,32 +62,30 @@ class Group(object):
     def remove(self, program):
         self.programs.remove(program)
 
-
     def __str__(self):
         s = """title = %s
         num programs = %d 
         num listiems = %d
         num li map   = %d """ % (safe_str(self.title), len(self.programs), len(self.listItems), len(self.programsByListItem))
         return s
+
     
 class RecordingsWindow(BaseWindow):
         
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
+        # inject dependencies from constructor
         [setattr(self,k,v) for k,v in kwargs.iteritems()]
         [setattr(self,k,v) for k,v in self.cachesByName.iteritems()]
 
         self.programs = []                       # [RecordedProgram]
         self.closed = False
-        
-        self.lastSelected = int(self.settings.get('recordings_last_selected'))
-        self.sortBy = self.settings.get('recordings_sort_by')
-        self.sortAscending = self.settings.getBoolean('recordings_sort_ascending')
-        self.group = self.settings.get('recordings_recording_group')
+        self.allGroupTitle = self.translator.get(m.ALL_RECORDINGS)
         self.activeRenderToken = None
         self.groupsByTitle = odict.odict()       # {unicode:Group}
         self.activeGroup = None
-        self.allGroupTitle = self.translator.get(m.ALL_RECORDINGS)
+        self.initDone = False
+        self.lastFocusId = None
         
     @catchall_ui
     def onInit(self):
@@ -96,9 +93,18 @@ class RecordingsWindow(BaseWindow):
             self.win = xbmcgui.Window(xbmcgui.getCurrentWindowId())
             self.groupsListbox = self.getControl(ID_GROUPS_LISTBOX)
             self.programsListBox = self.getControl(ID_PROGRAMS_LISTBOX)
+            self.readSettings()
             self.refresh()
-
+        self.initDone = True
+        
+    def readSettings(self):
+        self.lastSelectedGroup = self.settings.get('recordings_selected_group')
+        self.lastSelectedTitle = self.settings.get('recordings_selected_title')
+        self.sortBy = self.settings.get('recordings_sort_by')
+        self.sortAscending = self.settings.getBoolean('recordings_sort_ascending')
+        
     def onFocus(self, controlId):
+#        if self.initDone:
         self.lastFocusId = controlId
         if controlId == ID_GROUPS_LISTBOX:
             log.warn('groups focus')
@@ -106,7 +112,6 @@ class RecordingsWindow(BaseWindow):
             log.warn('uncaught focus %s' % controlId)
             
     @catchall_ui
-    @lirc_hack    
     def onClick(self, controlId):
         if controlId == ID_GROUPS_LISTBOX:
             log.warn('groups clicked!')
@@ -124,33 +129,42 @@ class RecordingsWindow(BaseWindow):
             self.applySort()
         else:
             log.warn('uncaught onClick %s' % controlId)
-                             
+
+    def saveSettings(self):
+        if self.programs:
+            try:
+                group = self.groupsListbox.getSelectedItem().getProperty('title')
+                self.settings.put('recordings_selected_group', [group, ''][group is None])
+                title = self.programsListBox.getSelectedItem().getProperty('title')
+                self.settings.put('recordings_selected_program', [title, ''][title is None])
+            except:
+                pass
+            
+        self.settings.put('recordings_sort_by', self.sortBy)
+        self.settings.put('recordings_sort_ascending', '%s' % self.sortAscending)
+                                     
     @catchall_ui
-    @lirc_hack            
     def onAction(self, action):
-        if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
+        id = action.getId()
+        if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
             self.closed = True
-            self.settings.put('recordings_last_selected', '%d'%self.programsListBox.getSelectedPosition())
-            self.settings.put('recordings_sort_by', self.sortBy)
-            self.settings.put('recordings_sort_ascending', '%s' % self.sortAscending)
-            self.settings.put('recordings_recording_group', self.group)
+            self.saveSettings()
             self.close()
-        elif action.getId() in (Action.UP, Action.DOWN, Action.PAGE_UP, Action.PAGE_DOWN, Action.HOME, Action.END):
+        elif id in (Action.UP, Action.DOWN, Action.PAGE_UP, Action.PAGE_DOWN, Action.HOME, Action.END):
             if self.lastFocusId == ID_GROUPS_LISTBOX:
                 log.warn('groups select!')
                 self.onGroupSelect()
-        elif action.getId() == ID_GROUPS_LISTBOX:
+            elif self.lastFocusId == ID_PROGRAMS_LISTBOX:
+                log.warn('title select!')
+                self.onTitleSelect()
+        elif id == ID_GROUPS_LISTBOX:
             log.warn('groups action!')
         else:
-            log.warn('uncaught action id %s' % action.getId())
+            log.warn('uncaught action id %s' % id)
     
-    def onGroupSelect(self):
-        self.activeGroup = self.groupsByTitle[self.groupsListbox.getSelectedItem().getProperty('title')]
-        self.renderPrograms()
-        self.activeRenderToken = time.clock()
-        self.renderPosters(self.activeRenderToken)
-        self.renderEpisodeColumn(self.activeRenderToken)
-        
+    def onTitleSelect(self):
+        self.lastSelectedTitle = self.programsListBox.getSelectedItem().getProperty('title')
+    
     @run_async
     @coalesce
     def preCacheThumbnails(self):
@@ -174,7 +188,6 @@ class RecordingsWindow(BaseWindow):
                     return
                 try:
                     if program.isCommFlagged():
-                        #program.getCommercials()
                         program.getFrameRate()
                 except:
                     log.exception('Comm break caching for recording %s failed' % safe_str(program.fullTitle()))
@@ -188,9 +201,6 @@ class RecordingsWindow(BaseWindow):
             self.close()
             return
         
-        # TODO: Recording group filter
-        #self.programs = filter(lambda p: p.getRecordingGroup() == self.group, self.programs)
-        
         # NOTE: No aggressive caching on windows since spawning the ffmpeg subprocess
         #       launches an annoying window
         self.programs.sort(key=SORT_BY[self.sortBy]['sorter'], reverse=self.sortAscending)
@@ -198,6 +208,14 @@ class RecordingsWindow(BaseWindow):
         
         if self.platform.getName() in ('unix','mac') and self.settings.isAggressiveCaching(): 
             self.preCacheCommBreaks()
+
+        self.groupsByTitle.clear()
+        self.groupsByTitle[self.allGroupTitle] = allGroup = Group(self.allGroupTitle)
+        for p in self.programs:
+            if not p.title() in self.groupsByTitle:
+                self.groupsByTitle[p.title()] = Group()
+            self.groupsByTitle[p.title()].add(p)
+            allGroup.add(p)
             
         self.render()
     
@@ -220,36 +238,45 @@ class RecordingsWindow(BaseWindow):
         self.setWindowProperty('sortAscending', ['false', 'true'][self.sortAscending])
 
     def renderGroups(self):
-        self.groupsByTitle.clear()
-        self.groupsByTitle[self.allGroupTitle] = allGroup = Group(self.allGroupTitle)
-        for p in self.programs:
-            if not p.title() in self.groupsByTitle:
-                self.groupsByTitle[p.title()] = Group()
-            self.groupsByTitle[p.title()].add(p)
-            allGroup.add(p)
-            
-        for title,group in self.groupsByTitle.iteritems():
+        lastSelectedIndex = 0
+        listItems = []
+        for i, (title, group) in enumerate(self.groupsByTitle.iteritems()):
             group.listItem = xbmcgui.ListItem()
+            listItems.append(group.listItem)
+            self.setListItemProperty(group.listItem, 'index', str(i))
             self.setListItemProperty(group.listItem, 'title', title)
-            self.setListItemProperty(group.listItem, 'date', str(len(group.programs)))  # TODO: rename 'date'
-            self.groupsListbox.addItem(group.listItem)
-        
-        self.groupsListbox.selectItem(0)
+            self.setListItemProperty(group.listItem, 'num_episodes', str(len(group.programs)))
+            if self.lastSelectedGroup == title:
+                lastSelectedIndex = i
+                log.warn('Last selected group index = %s %s' % (title, lastSelectedIndex))
+
+        self.groupsListbox.reset()
+        self.groupsListbox.addItems(listItems)
+        self.groupsListbox.selectItem(lastSelectedIndex)
+        log.warn('index checkl = %s' % self.groupsListbox.getSelectedPosition())
         self.onGroupSelect()
+
+    def onGroupSelect(self, lsg=None):
+        self.activeGroup = self.groupsByTitle[self.groupsListbox.getSelectedItem().getProperty('title')]
+        self.lastSelectedGroup = self.activeGroup.title
+        log.warn('onGrouSelect - group = %s' % self.lastSelectedGroup)    
+        self.renderPrograms()
+        self.activeRenderToken = time.clock()
+        self.renderPosters(self.activeRenderToken)
         
-    @timed
+        if not self.activeGroup.episodesDone:
+            self.renderEpisodeColumn(self.activeRenderToken, self.activeGroup)
+        
     def renderPrograms(self):        
-        self.activeGroup.listItems = []
-        self.activeGroup.programsByListItem = bidict.bidict()
-        #XXX self.activeGroup.listItemsByProgram = odict.odict()
+        #self.activeGroup.listItems = []
+        #self.activeGroup.programsByListItem = bidict.bidict()
         
         @timed 
-        def constructorTime(): 
+        def constructorTime():
             for p in self.activeGroup.programs:
                 listItem = xbmcgui.ListItem()
                 self.activeGroup.listItems.append(listItem)
                 self.activeGroup.programsByListItem[listItem] = p
-                #XXX self.activeGroup.listItemsByProgram[p] = listItem
         
         @timed 
         @ui_locked2
@@ -274,10 +301,11 @@ class RecordingsWindow(BaseWindow):
         def othertime():
             self.programsListBox.reset()
             self.programsListBox.addItems(self.activeGroup.listItems)
-            self.programsListBox.selectItem(self.lastSelected)
+            # TODO: restore last selected -- self.programsListBox.selectItem(self.lastSelected)
 
-        constructorTime()
-        propertyTime()
+        if not self.activeGroup.listItems:
+            constructorTime()
+            propertyTime()
         othertime()
 
     def lookupPoster(self, listItem, p):
@@ -301,13 +329,10 @@ class RecordingsWindow(BaseWindow):
             group.listItem.setThumbnailImage('OverlayHD.png')  # HACK: to force lisitem update 
 
             # if not rendered before, listItems will not have been realized
-            #XXX if group.listItemsByProgram.has_key(deletedProgram):
             if deletedProgram in group.programsByListItem.inv:
-                #XXX listItem = group.listItemsByProgram[deletedProgram]
                 listItem = group.programsByListItem[:deletedProgram]
                 group.listItems.remove(listItem)
                 del group.programsByListItem[listItem]
-                #XXX del group.listItemsByProgram[deletedProgram]
             else:
                 log.debug('Not fixing up group %s' % safe_str(title))
 
@@ -320,9 +345,14 @@ class RecordingsWindow(BaseWindow):
         # if last program in group, nuke group
         if len(self.groupsByTitle[title].programs) == 0:
             log.debug('Group %s now empty -- removing' % safe_str(title))
+            i = max(0, self.groupsByTitle.index(title))
             del self.groupsByTitle[title]
-            self.groupsListbox.reset()
-            self.groupsListbox.addItems([group.listItem for group in self.groupsByTitle.values()])
+            self.lastSelectedGroup, filler = self.groupsByTitle.byindex(i)
+            log.warn('auto selecing prev group at index %d with group %s' % (i,self.lastSelectedGroup))
+            self.renderGroups()
+            self.setFocus(self.groupsListbox)
+            #self.groupsListbox.reset()
+            #self.groupsListbox.addItems([group.listItem for group in self.groupsByTitle.values()])
         
     @run_async
     @catchall
@@ -337,9 +367,9 @@ class RecordingsWindow(BaseWindow):
 
     @run_async
     @catchall
-    def renderEpisodeColumn(self, myRenderToken):
+    def renderEpisodeColumn(self, myRenderToken, myGroup):
         results = odict.odict()
-        for (listItem, program) in self.activeGroup.programsByListItem.items()[:]:
+        for (listItem, program) in myGroup.programsByListItem.items()[:]:
             if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken:
                 return
             try:
@@ -350,6 +380,7 @@ class RecordingsWindow(BaseWindow):
                     listItem.setThumbnailImage('OverlayHD.png')  # HACK: to force lisitem update 
             except:
                 log.exception('Rendering season and episode for program %s' % safe_str(program.fullTitle()))
+        myGroup.episodesDone = True
         
     def goRecordingDetails(self):
         self.lastSelected = self.programsListBox.getSelectedPosition()
