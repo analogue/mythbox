@@ -19,9 +19,10 @@
 import logging
 import xbmc
 import xbmcgui
+import time
 
 from decorator import decorator
-from mythbox.util import timed, safe_str
+from mythbox.util import safe_str
 
 log = logging.getLogger('mythbox.ui')
 elog = logging.getLogger('mythbox.event')
@@ -223,6 +224,11 @@ class WindowMixin(object):
         else:
             log.warn('Setting listitem with a None: listItem=%s name=%s value=%s' % (listItem, name, value))
 
+    def updateListItemProperty(self, listItem, name, value):
+        self.setListItemProperty(listItem, name, value)
+        # HACK: to force lisitem update
+        listItem.setThumbnailImage('%s' + str(time.clock()))   
+
     def setWindowProperty(self, name, value):
         """
         Convenience method to make sure None values don't get set on a Window
@@ -231,6 +237,25 @@ class WindowMixin(object):
             self.win.setProperty(name, value)
         else:
             log.warn('Setting window property with a None: win=%s name=%s value=%s' % (self.win, name, value))
+
+    def selectListItemAtIndex(self, listbox, index):
+        ''''
+        ControlList.selectItem(index) is async. A subsequent call to ControlList.getSelectedPosition() 
+        does not guarantee that the index set in selectItem(...) will be returned. This here is a
+        little hack to wait until the the async msg is completed otherwise weird things happen :-)
+        '''
+        # TODO: guard against index > num list items
+        if index < 0: 
+            index = 0
+        listbox.selectItem(index)
+        maxtries = 100
+        cnt = 0
+        while listbox.getSelectedPosition() != index and cnt < maxtries:
+            cnt += 1
+            log.debug("waiting for item select to happen...%d" % cnt)
+            time.sleep(0.1)
+        if cnt == maxtries:
+            log.warn("timeout waiting for item select to happen")
 
 
 class BaseWindow(xbmcgui.WindowXML, WindowMixin):

@@ -595,11 +595,10 @@
             <width>230</width>
             <height>386</height>
             <aspectratio aligny="bottom">keep</aspectratio>
-            <texture background="true">$INFO[Container(600).ListItem.Property(poster)]</texture>
+            <texture background="false">$INFO[Container(600).ListItem.Property(poster)]</texture>
             <fadetime>400</fadetime>
         </control>
   
-        <!-- 
         <control type="image">
             <posx>30</posx>
             <posy>586</posy>
@@ -609,7 +608,6 @@
             <texture background="false" flipy="true" diffuse="diffuse_mirror2.png">$INFO[Container(600).ListItem.Property(poster)]</texture>
             <fadetime>400</fadetime>
         </control>
-        -->
         
     </control>
 

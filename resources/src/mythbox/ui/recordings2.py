@@ -53,6 +53,8 @@ class Group(object):
         self.listItems = []
         self.programsByListItem = bidict.bidict()
         self.episodesDone = False
+        self.postersDone = False
+        self.index = 0
         
     def add(self, program):
         if self.title is None:
@@ -84,7 +86,6 @@ class RecordingsWindow(BaseWindow):
         self.activeRenderToken = None
         self.groupsByTitle = odict.odict()       # {unicode:Group}
         self.activeGroup = None
-        self.initDone = False
         self.lastFocusId = None
         
     @catchall_ui
@@ -92,7 +93,7 @@ class RecordingsWindow(BaseWindow):
         if not self.win:
             self.win = xbmcgui.Window(xbmcgui.getCurrentWindowId())
             self.groupsListbox = self.getControl(ID_GROUPS_LISTBOX)
-            self.programsListBox = self.getControl(ID_PROGRAMS_LISTBOX)
+            self.programsListbox = self.getControl(ID_PROGRAMS_LISTBOX)
             self.readSettings()
             self.refresh()
         self.initDone = True
@@ -104,7 +105,6 @@ class RecordingsWindow(BaseWindow):
         self.sortAscending = self.settings.getBoolean('recordings_sort_ascending')
         
     def onFocus(self, controlId):
-#        if self.initDone:
         self.lastFocusId = controlId
         if controlId == ID_GROUPS_LISTBOX:
             log.warn('groups focus')
@@ -114,11 +114,11 @@ class RecordingsWindow(BaseWindow):
     @catchall_ui
     def onClick(self, controlId):
         if controlId == ID_GROUPS_LISTBOX:
-            log.warn('groups clicked!')
+            self.goRecordingDetails()
         elif controlId == ID_PROGRAMS_LISTBOX: 
             self.goRecordingDetails()
         elif controlId == ID_REFRESH_BUTTON:
-            self.lastSelected = self.programsListBox.getSelectedPosition()
+            self.lastSelected = self.programsListbox.getSelectedPosition()
             self.refresh()
         elif controlId == ID_SORT_BY_BUTTON:
             keys = SORT_BY.keys()
@@ -135,7 +135,7 @@ class RecordingsWindow(BaseWindow):
             try:
                 group = self.groupsListbox.getSelectedItem().getProperty('title')
                 self.settings.put('recordings_selected_group', [group, ''][group is None])
-                title = self.programsListBox.getSelectedItem().getProperty('title')
+                title = self.programsListbox.getSelectedItem().getProperty('title')
                 self.settings.put('recordings_selected_program', [title, ''][title is None])
             except:
                 pass
@@ -163,7 +163,7 @@ class RecordingsWindow(BaseWindow):
             log.warn('uncaught action id %s' % id)
     
     def onTitleSelect(self):
-        self.lastSelectedTitle = self.programsListBox.getSelectedItem().getProperty('title')
+        self.lastSelectedTitle = self.programsListbox.getSelectedItem().getProperty('title')
     
     @run_async
     @coalesce
@@ -204,6 +204,7 @@ class RecordingsWindow(BaseWindow):
         # NOTE: No aggressive caching on windows since spawning the ffmpeg subprocess
         #       launches an annoying window
         self.programs.sort(key=SORT_BY[self.sortBy]['sorter'], reverse=self.sortAscending)
+        
         self.preCacheThumbnails()
         
         if self.platform.getName() in ('unix','mac') and self.settings.isAggressiveCaching(): 
@@ -228,10 +229,6 @@ class RecordingsWindow(BaseWindow):
         log.debug('Rendering....')
         self.renderNav()
         self.renderGroups()
-        #self.renderPrograms()
-        #self.activeRenderToken = time.clock()
-        #self.renderPosters(self.activeRenderToken)
-        #self.renderEpisodeColumn(self.activeRenderToken)
         
     def renderNav(self):
         self.setWindowProperty('sortBy', self.translator.get(m.SORT) + ': ' + self.translator.get(SORT_BY[self.sortBy]['translation_id']))
@@ -242,6 +239,7 @@ class RecordingsWindow(BaseWindow):
         listItems = []
         for i, (title, group) in enumerate(self.groupsByTitle.iteritems()):
             group.listItem = xbmcgui.ListItem()
+            group.index = i
             listItems.append(group.listItem)
             self.setListItemProperty(group.listItem, 'index', str(i))
             self.setListItemProperty(group.listItem, 'title', title)
@@ -252,25 +250,28 @@ class RecordingsWindow(BaseWindow):
 
         self.groupsListbox.reset()
         self.groupsListbox.addItems(listItems)
-        self.groupsListbox.selectItem(lastSelectedIndex)
+        self.selectListItemAtIndex(self.groupsListbox, lastSelectedIndex)
         log.warn('index checkl = %s' % self.groupsListbox.getSelectedPosition())
         self.onGroupSelect()
 
     def onGroupSelect(self, lsg=None):
-        self.activeGroup = self.groupsByTitle[self.groupsListbox.getSelectedItem().getProperty('title')]
-        self.lastSelectedGroup = self.activeGroup.title
-        log.warn('onGrouSelect - group = %s' % self.lastSelectedGroup)    
+        if lsg is None:
+            self.activeGroup = self.groupsByTitle[self.groupsListbox.getSelectedItem().getProperty('title')]
+            self.lastSelectedGroup = self.activeGroup.title
+        else:
+            self.activeGroup = self.groupsByTitle[lsg]
+            
+        log.debug('onGroupSelect - group = %s' % safe_str(self.lastSelectedGroup))    
         self.renderPrograms()
         self.activeRenderToken = time.clock()
-        self.renderPosters(self.activeRenderToken)
+        
+        if not self.activeGroup.postersDone:
+            self.renderPosters(self.activeRenderToken, self.activeGroup)
         
         if not self.activeGroup.episodesDone:
             self.renderEpisodeColumn(self.activeRenderToken, self.activeGroup)
         
     def renderPrograms(self):        
-        #self.activeGroup.listItems = []
-        #self.activeGroup.programsByListItem = bidict.bidict()
-        
         @timed 
         def constructorTime():
             for p in self.activeGroup.programs:
@@ -299,9 +300,9 @@ class RecordingsWindow(BaseWindow):
         
         @timed
         def othertime():
-            self.programsListBox.reset()
-            self.programsListBox.addItems(self.activeGroup.listItems)
-            # TODO: restore last selected -- self.programsListBox.selectItem(self.lastSelected)
+            self.programsListbox.reset()
+            self.programsListbox.addItems(self.activeGroup.listItems)
+            # TODO: restore last selected -- self.programsListbox.selectItem(self.lastSelected)
 
         if not self.activeGroup.listItems:
             constructorTime()
@@ -314,9 +315,12 @@ class RecordingsWindow(BaseWindow):
             posterPath = self.mythThumbnailCache.get(p)
             if not posterPath:
                 posterPath = 'mythbox-logo.png'
-        self.setListItemProperty(listItem, 'poster', posterPath)
+        log.debug('lookupPoster setting %s tto %s' % (safe_str(p.title()), posterPath))
+        self.updateListItemProperty(listItem, 'poster', posterPath)
 
     def renderProgramDeleted2(self, deletedProgram, selectionIndex):
+        savedLastSelectedGroupIndex = self.groupsByTitle[self.lastSelectedGroup].index
+        
         title = deletedProgram.title()
         self.programs.remove(deletedProgram)
         for group in [self.groupsByTitle[title], self.groupsByTitle[self.allGroupTitle]]:
@@ -325,45 +329,71 @@ class RecordingsWindow(BaseWindow):
             group.programs.remove(deletedProgram)
             
             # update count in group
-            self.setListItemProperty(group.listItem, 'date', str(len(group.programs)))
-            group.listItem.setThumbnailImage('OverlayHD.png')  # HACK: to force lisitem update 
+            self.updateListItemProperty(group.listItem, 'num_episodes', str(len(group.programs)))
 
             # if not rendered before, listItems will not have been realized
             if deletedProgram in group.programsByListItem.inv:
                 listItem = group.programsByListItem[:deletedProgram]
+                groupIndex = group.listItems.index(listItem)
                 group.listItems.remove(listItem)
                 del group.programsByListItem[listItem]
-            else:
-                log.debug('Not fixing up group %s' % safe_str(title))
 
-        self.programsListBox.reset()
-        self.programsListBox.addItems(self.activeGroup.listItems)
-        self.programsListBox.selectItem(selectionIndex)
-        for i, listItem in enumerate(self.activeGroup.listItems[selectionIndex:]):
-            self.setListItemProperty(listItem, 'index', str(i + selectionIndex + 1))
+                #for i, listItem in enumerate(group.listItems[groupIndex:]):
+                #    self.setListItemProperty(listItem, 'index', str(i + groupIndex + 1))
+
+                self.programsListbox.reset()
+                self.programsListbox.addItems(self.activeGroup.listItems)
+            else:
+                log.debug('Not removing listitem from group %s -- not realized' % safe_str(title))
                 
-        # if last program in group, nuke group
-        if len(self.groupsByTitle[title].programs) == 0:
-            log.debug('Group %s now empty -- removing' % safe_str(title))
-            i = max(0, self.groupsByTitle.index(title))
-            del self.groupsByTitle[title]
-            self.lastSelectedGroup, filler = self.groupsByTitle.byindex(i)
-            log.warn('auto selecing prev group at index %d with group %s' % (i,self.lastSelectedGroup))
-            self.renderGroups()
-            self.setFocus(self.groupsListbox)
-            #self.groupsListbox.reset()
-            #self.groupsListbox.addItems([group.listItem for group in self.groupsByTitle.values()])
+            # if last program in group, nuke group
+            if len(group.programs) == 0:
+                log.debug('Group %s now empty -- removing' % safe_str(title))
+                i = max(0, self.groupsByTitle.index(title)-1)
+                del self.groupsByTitle[title]
+
+                # shift index up
+                for group in [group for group in self.groupsByTitle.values() if group.index > i]:
+                    group.index -= 1
+
+                self.groupsListbox.reset()
+                self.groupsListbox.addItems([group.listItem for group in self.groupsByTitle.values()])
+            
+        # next logical selection based on deleted program    
+        try:
+            if self.lastSelectedGroup in self.groupsByTitle:
+                log.debug("LSG %s not empty..selecting index %d" % (safe_str(self.lastSelectedGroup), savedLastSelectedGroupIndex))
+                self.selectListItemAtIndex(self.groupsListbox, savedLastSelectedGroupIndex)
+                self.selectListItemAtIndex(self.programsListbox, max(0, selectionIndex-1))
+            else:
+                log.debug("LSG %s is now empty..selected next best thing.." % self.lastSelectedGroup)
+                newGroupIndex = savedLastSelectedGroupIndex - 1
+                self.selectListItemAtIndex(self.groupsListbox, newGroupIndex)
+                try:
+                    newGroupTitle = [group.title for group in self.groupsByTitle.values() if group.index == newGroupIndex][0]
+                except:
+                    log.exception('determinging newGroupTitle blew up..selecting all recordings')
+                    newGroupTitle = self.allGroupTitle
+                self.onGroupSelect(newGroupTitle)
+                self.setFocus(self.groupsListbox)
+        except Exception, e:
+            log.warn(safe_str(e))
+            
+        
         
     @run_async
     @catchall
-    def renderPosters(self, myRenderToken):
-        for (listItem, program) in self.activeGroup.programsByListItem.items()[:]:
+    def renderPosters(self, myRenderToken, myGroup):
+        log.debug('renderPosters -- BEGIN --')
+        for (listItem, program) in myGroup.programsByListItem.items()[:]:
             if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken: 
                 return
             try:
                 self.lookupPoster(listItem, program)
             except:
                 log.exception('Program = %s' % safe_str(program.fullTitle()))
+        myGroup.postersDone = True
+        log.debug('renderPosters -- END --')
 
     @run_async
     @catchall
@@ -376,15 +406,14 @@ class RecordingsWindow(BaseWindow):
                 season, episode = self.fanArt.getSeasonAndEpisode(program)
                 if season and episode:
                     results[listItem] = '%sx%s' % (season, episode)
-                    self.setListItemProperty(listItem, 'episode', results[listItem])
-                    listItem.setThumbnailImage('OverlayHD.png')  # HACK: to force lisitem update 
+                    self.updateListItemProperty(listItem, 'episode', results[listItem])
             except:
                 log.exception('Rendering season and episode for program %s' % safe_str(program.fullTitle()))
         myGroup.episodesDone = True
         
     def goRecordingDetails(self):
-        self.lastSelected = self.programsListBox.getSelectedPosition()
-        selectedItem = self.programsListBox.getSelectedItem()
+        self.lastSelected = self.programsListbox.getSelectedPosition()
+        selectedItem = self.programsListbox.getSelectedItem()
         if not selectedItem:
             return
         
@@ -410,6 +439,6 @@ class RecordingsWindow(BaseWindow):
         if win.isDeleted:
             self.renderProgramDeleted2(programIterator.current(), programIterator.index())
         elif programIterator.index() != self.lastSelected:
-            self.programsListBox.selectItem(programIterator.index())
+            self.programsListbox.selectItem(programIterator.index())
                 
         del win
