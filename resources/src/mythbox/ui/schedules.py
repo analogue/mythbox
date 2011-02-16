@@ -199,6 +199,10 @@ class ScheduleDialog(BaseDialog):
         self.autoExpireCheckBox = self.getControl(207)
         self.autoTranscodeCheckBox = self.getControl(218)
         self.recordNewExpireOldCheckBox = self.getControl(213) 
+        self.userJob1CheckBox = self.getControl(214)
+        self.userJob2CheckBox = self.getControl(215)
+        self.userJob3CheckBox = self.getControl(216)
+        self.userJob4CheckBox = self.getControl(217)
         
         self.saveButton = self.getControl(250)
         self.deleteButton = self.getControl(251)
@@ -249,6 +253,18 @@ class ScheduleDialog(BaseDialog):
         elif self.recordNewExpireOldCheckBox == source: 
             s.setRecordNewAndExpireOld(self.recordNewExpireOldCheckBox.isSelected())    
         
+        elif self.userJob1CheckBox == source:
+            s.setAutoUserJob1(self.userJob1CheckBox.isSelected())
+
+        elif self.userJob2CheckBox == source:
+            s.setAutoUserJob2(self.userJob2CheckBox.isSelected())
+        
+        elif self.userJob3CheckBox == source:
+            s.setAutoUserJob3(self.userJob3CheckBox.isSelected())
+            
+        elif self.userJob4CheckBox == source:
+            s.setAutoUserJob4(self.userJob4CheckBox.isSelected())
+            
         elif controlId == 203: self._chooseFromList(CheckForDupesUsing.translations, t(m.CHECK_FOR_DUPES_USING), 'checkForDupesUsing', s.setCheckForDupesUsing)            
         elif controlId == 204: self._chooseFromList(CheckForDupesIn.translations, t(m.CHECK_FOR_DUPES_IN), 'checkForDupesIn', s.setCheckForDupesIn)
         elif controlId == 208: self._chooseFromList(EpisodeFilter.translations, t(m.EPISODE_FILTER), 'episodeFilter', s.setEpisodeFilter)
@@ -287,7 +303,7 @@ class ScheduleDialog(BaseDialog):
     def _updateView(self):
         s = self.schedule
         t = self.translator.get
-        
+
         if s.getScheduleId() is None:
             self.setWindowProperty('heading', t(m.NEW_SCHEDULE))
             self.deleteButton.setEnabled(False)
@@ -327,14 +343,34 @@ class ScheduleDialog(BaseDialog):
         self.setWindowProperty('checkForDupesIn', t(CheckForDupesIn.translations[s.getCheckForDupesIn()]))
         self.setWindowProperty('episodeFilter', t(EpisodeFilter.translations[s.getEpisodeFilter()])) 
         
-        self.enabledCheckBox.setSelected(s.isEnabled())
         self.autoTranscodeCheckBox.setSelected(s.isAutoTranscode())
         self.recordNewExpireOldCheckBox.setSelected(s.isRecordNewAndExpireOld())
         
         self.setWindowProperty('maxEpisodes', (t(m.N_EPISODES) % s.getMaxEpisodes(), t(m.ALL_EPISODES))[s.getMaxEpisodes() == 0])
         self.setWindowProperty('startEarly', (t(m.N_MINUTES_EARLY) % s.getStartOffset(), t(m.ON_TIME))[s.getStartOffset() == 0])
         self.setWindowProperty('endLate', (t(m.N_MINUTES_LATE) % s.getEndOffset(), t(m.ON_TIME))[s.getEndOffset() == 0])
-            
+
+        self.enabledCheckBox.setSelected(s.isEnabled())
+        self.renderUserJobs(s, t)
+        
+    @inject_db
+    def renderUserJobs(self, s, t):
+        jobs = {
+            'UserJob1': {'control':self.userJob1CheckBox, 'text':m.USERJOB1_ENABLED, 'descColumn':'UserJobDesc1', 'getter':s.isAutoUserJob1}, 
+            'UserJob2': {'control':self.userJob2CheckBox, 'text':m.USERJOB2_ENABLED, 'descColumn':'UserJobDesc2', 'getter':s.isAutoUserJob2},
+            'UserJob3': {'control':self.userJob3CheckBox, 'text':m.USERJOB3_ENABLED, 'descColumn':'UserJobDesc3', 'getter':s.isAutoUserJob3}, 
+            'UserJob4': {'control':self.userJob4CheckBox, 'text':m.USERJOB4_ENABLED, 'descColumn':'UserJobDesc4', 'getter':s.isAutoUserJob4}
+        }
+        
+        for jobName in jobs.keys():
+            jobCommand = self.db().getMythSetting(jobName)
+            checkBox = jobs[jobName]['control']
+            if len(jobCommand) == 0:
+                checkBox.setVisible(False)
+            else:
+                checkBox.setLabel(t(jobs[jobName]['text']) + u' - ' + self.db().getMythSetting(jobs[jobName]['descColumn']))    
+                checkBox.setSelected(jobs[jobName]['getter']())
+        
     def _chooseFromList(self, translations, title, property, setter):
         """
         Boiler plate code that presents the user with a dialog box to select a value from a list.

@@ -4,6 +4,7 @@ xx/xx/2011 MythBox 1.0.3
   New
     - Selecting an upcoming recording in the TV Guide allows you to
       edit its recording schedule
+    - Issue 155 - User Jobs added to the Create/Edit Schedule window
 
   Fixed
     - Some 1080i ATSC recordings from a HD Homerun were incorrectly

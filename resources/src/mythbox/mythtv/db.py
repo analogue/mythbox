@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -507,8 +507,9 @@ class MythDatabase(object):
         @rtype: str
         @return: Setting from the  SETTINGS table or None if not found
         """
-        sql = 'select data from settings where value = "%s"  '% key
-        if hostname: sql += ' and hostname = "%s"' % hostname
+        sql = 'select data from settings where value = "%s" '% key
+        if hostname: 
+            sql += ' and hostname = "%s"' % hostname
                    
         result = None
         self.cursor.execute(sql)

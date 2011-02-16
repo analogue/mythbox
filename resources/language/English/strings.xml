@@ -379,6 +379,10 @@ To submit translations for your native language
   <string id="1118">On time</string>
   <string id="1119">%d minute(s) late</string>  
   <string id="1123">Value must be between %d and %d</string>
+  <string id="1124">User Job 1 Enabled</string>
+  <string id="1125">User Job 2 Enabled</string>
+  <string id="1126">User Job 3 Enabled</string>
+  <string id="1127">User Job 4 Enabled</string>
   
   <string id="1120">Save</string>
   <string id="1121">Cancel</string>

@@ -1640,7 +1640,7 @@ class RecordingSchedule(Schedule):
         """
         # Internal value 0 or 1
         return bool(self._data['autouserjob1'])
-    
+         
     def isAutoUserJob2(self):
         """
         @return: True if userjob2 set to run automatically, False otherwise.
@@ -1661,6 +1661,18 @@ class RecordingSchedule(Schedule):
         """
         # Internal value 0 or 1
         return bool(self._data['autouserjob4'])
+
+    def setAutoUserJob1(self, b):
+        self._data['autouserjob1'] = int(b)
+
+    def setAutoUserJob2(self, b):
+        self._data['autouserjob2'] = int(b)
+
+    def setAutoUserJob3(self, b):
+        self._data['autouserjob3'] = int(b)
+
+    def setAutoUserJob4(self, b):
+        self._data['autouserjob4'] = int(b)
     
     def findday(self):
         """
