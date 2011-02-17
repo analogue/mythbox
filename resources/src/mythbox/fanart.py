@@ -70,6 +70,9 @@ class BaseFanartProvider(object):
     def getPosters(self, program):
         raise Exception, 'Abstract method'
     
+    def getBanners(self, program):
+        raise Exception, 'Abstract method'
+    
     def getRandomPoster(self, program):
         posters = self.getPosters(program)
         if posters:
@@ -96,12 +99,16 @@ class NoOpFanartProvider(BaseFanartProvider):
 
     def getPosters(self, program):
         return []
+
+    def getBanners(self, program):
+        return []
     
     def getRandomPoster(self, program):
         return None
     
     def getSeasonAndEpisode(self, program):
         return None, None
+
 
 class PersistentFanartProvider(BaseFanartProvider):
     """Abstract base class which persists a dict (pcache) to disk across sessions"""
@@ -184,6 +191,16 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
         return posters
 
     @chain
+    def getBanners(self, program):
+        banners = []
+        key = self.createKey('getBanners', program) 
+        if not self.hasStruckOut(key):
+            banners = self.delegate.getBanners(program)
+            if not banners:
+                self.strikeOut(key, program)
+        return banners
+
+    @chain
     def getSeasonAndEpisode(self, program):
         season, episode = None, None
         key = self.createKey('getSeasonAndEpisode', program)
@@ -214,17 +231,25 @@ class SpamSkippingFanartProvider(BaseFanartProvider):
         BaseFanartProvider.__init__(self, nextProvider)
     
     def getPosters(self, program):
-        if (program.title() in self.SPAM):
+        if program.title() in self.SPAM:
             return []
         if self.nextProvider:
             return self.nextProvider.getPosters(program)
-                
+
+    def getBanners(self, program):
+        if program.title() in self.SPAM:
+            return []
+        if self.nextProvider:
+            return self.nextProvider.getBanners(program)
+                        
     def hasPosters(self, program):
-        if (program.title() in self.SPAM):
+        if program.title() in self.SPAM:
             return True
         return self.nextProvider.hasPosters(program)
         
     def getSeasonAndEpisode(self, program):
+        if program.title() in self.SPAM:
+            return None,None 
         return self.nextProvider.getSeasonAndEpisode(program)
        
         
@@ -246,6 +271,18 @@ class SuperFastFanartProvider(PersistentFanartProvider):
             if posters:  # cache returned poster 
                 self.imagePathsByKey[key] = posters
         return posters
+
+    def getBanners(self, program):
+        banners = []
+        key = self.createKey('getBanners', program)
+        if key in self.imagePathsByKey:
+            banners = self.imagePathsByKey[key]
+        
+        if not banners and self.nextProvider:
+            banners = self.nextProvider.getBanners(program)
+            if banners:  # cache returned banner 
+                self.imagePathsByKey[key] = banners
+        return banners
         
     def hasPosters(self, program):
         return self.createKey('getPosters', program) in self.imagePathsByKey
@@ -295,11 +332,19 @@ class HttpCachingFanartProvider(BaseFanartProvider):
         posters = []
         if self.nextProvider:
             httpPosters = self.nextProvider.getPosters(program)
-            posters = self.cachePosters(httpPosters)
+            posters = self.cacheImages(httpPosters)
         return posters
 
-    def cachePosters(self, httpUrls):
-        '''Immediately retrieve the first URL and add the remaining to the 
+    def getBanners(self, program):
+        banners = []
+        if self.nextProvider:
+            httpBanners = self.nextProvider.getBanners(program)
+            banners = self.cacheImages(httpBanners)
+        return banners
+    
+    def cacheImages(self, httpUrls):
+        '''
+        Immediately retrieve the first URL and add the remaining to the 
         work queue so we can return *something* very quickly.
         '''
         filepaths = []
@@ -318,10 +363,10 @@ class HttpCachingFanartProvider(BaseFanartProvider):
         
         return filepaths
     
-    def tryToCache(self, poster):
-        if poster and poster[:4] == 'http':
+    def tryToCache(self, imageUrl):
+        if imageUrl and imageUrl[:4] == 'http':
             try:
-                filepath = self.httpCache.get(poster)
+                filepath = self.httpCache.get(imageUrl)
             except Exception, ioe:
                 log.exception(ioe)
                 filepath = None
@@ -365,6 +410,11 @@ class ImdbFanartProvider(BaseFanartProvider):
                 log.error('IMDB error looking up %s: %s' % (safe_str(program.title()), safe_str(str(e))))
         return posters
     
+    @chain
+    def getBanners(self, program):
+        return []
+
+    @chain    
     def getSeasonAndEpisode(self, program):
         return None,None
 
@@ -394,7 +444,7 @@ class TvdbFanartProvider(BaseFanartProvider):
                 # Example: tvdb['scrubs']['_banners']['poster']['680x1000']['35308']['_bannerpath']
                 #posterUrl = self.tvdb[program.title()]['_banners']['poster'].itervalues().next().itervalues().next()['_bannerpath']
                 
-                postersByDimension = self._queryTvDb(program.title()) 
+                postersByDimension = self._queryTvDb(program.title(), qtype='poster') 
                 for dimension in postersByDimension.keys():
                     #log.debug('key=%s' % dimension)
                     for id in postersByDimension[dimension].keys():
@@ -407,6 +457,18 @@ class TvdbFanartProvider(BaseFanartProvider):
                 log.warn('TVDB errored out on "%s" with error "%s"' % (program.title(), str(e)))
         return posters
 
+    @chain
+    def getBanners(self, program):
+        banners = []
+        if not program.isMovie():
+            bannersByType = self._queryTvDb(program.title(), qtype='series')
+            for subType in ['graphical', 'text', 'blank']:
+                if subType in bannersByType:
+                    bannersById = bannersByType[subType]
+                    for id in bannersById.keys():
+                        banners.append(bannersById[id]['_bannerpath'])
+        return banners
+
     def clear(self):
         super(TvdbFanartProvider, self).clear()        
         shutil.rmtree(self.tvdbCacheDir, ignore_errors=True)
@@ -414,8 +476,8 @@ class TvdbFanartProvider(BaseFanartProvider):
 
     # tvdb site rejects queries if > 2 per originating IP
     @max_threads(2)
-    def _queryTvDb(self, title):
-        return self.tvdb[title]['_banners']['poster']
+    def _queryTvDb(self, title, qtype):
+        return self.tvdb[title]['_banners'][qtype]
 
     @chain
     def getSeasonAndEpisode(self, program):
@@ -662,6 +724,9 @@ class FanArt(object):
     def getPosters(self, program):
         return self.provider.getPosters(program)
 
+    def getBanners(self, program):
+        return self.provider.getBanners(program)
+    
     def hasPosters(self, program):
         return self.provider.hasPosters(program)
     

@@ -436,6 +436,20 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.assertIsNone(season)
         self.assertIsNone(episode)
         
+    def test_getBanners_When_program_is_not_movie_Then_returns_banners(self):
+        # Setup
+        program = TVProgram({'title':'Seinfeld', 'category_type':'series'}, translator=Mock())
+        provider = TvdbFanartProvider(self.platform, nextProvider=None)
+        
+        # Test
+        bannerUrls = provider.getBanners(program)
+        
+        # Verify
+        [log.debug('Banner = %s' % banner) for banner in bannerUrls]
+        self.assertTrue(len(bannerUrls) > 0)
+        for bannerUrl in bannerUrls:
+            self.assertEqual("http", bannerUrl[0:4])
+
 
 class TheMovieDbFanartProviderTest(BaseFanartProviderTestCase):
 
