@@ -297,6 +297,7 @@ class LiveTvWindow(BaseWindow):
         self.activeRenderToken = time.clock()
         self.renderTvPosters(self.activeRenderToken)    # async
         self.renderMoviePosters(self.activeRenderToken) # async
+        self.renderBanners(self.activeRenderToken)      # async
     
     @lirc_hack    
     @catchall    
@@ -454,6 +455,23 @@ class LiveTvWindow(BaseWindow):
             except:
                 log.exception('channel = %s' % safe_str(channel))
 
+    @run_async
+    @catchall
+    def renderBanners(self, myRenderToken):
+        log.debug('---- RENDER BANNER BEGIN ----')
+        for channel, li in self.listItemsByChannel.items():
+            if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken:
+                return
+            if channel.currentProgram:
+                bannerPath = self.fanArt.pickBanner(channel.currentProgram)
+                if bannerPath:
+                    log.debug('setting banner for %s to %s' % (safe_str(channel.currentProgram.title()), bannerPath))
+                    self.updateListItemProperty(li, 'banner', bannerPath)
+                else:
+                    log.debug('no banner for %s' % safe_str(channel.currentProgram.title()))
+        log.debug('---- RENDER BANNER END ----')
+                    
+        
     def lookupPoster(self, listItem, channel, myRenderToken):
         posterPath = self.fanArt.pickPoster(channel.currentProgram)
         if not posterPath:

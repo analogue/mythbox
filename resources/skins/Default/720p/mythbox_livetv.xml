@@ -84,6 +84,15 @@
                     <info>ListItem.Property(channelIcon)</info>
                     <aspectratio>keep</aspectratio>
                 </control>
+
+                <control type="image">
+                    <posx>598</posx>
+                    <posy>2</posy>
+                    <width>300</width>
+                    <height>56</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture diffuse="mb-diffuse-left.png">$INFO[ListItem.Property(banner)]</texture>
+                </control>
                 
                 <control type="label">
                     <posx>140</posx>
@@ -166,6 +175,15 @@
                     <height>56</height>
                     <info>ListItem.Property(channelIcon)</info>
                     <aspectratio>keep</aspectratio>
+                </control>
+
+                <control type="image">
+                    <posx>598</posx>
+                    <posy>2</posy>
+                    <width>300</width>
+                    <height>56</height>
+                    <aspectratio>scale</aspectratio>
+                    <texture diffuse="mb-diffuse-left.png">$INFO[ListItem.Property(banner)]</texture>
                 </control>
                 
                 <control type="label">

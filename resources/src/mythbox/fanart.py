@@ -444,19 +444,22 @@ class TvdbFanartProvider(BaseFanartProvider):
                         posters.append(bannerPath)
                 log.debug('TVDB[%s] = %s' % (len(posters), str(program.title())))
             except Exception, e:
-                log.warn('TVDB errored out on "%s" with error "%s"' % (program.title(), str(e)))
+                log.warn('TVDB errored out on "%s" with error "%s"' % (safe_str(program.title()), safe_str(e)))
         return posters
-
+    
     @chain
     def getBanners(self, program):
         banners = []
         if not program.isMovie():
-            bannersByType = self._queryTvDb(program.title(), qtype='series')
-            for subType in ['graphical', 'text', 'blank']:
-                if subType in bannersByType:
-                    bannersById = bannersByType[subType]
-                    for id in bannersById.keys():
-                        banners.append(bannersById[id]['_bannerpath'])
+            try:
+                bannersByType = self._queryTvDb(program.title(), qtype='series')
+                for subType in ['graphical', 'text', 'blank']:
+                    if subType in bannersByType:
+                        bannersById = bannersByType[subType]
+                        for id in bannersById.keys():
+                            banners.append(bannersById[id]['_bannerpath'])
+            except Exception, e:
+                log.warn('TVDB - no banners for %s - %s' % (safe_str(program.title()), safe_str(e)))
         return banners
 
     def clear(self):
@@ -534,7 +537,11 @@ class TheMovieDbFanartProvider(BaseFanartProvider):
                 log.error('TMDB fanart search error: %s %s' % (program.title(), e))
         return posters
 
-
+    @chain
+    def getBanners(self, program):
+        return []
+    
+    
 class GoogleImageSearchProvider(BaseFanartProvider):
     
     def __init__(self, nextProvider=None):
@@ -564,7 +571,11 @@ class GoogleImageSearchProvider(BaseFanartProvider):
         except Exception, e:
             log.exception('GOOGLE fanart search:  %s %s' % (safe_str(program.title()), str(e)))
         return posters
-        
+
+    @chain
+    def getBanners(self, program):
+        return []
+
 
 class TvRageProvider(NoOpFanartProvider):
 
@@ -703,24 +714,14 @@ class FanArt(object):
         return self.provider.getSeasonAndEpisode(program)
     
     def pickPoster(self, program):
-        """
-        @type program: Program 
-        @return: returns path to image suitable as a boxcover that is shaped taller 
-                 than wide (portrait mode) with medium quality resolution
-                 (not for thumbnails). 
-        """
         posters = self.provider.getPosters(program)
         if posters:
             return random.choice(posters)
-        else:
-            return None
     
     def pickBanner(self, program):
         banners = self.provider.getBanners(program)
         if banners:
             return random.choice(banners)
-        else:
-            return None
     
     def getPosters(self, program):
         return self.provider.getPosters(program)
@@ -739,7 +740,7 @@ class FanArt(object):
         
     def configure(self, settings):
         self.provider.close()
-        p = None
+        p = NoOpFanartProvider()
         if settings.getBoolean('fanart_google'): p = GoogleImageSearchProvider(p)
         if settings.getBoolean('fanart_imdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, ImdbFanartProvider(), p)
         if settings.getBoolean('fanart_tmdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, TheMovieDbFanartProvider(), p)
