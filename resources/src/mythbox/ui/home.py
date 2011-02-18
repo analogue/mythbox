@@ -318,7 +318,7 @@ class HomeWindow(BaseWindow):
             self.setListItemProperty(listItem, 'title', r.title())
             self.setListItemProperty(listItem, 'description', r.description())
             
-            cover = self.fanArt.getRandomPoster(r)
+            cover = self.fanArt.pickPoster(r)
             if not cover:
                 cover = self.mythThumbnailCache.get(r)
                 if not cover:

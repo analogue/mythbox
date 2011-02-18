@@ -9,7 +9,7 @@ class LiveTvWindowTest(unittest.TestCase):
     def testConstructor(self):
         
         fanArt = Mock()
-        when(fanArt).getRandomPoster(any()).thenReturn(None)
+        when(fanArt).pickPoster(any()).thenReturn(None)
         
         kwargs = {}
         kwargs['settings'] = Mock()

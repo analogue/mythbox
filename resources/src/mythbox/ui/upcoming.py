@@ -218,7 +218,7 @@ class UpcomingRecordingsWindow(BaseWindow):
         for (program, listItem) in self.listItemsByProgram.items()[:]:
             if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken: 
                 return
-            posterPath = self.fanArt.getRandomPoster(program)
+            posterPath = self.fanArt.pickPoster(program)
             if posterPath is None:
                 if self.channelsById[program.getChannelId()].getIconPath():
                     posterPath = self.mythChannelIconCache.get(self.channelsById[program.getChannelId()])

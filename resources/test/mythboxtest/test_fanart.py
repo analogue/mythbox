@@ -234,34 +234,6 @@ class ImdbFanartProviderTest(BaseFanartProviderTestCase):
     def test_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
         self.base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably()
         
-    def test_getRandomPoster_When_program_is_a_movie_Then_returns_fanart(self):
-        # Setup
-        program = TVProgram({'title':'Fargo', 'category_type':'movie'}, translator=Mock())
-        provider = ImdbFanartProvider(nextProvider=None)
-        
-        # Test
-        posterUrl = provider.getRandomPoster(program)
-        
-        # Verify
-        log.debug('Poster URL = %s' % posterUrl)
-        try:
-            self.assertEqual('http', posterUrl[0:4])
-        except TypeError, te:
-            # IMDB is down or not working. pass test with warning
-            # Symptom: TypeError: unsubscriptable object
-            log.warning('Test skipped..IMDB may be down: %s' % te)
-
-    def test_getRandomPoster_When_program_is_not_movie_Then_returns_None(self):
-        # Setup
-        program = TVProgram({'title':'Seinfeld', 'category_type':'series'}, translator=Mock())
-        provider = ImdbFanartProvider(nextProvider=None)
-        
-        # Test
-        posterUrl = provider.getRandomPoster(program)
-        
-        # Verify
-        self.assertIsNone(posterUrl)
-
     def test_getPosters_When_program_is_a_movie_Then_returns_fanart(self):
         # Setup
         program = TVProgram({'title':'Fargo', 'category_type':'movie'}, translator=Mock())
@@ -298,21 +270,6 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
 
     def test_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
         self.base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably()
-        
-    def test_getRandomPoster_When_program_is_not_movie_Then_returns_poster(self):
-        program = TVProgram({'title':'Seinfeld', 'category_type':'series'}, translator=Mock())
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
-        posterUrl = provider.getRandomPoster(program)
-        log.debug('Poster URL = %s' % posterUrl)
-        try: 
-            self.assertEqual("http", posterUrl[0:4])
-        except TypeError: 
-            pass  # HACK: In case tvdb.com unreachable
-
-    def test_getRandomPoster_When_program_is_movie_Then_returns_None(self):
-        program = TVProgram({'title':'Departed', 'category_type':'movie'}, translator=Mock())
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
-        self.assertIsNone(provider.getRandomPoster(program))
 
     def test_getPosters_When_program_is_not_movie_Then_returns_posters(self):
         # Setup
@@ -461,27 +418,6 @@ class TheMovieDbFanartProviderTest(BaseFanartProviderTestCase):
 
     def test_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
         self.base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably()
-        
-    def test_getRandomPoster_When_program_is_movie_Then_returns_poster(self):
-        # Setup
-        program = TVProgram({'title': 'Ghostbusters', 'category_type':'movie'}, translator=Mock())
-        provider = TheMovieDbFanartProvider(nextProvider=None)
-        
-        # Test
-        posterUrl = provider.getRandomPoster(program)
-        
-        # Verify
-        log.debug('Poster URL = %s' % posterUrl)
-        try:
-            self.assertEqual('http', posterUrl[0:4])
-        except TypeError:
-            # HACK: so unit test doesn't fail when TMDB.com is down
-            pass
-        
-    def test_getRandomPoster_When_program_is_not_movie_Then_returns_None(self):
-        program = TVProgram({'title': 'Seinfeld', 'category_type':'series'}, translator=Mock())
-        provider = TheMovieDbFanartProvider(nextProvider=None)
-        self.assertIsNone(provider.getRandomPoster(program))
 
     def test_getPosters_When_program_is_movie_Then_returns_posters(self):
         # Setup
@@ -512,21 +448,6 @@ class GoogleImageSearchProviderTest(BaseFanartProviderTestCase):
 
     def test_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
         self.base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably()
-
-    def test_getRandomPoster_works(self):
-        # Setup
-        program = TVProgram({'title': 'Two Fat Ladies', 'category_type':'series'}, translator=Mock())
-        provider = GoogleImageSearchProvider(nextProvider=None)
-        
-        # Test
-        posterUrl = provider.getRandomPoster(program)
-        
-        # Verify
-        log.debug('Poster path = %s' % posterUrl)
-
-        # HACK: so unit test doesn't fail when google is unreachable
-        try: self.assertEqual('http', posterUrl[0:4])
-        except TypeError: pass
         
     def test_getPosters_works(self):
         # Setup
@@ -629,48 +550,6 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
             },
             translator=Mock())
     
-    def test_getRandomPoster_When_not_struck_out_and_delegate_returns_none_Then_strike_out_and_return_nextProviders_result(self):
-        # Setup
-        provider = OneStrikeAndYoureOutFanartProvider(self.platform, self.delegate, self.nextProvider)
-        key = provider.createKey('getPosters', self.program)
-        when(self.delegate).getPosters(any()).thenReturn([])
-        when(self.nextProvider).getPosters(any()).thenReturn(['blah.png'])
-        
-        # Test
-        poster = provider.getRandomPoster(self.program)
-        
-        # Verify
-        self.assertEqual('blah.png', poster)
-        self.assertIn(self.program.title(), provider.struckOut[key].values())
-        
-    def test_getRandomPoster_When_not_struck_out_and_delegate_returns_poster_Then_return_poster(self):
-        # Setup
-        provider = OneStrikeAndYoureOutFanartProvider(self.platform, self.delegate, self.nextProvider)
-        when(self.delegate).getPosters(any()).thenReturn(['blah.png'])
-        
-        # Test
-        poster = provider.getRandomPoster(self.program)
-        
-        # Verify
-        self.assertEqual('blah.png', poster)
-        self.assertNotIn(self.program.title(), provider.struckOut.values())
-        verifyZeroInteractions(self.nextProvider)
-
-    def test_getRandomPoster_When_struck_out_Then_skip_delegate_and_return_nextProviders_result(self):
-        # Setup
-        provider = OneStrikeAndYoureOutFanartProvider(self.platform, self.delegate, self.nextProvider)
-        key = provider.createKey('getPosters', self.program)
-        provider.strikeOut(key, self.program)
-        when(self.nextProvider).getPosters(any()).thenReturn(['blah.png'])
-        
-        # Test
-        poster = provider.getRandomPoster(self.program)
-        
-        # Verify
-        self.assertEqual('blah.png', poster)
-        self.assertIn(self.program.title(), provider.struckOut[key].values())
-        verifyZeroInteractions(self.delegate)
-
     def test_getPosters_When_not_struck_out_and_delegate_returns_empty_list_Then_strike_out_and_return_nextProviders_result(self):
         # Setup
         provider = OneStrikeAndYoureOutFanartProvider(self.platform, self.delegate, self.nextProvider)
@@ -859,33 +738,6 @@ class SuperFastFanartProviderTest(unittest.TestCase):
             self.assertTrue(4, len(httpUrls))
         provider2.close()
     
-    def test_getRandomPoster_When_poster_not_in_cache_and_returned_by_next_in_chain_Then_cache_locally_and_return_poster(self):
-        # Setup
-        when(self.nextProvider).getPosters(any(Program)).thenReturn(['logo.gif'])
-        key = self.provider.createKey('getPosters', self.program)
-        self.assertFalse(key in self.provider.imagePathsByKey)
-                        
-        # Test
-        posterPath = self.provider.getRandomPoster(self.program)
-        
-        # Verify
-        log.debug('Poster path = %s' % posterPath)
-        self.assertEqual('logo.gif', posterPath)
-        self.assertIn(key, self.provider.imagePathsByKey)
-
-    def test_getRandomPoster_When_next_link_in_chain_doesnt_find_poster_Then_dont_cache_anything(self):
-        # Setup
-        when(self.nextProvider).getPosters(any(Program)).thenReturn([])
-        key = self.provider.createKey('getPosters', self.program)
-        self.assertFalse(key in self.provider.imagePathsByKey)
-                        
-        # Test
-        posterPath = self.provider.getRandomPoster(self.program)
-        
-        # Verify
-        self.assertTrue(posterPath is None)
-        self.assertNotIn(key, self.provider.imagePathsByKey)
-
     def test_getPosters_When_posters_not_in_cache_and_returned_by_next_in_chain_Then_cache_locally_and_return_posters(self):
         # Setup
         when(self.nextProvider).getPosters(any(Program)).thenReturn(['logo.gif'])

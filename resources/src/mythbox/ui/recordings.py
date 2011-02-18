@@ -215,7 +215,7 @@ class RecordingsWindow(BaseWindow):
         othertime()
 
     def lookupPoster(self, listItem, p):
-        posterPath = self.fanArt.getRandomPoster(p)
+        posterPath = self.fanArt.pickPoster(p)
         if not posterPath:
             posterPath = self.mythThumbnailCache.get(p)
             if not posterPath:

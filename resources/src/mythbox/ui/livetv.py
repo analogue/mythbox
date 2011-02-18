@@ -455,7 +455,7 @@ class LiveTvWindow(BaseWindow):
                 log.exception('channel = %s' % safe_str(channel))
 
     def lookupPoster(self, listItem, channel, myRenderToken):
-        posterPath = self.fanArt.getRandomPoster(channel.currentProgram)
+        posterPath = self.fanArt.pickPoster(channel.currentProgram)
         if not posterPath:
             if channel.getIconPath():
                 posterPath = self.mythChannelIconCache.get(channel)

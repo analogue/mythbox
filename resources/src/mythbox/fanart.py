@@ -72,13 +72,6 @@ class BaseFanartProvider(object):
     
     def getBanners(self, program):
         raise Exception, 'Abstract method'
-    
-    def getRandomPoster(self, program):
-        posters = self.getPosters(program)
-        if posters:
-            return random.choice(posters)
-        else:
-            return None
 
     def getSeasonAndEpisode(self, program):
         if self.nextProvider:
@@ -102,9 +95,6 @@ class NoOpFanartProvider(BaseFanartProvider):
 
     def getBanners(self, program):
         return []
-    
-    def getRandomPoster(self, program):
-        return None
     
     def getSeasonAndEpisode(self, program):
         return None, None
@@ -712,14 +702,25 @@ class FanArt(object):
         '''Return pair of strings'''
         return self.provider.getSeasonAndEpisode(program)
     
-    def getRandomPoster(self, program):
+    def pickPoster(self, program):
         """
         @type program: Program 
         @return: returns path to image suitable as a boxcover that is shaped taller 
                  than wide (portrait mode) with medium quality resolution
                  (not for thumbnails). 
         """
-        return self.provider.getRandomPoster(program)
+        posters = self.provider.getPosters(program)
+        if posters:
+            return random.choice(posters)
+        else:
+            return None
+    
+    def pickBanner(self, program):
+        banners = self.provider.getBanners(program)
+        if banners:
+            return random.choice(banners)
+        else:
+            return None
     
     def getPosters(self, program):
         return self.provider.getPosters(program)

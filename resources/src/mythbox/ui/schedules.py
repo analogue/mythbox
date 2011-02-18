@@ -165,7 +165,7 @@ class SchedulesWindow(BaseWindow):
             listItem = self.listItemsBySchedule[schedule]
             try:
                 try:
-                    posterPath = self.fanArt.getRandomPoster(schedule)
+                    posterPath = self.fanArt.pickPoster(schedule)
                     if not posterPath:
                         channel =  self.channelsById[schedule.getChannelId()]
                         if channel.getIconPath():
