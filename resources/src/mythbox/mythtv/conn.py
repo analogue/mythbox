@@ -247,13 +247,13 @@ class Connection(object):
 
     @timed
     def annPlayback(self, cmdSock):
-        reply = self._sendRequest(cmdSock, ['ANN Playback %s 0' % self.platform.getHostname()])
+        reply = self._sendRequest(cmdSock, ['ANN Playback mythbox-%s 0' % self.platform.getHostname()])
         if not self._isOk(reply):
             raise ServerException, 'Backend playback refused: %s' % reply
     
     @timed
     def annMonitor(self, cmdSock):
-        reply = self._sendRequest(cmdSock, ['ANN Monitor %s 0' % self.platform.getHostname()])
+        reply = self._sendRequest(cmdSock, ['ANN Monitor mythbox-%s 0' % self.platform.getHostname()])
         if not self._isOk(reply):
             raise ServerException, 'Backend monitor refused: %s' % reply
 
@@ -269,7 +269,7 @@ class Connection(object):
         """
         backend = self.db().toBackend(backendHost)
         s = self.connect(announce=None, slaveBackend=backend.ipAddress)
-        self._sendMsg(s, self.protocol.buildAnnounceFileTransferCommand(self.platform.getHostname(),  filePath))
+        self._sendMsg(s, self.protocol.buildAnnounceFileTransferCommand('mythbox-%s' % self.platform.getHostname(),  filePath))
         reply = self._readMsg(s)
         if not self._isOk(reply):
             raise ServerException('Backend filetransfer refused: %s' % reply)
@@ -1072,7 +1072,7 @@ class Connection(object):
             if numBytes:
                 filesize = min(numBytes, filesize)
             
-            maxBlockSize = 2000000 # 2MB
+            maxBlockSize = 20000000 # 20MB
             remainingBytes = filesize
             fh = file(destPath, 'w+b')
             maxReceived = 0
