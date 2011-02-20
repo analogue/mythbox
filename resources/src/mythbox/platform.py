@@ -39,9 +39,13 @@ def getPlatform():
         elif 'linux' in sys.platform:
             __instance = UnixPlatform()
         elif 'darwin' in sys.platform:
-            __instance = MacPlatform()
+            # gotta be a better way to detect ipad/iphone/atv
+            if 'USER' in os.environ and os.environ['USER'] == 'mobile':
+                __instance = IOSPlatform()
+            else: 
+                __instance = MacPlatform()
         else:
-            log.error('ERROR: Platform check did not match win32, linux, or darwin. Was %s instead' % sys.platform)
+            log.error('ERROR: Platform check did not match win32, linux, darwin, or iOS. Was %s instead' % sys.platform)
             __instance = UnixPlatform()
     return __instance
 
@@ -178,7 +182,6 @@ class UnixPlatform(Platform):
 
     def __init__(self, *args, **kwargs):
         Platform.__init__(self, *args, **kwargs)
-        self.ffmpegUrl = '/usr/bin/ffmpeg'
         
     def getName(self):
         return "unix"
@@ -233,3 +236,24 @@ class MacPlatform(Platform):
 
     def getDefaultRecordingsDir(self):
         return '/change/me'
+
+    
+class IOSPlatform(Platform):
+    
+    def __init__(self, *args, **kwargs):
+        Platform.__init__(self, *args, **kwargs)
+        
+    def getName(self):
+        return 'ios'
+
+    def getFFMpegPath(self, prompt=False):
+        f = '/usr/local/bin/ffmpeg'
+        if os.path.exists(f) and os.path.isfile(f):
+            return f
+        else:
+            if prompt:
+                xbmcgui.Dialog().ok('Error', 'Please install ffmpeg via Cydia', '1) Sections > Repositories > ModMyi.com > Install', '2) Sections > Multimedia > FFmpeg > Install')
+            raise Exception, 'ffmpeg not installed'
+
+    def getDefaultRecordingsDir(self):
+        return '/var/mobile'

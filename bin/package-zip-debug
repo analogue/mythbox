@@ -8,7 +8,7 @@ find . -name "*.pyo" | xargs rm -fv
 
 
 export rev=$1
-export fname=script.mythbox.1.0.$rev-dharma.zip
+export fname=script.mythbox.1.0.$rev-debug.zip
 echo Packaging $fname
 
 rm -rf target/script.mythbox
@@ -47,10 +47,8 @@ zip --quiet \
     --exclude="script.mythbox/resources/lib/simplejson/*" \
     --exclude="script.mythbox/resources/lib/threadpool/*" \
     --exclude="script.mythbox/resources/lib/tvdb_api/tests/*" \
-    --exclude="script.mythbox/resources/lib/twisted/*" \
     --exclude="script.mythbox/resources/lib/unittest2/*" \
     --exclude="script.mythbox/resources/lib/unittest/*" \
-    --exclude="script.mythbox/resources/lib/zope.interface/*" \
     --exclude="script.mythbox/resources/test/*" \
     --exclude="script.mythbox/target/*" \
     --exclude="script.mythbox/trac/*"
