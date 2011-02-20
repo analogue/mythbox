@@ -598,6 +598,17 @@
             <texture background="false">$INFO[Container(600).ListItem.Property(poster)]</texture>
             <fadetime>400</fadetime>
         </control>
+
+        <control type="label">
+            <description>poster size</description>
+            <posx>40</posx>
+            <posy>590</posy>
+            <width>230</width>
+            <height>40</height>
+            <font>font10</font>
+            <textcolor>88FFFFFF</textcolor>
+            <label>$INFO[Container(600).ListItem.Property(posterSize)]</label>
+        </control>
   
         <control type="image">
             <posx>30</posx>

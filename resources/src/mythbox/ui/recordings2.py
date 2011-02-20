@@ -19,6 +19,7 @@
 import bidict
 import logging
 import odict
+import os
 import time
 import xbmc
 import xbmcgui
@@ -28,7 +29,7 @@ from mythbox.mythtv.conn import inject_conn
 from mythbox.ui.recordingdetails import RecordingDetailsWindow
 from mythbox.ui.toolkit import window_busy, BaseWindow, Action
 from mythbox.util import catchall_ui, run_async, timed, catchall, ui_locked, ui_locked2, coalesce, safe_str
-from mythbox.util import CyclingBidiIterator
+from mythbox.util import CyclingBidiIterator, formatSize
 
 log = logging.getLogger('mythbox.ui')
 
@@ -317,6 +318,13 @@ class RecordingsWindow(BaseWindow):
                 posterPath = 'mythbox-logo.png'
         log.debug('lookupPoster setting %s tto %s' % (safe_str(p.title()), posterPath))
         self.updateListItemProperty(listItem, 'poster', posterPath)
+
+        if log.isEnabledFor(logging.DEBUG):
+            try:
+                self.setListItemProperty(listItem, 'posterSize', formatSize(os.path.getsize(posterPath)/1000))
+            except:
+                pass
+
 
     def renderProgramDeleted2(self, deletedProgram, selectionIndex):
         savedLastSelectedGroupIndex = self.groupsByTitle[self.lastSelectedGroup].index

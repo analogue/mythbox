@@ -18,6 +18,7 @@
 #
 import datetime
 import logging
+import os
 import threading
 import time
 import xbmcgui
@@ -31,11 +32,10 @@ from mythbox.mythtv.domain import Channel
 from mythbox.mythtv.conn import ServerException
 from mythbox.ui.player import MythPlayer, NoOpCommercialSkipper
 from mythbox.ui.toolkit import Action, BaseWindow, window_busy
-from mythbox.util import safe_str,catchall, catchall_ui, run_async, lirc_hack, ui_locked, coalesce, ui_locked2
+from mythbox.util import safe_str,catchall, catchall_ui, run_async, lirc_hack, ui_locked, coalesce, ui_locked2, formatSize
 from odict import odict
 
-log = logging.getLogger('mythbox.ui')
-    
+log = logging.getLogger('mythbox.ui')    
 
 class BaseLiveTvBrain(object):
 
@@ -483,4 +483,8 @@ class LiveTvWindow(BaseWindow):
                 posterPath = 'mythbox-logo.png'
         if myRenderToken == self.activeRenderToken:
             self.setListItemProperty(listItem, 'poster', posterPath)
-        
+            if log.isEnabledFor(logging.DEBUG):
+                try:
+                    self.setListItemProperty(listItem, 'posterSize', formatSize(os.path.getsize(posterPath)/1000))
+                except:
+                    pass
