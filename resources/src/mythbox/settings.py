@@ -115,7 +115,7 @@ class MythSettings(object):
             'mysql_password'             : 'change_me',
             'mysql_encoding_override'    : 'latin1',
             'paths_recordedprefix'       : self.platform.getDefaultRecordingsDir(),
-            'aggressive_caching'         : 'False',
+            'aggressive_caching'         : 'True',
             'recorded_view_by'           : '2', 
             'upcoming_view_by'           : '2',
             'confirm_on_delete'          : 'True',
