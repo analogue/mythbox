@@ -236,6 +236,11 @@ class SpamSkippingFanartProvider(BaseFanartProvider):
         if program.title() in self.SPAM:
             return True
         return self.nextProvider.hasPosters(program)
+
+    def hasBanners(self, program):
+        if program.title() in self.SPAM:
+            return True
+        return self.nextProvider.hasBanners(program)
         
     def getSeasonAndEpisode(self, program):
         if program.title() in self.SPAM:
@@ -263,19 +268,34 @@ class SuperFastFanartProvider(PersistentFanartProvider):
         return posters
 
     def getBanners(self, program):
+        # Different from posters in that it is ok for the
+        # list to be empty
         banners = []
         key = self.createKey('getBanners', program)
         if key in self.imagePathsByKey:
             banners = self.imagePathsByKey[key]
-        
-        if not banners and self.nextProvider:
+        elif self.nextProvider:
             banners = self.nextProvider.getBanners(program)
-            if banners:  # cache returned banner 
-                self.imagePathsByKey[key] = banners
+            self.imagePathsByKey[key] = banners
         return banners
+
+#    def getBanners(self, program):
+#        banners = []
+#        key = self.createKey('getBanners', program)
+#        if key in self.imagePathsByKey:
+#            banners = self.imagePathsByKey[key]
+#        
+#        if not banners and self.nextProvider:
+#            banners = self.nextProvider.getBanners(program)
+#            if banners:  # cache returned banner 
+#                self.imagePathsByKey[key] = banners
+#        return banners
         
     def hasPosters(self, program):
         return self.createKey('getPosters', program) in self.imagePathsByKey
+        
+    def hasBanners(self, program):
+        return self.createKey('getBanners', program) in self.imagePathsByKey
         
     def createKey(self, methodName, program):
         key = '%s-%s' % (methodName, safe_str(program.title()))
@@ -728,6 +748,9 @@ class FanArt(object):
 
     def getBanners(self, program):
         return self.provider.getBanners(program)
+    
+    def hasBanners(self, program):
+        return self.provider.hasBanners(program)
     
     def hasPosters(self, program):
         return self.provider.hasPosters(program)

@@ -24,9 +24,12 @@
 #
 
 import logging
+import time
+import xbmc
 import xbmcgui
 import mythbox.msg as m
 import mythbox.ui.toolkit as ui
+import Queue
 
 from datetime import datetime, timedelta
 from mythbox.mythtv.conn import inject_conn
@@ -131,14 +134,17 @@ class TvGuideWindow(ui.BaseWindow):
         self.prevButtonInfo = None  # gridCell
         self.pager = None           # Pager
         self.initialized = False
+        
+        self.bannerQueue = Queue.Queue()
 
     @catchall_ui
     def onInit(self):
         log.debug('onInit')
         if self.win is None:
             self.win = xbmcgui.Window(xbmcgui.getCurrentWindowId())
+            self.workerBee()
             self.loadGuide()
-        
+            
     @catchall_ui
     @timed
     @inject_db
@@ -313,6 +319,13 @@ class TvGuideWindow(ui.BaseWindow):
             self.setWindowProperty('airtime', program.formattedAirTime())
             self.setWindowProperty('duration', program.formattedDuration())
             self.setWindowProperty('originalAirDate', program.formattedOriginalAirDate())
+            self.setWindowProperty('banner', u'')
+            if self.fanArt.hasBanners(program):
+                bannerPath = self.fanArt.pickBanner(program)
+                self.setWindowProperty('banner', [u'',bannerPath][bannerPath is not None])
+            else:
+                log.debug('Added to bannerqueue: %s' % safe_str(program.title()))
+                self.bannerQueue.put(program)
         else:
             self.setWindowProperty('title', u'')
             self.setWindowProperty('category', u'')
@@ -321,7 +334,31 @@ class TvGuideWindow(ui.BaseWindow):
             self.setWindowProperty('airtime', u'')
             self.setWindowProperty('duration', u'')
             self.setWindowProperty('originalAirDate', u'')
+            self.setWindowProperty('banner', u'')
 
+    @run_async
+    def workerBee(self):
+        while not self.closed and not xbmc.abortRequested:
+            try:
+                if not self.bannerQueue.empty():
+                    log.debug('Banner queue size: %d' % self.bannerQueue.qsize())
+                program = self.bannerQueue.get(block=True, timeout=1)
+                bannerPath = self.fanArt.pickBanner(program)
+                log.debug('workerBee resolved %s to %s' % (safe_str(program.title()), bannerPath))
+            except Queue.Empty:
+                pass
+
+#    @run_async
+#    @coalesce
+#    @catchall
+#    def renderBanner(self, program, myRenderToken):
+#        log.debug('post-caching banner for %s' % safe_str(program.title()))
+#        bannerPath = self.fanArt.pickBanner(program)
+#        if myRenderToken == self.activeRenderToken:
+#            self.setWindowProperty('banner', [u'',bannerPath][bannerPath is not None])
+#        #else:
+#        #    self.renderBanner(self.program)
+            
     @window_busy
     @inject_conn
     def watchLiveTv(self, program):
