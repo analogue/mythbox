@@ -1195,6 +1195,33 @@ class Connection(object):
             return msg[0].upper() == 'OK'
 
 
+class EventConnection(Connection):
+    '''Strictly for reading system events from the master backend'''
+     
+    def __init__(self, *args, **kwargs):
+        Connection.__init__(self, *args, **kwargs)
+
+    def connect(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((self.master.ipAddress, self.master.port))
+        if not protocol.serverVersion:
+            protocol.serverVersion = self.getServerVersion()
+        
+        try:
+            self.protocol = protocol.protocols[protocol.serverVersion]
+        except KeyError:
+            raise ProtocolException('Unsupported protocol: %s' % protocol.serverVersion)
+
+        self.negotiateProtocol(s, protocol.serverVersion, self.protocol.protocolToken())
+        self.annEvent(s)
+        return s
+
+    def annEvent(self, cmdSock):
+        reply = self._sendRequest(cmdSock, ['ANN Playback mythbox-%s 3' % self.platform.getHostname()])
+        if not self._isOk(reply):
+            raise ServerException, 'Backend announce with events refused: %s' % reply
+
+
 class ConnectionFactory(pool.PoolableFactory):
     
     def __init__(self, *args, **kwargs):

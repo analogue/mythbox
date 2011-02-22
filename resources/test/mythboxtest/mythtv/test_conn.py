@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -25,7 +25,7 @@ from mockito import Mock
 from mythbox.bus import EventBus
 from mythbox.mythtv import protocol
 from mythbox.mythtv.enums import Upcoming
-from mythbox.mythtv.conn import Connection, createChainId, ServerException, encodeLongLong, decodeLongLong
+from mythbox.mythtv.conn import Connection, EventConnection, createChainId, ServerException, encodeLongLong, decodeLongLong
 from mythbox.mythtv.db import MythDatabase
 from mythbox.mythtv.protocol import ProtocolException
 from mythbox.platform import getPlatform
@@ -396,8 +396,38 @@ class ConnectionTest(unittest2.TestCase):
         recordings = self.conn.getRecordings()
         self.assertTrue(recordings, 'Recordings required to run this test')
         return recordings
-    
 
+
+class EventConnectionTest(unittest2.TestCase):
+
+    def setUp(self):
+        self.platform = getPlatform()
+        self.translator = Mock()
+        self.settings = MythSettings(self.platform, self.translator)
+        
+        privateConfig = OnDemandConfig()
+        self.settings.put('mysql_host', privateConfig.get('mysql_host'))
+        self.settings.put('mysql_port', privateConfig.get('mysql_port'))
+        self.settings.setMySqlDatabase(privateConfig.get('mysql_database'))
+        self.settings.setMySqlUser(privateConfig.get('mysql_user'))  
+        self.settings.put('mysql_password', privateConfig.get('mysql_password'))
+        self.settings.put('paths_recordedprefix', privateConfig.get('paths_recordedprefix'))
+        
+        self.db = MythDatabase(self.settings, self.translator)
+        self.bus = EventBus()
+        self.conn = EventConnection(self.settings, self.translator, self.platform, self.bus, self.db)
+
+    def tearDown(self):
+        self.conn.close()
+
+    def test_read_a_system_event(self):
+        for i in xrange(1):
+            msg = self.conn._readMsg(self.conn.cmdSock)
+            log.debug(msg)
+            self.assertEqual('BACKEND_MESSAGE', msg[0])
+            self.assertTrue(msg[1].startswith('SYSTEM_EVENT'))
+            
+            
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')
