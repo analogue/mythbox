@@ -32,7 +32,7 @@ from mythbox.mythtv import protocol
 from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.enums import TVState, Upcoming
 from mythbox.mythtv.protocol import ProtocolException
-from mythbox.util import timed, threadlocals, timed_cache, safe_str
+from mythbox.util import timed, threadlocals, timed_cache, safe_str, max_threads
 
 log     = logging.getLogger('mythbox.core')     # mythtv core logger
 wirelog = logging.getLogger('mythbox.wire')     # wire level protocol logger
@@ -138,6 +138,31 @@ class ServerException(Exception):
     pass
 
 
+class UpcomingRecordings(object):
+    
+    def __init__(self, *args, **kwargs):
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ['bus']]
+        self.upcoming = None
+        self.bus.register(self)
+    
+    @max_threads(1)
+    def all(self):
+        log.debug('all begin')
+        if self.upcoming is None:
+            self.upcoming = self.all_internal()
+        return self.upcoming[:]
+    
+    @inject_conn
+    def all_internal(self):
+        log.debug("all internal begin")
+        return self.conn().getUpcomingRecordings()
+    
+    def onEvent(self, event):
+        id = event['id']
+        if id == Event.SCHEDULER_RAN:
+            self.upcoming = None
+
+    
 class Connection(object):
     """Connection to MythTV Backend.
     TODO: Fix quirkiness -- establishes new conn to slave if target backend isn't the master"""
@@ -1203,6 +1228,7 @@ class EventConnection(Connection):
 
     def connect(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(None)
         s.connect((self.master.ipAddress, self.master.port))
         if not protocol.serverVersion:
             protocol.serverVersion = self.getServerVersion()
@@ -1217,7 +1243,7 @@ class EventConnection(Connection):
         return s
 
     def annEvent(self, cmdSock):
-        reply = self._sendRequest(cmdSock, ['ANN Playback mythbox-%s 3' % self.platform.getHostname()])
+        reply = self._sendRequest(cmdSock, ['ANN Playback %s 3' % self.platform.getHostname()])
         if not self._isOk(reply):
             raise ServerException, 'Backend announce with events refused: %s' % reply
 

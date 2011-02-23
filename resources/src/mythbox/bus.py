@@ -26,6 +26,7 @@ class Event(object):
     RECORDING_DELETED    = 'RECORDING_DELETED'  # keys: id, program
     SETTING_CHANGED      = 'SETTING_CHANGED'    # keys: id, tag, old, new
     SHUTDOWN             = 'SHUDTOWN'           # keys: None
+    SCHEDULER_RAN        = 'SCHEDULER_RAN'      # keys: None
 
 
 class EventBus(object):

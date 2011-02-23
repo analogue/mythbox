@@ -114,6 +114,7 @@ class MythSettings(object):
             'mysql_user'                 : 'mythtv',
             'mysql_password'             : 'change_me',
             'mysql_encoding_override'    : 'latin1',
+            'streaming_enabled'          : 'False',
             'paths_recordedprefix'       : self.platform.getDefaultRecordingsDir(),
             'aggressive_caching'         : 'True',
             'recorded_view_by'           : '2', 

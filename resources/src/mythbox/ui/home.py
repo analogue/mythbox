@@ -28,12 +28,13 @@ from mythbox.bus import Event
 from mythbox.mythtv.db import MythDatabaseFactory
 from mythbox.mythtv.domain import StatusException
 from mythbox.mythtv.enums import JobStatus, JobType
-from mythbox.mythtv.conn import inject_conn, inject_db, ConnectionFactory
+from mythbox.mythtv.conn import inject_conn, inject_db, ConnectionFactory, EventConnection
 from mythbox.settings import SettingsException
 from mythbox.ui.player import MythPlayer, TrackingCommercialSkipper
 from mythbox.ui.toolkit import BaseWindow, Action, window_busy, showPopup
 from mythbox.util import catchall_ui, catchall, lirc_hack, run_async, coalesce, safe_str 
 from mythbox.util import hasPendingWorkers, waitForWorkersToDie, formatSize
+from mythbox.mythtv.publish import MythEventPublisher
 
 log = logging.getLogger('mythbox.ui')
 
@@ -170,17 +171,16 @@ class HomeWindow(BaseWindow):
                 self.close()
                 return False
             
-        if self.settingsOK:      
-            pool.pools['dbPool'] = pool.EvictingPool(MythDatabaseFactory(settings=self.settings, translator=self.translator), maxAgeSecs=10*60, reapEverySecs=10)
-            
-            # TODO: Conn pool is non-evicting (I think we have to maintain connections to backends so they don't go to sleep/suspend)
-            pool.pools['connPool'] = pool.Pool(ConnectionFactory(settings=self.settings, translator=self.translator, platform=self.platform, bus=self.bus))
-        
         if self.settingsOK:
+            deps = {'settings':self.settings,'translator':self.translator, 'platform':self.platform, 'bus':self.bus}      
+            pool.pools['dbPool'] = pool.EvictingPool(MythDatabaseFactory(**deps), maxAgeSecs=10*60, reapEverySecs=10)
+            pool.pools['connPool'] = pool.Pool(ConnectionFactory(**deps))
             self.dumpBackendInfo()
-             
+            self.publisher = MythEventPublisher(**deps)
+            self.publisher.startup()
+            
         return self.settingsOK
-    
+        
     @inject_db
     def dumpBackendInfo(self):
         backends = [self.db().getMasterBackend()]
@@ -208,6 +208,11 @@ class HomeWindow(BaseWindow):
         xbmc.log('Before bus.publish')
         self.bus.publish({'id':Event.SHUTDOWN})
         
+        try:
+            self.publisher.shutdown()
+        except:
+            log.exception('shutting down publisher')
+            
         xbmc.log('Before reaping')
         
         try:

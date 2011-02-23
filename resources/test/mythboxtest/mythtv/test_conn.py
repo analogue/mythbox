@@ -19,7 +19,7 @@
 import logging
 import os
 import tempfile
-import unittest2
+import unittest2 as unittest
 
 from mockito import Mock
 from mythbox.bus import EventBus
@@ -34,7 +34,7 @@ from mythbox.util import OnDemandConfig
 
 log = logging.getLogger('mythbox.unittest')
 
-class FunctionsTest(unittest2.TestCase):
+class FunctionsTest(unittest.TestCase):
     
     def test_createChainId(self):
         chainId = createChainId()
@@ -71,7 +71,7 @@ class FunctionsTest(unittest2.TestCase):
         self.assertEquals(0xffffffff, highWord)
 
 
-class ConnectionTest(unittest2.TestCase):
+class ConnectionTest(unittest.TestCase):
 
     def setUp(self):
         self.platform = getPlatform()
@@ -398,7 +398,7 @@ class ConnectionTest(unittest2.TestCase):
         return recordings
 
 
-class EventConnectionTest(unittest2.TestCase):
+class EventConnectionTest(unittest.TestCase):
 
     def setUp(self):
         self.platform = getPlatform()
@@ -421,14 +421,60 @@ class EventConnectionTest(unittest2.TestCase):
         self.conn.close()
 
     def test_read_a_system_event(self):
-        for i in xrange(1):
+        import os
+        x  = 1
+        if 'MYTH_SNIFFER' in os.environ:
+            x = 9999999
+        for i in xrange(x):
             msg = self.conn._readMsg(self.conn.cmdSock)
             log.debug(msg)
             self.assertEqual('BACKEND_MESSAGE', msg[0])
             self.assertTrue(msg[1].startswith('SYSTEM_EVENT'))
+
             
+from mythbox.mythtv.conn import UpcomingRecordings, ConnectionFactory
+from mythbox.pool import pools, Pool
+from mythbox.mythtv.db import MythDatabaseFactory
+from mythbox.bus import Event
+
+class UpcomingRecordingsTest(unittest.TestCase):
+    
+    def setUp(self):
+        self.platform = getPlatform()
+        self.translator = Mock()
+        self.settings = MythSettings(self.platform, self.translator)
+        
+        privateConfig = OnDemandConfig()
+        self.settings.put('mysql_host', privateConfig.get('mysql_host'))
+        self.settings.put('mysql_port', privateConfig.get('mysql_port'))
+        self.settings.setMySqlDatabase(privateConfig.get('mysql_database'))
+        self.settings.setMySqlUser(privateConfig.get('mysql_user'))  
+        self.settings.put('mysql_password', privateConfig.get('mysql_password'))
+        self.settings.put('paths_recordedprefix', privateConfig.get('paths_recordedprefix'))
+        self.bus = EventBus()
+        pools['dbPool']   = Pool(MythDatabaseFactory(settings=self.settings, translator=self.translator))
+        pools['connPool'] = Pool(ConnectionFactory(settings=self.settings, translator=self.translator, platform=self.platform, bus=self.bus))
+        
+    def tearDown(self):
+        pools['connPool'].shutdown()
+        pools['dbPool'].shutdown()
+        
+    def test_all(self):
+        u = UpcomingRecordings(bus=self.bus)
+        upcoming = u.all()
+        for ur in upcoming:
+            print(ur)
+        for i in xrange(10):
+            u.all()    
+
+    def test_all_When_scheduler_ran_event_published_Then_will_force_refresh_of_upcoming_recordings(self):
+        u = UpcomingRecordings(bus=self.bus)
+        log.debug('Retrieved %s upcoming recorindgs' % len(u.all()))
+        self.bus.publish({'id': Event.SCHEDULER_RAN})
+        log.debug('Retrieved %s upcoming recorindgs' % len(u.all()))
+
             
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')
-    unittest2.main()
+    unittest.main()
