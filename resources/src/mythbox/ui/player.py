@@ -51,13 +51,6 @@ class MythPlayer(xbmc.Player):
         self.mythThumbnailCache = kwargs['mythThumbnailCache']
         self.translator = kwargs['translator']
         
-#    def __del__(self):
-#        log.warn("\n\n\n\n\t\tGC'ing player\n\n\n")
-#        try:
-#            xbmc.Player.__del__(self)
-#        except:
-#            log.exception('MythPlayer finalizer')
-            
     # Public ------------------------------------------------------------------
       
     def getFileUrl(self):
@@ -68,7 +61,7 @@ class MythPlayer(xbmc.Player):
         Plays the given program. Blocks until playback is stopped or until the 
         end of the recording is reached
         """
-        mlog.debug('> playRecording(%s)' % program.title())
+        mlog.debug('> playRecording(%s)' % safe_str(program.title()))
         assert not self.isPlaying(), 'Player is already playing a video'
         self._reset(program)
         self._commSkipper = commSkipper

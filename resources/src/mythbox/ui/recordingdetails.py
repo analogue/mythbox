@@ -25,7 +25,7 @@ from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.conn import inject_conn
 from mythbox.mythtv.domain import StatusException
 from mythbox.mythtv.enums import JobType, JobStatus
-from mythbox.ui.player import MythPlayer, NoOpCommercialSkipper, TrackingCommercialSkipper
+from mythbox.ui.player import MythPlayer, MythStreamingPlayer, NoOpCommercialSkipper, TrackingCommercialSkipper
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import Action, BaseWindow, window_busy
 from mythbox.util import safe_str, catchall, catchall_ui, run_async, lirc_hack, coalesce
@@ -37,17 +37,13 @@ class RecordingDetailsWindow(BaseWindow):
     
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
-        self.programIterator = kwargs['programIterator']
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'platform', 'fanArt', 'cachesByName', 'programIterator',)]
+        [setattr(self,k,v) for k,v in self.cachesByName.iteritems() if k in ('mythChannelIconCache', 'mythThumbnailCache',)]
+        
         self.program = self.programIterator.current() 
-        self.settings = kwargs['settings']
-        self.translator = kwargs['translator']
-        self.platform = kwargs['platform']
-        self.mythThumbnailCache = kwargs['mythThumbnailCache']
-        self.mythChannelIconCache = kwargs['mythChannelIconCache']
-        self.fanArt = kwargs['fanArt']
         self.isDeleted = False
         self.initialized = False
-        self.win = None
+        self.streaming = self.settings.getBoolean('streaming_enabled')
             
     @catchall_ui
     def onInit(self):
@@ -125,24 +121,32 @@ class RecordingDetailsWindow(BaseWindow):
         else:
             xbmcgui.Dialog().ok(self.translator.get(m.ERROR), self.translator.get(m.JOB_NOT_FOUND)) 
 
+    @catchall_ui
     def play(self):
-        p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
-        
-        # TODO: Can't turn off commskip in myth://. I like my commskip w/ toasters better...
-        #from mythbox.ui.player import MythStreamingPlayer
-        #p = MythStreamingPlayer(mythThumbnailCache=self.mythThumbnailCache, settings=self.settings)
-        p.playRecording(self.program, NoOpCommercialSkipper(p, self.program, self.translator))
-        del p 
+        log.debug("Playing %s .." % safe_str(self.program.title()))
+
+        if self.streaming:
+            # Play via myth://
+            p = MythStreamingPlayer(mythThumbnailCache=self.mythThumbnailCache, translator=self.translator, settings=self.settings)
+            p.playRecording(self.program, NoOpCommercialSkipper(p, self.program, self.translator))
+        else:
+            # Play via local fs
+            p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
+            p.playRecording(self.program, NoOpCommercialSkipper(p, self.program, self.translator))
+            del p 
     
     def playWithCommSkip(self):
-        p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
-        
-        # TODO: Can't turn off commskip in myth://. I like my commskip w/ toasters better...
-        #from mythbox.ui.player import MythStreamingPlayer
-        #p = MythStreamingPlayer(mythThumbnailCache=self.mythThumbnailCache, settings=self.settings)
-        
-        p.playRecording(self.program, TrackingCommercialSkipper(p, self.program, self.translator))
-        del p 
+        log.debug("Playing with skip %s .." % safe_str(self.program.title()))
+      
+        if self.streaming:  
+            # Play via myth://
+            p = MythStreamingPlayer(mythThumbnailCache=self.mythThumbnailCache, translator=self.translator, settings=self.settings)
+            p.playRecording(self.program, NoOpCommercialSkipper(p, self.program, self.translator))
+        else:
+            # Play via local fs
+            p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
+            p.playRecording(self.program, TrackingCommercialSkipper(p, self.program, self.translator))
+            del p
         
     @inject_db
     def editSchedule(self):
@@ -187,7 +191,7 @@ class RecordingDetailsWindow(BaseWindow):
         elif id == Action.PAGE_DOWN:
             self.nextRecording()
         else: 
-            log.debug('action = %s  id = %s' % (action, action.getId()))
+            log.debug('unhandled action = %s  id = %s' % (action, action.getId()))
 
     def onFocus(self, controlId):
         pass

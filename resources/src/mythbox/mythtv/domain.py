@@ -991,9 +991,15 @@ class RecordedProgram(Program):
         """
         return self.getFilename() + '.png'
 
+    def getFrameRate(self):
+        if self.settings.getBoolean('streaming_enabled'):
+            return self.getFrameRate2();
+        else:
+            return self.getFrameRate1()
+        
     @timed
     @synchronized
-    def getFrameRate(self):
+    def getFrameRate1(self):
         """
         @rtype: float
         @note: cached 
@@ -1055,39 +1061,59 @@ class RecordedProgram(Program):
         #
         # TODO: Integrate for Issue 111
         #
+        
+        ffmpeg_cache_dir=os.path.join(self._platform.getScriptDataDir(), 'cache', 'ffmpeg')
+        requireDir(ffmpeg_cache_dir) 
+        
         if not self._fps:
             ffmpegParser = FFMPEG(
                 ffmpeg=self._platform.getFFMpegPath(),
-                closeFDs=(type(self._platform) != WindowsPlatform),
-                windows=(type(self._platform) == WindowsPlatform))  
-                # WORKAROUND: close_fds borked on windows
-
+                closeFDs=(type(self._platform) != WindowsPlatform),  # WORKAROUND: close_fds borked on windows
+                windows=(type(self._platform) == WindowsPlatform),   # WORKAROUND: let pyxcoder know we're on windows
+                tempdir=ffmpeg_cache_dir,
+                log=log)
                         
             import tempfile
             fileSink = tempfile.mktemp('.mpg', 'mythbox')
-            log.debug('Saving recording fragment to: %s' % fileSink)
-            transferred = self.conn().transferFile(self.getFilename(), fileSink, self.db().toBackend(self.hostname()).ipAddress, max=5000000)
-
-            if not transferred:
-                showPopup('Error', 'Transfer fragment failed')
-                self._fps = 29.97
-                return self._fps
-            
             try:
-                metadata = ffmpegParser.get_metadata(fileSink)
-            except:
-                log.exception('ffmpeg parsing failed')
-                metadata = None
+                log.debug('Saving recording fragment to: %s' % fileSink)
+                transferred = self.conn().transferFile(self.getFilename(), fileSink, self.db().toBackend(self.hostname()).ipAddress, numBytes=5000000)
+    
+                if not transferred:
+                    showPopup('Error', 'Transfer fragment failed')
+                    self._fps = 29.97
+                    return self._fps
                 
-            log.debug('ffmpeg metadata for %s = %s' % (fileSink, metadata))
-            if metadata:
-                self._fps = float(metadata.frame_rate)
-            else:
-                self._fps = 29.97
-                log.error("""Could not determine FPS for file %s so defaulting to %s FPS.
-                             Make sure you have the ffmpeg executable in your path. 
-                             Commercial skipping may be inaccurate""" % (self._fps, self.getLocalPath()))
-                showPopup(self.translator.get(m.ERROR), 'FFMpeg could not determine framerate. Comm skip may be inaccurate')
+                try:
+                    metadata = ffmpegParser.get_metadata(fileSink)
+                except:
+                    log.exception('ffmpeg parsing failed')
+                    metadata = None
+                    
+                log.debug('ffmpeg metadata for %s = %s' % (fileSink, metadata))
+                if metadata:
+                    self._fps = float(metadata.frame_rate)
+
+                    # Hack for FFMPEG returning incorrect or conflicting framerates for specific types of video files
+                    for name, profile_data in self._fps_overrides.iteritems():
+                        try:
+                            if len([key for key,value in profile_data['tags'].iteritems() if getattr(metadata, key) == value]) == len(profile_data['tags']):  # all key/value pairs match
+                                old_fps = self._fps
+                                self._fps = profile_data['fps']
+                                log.debug('FPS override %s activated for %s from %s to %s' % (name, safe_str(self.title()), old_fps, self._fps))
+                                break
+                        except:
+                            log.exception('Blew up trying to test for fps overrides')
+                else:
+                    self._fps = 29.97
+                    log.error("""Could not determine FPS for file %s so defaulting to %s FPS.
+                                 Make sure you have the ffmpeg executable in your path. 
+                                 Commercial skipping may be inaccurate""" % (self._fps, self.getLocalPath()))
+                    showPopup(self.translator.get(m.ERROR), 'FFMpeg could not determine framerate. Comm skip may be inaccurate')
+            finally:
+                if os.path.exists(fileSink):
+                    os.remove(fileSink)
+            log.debug('FPS = %s' % self._fps)
         return self._fps
 
     def formattedFileSize(self):
@@ -1963,36 +1989,35 @@ class Tuner(object):
         tvState = self.conn().protocol.tvState()
         
         if tunerStatus in (tvState.WatchingLiveTV, tvState.WatchingRecording, tvState.RecordingOnly):
-            recording = self.conn().getCurrentRecording(self)
+            r = self.conn().getCurrentRecording(self)
         
         if tvState.OK == tunerStatus:
             next = self.getNextScheduledRecording() 
             status = t(m.IDLE) + u'. '
             if next:
                 status += t(m.NEXT_RECORDING_STARTS_AT) % (next.title(), next.formattedStartTime())
+                
         elif tvState.Error == tunerStatus:
             status = t(m.UNKNOWN)
+            
         elif tvState.WatchingLiveTV == tunerStatus:
-            status = t(m.WATCHING_AND_ENDS_AT) %(
-                recording.title(), 
-                recording.getChannelName(), 
-                self.time2string(recording.recendtime()))
+            status = t(m.WATCHING_AND_ENDS_AT) % (r.title(), r.getChannelName(), self.time2string(r.recendtime()))
+            
         elif tvState.WatchingPreRecorded == tunerStatus:
             status = t(m.WATCHING_PRERECORDED)
+            
         elif tvState.WatchingRecording == tunerStatus:
-            status = t(m.WATCHING_AND_RECORDING_UNTIL) % (
-                recording.title(), 
-                recording.getChannelName(), 
-                self.time2string(recording.recendtime()))
+            status = t(m.WATCHING_AND_RECORDING_UNTIL) % (r.title(), r.getChannelName(), self.time2string(r.recendtime()))
+            
         elif tvState.RecordingOnly == tunerStatus: 
-            status = t(m.RECORDING_ON_UNTIL) % (
-                recording.title(), 
-                recording.getChannelName(),
-                self.time2string(recording.recendtime()))                    
+            status = t(m.RECORDING_ON_UNTIL) % (r.title(), r.getChannelName(), self.time2string(r.recendtime()))
+            
         elif tvState.ChangingState == tunerStatus:
             status = t(m.BUSY)
+            
         else: 
             status = t(m.UNKNOWN_TUNER_STATUS) % tunerStatus
+            
         return status
 
     def time2string(self, t):
