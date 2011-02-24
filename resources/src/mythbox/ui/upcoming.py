@@ -51,12 +51,8 @@ class UpcomingRecordingsWindow(BaseWindow):
     
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
-        
-        self.settings = kwargs['settings']
-        self.translator = kwargs['translator']
-        self.platform = kwargs['platform']
-        self.fanArt = kwargs['fanArt']
-        self.mythChannelIconCache = kwargs['cachesByName']['mythChannelIconCache']
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings','translator','platform','fanArt','cachesByName', 'upcoming', )]
+        self.mythChannelIconCache = self.cachesByName['mythChannelIconCache']
         
         self.programs = []                       # [RecordedProgram]
         self.channelsById = None                 # {int:Channel}
@@ -65,7 +61,6 @@ class UpcomingRecordingsWindow(BaseWindow):
         self.programsByListItem = odict.odict()  # {ListItem:Program}
         self.sortBy = self.settings.get('upcoming_sort_by')
         self.sortAscending = self.settings.getBoolean('upcoming_sort_ascending')
-        self.closed = False
         self.activeRenderToken = None
         
     @catchall_ui

@@ -129,11 +129,7 @@ class SettingsWindow(BaseWindow):
     
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
-        self.settings = kwargs['settings']
-        self.translator = kwargs['translator']
-        self.platform = kwargs['platform']
-        self.fanArt = kwargs['fanArt']
-        self.cachesByName = kwargs['cachesByName']
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings','translator','platform','fanArt','cachesByName',)]
         self.settingsMap = {}  # key = controlId,  value = Setting
         self.t = self.translator.get
         

@@ -28,7 +28,8 @@ from mythbox.bus import Event
 from mythbox.mythtv.db import MythDatabaseFactory
 from mythbox.mythtv.domain import StatusException
 from mythbox.mythtv.enums import JobStatus, JobType
-from mythbox.mythtv.conn import inject_conn, inject_db, ConnectionFactory, EventConnection
+from mythbox.mythtv.conn import inject_conn, inject_db, ConnectionFactory, EventConnection,\
+    UpcomingRecordings
 from mythbox.settings import SettingsException
 from mythbox.ui.player import MythPlayer, TrackingCommercialSkipper
 from mythbox.ui.toolkit import BaseWindow, Action, window_busy, showPopup
@@ -47,17 +48,10 @@ class HomeWindow(BaseWindow):
     
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
-        self.dependencies = kwargs
-        self.settings     = kwargs['settings']
-        self.translator   = kwargs['translator']
-        self.platform     = kwargs['platform']
-        self.fanArt       = kwargs['fanArt']
-        self.bus          = kwargs['bus']
-        self.feedHose     = kwargs['feedHose']
-        self.mythThumbnailCache = kwargs['cachesByName']['mythThumbnailCache']
-        self.mythChannelIconCache = kwargs['cachesByName']['mythChannelIconCache']
-        self.httpCache = kwargs['cachesByName']['httpCache']
-        self.win = None
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'platform', 'fanArt', 'cachesByName', 'bus', 'feedHose',)]
+        [setattr(self,k,v) for k,v in self.cachesByName.iteritems() if k in ('mythChannelIconCache', 'mythThumbnailCache', 'httpCache',)]
+
+        self.deps = kwargs
         self.lastFocusId = None
         self.shutdownPending = False
         self.bus.register(self)
@@ -172,12 +166,16 @@ class HomeWindow(BaseWindow):
                 return False
             
         if self.settingsOK:
-            deps = {'settings':self.settings,'translator':self.translator, 'platform':self.platform, 'bus':self.bus}      
-            pool.pools['dbPool'] = pool.EvictingPool(MythDatabaseFactory(**deps), maxAgeSecs=10*60, reapEverySecs=10)
-            pool.pools['connPool'] = pool.Pool(ConnectionFactory(**deps))
+            pool.pools['dbPool'] = pool.EvictingPool(MythDatabaseFactory(**self.deps), maxAgeSecs=10*60, reapEverySecs=10)
+            pool.pools['connPool'] = pool.Pool(ConnectionFactory(**self.deps))
+            
             self.dumpBackendInfo()
-            self.publisher = MythEventPublisher(**deps)
+            
+            self.publisher = MythEventPublisher(**self.deps)
             self.publisher.startup()
+            
+            # a little circurlar, but we can instantiate until we have a valid set of settings
+            self.deps['upcoming'] = UpcomingRecordings(**self.deps)
             
         return self.settingsOK
         
@@ -255,7 +253,7 @@ class HomeWindow(BaseWindow):
         
     def goWatchTv(self):
         from mythbox.ui.livetv import LiveTvWindow 
-        LiveTvWindow('mythbox_livetv.xml', self.platform.getScriptDir(), **self.dependencies).doModal()
+        LiveTvWindow('mythbox_livetv.xml', self.platform.getScriptDir(), **self.deps).doModal()
 
     @window_busy
     def goPlayRecording(self):
@@ -266,25 +264,25 @@ class HomeWindow(BaseWindow):
             
     def goWatchRecordings(self):
         #from mythbox.ui.recordings import RecordingsWindow
-        #RecordingsWindow('mythbox_recordings.xml', self.platform.getScriptDir(), **self.dependencies).doModal()
+        #RecordingsWindow('mythbox_recordings.xml', self.platform.getScriptDir(), **self.deps).doModal()
         from mythbox.ui.recordings2 import RecordingsWindow
-        RecordingsWindow('mythbox_recordings2.xml', self.platform.getScriptDir(), **self.dependencies).doModal()
+        RecordingsWindow('mythbox_recordings2.xml', self.platform.getScriptDir(), **self.deps).doModal()
         
     def goTvGuide(self):
         from tvguide import TvGuideWindow 
-        TvGuideWindow('mythbox_tvguide.xml', self.platform.getScriptDir(), **self.dependencies).doModal() 
+        TvGuideWindow('mythbox_tvguide.xml', self.platform.getScriptDir(), **self.deps).doModal() 
     
     def goRecordingSchedules(self):
         from schedules import SchedulesWindow 
-        SchedulesWindow('mythbox_schedules.xml', self.platform.getScriptDir(), **self.dependencies).doModal()
+        SchedulesWindow('mythbox_schedules.xml', self.platform.getScriptDir(), **self.deps).doModal()
             
     def goUpcomingRecordings(self):
         from upcoming import UpcomingRecordingsWindow
-        UpcomingRecordingsWindow('mythbox_upcoming.xml', self.platform.getScriptDir(), **self.dependencies).doModal()
+        UpcomingRecordingsWindow('mythbox_upcoming.xml', self.platform.getScriptDir(), **self.deps).doModal()
         
     def goSettings(self):
         from uisettings import SettingsWindow
-        SettingsWindow('mythbox_settings.xml', self.platform.getScriptDir(), **self.dependencies).doModal() 
+        SettingsWindow('mythbox_settings.xml', self.platform.getScriptDir(), **self.deps).doModal() 
 
     @window_busy
     def refresh(self):
@@ -308,7 +306,7 @@ class HomeWindow(BaseWindow):
     @inject_conn
     @coalesce
     def renderCoverFlow(self, exclude=None):
-        log.debug('>> renderCoverFlow begin')
+        log.debug('>>> renderCoverFlow begin')
         self.recordings = self.conn().getAllRecordings()
         
         if exclude:
@@ -328,12 +326,8 @@ class HomeWindow(BaseWindow):
                 cover = self.mythThumbnailCache.get(r)
                 if not cover:
                     cover = 'mythbox-logo.png'
-            self.setListItemProperty(listItem, 'thumb', cover)
-            # WORKAROUND: 
-            #    Image associated with 'thumb' property won't update
-            #    unless we 'poke' the list item by calling setThumbnailImage(...)
-            #    with a bogus image
-            listItem.setThumbnailImage('OverlayHD.png') 
+            self.updateListItemProperty(listItem, 'thumb', cover)
+            
         log.debug('<<< renderCoverFlow end')
         
     @run_async

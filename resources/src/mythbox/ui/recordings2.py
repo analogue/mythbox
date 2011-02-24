@@ -78,11 +78,10 @@ class RecordingsWindow(BaseWindow):
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
         # inject dependencies from constructor
-        [setattr(self,k,v) for k,v in kwargs.iteritems()]
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'platform', 'fanArt', 'cachesByName')]
         [setattr(self,k,v) for k,v in self.cachesByName.iteritems()]
 
         self.programs = []                       # [RecordedProgram]
-        self.closed = False
         self.allGroupTitle = self.translator.get(m.ALL_RECORDINGS)
         self.activeRenderToken = None
         self.groupsByTitle = odict.odict()       # {unicode:Group}
@@ -325,7 +324,6 @@ class RecordingsWindow(BaseWindow):
             except:
                 pass
 
-
     def renderProgramDeleted2(self, deletedProgram, selectionIndex):
         savedLastSelectedGroupIndex = self.groupsByTitle[self.lastSelectedGroup].index
         
@@ -386,8 +384,6 @@ class RecordingsWindow(BaseWindow):
                 self.setFocus(self.groupsListbox)
         except Exception, e:
             log.warn(safe_str(e))
-            
-        
         
     @run_async
     @catchall
@@ -439,8 +435,7 @@ class RecordingsWindow(BaseWindow):
             settings=self.settings,
             translator=self.translator,
             platform=self.platform,
-            mythThumbnailCache=self.mythThumbnailCache,
-            mythChannelIconCache=self.mythChannelIconCache,
+            cachesByName=self.cachesByName,
             fanArt=self.fanArt)
         win.doModal()
 

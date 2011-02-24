@@ -41,17 +41,12 @@ class SchedulesWindow(BaseWindow):
     
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
-        
-        self.settings = kwargs['settings']
-        self.translator = kwargs['translator']
-        self.platform = kwargs['platform']
-        self.fanArt = kwargs['fanArt']
-        self.mythChannelIconCache = kwargs['cachesByName']['mythChannelIconCache']
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings','translator','platform','fanArt','cachesByName',)]
+        [setattr(self,k,v) for k,v in self.cachesByName.iteritems() if k in ('mythChannelIconCache',)]
         
         self.schedules = []                       # [RecordingSchedule]
         self.listItemsBySchedule = odict.odict()  # {RecordingSchedule:ListItem}
         self.channelsById = None                  # {int:Channel}
-        self.closed = False
         self.lastFocusId = ID_SCHEDULES_LISTBOX
         self.lastSelected = int(self.settings.get('schedules_last_selected'))
         self.activeRenderToken = None
@@ -182,13 +177,11 @@ class ScheduleDialog(BaseDialog):
         
     def __init__(self, *args, **kwargs):
         BaseDialog.__init__(self, *args, **kwargs)
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings','translator','platform','mythChannelIconCache',)]
+        
         # Leave passed in schedule untouched; work on a copy of it 
         # in case the user cancels the operation.
         self.schedule = copy.copy(kwargs['schedule'])
-        self.translator = kwargs['translator']
-        self.platform = kwargs['platform']
-        self.settings = kwargs['settings']
-        self.mythChannelIconCache = kwargs['mythChannelIconCache']
         self.shouldRefresh = False
         
     @catchall

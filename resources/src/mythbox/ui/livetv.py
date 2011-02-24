@@ -256,18 +256,13 @@ class LiveTvWindow(BaseWindow):
     
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'platform', 'fanArt', 'cachesByName',)]
+        [setattr(self,k,v) for k,v in self.cachesByName.iteritems() if k in ('mythChannelIconCache',)]
          
-        self.settings = kwargs['settings']
-        self.translator = kwargs['translator']
-        self.mythChannelIconCache = kwargs['cachesByName']['mythChannelIconCache']
-        self.platform = kwargs['platform']
-        self.fanArt = kwargs['fanArt']
-
         self.channels = None                     # Channels sorted and merged (if multiple tuners)
         self.channelsById = None                 # {int channelId:Channel}
         self.programs = None                     # [TVProgram]
         self.listItemsByChannel = odict()        # {Channel:ListItem}
-        self.closed = False
         self.lastSelected = int(self.settings.get('livetv_last_selected'))
 
         self.activeRenderToken = None

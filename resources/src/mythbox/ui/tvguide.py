@@ -99,18 +99,12 @@ class TvGuideWindow(ui.BaseWindow):
     
     def __init__(self, *args, **kwargs):
         ui.BaseWindow.__init__(self, *args, **kwargs)
-        self.settings     = kwargs['settings']
-        self.translator   = kwargs['translator']
-        self.platform     = kwargs['platform']
-        self.fanArt       = kwargs['fanArt']
-        self.cachesByName = kwargs['cachesByName']
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings','translator','platform','fanArt','cachesByName',)]
+        [setattr(self,k,v) for k,v in self.cachesByName.iteritems()]
+
         self.upcoming = []  # RecordedProgram[]
         self.upcomingByProgram = {}
-        self.win = None
         
-        self.mythThumbnailCache = self.cachesByName['mythThumbnailCache']
-        self.mythChannelIconCache = self.cachesByName['mythChannelIconCache']
-        self.httpCache = self.cachesByName['httpCache']
         # =============================================================
 
         self.gridCells = []      # ProgramCell[] for grid of visible programs
@@ -348,17 +342,6 @@ class TvGuideWindow(ui.BaseWindow):
             except Queue.Empty:
                 pass
 
-#    @run_async
-#    @coalesce
-#    @catchall
-#    def renderBanner(self, program, myRenderToken):
-#        log.debug('post-caching banner for %s' % safe_str(program.title()))
-#        bannerPath = self.fanArt.pickBanner(program)
-#        if myRenderToken == self.activeRenderToken:
-#            self.setWindowProperty('banner', [u'',bannerPath][bannerPath is not None])
-#        #else:
-#        #    self.renderBanner(self.program)
-            
     @window_busy
     @inject_conn
     def watchLiveTv(self, program):

@@ -48,21 +48,14 @@ class RecordingsWindow(BaseWindow):
         
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
- 
-        self.settings = kwargs['settings']
-        self.translator = kwargs['translator']
-        self.platform = kwargs['platform']
-        self.fanArt = kwargs['fanArt']
-        self.mythChannelIconCache = kwargs['cachesByName']['mythChannelIconCache']
-        self.mythThumbnailCache = kwargs['cachesByName']['mythThumbnailCache']
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'platform', 'fanArt', 'cachesByName',)]
+        [setattr(self,k,v) for k,v in self.cachesByName.iteritems() if k in ('mythChannelIconCache', 'mythThumbnailCache',)]
 
         self.programs = []                       # [RecordedProgram]
         self.allPrograms = []                    # [RecordedProgram]
         self.programsByListItem = odict.odict()  # {ListItem:RecordedProgram}
-        self.closed = False
         
         self.lastSelected = int(self.settings.get('recordings_last_selected'))
-        
         self.sortBy = self.settings.get('recordings_sort_by')
         self.sortAscending = self.settings.getBoolean('recordings_sort_ascending')
         self.group = self.settings.get('recordings_recording_group')
@@ -281,8 +274,7 @@ class RecordingsWindow(BaseWindow):
             settings=self.settings,
             translator=self.translator,
             platform=self.platform,
-            mythThumbnailCache=self.mythThumbnailCache,
-            mythChannelIconCache=self.mythChannelIconCache,
+            cachesByName=self.cachesByName,
             fanArt=self.fanArt)
         win.doModal()
 
