@@ -138,32 +138,7 @@ class ServerException(Exception):
     """Thrown in response to error conditions from the mythtv backend"""
     pass
 
-
-class UpcomingRecordings(object):
-    
-    def __init__(self, *args, **kwargs):
-        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ['bus']]
-        self.upcoming = None
-        self.bus.register(self)
-    
-    @max_threads(1)
-    def all(self):
-        log.debug('all begin')
-        if self.upcoming is None:
-            self.upcoming = self.all_internal()
-        return self.upcoming[:]
-    
-    @inject_conn
-    def all_internal(self):
-        log.debug("all internal begin")
-        return self.conn().getUpcomingRecordings()
-    
-    def onEvent(self, event):
-        id = event['id']
-        if id == Event.SCHEDULER_RAN:
-            self.upcoming = None
-
-    
+  
 class Connection(object):
     """Connection to MythTV Backend.
     TODO: Fix quirkiness -- establishes new conn to slave if target backend isn't the master"""
@@ -277,13 +252,13 @@ class Connection(object):
 
     @timed
     def annPlayback(self, cmdSock):
-        reply = self._sendRequest(cmdSock, ['ANN Playback mythbox-%s 0' % self.platform.getHostname()])
+        reply = self._sendRequest(cmdSock, ['ANN Playback %s 0' % self.platform.getHostname()])
         if not self._isOk(reply):
             raise ServerException, 'Backend playback refused: %s' % reply
     
     @timed
     def annMonitor(self, cmdSock):
-        reply = self._sendRequest(cmdSock, ['ANN Monitor mythbox-%s 0' % self.platform.getHostname()])
+        reply = self._sendRequest(cmdSock, ['ANN Monitor %s 0' % self.platform.getHostname()])
         if not self._isOk(reply):
             raise ServerException, 'Backend monitor refused: %s' % reply
 
@@ -299,7 +274,7 @@ class Connection(object):
         """
         backend = self.db().toBackend(backendHost)
         s = self.connect(announce=None, slaveBackend=backend.ipAddress)
-        self._sendMsg(s, self.protocol.buildAnnounceFileTransferCommand('mythbox-%s' % self.platform.getHostname(),  filePath))
+        self._sendMsg(s, self.protocol.buildAnnounceFileTransferCommand('%s' % self.platform.getHostname(),  filePath))
         reply = self._readMsg(s)
         if not self._isOk(reply):
             raise ServerException('Backend filetransfer refused: %s' % reply)
@@ -720,7 +695,7 @@ class Connection(object):
                 log.debug('Invalidating cached upcoming recordings')
             finally:
                 Connection.upcomingLock.release()
-        
+
     @classmethod
     def _getUpcomingRecordings(clazz, conn):
         try:
@@ -740,10 +715,10 @@ class Connection(object):
         Rely on events published on the bus to invalidate the data and only re-query
         when needed.
         '''
-        return Connection._getUpcomingRecordings(self)
+        return [upcoming for upcoming in Connection._getUpcomingRecordings(self) if upcoming.getRecordingStatus() in filter]
         
     @timed
-    def _internal_getUpcomingRecordings(self, filter=Upcoming.SCHEDULED):
+    def _internal_getUpcomingRecordings(self):
         """
         @type filter: UPCOMING_*
         @rtype: RecordedProgram[]
@@ -800,8 +775,7 @@ class Connection(object):
                     self.platform,
                     self.protocol,
                     [self, None][self._db is None])
-            if program.getRecordingStatus() in filter:
-                upcoming.append(program)
+            upcoming.append(program)
             offset += self.protocol.recordSize()
         return upcoming
 
@@ -1283,6 +1257,10 @@ class EventConnection(Connection):
         self.annEvent(s)
         return s
 
+    def readEvent(self):
+        '''Returns list of strings'''
+        return self._readMsg(self.cmdSock)
+        
     def annEvent(self, cmdSock):
         reply = self._sendRequest(cmdSock, ['ANN Playback %s 3' % self.platform.getHostname()])
         if not self._isOk(reply):

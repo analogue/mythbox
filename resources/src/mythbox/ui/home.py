@@ -28,8 +28,7 @@ from mythbox.bus import Event
 from mythbox.mythtv.db import MythDatabaseFactory
 from mythbox.mythtv.domain import StatusException
 from mythbox.mythtv.enums import JobStatus, JobType
-from mythbox.mythtv.conn import inject_conn, inject_db, ConnectionFactory, EventConnection,\
-    UpcomingRecordings
+from mythbox.mythtv.conn import inject_conn, inject_db, ConnectionFactory
 from mythbox.settings import SettingsException
 from mythbox.ui.player import MythPlayer, TrackingCommercialSkipper
 from mythbox.ui.toolkit import BaseWindow, Action, window_busy, showPopup
@@ -173,9 +172,6 @@ class HomeWindow(BaseWindow):
             
             self.publisher = MythEventPublisher(**self.deps)
             self.publisher.startup()
-            
-            # a little circurlar, but we can instantiate until we have a valid set of settings
-            self.deps['upcoming'] = UpcomingRecordings(**self.deps)
             
         return self.settingsOK
         
