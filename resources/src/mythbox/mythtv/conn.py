@@ -25,6 +25,7 @@ import thread
 import threading
 import time
 
+from threading import RLock
 from decorator import decorator
 from mythbox import pool
 from mythbox.bus import Event
@@ -176,6 +177,7 @@ class Connection(object):
         self.platform = platform
         self.protocol = None
         self.bus = bus
+        self.bus.register(self)  # interested in SCHEDULER_RAN event to invalidate upcoming recordings
         self._db = db
         self.db_init()
 
@@ -250,6 +252,9 @@ class Connection(object):
             
         if self._db:
             self._db.close()
+            
+        if self.bus:
+            self.bus.deregister(self)
                 
     @timed            
     def negotiateProtocol(self, s, clientVersion, versionToken):
@@ -699,10 +704,46 @@ class Connection(object):
             offset += self.protocol.recordSize()
         return scheduledRecordings
 
+    upcomingLock = RLock()
+    upcomingCached = None
+    
+    def onEvent(self, event):
+        if event['id'] == Event.SCHEDULER_RAN:
+            Connection._invalidateUpcomingRecordings()
+
+    @classmethod
+    def _invalidateUpcomingRecordings(clazz):
+        if Connection.upcomingCached is not None:
+            try:
+                Connection.upcomingLock.acquire()
+                Connection.upcomingCached = None
+                log.debug('Invalidating cached upcoming recordings')
+            finally:
+                Connection.upcomingLock.release()
         
-    @timed_cache(seconds=5)
-    @timed
+    @classmethod
+    def _getUpcomingRecordings(clazz, conn):
+        try:
+            Connection.upcomingLock.acquire()
+            if Connection.upcomingCached == None:
+                Connection.upcomingCached = conn._internal_getUpcomingRecordings()
+            else:
+                log.debug('Returning cached upcoming recordings')
+            return Connection.upcomingCached[:]
+        finally:
+            Connection.upcomingLock.release()
+    
     def getUpcomingRecordings(self, filter=Upcoming.SCHEDULED):
+        '''
+        Serialize access to cached upcoming recordings since this is an expensive
+        operation for the backend and can also be data intensive (2MB+ for mine). 
+        Rely on events published on the bus to invalidate the data and only re-query
+        when needed.
+        '''
+        return Connection._getUpcomingRecordings(self)
+        
+    @timed
+    def _internal_getUpcomingRecordings(self, filter=Upcoming.SCHEDULED):
         """
         @type filter: UPCOMING_*
         @rtype: RecordedProgram[]

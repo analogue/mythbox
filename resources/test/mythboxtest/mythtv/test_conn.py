@@ -30,7 +30,7 @@ from mythbox.mythtv.db import MythDatabase
 from mythbox.mythtv.protocol import ProtocolException
 from mythbox.platform import getPlatform
 from mythbox.settings import MythSettings
-from mythbox.util import OnDemandConfig
+from mythbox.util import OnDemandConfig, run_async
 
 log = logging.getLogger('mythbox.unittest')
 
@@ -179,7 +179,22 @@ class ConnectionTest(unittest.TestCase):
         recording = self.getRecordings().pop()
         actual = self.conn.getRecording(32, recording.recstarttime())
         self.assertTrue(actual is None)
-    
+  
+    def test_getUpcomingRecordings2(self):
+        foos = [Foo() for i in xrange(10)]
+        threads = [f.doWorkAsync(i) for i,f in enumerate(foos)]
+        [t.join() for t in threads]
+
+        upcoming = self.conn.getUpcomingRecordings2()
+        log.debug('Num upcoming recordings = %d' % (len(upcoming)))
+        for i,program in enumerate(upcoming):
+            log.debug('%d: tuner=%s %s' % (i, program.getTunerId(), program))
+            #program.dumpData()
+            
+        for program in upcoming:
+            self.assertTrue(program.getRecordingStatus() in Upcoming.SCHEDULED)
+            self.assertTrue(program.getTunerId() >= 0)
+          
     def test_getUpcomingRecordings_When_no_args_Then_returns_only_programs_that_will_be_recorded(self):
         upcoming = self.conn.getUpcomingRecordings()
         log.debug('Num upcoming recordings = %d' % (len(upcoming)))
@@ -473,6 +488,39 @@ class UpcomingRecordingsTest(unittest.TestCase):
         self.bus.publish({'id': Event.SCHEDULER_RAN})
         log.debug('Retrieved %s upcoming recorindgs' % len(u.all()))
 
+
+class Connection2Test(unittest.TestCase):
+
+    def setUp(self):
+        self.platform = getPlatform()
+        self.translator = Mock()
+        self.settings = MythSettings(self.platform, self.translator)
+        
+        privateConfig = OnDemandConfig()
+        self.settings.put('mysql_host', privateConfig.get('mysql_host'))
+        self.settings.put('mysql_port', privateConfig.get('mysql_port'))
+        self.settings.setMySqlDatabase(privateConfig.get('mysql_database'))
+        self.settings.setMySqlUser(privateConfig.get('mysql_user'))  
+        self.settings.put('mysql_password', privateConfig.get('mysql_password'))
+        self.settings.put('paths_recordedprefix', privateConfig.get('paths_recordedprefix'))
+        self.bus = EventBus()
+
+    def tearDown(self):
+        pass #self.conn.close()
+
+    
+    def test_getUpcomingRecordings2(self):
+        
+        @run_async
+        def run_target(method):
+            method()
+
+        dbs = [MythDatabase(self.settings, self.translator) for i in xrange(10)]
+        conns = [Connection(self.settings, self.translator, self.platform, self.bus, dbs[i]) for i in xrange(10)]
+        threads = [run_target(conn.getUpcomingRecordings2) for conn in conns]
+        [t.join() for t in threads]
+        [conn.close() for conn in conns]
+        
             
 if __name__ == '__main__':
     import logging.config
