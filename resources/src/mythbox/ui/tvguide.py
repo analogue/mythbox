@@ -24,7 +24,6 @@
 #
 
 import logging
-import time
 import xbmc
 import xbmcgui
 import mythbox.msg as m
@@ -38,7 +37,8 @@ from mythbox.mythtv.domain import ScheduleFromProgram, Channel
 from mythbox.mythtv.enums import Upcoming
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import Action, Align, AspectRatio, window_busy
-from mythbox.util import catchall_ui, timed, lirc_hack, catchall, ui_locked2, safe_str, coalesce, run_async
+from mythbox.util import catchall_ui, timed, lirc_hack, catchall, ui_locked2, safe_str, run_async
+from mythbox.bus import Event
 
 log = logging.getLogger('mythbox.ui')
 
@@ -99,11 +99,11 @@ class TvGuideWindow(ui.BaseWindow):
     
     def __init__(self, *args, **kwargs):
         ui.BaseWindow.__init__(self, *args, **kwargs)
-        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings','translator','platform','fanArt','cachesByName',)]
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings','translator','platform','fanArt','cachesByName', 'bus')]
         [setattr(self,k,v) for k,v in self.cachesByName.iteritems()]
 
-        self.upcoming = []  # RecordedProgram[]
-        self.upcomingByProgram = {}
+        self._upcomingByProgram = None
+        self._upcomingStale = True
         
         # =============================================================
 
@@ -130,7 +130,22 @@ class TvGuideWindow(ui.BaseWindow):
         self.initialized = False
         
         self.bannerQueue = Queue.Queue()
+        self.bus.register(self)
+        
 
+    def onEvent(self, event):
+        if event['id'] == Event.SCHEDULER_RAN:
+            self._upcomingStale = True
+            
+    @inject_conn            
+    def upcomingByProgram(self):
+        if self._upcomingStale:
+            self._upcomingStale = False
+            self._upcomingByProgram = {} 
+            for p in self.conn().getUpcomingRecordings(filter=Upcoming.SCHEDULED):
+                self._upcomingByProgram[p] = p
+        return self._upcomingByProgram
+        
     @catchall_ui
     def onInit(self):
         log.debug('onInit')
@@ -193,7 +208,6 @@ class TvGuideWindow(ui.BaseWindow):
             
             self.setChannel(int(self.settings.get('tv_guide_last_selected')))
             self.setTime(datetime.now() - timedelta(minutes=30))
-            self.cacheUpcoming()
             self.initialized = True
 
         self._render()
@@ -205,16 +219,6 @@ class TvGuideWindow(ui.BaseWindow):
                 self.setFocus(self.prevFocus)
             else:
                 raise Exception, self.translator.get(m.NO_EPG_DATA)
-
-    @run_async
-    @coalesce
-    @catchall
-    @inject_conn
-    def cacheUpcoming(self):
-        self.upcoming = self.conn().getUpcomingRecordings(filter=Upcoming.SCHEDULED)
-        self.upcomingByProgram.clear()
-        for p in self.upcoming:
-            self.upcomingByProgram[p] = p
 
     @catchall_ui
     @lirc_hack            
@@ -236,6 +240,7 @@ class TvGuideWindow(ui.BaseWindow):
         if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
             self.closed = True
             self.settings.put('tv_guide_last_selected', '%s' % self.startChan)
+            self.bus.deregister(self)
             self.close()
         elif action == Action.DOWN       : actionConsumed = self._checkPageDown(self.prevFocus)
         elif action == Action.UP         : actionConsumed = self._checkPageUp(self.prevFocus)
@@ -387,9 +392,6 @@ class TvGuideWindow(ui.BaseWindow):
                     settings=self.settings,
                     mythChannelIconCache=self.mythChannelIconCache)
                 d.doModal()
-                
-                if d.shouldRefresh:
-                    self.cacheUpcoming()
 
         return actionConsumed
 
@@ -448,9 +450,9 @@ class TvGuideWindow(ui.BaseWindow):
 #            if program.starttimeAsTime() < self.startTime:
 #                cell.control.setLabel(label= '<')
 
-        if self.upcomingByProgram.has_key(program):
+        if program in self.upcomingByProgram():
             cell.title = '[B][COLOR=ffe2ff43]' + cell.title + '[/COLOR][/B]'
-            cell.scheduleId = self.upcomingByProgram[program].getScheduleId()
+            cell.scheduleId = self.upcomingByProgram()[program].getScheduleId()
         
         # Create a label to hold the name of the program with insets  
         # Label text seems to get truncated correctly...
@@ -474,7 +476,8 @@ class TvGuideWindow(ui.BaseWindow):
                 relY + self.guide_y + 2, 
                 overlayWidth, 
                 overlayHeight, 
-                self.platform.getMediaPath('OverlayHD.png'))
+                self.platform.getMediaPath('OverlayHD.png'),
+                aspectRatio=1)
             self.addControl(cell.hdOverlay)
         
         self.gridCells.append(cell)
