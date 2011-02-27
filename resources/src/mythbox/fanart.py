@@ -284,18 +284,6 @@ class SuperFastFanartProvider(PersistentFanartProvider):
             self.imagePathsByKey[key] = banners
         return banners
 
-#    def getBanners(self, program):
-#        banners = []
-#        key = self.createKey('getBanners', program)
-#        if key in self.imagePathsByKey:
-#            banners = self.imagePathsByKey[key]
-#        
-#        if not banners and self.nextProvider:
-#            banners = self.nextProvider.getBanners(program)
-#            if banners:  # cache returned banner 
-#                self.imagePathsByKey[key] = banners
-#        return banners
-        
     def hasPosters(self, program):
         return self.createKey('getPosters', program) in self.imagePathsByKey
         
@@ -569,6 +557,8 @@ class TheMovieDbFanartProvider(BaseFanartProvider):
     
 class GoogleImageSearchProvider(BaseFanartProvider):
     
+    API_KEY = 'ABQIAAAAtSwHhE1Qf9mbLYNOFLH-DhT20V1GhzX5gQnCPfmaLAI2Lns2JRTbUFdk3MQzyqjPwjJDcQay_EVizw'
+    
     def __init__(self, nextProvider=None):
         BaseFanartProvider.__init__(self, nextProvider)        
     
@@ -577,7 +567,7 @@ class GoogleImageSearchProvider(BaseFanartProvider):
     def getPosters(self, program):
         posters = []
         try:
-            url_values = urllib.urlencode({'v':'1.0', 'safe':'on', 'imgar':'t', 'q':program.title()}, doseq=True)
+            url_values = urllib.urlencode({'v':'1.0', 'safe':'moderate', 'imgsz':'medium', 'key':self.API_KEY, 'q':program.title()}, doseq=True)
             searchUrl = 'http://ajax.googleapis.com/ajax/services/search/images?' + url_values
             req = urllib2.Request(searchUrl, headers={'Referer':'http://mythbox.googlecode.com'})
             resp = urllib2.urlopen(req)

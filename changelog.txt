@@ -8,6 +8,7 @@ xx/xx/2011 MythBox 1.0.3
     - TVDB banners added to Watch TV and TV Guide windows
     - Optimized retrieval of upcoming recordings based on schedule
       change events from the backend
+    - Google Image Search updated with API key and size restrictions
     
   Fixed
     - Some 1080i ATSC recordings from a HD Homerun were incorrectly
