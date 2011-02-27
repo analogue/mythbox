@@ -556,6 +556,7 @@ class TheMovieDbFanartProvider(BaseFanartProvider):
     
     
 class GoogleImageSearchProvider(BaseFanartProvider):
+    '''http://code.google.com/apis/imagesearch/v1/jsondevguide.html'''
     
     API_KEY = 'ABQIAAAAtSwHhE1Qf9mbLYNOFLH-DhT20V1GhzX5gQnCPfmaLAI2Lns2JRTbUFdk3MQzyqjPwjJDcQay_EVizw'
     
