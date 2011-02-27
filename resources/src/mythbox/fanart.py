@@ -36,7 +36,7 @@ import urllib
 import Queue
 
 from decorator import decorator
-from mythbox.util import synchronized, safe_str, run_async, max_threads, timed, requireDir
+from mythbox.util import synchronized, safe_str, run_async, max_threads, timed, requireDir, formatSize
 from mythbox.bus import Event
 
 log = logging.getLogger('mythbox.fanart')
@@ -135,6 +135,11 @@ class PersistentFanartProvider(BaseFanartProvider):
     def close(self):
         super(PersistentFanartProvider, self).close()
         self.saveCache()
+        if log.isEnabledFor(logging.DEBUG):
+            try: 
+                log.debug('Cache size %s %s' % (os.path.split(self.pfilename)[1], formatSize(os.path.getsize(self.pfilename)/1000))) 
+            except: 
+                pass
         
 
 class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
