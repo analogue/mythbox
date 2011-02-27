@@ -568,7 +568,7 @@ class GoogleImageSearchProvider(BaseFanartProvider):
     def getPosters(self, program):
         posters = []
         try:
-            url_values = urllib.urlencode({'v':'1.0', 'safe':'moderate', 'imgsz':'medium', 'key':self.API_KEY, 'q':program.title()}, doseq=True)
+            url_values = urllib.urlencode({'v':'1.0', 'safe':'moderate', 'rsz':'8', 'imgsz':'medium', 'key':self.API_KEY, 'q':program.title()}, doseq=True)
             searchUrl = 'http://ajax.googleapis.com/ajax/services/search/images?' + url_values
             req = urllib2.Request(searchUrl, headers={'Referer':'http://mythbox.googlecode.com'})
             resp = urllib2.urlopen(req)
@@ -580,10 +580,12 @@ class GoogleImageSearchProvider(BaseFanartProvider):
             #    log.debug('url = %s' % searchUrl)
             #    for result in obj['responseData']['results']: 
             #        log.debug(result['unescapedUrl'])            
-            
-            for i,result in enumerate(obj['responseData']['results']):
-                #log.debug('%d googleresult = %s' % (i, result['unescapedUrl']))
-                posters.append(result['unescapedUrl'])
+        
+            posters = [result['unescapedUrl'] for result in obj['responseData']['results'] if float(result['height'])/float(result['width']) > 1.0]
+            if len(posters) == 0:
+                log.debug('No images meet aspect ratio constaints for %s' % safe_str(program.title()))
+                posters.append(obj['responseData']['results'][0]['unescapedUrl'])
+        
         except Exception, e:
             log.exception('GOOGLE fanart search:  %s %s' % (safe_str(program.title()), str(e)))
         return posters
