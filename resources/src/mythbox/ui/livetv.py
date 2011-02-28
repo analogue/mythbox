@@ -32,7 +32,7 @@ from mythbox.mythtv.domain import Channel
 from mythbox.mythtv.conn import ServerException
 from mythbox.ui.player import MythPlayer, NoOpCommercialSkipper
 from mythbox.ui.toolkit import Action, BaseWindow, window_busy
-from mythbox.util import safe_str,catchall, catchall_ui, run_async, lirc_hack, ui_locked, coalesce, ui_locked2, formatSize
+from mythbox.util import safe_str,catchall, catchall_ui, run_async, lirc_hack, ui_locked, ui_locked2, formatSize
 from odict import odict
 
 log = logging.getLogger('mythbox.ui')    
@@ -402,6 +402,12 @@ class LiveTvWindow(BaseWindow):
                     else:
                         channel.needsPoster = True
                         self.setListItemProperty(listItem, 'poster', 'loading.gif')
+                        
+                    if self.fanArt.hasBanners(channel.currentProgram):
+                        channel.needsBanner = False
+                        self.setListItemProperty(listItem, 'banner', self.fanArt.pickBanner(channel.currentProgram))
+                    else:
+                        channel.needsBanner = True
                 else:
                     self.setListItemProperty(listItem, 'title', self.translator.get(m.NO_DATA))
                     
@@ -457,7 +463,8 @@ class LiveTvWindow(BaseWindow):
         for channel, li in self.listItemsByChannel.items():
             if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken:
                 return
-            if channel.currentProgram:
+            if channel.currentProgram and channel.needsBanner:
+                channel.needsBanner = False
                 bannerPath = self.fanArt.pickBanner(channel.currentProgram)
                 if bannerPath:
                     log.debug('setting banner for %s to %s' % (safe_str(channel.currentProgram.title()), bannerPath))
