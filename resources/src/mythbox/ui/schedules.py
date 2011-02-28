@@ -141,6 +141,12 @@ class SchedulesWindow(BaseWindow):
                 except:
                     log.warn('Schedule for %s refers to non-existant channel with id %s' % (safe_str(s.title()), s.getChannelId()))
                 
+                if self.fanArt.hasPosters(s):
+                    s.needsPoster = False
+                    self.setListItemProperty(listItem, 'poster', self.lookupPoster(s))
+                else:
+                    s.needsPoster = True
+                
                 listItems.append(listItem)
                 self.listItemsBySchedule[s] = listItem
 
@@ -157,20 +163,24 @@ class SchedulesWindow(BaseWindow):
         for schedule in self.listItemsBySchedule.keys()[:]:
             if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken: 
                 return
-            listItem = self.listItemsBySchedule[schedule]
-            try:
-                try:
-                    posterPath = self.fanArt.pickPoster(schedule)
-                    if not posterPath:
-                        channel =  self.channelsById[schedule.getChannelId()]
-                        if channel.getIconPath():
-                            posterPath = self.mythChannelIconCache.get(channel)
-                except:
-                    posterPath = self.platform.getMediaPath('mythbox.png')
-                    log.exception('Schedule = %s' % safe_str(schedule))
-            finally:
-                self.setListItemProperty(listItem, 'poster', posterPath)
-                
+            if schedule.needsPoster:
+                schedule.needsPoster = False
+                listItem = self.listItemsBySchedule[schedule]
+                self.setListItemProperty(listItem, 'poster', self.lookupPoster(schedule))
+
+    def lookupPoster(self, schedule):
+        try:
+            posterPath = self.fanArt.pickPoster(schedule)
+            if not posterPath:
+                channel =  self.channelsById[schedule.getChannelId()]
+                if channel.getIconPath():
+                    posterPath = self.mythChannelIconCache.get(channel)
+        except:
+            posterPath = self.platform.getMediaPath('mythbox.png')
+            log.exception('Schedule = %s' % safe_str(schedule))
+        
+        return posterPath
+        
 
 class ScheduleDialog(BaseDialog):
     """Create new and edit existing recording schedules"""
