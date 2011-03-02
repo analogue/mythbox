@@ -313,6 +313,16 @@
             </control>
     
 <!--  Programs Listbox -->
+
+            <control type="image">
+                <posx>315</posx>
+                <posy>380</posy>
+                <width>940</width>
+                <height>250</height>
+                <aspectratio aligny="top">scale</aspectratio>
+                <texture diffuse="mb-diffuse-left.png">$INFO[Container(600).ListItem.Property(background)]</texture>
+                <fadetime>400</fadetime>
+            </control>
     
             <control type="list" id="600">
                 <posx>315</posx>

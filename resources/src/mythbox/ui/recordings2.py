@@ -55,6 +55,7 @@ class Group(object):
         self.programsByListItem = bidict.bidict()
         self.episodesDone = False
         self.postersDone = False
+        self.backgroundsDone = False
         self.index = 0
         
     def add(self, program):
@@ -271,6 +272,9 @@ class RecordingsWindow(BaseWindow):
         if not self.activeGroup.episodesDone:
             self.renderEpisodeColumn(self.activeRenderToken, self.activeGroup)
         
+        if not self.activeGroup.backgroundsDone:
+            self.renderBackgrounds(self.activeRenderToken, self.activeGroup)
+        
     def renderPrograms(self):        
         @timed 
         def constructorTime():
@@ -289,6 +293,7 @@ class RecordingsWindow(BaseWindow):
                     self.setListItemProperty(listItem, 'date', p.formattedAirDate())
                     self.setListItemProperty(listItem, 'time', p.formattedStartTime())
                     self.setListItemProperty(listItem, 'index', str(i+1))
+                    
                     if self.fanArt.hasPosters(p):
                         p.needsPoster = False
                         self.lookupPoster(listItem, p)
@@ -398,6 +403,28 @@ class RecordingsWindow(BaseWindow):
                 log.exception('Program = %s' % safe_str(program.fullTitle()))
         myGroup.postersDone = True
         log.debug('renderPosters -- END --')
+
+    @run_async
+    @catchall
+    def renderBackgrounds(self, myRenderToken, myGroup):
+        try:
+            log.debug('renderBackgrounds -- BEGIN --')
+            for (listItem, program) in myGroup.programsByListItem.items()[:]:
+                if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken: 
+                    return
+                try:
+                    self.lookupBackground(listItem, program)
+                except:
+                    log.exception('renderBackground for Program = %s' % safe_str(program.fullTitle()))
+            myGroup.backgroundsDone = True
+        finally:
+            log.debug('renderBackgrounds -- END --')
+
+    def lookupBackground(self, listItem, p):
+        path = self.fanArt.pickBackground(p)
+        if path is not None:
+            log.debug('lookupBackground setting %s to %s' % (safe_str(p.title()), path))
+            self.updateListItemProperty(listItem, 'background', path)
 
     @run_async
     @catchall
