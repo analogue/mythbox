@@ -407,6 +407,20 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         for bannerUrl in bannerUrls:
             self.assertEqual("http", bannerUrl[0:4])
 
+    def test_getBackgrounds_When_program_is_not_movie_Then_returns_backgrounds(self):
+        # Setup
+        program = TVProgram({'title':'Seinfeld', 'category_type':'series'}, translator=Mock())
+        provider = TvdbFanartProvider(self.platform, nextProvider=None)
+        
+        # Test
+        urls = provider.getBackgrounds(program)
+        
+        # Verify
+        [log.debug('Background = %s' % url) for url in urls]
+        self.assertTrue(len(urls) > 0)
+        for url in urls:
+            self.assertEqual("http", url[0:4])
+
 
 class TheMovieDbFanartProviderTest(BaseFanartProviderTestCase):
 

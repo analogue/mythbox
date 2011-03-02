@@ -73,6 +73,9 @@ class BaseFanartProvider(object):
     def getBanners(self, program):
         raise Exception, 'Abstract method'
 
+    def getBackgrounds(self, program):
+        raise Exception, 'Abstract method'
+
     def getSeasonAndEpisode(self, program):
         if self.nextProvider:
             return self.nextProvider.getSeasonAndEpisode(program)
@@ -94,6 +97,9 @@ class NoOpFanartProvider(BaseFanartProvider):
         return []
 
     def getBanners(self, program):
+        return []
+
+    def getBackgrounds(self, program):
         return []
     
     def getSeasonAndEpisode(self, program):
@@ -196,6 +202,26 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
         return banners
 
     @chain
+    def getBackgrounds(self, program):
+        return self._getStrikeOutable(program, 'getBackgrounds', self.delegate.getBackgrounds)
+#        backgrounds = []
+#        key = self.createKey('getBackgrounds', program) 
+#        if not self.hasStruckOut(key):
+#            backgrounds = self.delegate.getBackgrounds(program)
+#            if not backgrounds:
+#                self.strikeOut(key, program)
+#        return backgrounds
+
+    def _getStrikeOutable(self, program, methodName, delegateFunc):
+        results = []
+        key = self.createKey(methodName, program) 
+        if not self.hasStruckOut(key):
+            results = delegateFunc(program)
+            if not results:
+                self.strikeOut(key, program)
+        return results
+
+    @chain
     def getSeasonAndEpisode(self, program):
         season, episode = None, None
         key = self.createKey('getSeasonAndEpisode', program)
@@ -237,6 +263,12 @@ class SpamSkippingFanartProvider(BaseFanartProvider):
         if self.nextProvider:
             return self.nextProvider.getBanners(program)
                         
+    def getBackgrounds(self, program):
+        if program.title() in self.SPAM:
+            return []
+        if self.nextProvider:
+            return self.nextProvider.getBackgrounds(program)
+                                
     def hasPosters(self, program):
         if program.title() in self.SPAM:
             return True
@@ -246,6 +278,11 @@ class SpamSkippingFanartProvider(BaseFanartProvider):
         if program.title() in self.SPAM:
             return True
         return self.nextProvider.hasBanners(program)
+
+    def hasBackgrounds(self, program):
+        if program.title() in self.SPAM:
+            return True
+        return self.nextProvider.hasBackgrounds(program)
         
     def getSeasonAndEpisode(self, program):
         if program.title() in self.SPAM:
@@ -284,11 +321,26 @@ class SuperFastFanartProvider(PersistentFanartProvider):
             self.imagePathsByKey[key] = banners
         return banners
 
+    def getBackgrounds(self, program):
+        # Different from posters in that it is ok for the
+        # list to be empty
+        backgrounds = []
+        key = self.createKey('getBackgrounds', program)
+        if key in self.imagePathsByKey:
+            backgrounds = self.imagePathsByKey[key]
+        elif self.nextProvider:
+            backgrounds = self.nextProvider.getBackgrounds(program)
+            self.imagePathsByKey[key] = backgrounds
+        return backgrounds
+
     def hasPosters(self, program):
         return self.createKey('getPosters', program) in self.imagePathsByKey
         
     def hasBanners(self, program):
         return self.createKey('getBanners', program) in self.imagePathsByKey
+    
+    def hasBackgrounds(self, program):
+        return self.createKey('getBackgrounds', program) in self.imagePathsByKey
         
     def createKey(self, methodName, program):
         key = '%s-%s' % (methodName, safe_str(program.title()))
@@ -345,6 +397,13 @@ class HttpCachingFanartProvider(BaseFanartProvider):
             banners = self.cacheImages(httpBanners)
         return banners
     
+    def getBackgrounds(self, program):
+        backgrounds = []
+        if self.nextProvider:
+            httpBackgrounds = self.nextProvider.getBackgrounds(program)
+            backgrounds = self.cacheImages(httpBackgrounds)
+        return backgrounds
+        
     def cacheImages(self, httpUrls):
         '''
         Immediately retrieve the first URL and add the remaining to the 
@@ -417,6 +476,10 @@ class ImdbFanartProvider(BaseFanartProvider):
     def getBanners(self, program):
         return []
 
+    @chain
+    def getBackgrounds(self, program):
+        return []
+    
     @chain    
     def getSeasonAndEpisode(self, program):
         return None,None
@@ -474,6 +537,21 @@ class TvdbFanartProvider(BaseFanartProvider):
             except Exception, e:
                 log.warn('TVDB - no banners for %s - %s' % (safe_str(program.title()), safe_str(e)))
         return banners
+
+    @chain
+    def getBackgrounds(self, program):
+        backgrounds = []
+        if not program.isMovie():
+            try:
+                backgroundsByDimension = self._queryTvDb(program.title(), qtype='fanart')
+                for knownDim in ['1280x720', '1920x1080']:
+                    if knownDim in backgroundsByDimension:
+                        backgroundsById = backgroundsByDimension[knownDim]
+                        for id in backgroundsById.keys():
+                            backgrounds.append(backgroundsById[id]['_bannerpath'])
+            except Exception, e:
+                log.debug('TVDB - no backgrounds for %s - %s' % (safe_str(program.title()), safe_str(e)))
+        return backgrounds
 
     def clear(self):
         super(TvdbFanartProvider, self).clear()        
@@ -554,6 +632,10 @@ class TheMovieDbFanartProvider(BaseFanartProvider):
     def getBanners(self, program):
         return []
     
+    @chain
+    def getBackgrounds(self, program):
+        return []
+    
     
 class GoogleImageSearchProvider(BaseFanartProvider):
     '''http://code.google.com/apis/imagesearch/v1/jsondevguide.html'''
@@ -592,6 +674,10 @@ class GoogleImageSearchProvider(BaseFanartProvider):
 
     @chain
     def getBanners(self, program):
+        return []
+    
+    @chain
+    def getBackgrounds(self, program):
         return []
 
 
@@ -740,6 +826,11 @@ class FanArt(object):
         banners = self.provider.getBanners(program)
         if banners:
             return random.choice(banners)
+
+    def pickBackground(self, program):
+        backgrounds = self.provider.getBackgrounds(program)
+        if backgrounds:
+            return random.choice(backgrounds)
     
     def getPosters(self, program):
         return self.provider.getPosters(program)
@@ -747,11 +838,17 @@ class FanArt(object):
     def getBanners(self, program):
         return self.provider.getBanners(program)
     
+    def getBackgrounds(self, program):
+        return self.provider.getBackgrounds(program)
+
     def hasBanners(self, program):
         return self.provider.hasBanners(program)
     
     def hasPosters(self, program):
         return self.provider.hasPosters(program)
+
+    def hasBackgrounds(self, program):
+        return self.provider.hasBackgrounds(program)
     
     def clear(self):
         self.provider.clear() 
