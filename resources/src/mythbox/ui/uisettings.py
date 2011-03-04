@@ -132,7 +132,13 @@ class SettingsWindow(BaseWindow):
         [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings','translator','platform','fanArt','cachesByName',)]
         self.settingsMap = {}  # key = controlId,  value = Setting
         self.t = self.translator.get
+        self.dumpAdvancedSettings()
         
+    def dumpAdvancedSettings(self):
+        from mythbox.advanced import AdvancedSettings
+        s = AdvancedSettings(self.platform)
+        log.debug("Advanced Settings:\n%s" % s)
+                 
     def register(self, setting):
         self.settingsMap[setting.widget.getId()] = setting
     

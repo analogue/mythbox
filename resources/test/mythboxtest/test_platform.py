@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -17,13 +17,13 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 import logging
-import unittest2
+import unittest2 as unittest
 
 from mythbox.platform import getPlatform
 
 log = logging.getLogger('mythbox.unittest')
 
-class PlatformTest(unittest2.TestCase):
+class PlatformTest(unittest.TestCase):
 
     def test_getScriptDirNotNull(self):
         platform = getPlatform()
@@ -53,9 +53,11 @@ class PlatformTest(unittest2.TestCase):
         platform1 = getPlatform()
         platform2 = getPlatform()
         self.assertTrue(platform1 == platform2)
-        
+
+    def test_getUserDataDir(self):
+        self.assertIsNotNone(getPlatform().getUserDataDir())
 
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')
-    unittest2.main()
+    unittest.main()

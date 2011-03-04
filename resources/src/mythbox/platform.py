@@ -119,12 +119,15 @@ class Platform(object):
     def getCacheDir(self):
         return os.path.join(self.getScriptDataDir(), 'cache')
     
+    def getUserDataDir(self):
+        return xbmc.translatePath('special://userdata')
+    
     def getHostname(self):
         try:
             return socket.gethostname()
         except:
             return xbmc.getIPAddress()
-        
+     
     def isUnix(self):
         return False
     
