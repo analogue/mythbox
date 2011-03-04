@@ -263,6 +263,51 @@
             </control>
         </control>
 
+xxx
+        <control type="grouplist" id="9006">
+            <description>Playback Settings</description>
+            <posx>300</posx>
+            <posy>135</posy>
+            <width>1100</width>
+            <height>550</height>
+            <itemgap>4</itemgap>
+            <onleft>259</onleft>
+            <onright>259</onright>
+            <ondown>9006</ondown>
+            <onup>9006</onup>
+            <visible>Control.HasFocus(259)|ControlGroup(9006).HasFocus()</visible>
+            <animation effect="fade" time="200">VisibleChange</animation>
+            
+            <control type="button" id="601">
+                <description>Seek by time or percent</description>
+                <label>Seek By</label>
+                <width>950</width>
+                <height>35</height>
+                <align>left</align>
+                <font>font12</font>
+                <textoffsetx>10</textoffsetx>
+                <texturefocus border="7">list-focus.png</texturefocus>
+                <texturenofocus>-</texturenofocus>
+                <textcolor>88FFFFFF</textcolor>
+                <focusedcolor>ffffffff</focusedcolor>
+                <label2></label2>
+            </control>
+
+            <control type="button" id="602">
+                <description>Forward Big Jump</description>
+                <label>Forward Big Jump</label>
+                <width>950</width>
+                <height>35</height>
+                <align>left</align>
+                <font>font12</font>
+                <textoffsetx>10</textoffsetx>
+                <texturefocus border="7">list-focus.png</texturefocus>
+                <texturenofocus>-</texturenofocus>
+                <textcolor>88FFFFFF</textcolor>
+                <focusedcolor>ffffffff</focusedcolor>
+                <label2></label2>
+            </control>
+        </control>
 
         <control type="grouplist" id="9002">
             <description>Fan Art Scraper Settings</description>
@@ -855,12 +900,12 @@
             <onright>9000</onright>
             <onleft>9000</onleft>
             <onup>251</onup>
-            <ondown>254</ondown>
+            <ondown>259</ondown>
         </control>
         
-        <control type="button" id="254">
-            <description>Fan Art</description>
-            <label>SCRIPT420</label>
+        <control type="button" id="259">
+            <description>playback</description>
+            <label>SCRIPT470</label>
             <posx>0</posx>
             <posy>80</posy>
             <width>285</width>
@@ -872,7 +917,27 @@
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
             <enable>!substring(Window.Property(busy),true)</enable>
+            <onright>9006</onright>
+            <onleft>9006</onleft>
             <onup>250</onup>
+            <ondown>254</ondown>
+        </control>
+        
+        <control type="button" id="254">
+            <description>Fan Art</description>
+            <label>SCRIPT420</label>
+            <posx>0</posx>
+            <posy>120</posy>
+            <width>285</width>
+            <height>40</height>
+            <align>left</align>
+            <aligny>center</aligny>
+            <textoffsetx>40</textoffsetx>
+            <texturefocus>button_focus.png</texturefocus>
+            <texturenofocus>button_nofocus.png</texturenofocus>
+            <pulseonselect>true</pulseonselect>
+            <enable>!substring(Window.Property(busy),true)</enable>
+            <onup>259</onup>
             <ondown>253</ondown>
             <onright>9002</onright>
             <onleft>9002</onleft>
@@ -882,7 +947,7 @@
             <description>Test Settings button</description>
             <label>SCRIPT430</label>
             <posx>0</posx>
-            <posy>120</posy>
+            <posy>160</posy>
             <width>285</width>
             <height>40</height>
             <align>left</align>
@@ -900,7 +965,7 @@
             <description>Advanced button</description>
             <label>SCRIPT440</label>
             <posx>0</posx>
-            <posy>160</posy>
+            <posy>200</posy>
             <width>285</width>
             <height>40</height>
             <align>left</align>
@@ -920,7 +985,7 @@
             <description>xbmc settings</description>
             <label>SCRIPT450</label>
             <posx>0</posx>
-            <posy>200</posy>
+            <posy>240</posy>
             <width>285</width>
             <height>40</height>
             <align>left</align>
@@ -941,7 +1006,7 @@
             <description>readme and faq</description>
             <label>SCRIPT455</label>
             <posx>0</posx>
-            <posy>240</posy>
+            <posy>280</posy>
             <width>285</width>
             <height>40</height>
             <align>left</align>
@@ -961,7 +1026,7 @@
             <description>about</description>
             <label>SCRIPT460</label>
             <posx>0</posx>
-            <posy>280</posy>
+            <posy>320</posy>
             <width>285</width>
             <height>40</height>
             <align>left</align>
@@ -974,6 +1039,7 @@
             <onup>258</onup>
             <ondown>251</ondown>
         </control>
+
     </control>
     
     <control type="multiimage">

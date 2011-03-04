@@ -136,7 +136,7 @@ class SettingsWindow(BaseWindow):
         
     def dumpAdvancedSettings(self):
         from mythbox.advanced import AdvancedSettings
-        s = AdvancedSettings(self.platform)
+        s = AdvancedSettings(platform=self.platform)
         log.debug("Advanced Settings:\n%s" % s)
                  
     def register(self, setting):

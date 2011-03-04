@@ -43,8 +43,10 @@ class AdvancedSettings(object):
           
     def __init__(self, *args, **kwargs):
         self.init_with = None
-        [setattr(self, name, value) for name,value in kwargs.items() if name in ('platform', 'init_with') ]
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('platform', 'init_with',) ]
+               
         self.filename = os.path.join(self.platform.getUserDataDir(), 'advancedsettings.xml')
+        log.error(self.filename)
         if self.init_with:
             self.dom = parseString(self.init_with)
         else:
@@ -58,7 +60,7 @@ class AdvancedSettings(object):
             f.close()
             return contents
         else:
-            log.debug('%s does not exist. Starting fresh')
+            log.debug('%s does not exist. Starting fresh' % self.filename)
             return u'<advancedsettings/>'
                 
     def _write(self):
