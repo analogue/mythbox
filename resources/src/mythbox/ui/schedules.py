@@ -371,7 +371,7 @@ class ScheduleDialog(BaseDialog):
             if len(jobCommand) == 0:
                 checkBox.setVisible(False)
             else:
-                checkBox.setLabel(t(jobs[jobName]['text']) + u' - ' + self.db().getMythSetting(jobs[jobName]['descColumn']))    
+                checkBox.setLabel(self.db().getMythSetting(jobs[jobName]['descColumn']))    
                 checkBox.setSelected(jobs[jobName]['getter']())
         
     def _chooseFromList(self, translations, title, property, setter):

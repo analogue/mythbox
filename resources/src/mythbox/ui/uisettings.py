@@ -24,6 +24,7 @@ import mythbox.msg as m
 from mythbox.settings import MythSettings, SettingsException
 from mythbox.ui.toolkit import window_busy, BaseWindow, enterNumeric, enterText, Action
 from mythbox.util import catchall, lirc_hack, timed, safe_str
+from mythbox.advanced import AdvancedSettings
 
 log = logging.getLogger('mythbox.ui')
 
@@ -132,17 +133,13 @@ class SettingsWindow(BaseWindow):
         [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings','translator','platform','fanArt','cachesByName',)]
         self.settingsMap = {}  # key = controlId,  value = Setting
         self.t = self.translator.get
-        self.dumpAdvancedSettings()
-        
-    def dumpAdvancedSettings(self):
-        from mythbox.advanced import AdvancedSettings
-        s = AdvancedSettings(platform=self.platform)
-        log.debug("Advanced Settings:\n%s" % s)
+        self.advanced = AdvancedSettings(platform=self.platform)
+        log.debug('Advanced settings:\n %s' % self.advanced)
                  
     def register(self, setting):
         self.settingsMap[setting.widget.getId()] = setting
     
-    @timed   
+    @timed 
     def onInit(self):
         if not self.win:
             log.debug('onInit')
@@ -180,8 +177,17 @@ class SettingsWindow(BaseWindow):
             self.register(Setting(self.settings, 'logging_enabled', bool, None, self.getControl(502)))
             self.register(Setting(self.settings, 'feeds_twitter', str, None, self.getControl(503)))
                         
+            # Playback settings
+            self.advanced.get = self.advanced.getSetting
+            self.advanced.put = self.advanced.setSetting
+            self.register(Setting(self.advanced, 'video/usetimeseeking', str, None, self.getControl(601)))
+            self.register(Setting(self.advanced, 'video/timeseekforward', int, None, self.getControl(602)))
+            self.register(Setting(self.advanced, 'video/timeseekbackward', int, None, self.getControl(603)))
+            self.register(Setting(self.advanced, 'video/timeseekforwardbig', int, None, self.getControl(604)))
+            self.register(Setting(self.advanced, 'video/timeseekbackwardbig', int, None, self.getControl(605)))
+
             self.render()
-        
+            
     @catchall    
     @window_busy
     def onClick(self, controlId):
@@ -191,7 +197,11 @@ class SettingsWindow(BaseWindow):
         mappedSetting = self.settingsMap.get(controlId)
         if mappedSetting:
             mappedSetting.readInput()
-            self.settings.save()
+            if mappedSetting.store == self.advanced:
+                self.advanced.save()
+                log.debug(self.advanced)
+            else:
+                self.settings.save()
         elif self.testSettingsButton == source: self.testSettings()
         elif self.clearCacheButton == source: self.clearCache()
         else: log.debug("nothing done onClick")
