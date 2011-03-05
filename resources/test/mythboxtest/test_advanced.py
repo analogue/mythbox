@@ -41,7 +41,7 @@ class AdvancedSettingsTest(unittest.TestCase):
         advanced = AdvancedSettings(platform=p)
         s = '%s' % advanced
         log.debug(s)
-        self.assertTrue("<advancedsettings/>" in s)
+        self.assertTrue("<advancedsettings />" in s)
 
     # hasSetting
     
