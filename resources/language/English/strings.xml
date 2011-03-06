@@ -404,7 +404,7 @@ To submit translations for your native language
   <string id="411">Master Backend Hostname</string>
   <string id="412">Master Backend Port</string>
   <string id="413">Local Recording Directory(s)</string>
-  <string id="414"></string>
+  <string id="414">Enable Streaming</string>
   <string id="415">Confirm on Delete</string>
   <string id="416">Location of MythTV recordings on the local filesystem (mounted storage group dirs if your backend is remote).</string>
   <string id="417">Multiple directories can be separated with a colon on Linux/Mac or a semi-colon on Windows.</string>

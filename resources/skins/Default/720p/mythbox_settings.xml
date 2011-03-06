@@ -190,6 +190,22 @@
                 <enable>false</enable>
             </control>
 
+            <control type="radiobutton" id="208">
+                <description>enable streaming</description>
+                <label>SCRIPT414</label>
+                <width>950</width>
+                <height>35</height>
+                <align>left</align>
+                <font>font12</font>
+                <textoffsetx>10</textoffsetx>
+                <texturefocus border="7">list-focus.png</texturefocus>
+                <texturenofocus>-</texturenofocus>
+                <textcolor>88FFFFFF</textcolor>
+                <focusedcolor>ffffffff</focusedcolor>
+                <textureradiofocus>checkbox-focus.png</textureradiofocus>
+                <textureradionofocus>checkbox-nofocus.png</textureradionofocus>
+            </control>
+
             <control type="button" id="205">
                 <description>local recording directories</description>
                 <label>SCRIPT413</label>

@@ -153,7 +153,8 @@ class SettingsWindow(BaseWindow):
             if hasattr(self.settings, 'master') and self.settings.master:
                 self.setWindowProperty('MasterBackendHostname', '%s / %s' % (self.settings.master.hostname, self.settings.master.ipAddress))
                 self.setWindowProperty('MasterBackendPort', str(self.settings.master.port))
-                
+            
+            self.register(Setting(self.settings, 'streaming_enabled', bool, None, self.getControl(208)))
             self.register(Setting(self.settings, 'paths_recordedprefix', str, ExternalizedSettingValidator(MythSettings.verifyRecordingDirs), self.getControl(205)))
             self.register(Setting(self.settings, 'confirm_on_delete', bool, None, self.getControl(206)))
             self.register(Setting(self.settings, 'aggressive_caching', bool, None, self.getControl(207)))

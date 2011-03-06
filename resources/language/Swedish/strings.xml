@@ -397,7 +397,7 @@ To submit translations for your native language
   <string id="411">Huvud-backend värdnamn</string>
   <string id="412">Huvud-backend port</string>
   <string id="413">Lokal inspelningskatalog</string>
-  <string id="414"></string>
+
   <string id="415">Bekräfta borttagning</string>
   <string id="416">Lokal plats för MythTV-inspelningar (monterad disk om backend inte är lokal).</string>
   <string id="417">Flera kataloger kan avskiljas med kolon på Linux/Mac och medsemikolon på Windows.</string>

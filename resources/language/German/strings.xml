@@ -342,7 +342,7 @@
   <string id="411">Master Backend Hostname</string>
   <string id="412">Master Backend Port</string>
   <string id="413">Lokale Aufzeichnungs Vezeichniss(e)</string>
-  <string id="414"></string>
+
   <string id="415">Löschen bestätigen</string>
   <string id="416">Standort der Mythtv-Aufzeichnungen auf dem lokalen file-system.</string>
   <string id="417">Mehrfache Verzeichnisse können durch eine Komma (Linux/Mac) oder ein Semmiklon (Windows) angegeben werden.</string>

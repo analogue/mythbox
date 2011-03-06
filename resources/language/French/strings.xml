@@ -370,7 +370,7 @@
   <string id="411">Nom d'Hôte du Backend Maître</string>
   <string id="412">Port du Backend Maître</string>
   <string id="413">Répertoire(s) local pour l'enregistrement</string>
-  <string id="414"></string>
+
   <string id="415">Confirmer lors de la Suppression</string>
   <string id="416">Emplacement des enregistrements MythTV en fichier local (répertoires montés si votre backend est déporté).</string>
   <string id="417">Les répertoires multiples peuvent être séparés par : avec Linux/Mac et un ; avec Windows.</string>

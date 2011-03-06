@@ -397,7 +397,7 @@ To submit translations for your native language
   <string id="411">Název hlavního backend serveru</string>
   <string id="412">Port hlavního backend serveru</string>
   <string id="413">Místní adresář(e) nahrávání</string>
-  <string id="414"></string>
+
   <string id="415">Potvrzení smazání</string>
   <string id="416">Umístění nahrávek MythTV na místním souborovém systému (připojená skupina adresářů úložišť, jestliže je váš backend vzdálený).</string>
   <string id="417">Více adresářů může být odděleno čárkou pro systémy Linux/Mac nebo středníkem pro Windows.</string>

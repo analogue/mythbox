@@ -364,7 +364,7 @@
   <string id="411">Master backend hostnaam</string>
   <string id="412">Master backend poort</string>
   <string id="413">Lokale opname map(pen)</string>
-  <string id="414">FFMpeg programma pad</string>
+
   <string id="415">Verwijderingen bevestigen</string>
   <string id="416">Locatie MythTV opnames op het lokale systeem, eventueel via gekoppelde storage groepen</string>
   <string id="417">Meerdere mappen scheiden met een ":" op Linux/Mac en een ";" op Windows</string>
