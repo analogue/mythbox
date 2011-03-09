@@ -368,7 +368,7 @@ class ScheduleDialog(BaseDialog):
         for jobName in jobs.keys():
             jobCommand = self.db().getMythSetting(jobName)
             checkBox = jobs[jobName]['control']
-            if len(jobCommand) == 0:
+            if jobCommand is None or len(jobCommand) == 0:
                 checkBox.setVisible(False)
             else:
                 checkBox.setLabel(self.db().getMythSetting(jobs[jobName]['descColumn']))    
