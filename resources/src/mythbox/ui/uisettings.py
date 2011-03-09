@@ -97,8 +97,12 @@ class Setting(object):
         ok = False
         if self.type == str:
             ok, value = enterText(control=self.widget, validator=self.validator)
-        elif self.type == int:
-            ok, value = enterNumeric(control=self.widget, validator=self.validator)
+        elif self.type in (int, Seconds,):
+            ok, value = enterNumeric(control=self.widget, validator=self.validator, current=self.store.get(self.key))
+        elif self.type == NegativeSeconds:
+            ok, value = enterNumeric(control=self.widget, validator=self.validator, current= str(int(self.store.get(self.key)) * -1))
+            if value != '0':
+                value = '-' + value
         elif self.type == bool and type(self.widget) == xbmcgui.ControlRadioButton:
             ok, value = True, ['False', 'True'][self.widget.isSelected()]
         else:
@@ -106,6 +110,7 @@ class Setting(object):
 
         if ok:
             self.store.put(self.key, value)
+            self.render() # re-render since enterNumeric(...) doesn't handle special cases like Seconds
 
     def render(self):
         value = self.store.get(self.key)
@@ -115,6 +120,10 @@ class Setting(object):
                 self.widget.setLabel(label=self.widget.getLabel(), label2=value)
             elif self.type == int:
                 self.widget.setLabel(label=self.widget.getLabel(), label2=str(value))
+            elif self.type == Seconds:
+                self.widget.setLabel(label=self.widget.getLabel(), label2='%s seconds' % value)
+            elif self.type == NegativeSeconds:
+                self.widget.setLabel(label=self.widget.getLabel(), label2='%s seconds' % str(int(value) * -1))                
             else:
                 raise Exception('Dont know how to handle type %s in render()' % self.type)
         elif type(self.widget) == xbmcgui.ControlRadioButton:
@@ -125,6 +134,22 @@ class Setting(object):
         else:
             raise Exception('Unknown widget in render(): %s' % type(self.widget))
             
+class Seconds(object):
+    
+    def __init__(self, min, max):
+        self.min = min
+        self.max = max
+        
+    def validate(self, value):
+        try:
+            s = int(value)
+            if s < min or s > max:
+                raise SettingsException('out of bounds')
+        except Exception, e:
+            raise SettingsException(e.message)
+    
+class NegativeSeconds(object):
+    pass
 
 class SettingsWindow(BaseWindow):
     
@@ -182,10 +207,10 @@ class SettingsWindow(BaseWindow):
             self.advanced.get = self.advanced.getSetting
             self.advanced.put = self.advanced.setSetting
             self.register(Setting(self.advanced, 'video/usetimeseeking', str, None, self.getControl(601)))
-            self.register(Setting(self.advanced, 'video/timeseekforward', int, None, self.getControl(602)))
-            self.register(Setting(self.advanced, 'video/timeseekbackward', int, None, self.getControl(603)))
-            self.register(Setting(self.advanced, 'video/timeseekforwardbig', int, None, self.getControl(604)))
-            self.register(Setting(self.advanced, 'video/timeseekbackwardbig', int, None, self.getControl(605)))
+            self.register(Setting(self.advanced, 'video/timeseekforward', Seconds, None, self.getControl(602)))
+            self.register(Setting(self.advanced, 'video/timeseekbackward', NegativeSeconds, None, self.getControl(603)))
+            self.register(Setting(self.advanced, 'video/timeseekforwardbig', Seconds, None, self.getControl(604)))
+            self.register(Setting(self.advanced, 'video/timeseekbackwardbig', NegativeSeconds, None, self.getControl(605)))
 
             self.render()
             

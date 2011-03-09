@@ -9,6 +9,9 @@ xx/xx/2011 MythBox 1.0.3
     - Optimized retrieval of upcoming recordings based on schedule
       change events from the backend
     - Google Image Search updated with API key and size restrictions
+    - Added Playback tab to the Settings window to allow the duration
+      in seconds of seeking forward and backward to be user configurable
+      (creates or updates XBMC's advancedsettings.xml) 
     
   Fixed
     - Issue 161 - schedule from TV Guide impossible if show category 
