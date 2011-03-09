@@ -760,6 +760,7 @@ class MythDatabase(object):
                 subtitle, 
                 description,
                 category, 
+                station,
                 profile,
                 recpriority, 
                 autoexpire,
@@ -770,7 +771,6 @@ class MythDatabase(object):
                 recgroup, 
                 dupmethod,
                 dupin, 
-                station,
                 seriesid, 
                 programid,
                 search, 
@@ -786,9 +786,9 @@ class MythDatabase(object):
                 parentid) 
             VALUES (
                 %s, %s, %s, %s, %s, %s, %s, 
-                %%s, %%s, %%s, 
-                %s, %s, %s, %s, %s, %s, 
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %%s, %%s, %%s, %%s, %%s, 
+                %s, %s, %s, %s, %s, 
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s)""" % (
                 recordid, 
                 s.getScheduleType(),
@@ -797,10 +797,11 @@ class MythDatabase(object):
                 quote(mythdate2dbdate(s.startdate())), 
                 quote(mythtime2dbtime(s.endtime())),
                 quote(mythdate2dbdate(s.enddate())), 
-                #quote(s.title()),            #
+                #quote(s.title()),            # passed as args to execute(..) for encoding
                 #quote(s.subtitle()),         #
                 #quote(s.description()),      #
-                quote(s.category()),
+                #quote(s.category()),         #
+                #quote(s.station()),          #
                 quote(s.profile()),
                 s.getPriority(), 
                 int(s.isAutoExpire()),
@@ -811,7 +812,6 @@ class MythDatabase(object):
                 quote(s.getRecordingGroup()), 
                 s.getCheckForDupesUsing(),
                 s.getDupin(), 
-                quote(s.station()),
                 quote(seriesid),  
                 quote(programid),
                 int(s.search()), 
@@ -827,7 +827,7 @@ class MythDatabase(object):
                 int(s.parentid()))
 
         log.debug("sql = %s" % safe_str(sql))
-        args = (s.title(), s.subtitle(), s.description())
+        args = (s.title(), s.subtitle(), s.description(), s.category(), s.station())
 
         c = self.conn.cursor(*cursorArgs)       
         try:

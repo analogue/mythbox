@@ -11,6 +11,8 @@ xx/xx/2011 MythBox 1.0.3
     - Google Image Search updated with API key and size restrictions
     
   Fixed
+    - Issue 161 - schedule from TV Guide impossible if show category 
+      contains (french) accented characters
     - Some 1080i ATSC recordings from a HD Homerun were incorrectly
       getting commskipped due to incorrect fps detection
 	
