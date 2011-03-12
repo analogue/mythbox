@@ -465,8 +465,13 @@ class HomeWindow(BaseWindow):
         entries = self.feedHose.getLatestEntries()
         if len(entries) > 0:
             for entry in entries:
-                t += '[COLOR=ffe2ff43]%s[/COLOR] [COLOR=white]%s[/COLOR]       ' % (entry.username, entry.text)
-            t = ' ' * 300 + t
+                t += u'[COLOR=ffe2ff43]%s[/COLOR] [COLOR=white]%s[/COLOR]       ' % (entry.username, entry.text)
+            t = (u' ' *300) + t
+        
+        t = t.replace('\n', '')
+        t = t.replace('\r', '')
+        t = t.replace('|', '')
+
         self.setWindowProperty('newsfeed', t)
         log.debug('renderNewsFeed exit')
         

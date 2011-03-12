@@ -18,7 +18,9 @@ xx/xx/2011 MythBox 1.0.3
       contains (french) accented characters
     - Some 1080i ATSC recordings from a HD Homerun were incorrectly
       getting commskipped due to incorrect fps detection
-	
+	- Twitter newsfeed no longer renders linebreaks which were causing
+	  multiline output
+	  
 1/25/2011 - MythBox 1.0.2
 -----------------------------
   New
