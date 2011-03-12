@@ -256,7 +256,9 @@ class RecordingsWindow(BaseWindow):
         self.onGroupSelect()
 
     def onGroupSelect(self, lsg=None):
-        if lsg is None:
+        if not self.programs:
+            return
+        elif lsg is None:
             self.activeGroup = self.groupsByTitle[self.groupsListbox.getSelectedItem().getProperty('title')]
             self.lastSelectedGroup = self.activeGroup.title
         else:
@@ -334,8 +336,9 @@ class RecordingsWindow(BaseWindow):
         
         title = deletedProgram.title()
         self.programs.remove(deletedProgram)
+                
         for group in [self.groupsByTitle[title], self.groupsByTitle[self.allGroupTitle]]:
-            log.debug('Removing %s from %s' % (safe_str(deletedProgram.fullTitle()), safe_str(group.title)))
+            log.debug('Removing title %s from group %s' % (safe_str(deletedProgram.fullTitle()), safe_str(group.title)))
             log.debug(group)
             group.programs.remove(deletedProgram)
             
@@ -355,24 +358,26 @@ class RecordingsWindow(BaseWindow):
                 self.programsListbox.reset()
                 self.programsListbox.addItems(self.activeGroup.listItems)
             else:
-                log.debug('Not removing listitem from group %s -- not realized' % safe_str(title))
+                log.debug('Not removing listitem from group "%s" -- not realized' % safe_str(group.title))
                 
             # if last program in group, nuke group
             if len(group.programs) == 0:
-                log.debug('Group %s now empty -- removing' % safe_str(title))
-                i = max(0, self.groupsByTitle.index(title)-1)
-                del self.groupsByTitle[title]
+                log.debug('Group %s now empty -- removing group ' % safe_str(group.title))
+                del self.groupsByTitle[group.title]
 
-                # shift index up
-                for group in [group for group in self.groupsByTitle.values() if group.index > i]:
-                    group.index -= 1
+                # re-index
+                for i,group in enumerate(self.groupsByTitle.values()):
+                    group.index = i
 
                 self.groupsListbox.reset()
                 self.groupsListbox.addItems([group.listItem for group in self.groupsByTitle.values()])
             
         # next logical selection based on deleted program    
         try:
-            if self.lastSelectedGroup in self.groupsByTitle:
+            if len(self.programs) == 0:
+                # deleted last recording -- nothing to show
+                self.setFocus(self.getControl(ID_REFRESH_BUTTON))
+            elif self.lastSelectedGroup in self.groupsByTitle:
                 log.debug("LSG %s not empty..selecting index %d" % (safe_str(self.lastSelectedGroup), savedLastSelectedGroupIndex))
                 self.selectListItemAtIndex(self.groupsListbox, savedLastSelectedGroupIndex)
                 self.selectListItemAtIndex(self.programsListbox, max(0, selectionIndex-1))
@@ -383,8 +388,9 @@ class RecordingsWindow(BaseWindow):
                 try:
                     newGroupTitle = [group.title for group in self.groupsByTitle.values() if group.index == newGroupIndex][0]
                 except:
-                    log.exception('determinging newGroupTitle blew up..selecting all recordings')
+                    log.exception('determinging newGroupTitle blew up..selecting group All Recordings')
                     newGroupTitle = self.allGroupTitle
+                self.lastSelectedGroup = newGroupTitle
                 self.onGroupSelect(newGroupTitle)
                 self.setFocus(self.groupsListbox)
         except Exception, e:
