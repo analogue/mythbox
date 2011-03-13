@@ -88,6 +88,7 @@ class RecordingsWindow(BaseWindow):
         self.groupsByTitle = odict.odict()       # {unicode:Group}
         self.activeGroup = None
         self.lastFocusId = None
+        self.sameBackgroundCache = {}            # {title:filepath}
         
     @catchall_ui
     def onInit(self):
@@ -207,6 +208,8 @@ class RecordingsWindow(BaseWindow):
         self.programs.sort(key=SORT_BY[self.sortBy]['sorter'], reverse=self.sortAscending)
         
         self.preCacheThumbnails()
+        
+        self.sameBackgroundCache.clear()
         
         if self.platform.getName() in ('unix','mac') and self.settings.isAggressiveCaching(): 
             self.preCacheCommBreaks()
@@ -426,8 +429,14 @@ class RecordingsWindow(BaseWindow):
         finally:
             log.debug('renderBackgrounds -- END --')
 
+    def sameBackground(self, program):
+        t = program.title()
+        if not t in self.sameBackgroundCache:
+            self.sameBackgroundCache[t] = self.fanArt.pickBackground(program)
+        return self.sameBackgroundCache[t]
+
     def lookupBackground(self, listItem, p):
-        path = self.fanArt.pickBackground(p)
+        path = self.sameBackground(p)
         if path is not None:
             log.debug('lookupBackground setting %s to %s' % (safe_str(p.title()), path))
             self.updateListItemProperty(listItem, 'background', path)
