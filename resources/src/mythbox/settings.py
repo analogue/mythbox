@@ -130,12 +130,14 @@ class MythSettings(object):
             'logging_enabled'            : 'False',
             'schedules_last_selected'    : '0',
             'livetv_last_selected'       : '0',
+
             'recordings_last_selected'   : '0',
             'recordings_selected_group'  : '',
             'recordings_selected_program': '',
-            'recordings_sort_by'         : 'Date',
+            'recordings_group_sort'      : 'Title',
+            'recordings_title_sort'      : 'Orig. Air Date',
             'recordings_sort_ascending'  : 'False',
-            'recordings_recording_group' : 'Default',
+            
             'tv_guide_last_selected'     : '0',
             'upcoming_sort_by'           : 'Date',
             'upcoming_sort_ascending'    : 'False',

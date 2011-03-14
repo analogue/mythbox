@@ -17,6 +17,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 import bidict
+import datetime
 import logging
 import odict
 import os
@@ -28,7 +29,7 @@ import mythbox.msg as m
 from mythbox.mythtv.conn import inject_conn
 from mythbox.ui.recordingdetails import RecordingDetailsWindow
 from mythbox.ui.toolkit import window_busy, BaseWindow, Action
-from mythbox.util import catchall_ui, run_async, timed, catchall, ui_locked, ui_locked2, coalesce, safe_str
+from mythbox.util import catchall_ui, run_async, timed, catchall, ui_locked2, coalesce, safe_str
 from mythbox.util import CyclingBidiIterator, formatSize
 
 log = logging.getLogger('mythbox.ui')
@@ -40,11 +41,14 @@ ID_SORT_BY_BUTTON         = 251
 ID_SORT_ASCENDING_TOGGLE  = 252
 ID_RECORDING_GROUP_BUTTON = 253
 
-SORT_BY = odict.odict([
-    ('Date',           {'translation_id': m.DATE, 'sorter' : lambda x: x.starttimeAsTime() }), 
-    ('Title',          {'translation_id': m.TITLE, 'sorter' : lambda x: '%s%s' % (x.title(), x.originalAirDate())}), 
-    ('Orig. Air Date', {'translation_id': m.ORIG_AIR_DATE, 'sorter' : lambda x: x.originalAirDate()})])
+TITLE_SORT_BY = odict.odict([
+    ('Date',           {'translation_id': m.DATE,          'reverse':True,  'sorter' : lambda x: x.starttimeAsTime() }), 
+    ('Title',          {'translation_id': m.TITLE,         'reverse':False, 'sorter' : lambda x: '%s%s' % (x.title(), x.originalAirDate())}), 
+    ('Orig. Air Date', {'translation_id': m.ORIG_AIR_DATE, 'reverse':True,  'sorter' : lambda x: x.originalAirDate()})])
 
+GROUP_SORT_BY = odict.odict([
+    ('Title', {'translation_id': m.TITLE, 'reverse': False, 'sorter' : lambda g: [g.title, '0000'][g.title == 'All recordings']}),
+    ('Date',  {'translation_id': m.DATE,  'reverse': True,  'sorter' : lambda g: [g.programs[0].starttimeAsTime(), datetime.datetime(datetime.MAXYEAR, 12, 31, 23, 59, 59, 999999, tzinfo=None)][g.title == 'All recordings']})])
 
 class Group(object):
     
@@ -103,7 +107,8 @@ class RecordingsWindow(BaseWindow):
     def readSettings(self):
         self.lastSelectedGroup = self.settings.get('recordings_selected_group')
         self.lastSelectedTitle = self.settings.get('recordings_selected_title')
-        self.sortBy = self.settings.get('recordings_sort_by')
+        self.groupSortBy = self.settings.get('recordings_group_sort')
+        self.titleSortBy = self.settings.get('recordings_title_sort')
         self.sortAscending = self.settings.getBoolean('recordings_sort_ascending')
         
     def onFocus(self, controlId):
@@ -115,17 +120,16 @@ class RecordingsWindow(BaseWindow):
             
     @catchall_ui
     def onClick(self, controlId):
-        if controlId == ID_GROUPS_LISTBOX:
-            self.goRecordingDetails()
-        elif controlId == ID_PROGRAMS_LISTBOX: 
+        if controlId in (ID_GROUPS_LISTBOX, ID_PROGRAMS_LISTBOX,): 
             self.goRecordingDetails()
         elif controlId == ID_REFRESH_BUTTON:
             self.lastSelected = self.programsListbox.getSelectedPosition()
             self.refresh()
         elif controlId == ID_SORT_BY_BUTTON:
-            keys = SORT_BY.keys()
-            self.sortBy = keys[(keys.index(self.sortBy) + 1) % len(keys)] 
-            self.applySort()
+            keys = GROUP_SORT_BY.keys()
+            self.groupSortBy = keys[(keys.index(self.groupSortBy) + 1) % len(keys)]
+            self.applyGroupSort()
+
         elif controlId == ID_SORT_ASCENDING_TOGGLE:
             self.sortAscending = not self.sortAscending
             self.applySort()
@@ -142,7 +146,8 @@ class RecordingsWindow(BaseWindow):
             except:
                 pass
             
-        self.settings.put('recordings_sort_by', self.sortBy)
+        self.settings.put('recordings_title_sort', self.titleSortBy)
+        self.settings.put('recordings_group_sort', self.groupSortBy)
         self.settings.put('recordings_sort_ascending', '%s' % self.sortAscending)
                                      
     @catchall_ui
@@ -202,15 +207,13 @@ class RecordingsWindow(BaseWindow):
             xbmcgui.Dialog().ok(self.translator.get(m.INFO), self.translator.get(m.NO_RECORDINGS_FOUND))
             self.close()
             return
-        
-        # NOTE: No aggressive caching on windows since spawning the ffmpeg subprocess
-        #       launches an annoying window
-        self.programs.sort(key=SORT_BY[self.sortBy]['sorter'], reverse=self.sortAscending)
-        
-        self.preCacheThumbnails()
+        self.programs.sort(key=TITLE_SORT_BY[self.titleSortBy]['sorter'], reverse=TITLE_SORT_BY[self.titleSortBy]['reverse'])
         
         self.sameBackgroundCache.clear()
-        
+        self.preCacheThumbnails()
+
+        # NOTE: No aggressive caching on windows since spawning the ffmpeg subprocess
+        #       launches an annoying window
         if self.platform.getName() in ('unix','mac') and self.settings.isAggressiveCaching(): 
             self.preCacheCommBreaks()
 
@@ -224,24 +227,34 @@ class RecordingsWindow(BaseWindow):
             
         self.render()
     
-    def applySort(self):
-        self.programs.sort(key=SORT_BY[self.sortBy]['sorter'], reverse=self.sortAscending)
-        self.render()
+    def applyGroupSort(self):
+        if self.groupSortBy == 'Date':
+            self.titleSortBy = 'Date'
+        elif self.groupSortBy == 'Title':
+            self.titleSortBy = 'Orig. Air Date'
+            
+        self.programs.sort(key=TITLE_SORT_BY[self.titleSortBy]['sorter'], reverse=TITLE_SORT_BY[self.titleSortBy]['reverse'])
+        self.refresh()
         
-    @ui_locked
+    @ui_locked2
     def render(self):
         log.debug('Rendering....')
         self.renderNav()
         self.renderGroups()
         
     def renderNav(self):
-        self.setWindowProperty('sortBy', self.translator.get(m.SORT) + ': ' + self.translator.get(SORT_BY[self.sortBy]['translation_id']))
+        self.setWindowProperty('sortBy', self.translator.get(m.SORT) + ': ' + self.translator.get(GROUP_SORT_BY[self.groupSortBy]['translation_id']))
         self.setWindowProperty('sortAscending', ['false', 'true'][self.sortAscending])
 
     def renderGroups(self):
         lastSelectedIndex = 0
         listItems = []
-        for i, (title, group) in enumerate(self.groupsByTitle.iteritems()):
+        
+        sortedGroups = self.groupsByTitle.values()[:]
+        sortedGroups.sort(key=GROUP_SORT_BY[self.groupSortBy]['sorter'], reverse=GROUP_SORT_BY[self.groupSortBy]['reverse'])
+                    
+        for i, group in enumerate(sortedGroups):
+            title = group.title
             group.listItem = xbmcgui.ListItem()
             group.index = i
             listItems.append(group.listItem)
@@ -254,7 +267,14 @@ class RecordingsWindow(BaseWindow):
 
         self.groupsListbox.reset()
         self.groupsListbox.addItems(listItems)
+
+        #
+        # HACK ALERT: Selection won't register unless gui unlocked
+        #        
+        xbmcgui.unlock()
         self.selectListItemAtIndex(self.groupsListbox, lastSelectedIndex)
+        xbmcgui.lock()
+        
         log.warn('index checkl = %s' % self.groupsListbox.getSelectedPosition())
         self.onGroupSelect()
 
@@ -289,7 +309,6 @@ class RecordingsWindow(BaseWindow):
                 self.activeGroup.programsByListItem[listItem] = p
         
         @timed 
-        @ui_locked2
         def propertyTime(): 
             for i, p in enumerate(self.activeGroup.programs):
                 try:
