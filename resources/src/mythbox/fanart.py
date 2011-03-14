@@ -826,7 +826,7 @@ class FanArt(object):
         banners = self.provider.getBanners(program)
         if banners:
             return random.choice(banners)
-
+        
     def pickBackground(self, program):
         backgrounds = self.provider.getBackgrounds(program)
         if backgrounds:
@@ -852,7 +852,8 @@ class FanArt(object):
     
     def clear(self):
         self.provider.clear() 
-
+        
+    @timed    
     def shutdown(self):
         self.provider.close()
         
