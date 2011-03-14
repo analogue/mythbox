@@ -226,7 +226,7 @@ class WindowMixin(object):
 
     def updateListItemProperty(self, listItem, name, value):
         self.setListItemProperty(listItem, name, value)
-        # HACK: to force lisitem update
+        # HACK: to force listitem update
         listItem.setThumbnailImage('%s' + str(time.clock()))   
 
     def setWindowProperty(self, name, value):

@@ -1,0 +1,34 @@
+<advancedsettings>
+  <loglevel>0</loglevel>
+  <displayremotecodes>true</displayremotecodes>
+
+  <video>
+    <smallstepbackseconds>7</smallstepbackseconds>  <!-- Length of the small skip back (normally the BACK button) when playing a video -->
+    <smallstepbacktries>3</smallstepbacktries>
+    <smallstepbackdelay>300</smallstepbackdelay>
+    <usetimeseeking>true</usetimeseeking>  <!-- Whether to use time based or percentage based seeking. -->
+    <timeseekforward>30</timeseekforward>  <!-- Time to seek forward in seconds when doing a short seek.  Defaults to 30. -->
+    <timeseekbackward>-10</timeseekbackward>  <!-- Time to seek backward in seconds when doing a short seek.  Defaults to -30. -->
+    <timeseekforwardbig>240</timeseekforwardbig>  <!-- Time to seek forward in seconds when doing a long seek.  Defaults to 600 (10 minutes). -->
+    <timeseekbackwardbig>-100</timeseekbackwardbig>  <!-- Time to seek forward in seconds when doing a long seek.  Defaults to -600 (10 minutes). -->
+    <percentseekforward>2</percentseekforward>  <!-- Amount to seek forward as a percentage, when doing a short seek.  Defaults to 2. -->
+    <percentseekbackward>-2</percentseekbackward>  <!-- Amount to seek backward as a percentage, when doing a short seek.  Defaults to -2. -->
+    <percentseekforwardbig>10</percentseekforwardbig>  <!-- Amount to seek forward as a percentage, when doing a long seek.  Defaults to 10. -->
+    <percentseekbackwardbig>-10</percentseekbackwardbig>  <!-- Amount to seek forward as a percentage, when doing a long seek.  Defaults to -10. -->
+    <blackbarcolour>1</blackbarcolour>  <!-- colour of the black bars (0->255), (black->white) on videos. -->
+    <fullscreenonmoviestart>true</fullscreenonmoviestart> <!-- Whether to go to fullscreen or not when starting a movie. Defaults to true. -->
+  </video>
+  <edl>
+    <maxcommbreaklength>0</maxcommbreaklength>
+    <!--
+    mergeshortcommbreaks
+    maxcommbreaklength", m_iEdlMaxCommBreakLength, 0, 10 * 60); // Between 0 and 10 minutes
+    XMLUtils::GetInt(pElement, "mincommbreaklength", m_iEdlMinCommBreakLength, 0, 5 * 60);  // Between 0 and 5 minutes
+    XMLUtils::GetInt(pElement, "maxcommbreakgap", m_iEdlMaxCommBreakGap, 0, 5 * 60);        // Between 0 and 5 minutes.
+    XMLUtils::GetInt(pElement, "maxstartgap", m_iEdlMaxStartGap, 0, 10 * 60);               // Between 0 and 10 minutes
+    XMLUtils::GetInt(pElement, "commbreakautowait", m_iEdlCommBreakAutowait, 0, 10);        // Between 0 and 10 seconds
+    XMLUtils::GetInt(pElement, "commbreakautowind", m_iEdlCommBreakAutowind, 0, 10);        // Between 0 and 10 seconds
+    -->
+  </edl>
+
+</advancedsettings>
