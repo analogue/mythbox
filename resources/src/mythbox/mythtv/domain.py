@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -21,6 +21,7 @@ import logging
 import os
 import re
 import sre
+import tempfile
 import time
 
 import mythbox.msg as m
@@ -1072,18 +1073,19 @@ class RecordedProgram(Program):
                 windows=(type(self._platform) == WindowsPlatform),   # WORKAROUND: let pyxcoder know we're on windows
                 tempdir=ffmpeg_cache_dir,
                 log=log)
-                        
-            import tempfile
-            fileSink = tempfile.mktemp('.mpg', 'mythbox')
+            
+            fileSink = os.path.join(ffmpeg_cache_dir, self.getBareFilename())           
+            
             try:
-                log.debug('Saving recording fragment to: %s' % fileSink)
-                transferred = self.conn().transferFile(self.getFilename(), fileSink, self.db().toBackend(self.hostname()).ipAddress, numBytes=5000000)
+                if not os.path.exists(os.path.join(ffmpeg_cache_dir, fileSink + ".out")):
+                    log.debug('Saving recording fragment to: %s' % fileSink)
+                    transferred = self.conn().transferFile(self.getFilename(), fileSink, self.db().toBackend(self.hostname()).ipAddress, numBytes=5000000)
     
-                if not transferred:
-                    showPopup('Error', 'Transfer fragment failed')
-                    self._fps = 29.97
-                    return self._fps
-                
+                    if not transferred:
+                        log.exception('Error', 'Transfer file fragment for %s failed' % safe_str(self.title()))
+                        self._fps = 29.97
+                        return self._fps
+                    
                 try:
                     metadata = ffmpegParser.get_metadata(fileSink)
                 except:
@@ -1108,7 +1110,7 @@ class RecordedProgram(Program):
                     self._fps = 29.97
                     log.error("""Could not determine FPS for file %s so defaulting to %s FPS.
                                  Make sure you have the ffmpeg executable in your path. 
-                                 Commercial skipping may be inaccurate""" % (self._fps, self.getLocalPath()))
+                                 Commercial skipping may be inaccurate""" % (self._fps, fileSink))
                     showPopup(self.translator.get(m.ERROR), 'FFMpeg could not determine framerate. Comm skip may be inaccurate')
             finally:
                 if os.path.exists(fileSink):
