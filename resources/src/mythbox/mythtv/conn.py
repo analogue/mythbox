@@ -1217,7 +1217,18 @@ class Connection(object):
     def _sendMsg(self, s, req):
         msg = self._buildMsg(req)
         wirelog.debug('write -> %s' % safe_str(msg[:80]))
-        s.send(msg)
+	try:
+             s.send(msg)
+	except Exception, e:
+             if str(e) == "(10053, 'Software caused connection abort')":
+                 print('Lost connection resetting')
+                 try:
+                     self.close()
+                 except Exception, e:
+                     print('noclose')
+                 self.db_init()
+                 return
+             raise e    
             
     def _sendRequest(self, s, msg):
         self._sendMsg(s, msg)
