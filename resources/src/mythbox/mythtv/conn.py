@@ -784,7 +784,7 @@ class Connection(object):
         """
         @return: RecordedProgram[]  (most recently recorded first)
         """
-        reply = self._sendRequest(self.cmdSock, ['QUERY_RECORDINGS Play'])   
+        reply = self._sendRequest(self.cmdSock, self.protocol.genQueryRecordingsCommand())   
         numPrograms = int(reply.pop(0))
         programs = [] 
         offset = 0
@@ -818,7 +818,7 @@ class Connection(object):
         # TODO: Optimize so it doesn't get all recordings and filters locally
         programs = []
         offset = 0
-        reply = self._sendRequest(self.cmdSock, ['QUERY_RECORDINGS Play'])   
+        reply = self._sendRequest(self.cmdSock, self.protocol.genQueryRecordingsCommand())   
         numRows = int(reply.pop(0))
         
         recordingGroup = recordingGroup.upper()

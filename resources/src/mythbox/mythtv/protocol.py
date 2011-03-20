@@ -102,6 +102,9 @@ class Protocol40(BaseProtocol):
     def genPixMapCommand(self):
         return ['QUERY_GENPIXMAP']        
 
+    def genQueryRecordingsCommand(self):
+        return ['QUERY_RECORDINGS Play']
+
     def genPixMapPreviewFilename(self, program):
         return program.getBareFilename() + '.640x360.png'
 
@@ -294,6 +297,18 @@ class Protocol64(Protocol63):
     def protocolToken(self):
         return "8675309J"
 
+class Protocol65(Protocol64):
+    
+    def version(self):
+        return 65
+    
+    def protocolToken(self):
+        return "D2BB94C2"
+
+    def genQueryRecordingsCommand(self): #technically the old query recs command works but actually causes sorting which would be redundant and may be removed in the future
+        return ['QUERY_RECORDINGS Unsorted']
+
+
 # Current rev in mythversion.h
 protocols = {
     40: Protocol40(),
@@ -316,5 +331,6 @@ protocols = {
     61: Protocol61(),  # 0.24
     62: Protocol62(),  # 0.24
     63: Protocol63(),  # 0.24
-    64: Protocol64()   # 0.24
+    64: Protocol64(),   # 0.24
+    65: Protocol65()   # 0.24
 }    
