@@ -77,6 +77,7 @@ class ConnectionTest(unittest.TestCase):
         self.platform = getPlatform()
         self.translator = Mock()
         self.settings = MythSettings(self.platform, self.translator)
+        self.settings.put('streaming_enabled', 'False')
         
         privateConfig = OnDemandConfig()
         self.settings.put('mysql_host', privateConfig.get('mysql_host'))
