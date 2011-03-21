@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@ import logging
 import os
 import tempfile
 import time
-import unittest2
+import unittest2 as unittest
 
 from mockito import Mock, when, verify, any, times
 from mythbox.mythtv.domain import CommercialBreak
@@ -30,7 +30,7 @@ from mythbox.ui.player import EdlCommercialSkipper, PositionTracker, TrackerSamp
 log = logging.getLogger('mythbox.unittest')
 
 
-class PositionTrackerTest(unittest2.TestCase):
+class PositionTrackerTest(unittest.TestCase):
 
     def test_constructor(self):
         player = Mock()
@@ -83,7 +83,7 @@ class MockPlayer(object):
         return time.time() - self.timestamp
 
 
-class EdlCommercialSkipperTest(unittest2.TestCase):
+class EdlCommercialSkipperTest(unittest.TestCase):
     
     def test_constructor_SkipFileCreatedForRecordingWithCommercials(self):
         # Setup
@@ -123,7 +123,7 @@ class EdlCommercialSkipperTest(unittest2.TestCase):
         self.assertFalse(os.path.isfile(edlFile))
 
 
-class TrackingCommercialSkipperTest(unittest2.TestCase):
+class TrackingCommercialSkipperTest(unittest.TestCase):
     
     def setUp(self):
         self.tracker = Mock()
@@ -132,7 +132,7 @@ class TrackingCommercialSkipperTest(unittest2.TestCase):
         when(self.translator).get(any()).thenReturn('some %s string')
         
         self.player = Mock()
-        when(self.player).getTracker().thenReturn(self.tracker)
+        self.player.tracker = self.tracker
         
         self.program = Mock()
         when(self.program).title().thenReturn('movie.mpg')
@@ -221,4 +221,4 @@ class TrackingCommercialSkipperTest(unittest2.TestCase):
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')
-    unittest2.main()
+    unittest.main()
