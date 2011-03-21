@@ -25,7 +25,7 @@ from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.conn import inject_conn
 from mythbox.mythtv.domain import StatusException
 from mythbox.mythtv.enums import JobType, JobStatus
-from mythbox.ui.player import MythPlayer, MythStreamingPlayer, NoOpCommercialSkipper, TrackingCommercialSkipper
+from mythbox.ui.player import MountedPlayer, StreamingPlayer, NoOpCommercialSkipper, TrackingCommercialSkipper
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import Action, BaseWindow, window_busy
 from mythbox.util import safe_str, catchall, catchall_ui, run_async, lirc_hack, coalesce
@@ -127,12 +127,12 @@ class RecordingDetailsWindow(BaseWindow):
 
         if self.streaming:
             # Play via myth://
-            p = MythStreamingPlayer(mythThumbnailCache=self.mythThumbnailCache, translator=self.translator, settings=self.settings)
-            p.playRecording(self.program, NoOpCommercialSkipper(p, self.program, self.translator))
+            p = StreamingPlayer(program=self.program, mythThumbnailCache=self.mythThumbnailCache, translator=self.translator, settings=self.settings)
+            p.playRecording(NoOpCommercialSkipper(p, self.program, self.translator))
         else:
             # Play via local fs
-            p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
-            p.playRecording(self.program, NoOpCommercialSkipper(p, self.program, self.translator))
+            p = MountedPlayer(program=self.program, mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
+            p.playRecording(NoOpCommercialSkipper(p, self.program, self.translator))
             del p 
     
     def playWithCommSkip(self):
@@ -140,12 +140,12 @@ class RecordingDetailsWindow(BaseWindow):
       
         if self.streaming:  
             # Play via myth://
-            p = MythStreamingPlayer(mythThumbnailCache=self.mythThumbnailCache, translator=self.translator, settings=self.settings)
-            p.playRecording(self.program, NoOpCommercialSkipper(p, self.program, self.translator))
+            p = StreamingPlayer(program=self.program, mythThumbnailCache=self.mythThumbnailCache, translator=self.translator, settings=self.settings)
+            p.playRecording(NoOpCommercialSkipper(p, self.program, self.translator))
         else:
             # Play via local fs
-            p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
-            p.playRecording(self.program, TrackingCommercialSkipper(p, self.program, self.translator))
+            p = MountedPlayer(program=self.program, mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
+            p.playRecording(TrackingCommercialSkipper(p, self.program, self.translator))
             del p
         
     @inject_db

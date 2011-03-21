@@ -27,7 +27,7 @@ import mythbox.msg as m
 import mythbox.ui.toolkit as toolkit
 
 from mythbox.ui.toolkit import showPopup
-from mythbox.util import formatSeconds, BoundedEvictingQueue, safe_str
+from mythbox.util import formatSeconds, BoundedEvictingQueue, safe_str, catchall
 from mythbox.mythtv.db import inject_db
 
 log = logging.getLogger('mythbox.ui')
@@ -40,119 +40,121 @@ mythPlayer = None
 SLEEP_MILLIS = 250
 
 
-class MythPlayer(xbmc.Player):
-    """
-    Plays mythtv recordings with support for bookmarks, commercial skipping, etc 
-    """
+class BasePlayer(xbmc.Player):
     
     def __init__(self, *args, **kwargs):
         xbmc.Player.__init__(self, *args, **kwargs)    
-        self._active = True
-        self.mythThumbnailCache = kwargs['mythThumbnailCache']
-        self.translator = kwargs['translator']
+        self.active = True
+        self.tracker = PositionTracker(self)
         
-    # Public ------------------------------------------------------------------
-      
-    def getFileUrl(self):
-        return self._program.getLocalPath()
+    def buildPlaybackUrl(self):
+        raise Exception('Abstract method')
+
+    def buildPlayList(self):
+        raise Exception('Abstract method')
+
+    def playRecording(self, commSkipper):
+        raise Exception('Abstract method')
+        
+    @catchall
+    def onPlayBackStarted(self):
+        if self.active:
+            log.debug('> onPlayBackStarted')
+            for target in (self.bookmarker, self.tracker, self.commSkipper):
+                try:
+                    target.onPlayBackStarted()
+                except:
+                    log.exception('onPlayBackStarted')
+            log.debug('< onPlayBackStarted')
+
+    def onPlayBackStopped(self):
+        if self.active:
+            log.debug('> onPlayBackStopped')
+            for target in (self.tracker, self.commSkipper, self.bookmarker):
+                try:
+                    target.onPlayBackStopped()
+                except:
+                    log.exception('onPlayBackStopped')
+            log.debug('< onPlayBackStopped')
+
+    def onPlayBackEnded(self):
+        if self.active:
+            log.debug('> onPlayBackEnded')
+            for target in (self.tracker, self.commSkipper, self.bookmarker):
+                try:
+                    target.onPlayBackEnded()
+                except:
+                    log.exception('onPlayBackStopped')
+            log.debug('< onPlayBackEnded')
+
+
+class MountedPlayer(BasePlayer):
+    '''Plays mythtv recordings with support for bookmarks, commercial skipping, etc'''
     
-    def playRecording(self, program, commSkipper):
+    def __init__(self, *args, **kwargs):
+        BasePlayer.__init__(self, *args, **kwargs)    
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('translator', 'mythThumbnailCache', 'program')]
+        self.bookmarker = MythBookmarker(self, self.program, self.translator)
+        self._playbackCompletedLock = threading.Event()
+        self._playbackCompletedLock.clear()
+        
+    def buildPlaybackUrl(self):
+        return self.program.getLocalPath()
+    
+    def playRecording(self, commSkipper):
         """
         Plays the given program. Blocks until playback is stopped or until the 
         end of the recording is reached
         """
-        mlog.debug('> playRecording(%s)' % safe_str(program.title()))
+        mlog.debug('> playRecording(%s)' % safe_str(self.program.title()))
         assert not self.isPlaying(), 'Player is already playing a video'
-        self._reset(program)
-        self._commSkipper = commSkipper
-        
-        # Equivalent url: myth://dbname:dbpassword@hostname:port/recordings/filename.mpg
-        self.play(self.getFileUrl(), self._buildPlayList())
-        self._waitForPlaybackCompleted()
-        self._active = False
+        self.commSkipper = commSkipper
+        self.play(self.buildPlaybackUrl(), self.buildPlayList())
+        self.waitForPlaybackCompleted()
+        self.active = False
         mlog.debug('< playRecording(...)')
 
-    def getProgram(self):
-        return self._program
-    
-    def getTracker(self):
-        return self._tracker
-    
     # Callbacks ---------------------------------------------------------------
 
-    def onPlayBackStarted(self):
-        if self._active:
-            try:
-                try:
-                    log.debug('> onPlayBackStarted')
-                    self._bookmarker.onPlayBackStarted()
-                finally:
-                    self._tracker.onPlayBackStarted()
-                    self._commSkipper.onPlayBackStarted()
-                    log.debug('< onPlayBackStarted')
-            except:
-                # Called on a separate thread -- log exceptions instead of raising them            
-                log.exception('onPlayBackStarted catchall')
-            
+
+    @catchall            
     def onPlayBackStopped(self):
-        if self._active:
+        if self.active:
             try:
-                try:
-                    log.debug('> onPlayBackStopped')
-                    self._tracker.onPlayBackStopped()
-                    self._commSkipper.onPlayBackStopped()
-                    self._bookmarker.onPlayBackStopped()
-                finally:
-                    self._playbackCompletedLock.set()
-                    log.debug('< onPlayBackStopped')
-            except:
-                # Called on a separate thread -- log exceptions instead of raising them
-                log.exception('onPlayBackStopped catchall')
-            
+                super(MountedPlayer, self).onPlayBackStopped()
+            finally:
+                self._playbackCompletedLock.set()
+    
+    @catchall            
     def onPlayBackEnded(self):
-        if self._active:
+        if self.active:
             try:
-                try:
-                    log.debug('> onPlayBackEnded')
-                    self._tracker.onPlayBackStopped()
-                    self._commSkipper.onPlayBackEnded()
-                    self._bookmarker.onPlayBackEnded()
-                finally:
-                    self._playbackCompletedLock.set()
-                    log.debug('< onPlayBackEnded')
-            except:
-                # Called on a separate thread -- log exceptions instead of raising them
-                log.exception('onPlayBackEnded catchall')
+                super(MountedPlayer, self).onPlayBackEnded()
+            finally:
+                self._playbackCompletedLock.set()
 
     # Private -----------------------------------------------------------------
     
-    def _reset(self, program):
-        self._program = program
-        self._playbackCompletedLock = threading.Event()
-        self._playbackCompletedLock.clear()
-        self._tracker = PositionTracker(self)
-        self._bookmarker = Bookmarker(self, self._program, self.translator)
-        
-    def _waitForPlaybackCompleted(self):
+    def waitForPlaybackCompleted(self):
         while not self._playbackCompletedLock.isSet():
             #log.debug('Waiting for playback completed...')
             xbmc.sleep(SLEEP_MILLIS)
 
-    def _buildPlayList(self):
+    def buildPlayList(self):
         mlog.debug("> _buildPlayList")
         
         playlistItem = xbmcgui.ListItem()
-        title = self._program.fullTitle()
-        comms = self._program.getCommercials()
+        title = self.program.fullTitle()
+        comms = self.program.getCommercials()
         if len(comms) > 0:
             title += '(%s breaks - %s)' % (len(comms), ', '.join(map(lambda c: formatSeconds(c.start), comms)))
                 
         playlistItem.setInfo(
             "video", {
-                "Genre"  : self._program.category(), 
-                "Studio" : self._program.formattedChannel(), 
+                "Genre"  : self.program.category(), 
+                "Studio" : self.program.formattedChannel(), 
                 "Title"  : title, 
-                "Plot"   : self._program.formattedDescription()
+                "Plot"   : self.program.formattedDescription()
             })
         
         # TODO: Set start offset if a comm break starts at 0.0 
@@ -162,44 +164,76 @@ class MythPlayer(xbmc.Player):
         return playlistItem
 
 
-#
-#  TODO: Integrate for Issue 111
-#
-class MythStreamingPlayer(MythPlayer):
+class StreamingPlayer(BasePlayer):
     """Use xbmcs built in myth support to stream the recording over the network."""
 
     def __init__(self, *args, **kwargs):
-        MythPlayer.__init__(self, *args, **kwargs)    
-        self.settings = kwargs['settings']
+        BasePlayer.__init__(self, *args, **kwargs)    
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'mythThumbnailCache', 'program')]
+        self.bookmarker = MythBookmarker(self, self.program, self.translator)
         
     @inject_db        
-    def getFileUrl(self):
+    def buildPlaybackUrl(self):
+        backend = self.db().toBackend(self.program.hostname())
+
         # myth://dbuser:dbpassword@mythbackend_hostname:mythbackend_port/recordings/filename.mpg
-        backend = self.db().toBackend(self.getProgram().hostname())
-        
-        #
-        # TODO: This doesn't work even with MasterBackendOverride=1. Must be a myth:// thing
-        #
-#        if backend.slave:
-#            if False: #backend.isAlive():
-#                pass
-#            else:
-#                log.error('ZZZ Slave down...trying master')
-#                backend = self.db().getMasterBackend()
-                
-        #backend = self.db().getMasterBackend()
         url = 'myth://%s:%s@%s:%s/recordings/%s' % (
             self.settings.get('mysql_database'),
             self.settings.get('mysql_password'),
             backend.ipAddress,
             backend.port,
-            self.getProgram().getBareFilename())
-        log.debug('XBMC recording url: %s' % url)
+            self.program.getBareFilename())
+        log.debug('Playback url: %s' % url)
         return url
     
+    def playRecording(self, commSkipper):
+        """
+        Plays the given program. Blocks until playback is stopped or until the 
+        end of the recording is reached
+        """
+        mlog.debug('> playRecording %s' % safe_str(self.program.title()))
+        assert not self.isPlaying(), 'Player is already playing a video'
+        self.commSkipper = commSkipper
+        self.play(self.buildPlaybackUrl(), self.buildPlayList())
+        #self._waitForPlaybackCompleted()
+        #self.active = False
+        mlog.debug('< playRecording')
+
+    def buildPlayList(self):
+        playlistItem = xbmcgui.ListItem()
+        playlistItem.setInfo(
+            "video", {
+                "Genre"  : self.program.category(), 
+                "Studio" : self.program.formattedChannel(), 
+                "Title"  : self.program.fullTitle(), 
+                "Plot"   : self.program.formattedDescription()
+            })
+        return playlistItem
+
 
 class Bookmarker(object):
-    """Mimics XBMC video player's builtin auto resume functionality"""
+    pass
+
+
+class XbmcBookmarker(Bookmarker):
+    '''When using a myth:// style URL for playback, defer to XBMC's built in 
+    resume from last postion functionality'''
+    
+    def __init__(self, *args, **kwargs):
+        pass
+    
+    def onPlayBackStarted(self):
+        pass
+        
+    def onPlayBackStopped(self):
+        pass
+        
+    def onPlayBackEnded(self):
+        pass
+    
+    
+class MythBookmarker(Bookmarker):
+    '''Mimics XBMC video player's builtin auto resume functionality'''
     
     def __init__(self, player, program, translator):
         self._player = player
@@ -233,7 +267,7 @@ class Bookmarker(object):
             log.debug('Recording has no bookmark or bookmark exceeds program length')
 
     def _saveLastPositionAsBookmark(self):
-        lastPos = self._player.getTracker().getLastPosition()
+        lastPos = self._player.tracker.getLastPosition()
         log.debug('Setting bookmark on %s to %s' %(safe_str(self._program.title()), formatSeconds(lastPos)))
         try:
             self._program.setBookmark(lastPos)
@@ -329,7 +363,7 @@ class ICommercialSkipper(object):
 
 class NoOpCommercialSkipper(ICommercialSkipper):
 
-    def __init__(self, player, program, translator):
+    def __init__(self, player=None, program=None, translator=None):
         ICommercialSkipper.__init__(self, player, program, translator)
 
     def onPlayBackStarted(self):
@@ -460,7 +494,7 @@ class TrackingCommercialSkipper(ICommercialSkipper):
     def _landedInCommercial(self, currPos):
         #samplesInCommercial = 4  # In commercial for 2 seconds
         secondsToSample = 4
-        samples = self._player.getTracker().getHistory(secondsToSample)
+        samples = self._player.tracker.getHistory(secondsToSample)
         samplesInCommercial = len(filter(lambda x: self._currentBreak.isDuring(x.pos), samples))
         log.debug('Samples in commercial = %d' % samplesInCommercial)
         if samplesInCommercial > 8 and samplesInCommercial < 12:
@@ -482,7 +516,7 @@ class TrackingCommercialSkipper(ICommercialSkipper):
         # skipping around
         if currPos > samplePeriodSecs:
             requiredSamples = 6  # TODO: Derive as percentage instead of hardcoding
-            numSamples = len(self._player.getTracker().getHistory(samplePeriodSecs))
+            numSamples = len(self._player.tracker.getHistory(samplePeriodSecs))
             log.debug('Samples in last %s seconds = %s' %(samplePeriodSecs, numSamples))
             wasSkipping = numSamples < requiredSamples
 

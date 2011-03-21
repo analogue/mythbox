@@ -30,7 +30,8 @@ from mythbox.mythtv.domain import StatusException
 from mythbox.mythtv.enums import JobStatus, JobType
 from mythbox.mythtv.conn import inject_conn, inject_db, ConnectionFactory
 from mythbox.settings import SettingsException
-from mythbox.ui.player import MythPlayer, TrackingCommercialSkipper
+from mythbox.ui.player import MountedPlayer, TrackingCommercialSkipper,\
+    StreamingPlayer, NoOpCommercialSkipper
 from mythbox.ui.toolkit import BaseWindow, Action, window_busy, showPopup
 from mythbox.util import catchall_ui, catchall, lirc_hack, run_async, coalesce, safe_str 
 from mythbox.util import hasPendingWorkers, waitForWorkersToDie, formatSize
@@ -253,9 +254,13 @@ class HomeWindow(BaseWindow):
 
     @window_busy
     def goPlayRecording(self):
-        p = MythPlayer(mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
         program=self.recordings[self.coverFlow.getSelectedPosition()]
-        p.playRecording(program, TrackingCommercialSkipper(p, program, self.translator))
+        if self.settings.getBoolean('streaming_enabled'):
+            p = StreamingPlayer(program=program, settings=self.settings, mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
+            p.playRecording(NoOpCommercialSkipper())
+        else:    
+            p = MountedPlayer(program=program, mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
+            p.playRecording(TrackingCommercialSkipper(p, program, self.translator))
         del p 
             
     def goWatchRecordings(self):

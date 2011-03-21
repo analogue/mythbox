@@ -71,13 +71,14 @@ class Group(object):
         self.programs.remove(program)
 
     def __str__(self):
-        s = """title = %s
-        num programs = %d 
-        num listiems = %d
-        num li map   = %d """ % (safe_str(self.title), len(self.programs), len(self.listItems), len(self.programsByListItem))
+        s = """
+        group         = %s
+        num programs  = %d 
+        num listitems = %d
+        num li map    = %d """ % (safe_str(self.title), len(self.programs), len(self.listItems), len(self.programsByListItem))
         return s
 
-    
+
 class RecordingsWindow(BaseWindow):
         
     def __init__(self, *args, **kwargs):

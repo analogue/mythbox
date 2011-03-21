@@ -30,7 +30,7 @@ from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.conn import inject_conn
 from mythbox.mythtv.domain import Channel
 from mythbox.mythtv.conn import ServerException
-from mythbox.ui.player import MythPlayer, NoOpCommercialSkipper
+from mythbox.ui.player import MountedPlayer, NoOpCommercialSkipper
 from mythbox.ui.toolkit import Action, BaseWindow, window_busy
 from mythbox.util import safe_str,catchall, catchall_ui, run_async, lirc_hack, ui_locked, ui_locked2, formatSize
 from odict import odict
@@ -187,16 +187,16 @@ class FileLiveTvBrain(BaseLiveTvBrain):
         self.tuner.stopLiveTV()
     
 
-class FileLiveTvPlayer(MythPlayer):
+class FileLiveTvPlayer(MountedPlayer):
     """
     Play live tv using the livetv recording available on the filesystem
     """
     
-    # TODO: Callback listener registration needs to be pushed down to MythPlayer
+    # TODO: Callback listener registration needs to be pushed down to MountedPlayer
     #       eventually making this class obsolete.
     
     def __init__(self):
-        MythPlayer.__init__(self)
+        MountedPlayer.__init__(self)
         self.listeners = []  
     
     def addListener(self, listener):
