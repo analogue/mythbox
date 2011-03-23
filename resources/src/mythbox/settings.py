@@ -201,7 +201,9 @@ class MythSettings(object):
         self.verifyMySQLConnectivity()
         self.verifyMythTVConnectivity()
         
-        MythSettings.verifyRecordingDirs(self.get('paths_recordedprefix'))
+        if not self.getBoolean('streaming_enabled'): 
+            MythSettings.verifyRecordingDirs(self.get('paths_recordedprefix'))
+        
         MythSettings.verifyBoolean(self.get('confirm_on_delete'), 'Confirm on delete must be True or False')
         MythSettings.verifyBoolean(self.get('aggressive_caching'), 'Aggressive Caching must be True or False')
         slog.debug('verified settings')

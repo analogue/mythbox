@@ -201,11 +201,17 @@ class StreamingPlayer(BasePlayer):
 
     def buildPlayList(self):
         playlistItem = xbmcgui.ListItem()
+        comms = self.program.getCommercials()
+        title = self.program.fullTitle()
+        if len(comms) > 0: 
+            # times are invalid when streaming so only show cardinality
+            title += u' (%d breaks)' % len(comms)        
+        
         playlistItem.setInfo(
             "video", {
                 "Genre"  : self.program.category(), 
                 "Studio" : self.program.formattedChannel(), 
-                "Title"  : self.program.fullTitle(), 
+                "Title"  : title, 
                 "Plot"   : self.program.formattedDescription()
             })
         return playlistItem

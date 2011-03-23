@@ -174,6 +174,9 @@ class SettingsWindow(BaseWindow):
             self.testSettingsButton = self.getControl(253)
             self.clearCacheButton = self.getControl(405)
             
+            self.streamingEnabledRadioButton = self.getControl(208)
+            self.recordingsButton = self.getControl(205) 
+            
             # MythTV Settings
             if hasattr(self.settings, 'master') and self.settings.master:
                 self.setWindowProperty('MasterBackendHostname', '%s / %s' % (self.settings.master.hostname, self.settings.master.ipAddress))
@@ -227,6 +230,8 @@ class SettingsWindow(BaseWindow):
                 self.advanced.save()
                 log.debug(self.advanced)
             else:
+                if self.streamingEnabledRadioButton == source: 
+                    self.renderStreaming()
                 self.settings.save()
         elif self.testSettingsButton == source: self.testSettings()
         elif self.clearCacheButton == source: self.clearCache()
@@ -242,11 +247,18 @@ class SettingsWindow(BaseWindow):
         if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
             self.close()
 
+    def renderStreaming(self):
+        # special mutual exclusion for handling of streaming enabled
+        self.recordingsButton.setEnabled(not self.streamingEnabledRadioButton.isSelected())
+
     @window_busy
     def render(self):
         for setting in self.settingsMap.values():
             log.debug('Rendering %s' % safe_str(setting.key))
             setting.render()
+
+        self.renderStreaming()
+                    
         import default
         self.setWindowProperty('AboutText', "%s\n\n%s\n\n%s\n\n%s" % (default.__scriptname__, default.__author__, default.__url__, self.platform.getVersion()))
         self.setWindowProperty('ReadmeText', '%s\n%s' % (

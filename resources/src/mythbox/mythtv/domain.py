@@ -994,7 +994,10 @@ class RecordedProgram(Program):
 
     def getFrameRate(self):
         if self.settings.getBoolean('streaming_enabled'):
-            return self.getFrameRate2();
+            # framerate not needed when using streaming.
+            # use an obviously invalid default so CommercialBreak objects 
+            # can still be constructed to get number of breaks 
+            return 29.97
         else:
             return self.getFrameRate1()
         
@@ -1048,75 +1051,75 @@ class RecordedProgram(Program):
             log.debug('FPS = %s' % self._fps)
         return self._fps
 
-    @timed
-    @inject_db
-    @inject_conn
-    def getFrameRate2(self):
-        """
-        Get framerate without the recording being accessible via the filesystem.
-        @rtype: float
-        @note: cached 
-        @note: most recordings are either 29.97 or 59.97
-        """
-        
-        #
-        # TODO: Integrate for Issue 111
-        #
-        
-        ffmpeg_cache_dir=os.path.join(self._platform.getScriptDataDir(), 'cache', 'ffmpeg')
-        requireDir(ffmpeg_cache_dir) 
-        
-        if not self._fps:
-            ffmpegParser = FFMPEG(
-                ffmpeg=self._platform.getFFMpegPath(),
-                closeFDs=(type(self._platform) != WindowsPlatform),  # WORKAROUND: close_fds borked on windows
-                windows=(type(self._platform) == WindowsPlatform),   # WORKAROUND: let pyxcoder know we're on windows
-                tempdir=ffmpeg_cache_dir,
-                log=log)
-            
-            fileSink = os.path.join(ffmpeg_cache_dir, self.getBareFilename())           
-            
-            try:
-                if not os.path.exists(os.path.join(ffmpeg_cache_dir, fileSink + ".out")):
-                    log.debug('Saving recording fragment to: %s' % fileSink)
-                    transferred = self.conn().transferFile(self.getFilename(), fileSink, self.db().toBackend(self.hostname()).ipAddress, numBytes=5000000)
-    
-                    if not transferred:
-                        log.exception('Error', 'Transfer file fragment for %s failed' % safe_str(self.title()))
-                        self._fps = 29.97
-                        return self._fps
-                    
-                try:
-                    metadata = ffmpegParser.get_metadata(fileSink)
-                except:
-                    log.exception('ffmpeg parsing failed')
-                    metadata = None
-                    
-                log.debug('ffmpeg metadata for %s = %s' % (fileSink, metadata))
-                if metadata:
-                    self._fps = float(metadata.frame_rate)
-
-                    # Hack for FFMPEG returning incorrect or conflicting framerates for specific types of video files
-                    for name, profile_data in self._fps_overrides.iteritems():
-                        try:
-                            if len([key for key,value in profile_data['tags'].iteritems() if getattr(metadata, key) == value]) == len(profile_data['tags']):  # all key/value pairs match
-                                old_fps = self._fps
-                                self._fps = profile_data['fps']
-                                log.debug('FPS override %s activated for %s from %s to %s' % (name, safe_str(self.title()), old_fps, self._fps))
-                                break
-                        except:
-                            log.exception('Blew up trying to test for fps overrides')
-                else:
-                    self._fps = 29.97
-                    log.error("""Could not determine FPS for file %s so defaulting to %s FPS.
-                                 Make sure you have the ffmpeg executable in your path. 
-                                 Commercial skipping may be inaccurate""" % (self._fps, fileSink))
-                    showPopup(self.translator.get(m.ERROR), 'FFMpeg could not determine framerate. Comm skip may be inaccurate')
-            finally:
-                if os.path.exists(fileSink):
-                    os.remove(fileSink)
-            log.debug('FPS = %s' % self._fps)
-        return self._fps
+#    @timed
+#    @inject_db
+#    @inject_conn
+#    def getFrameRate2(self):
+#        """
+#        Get framerate without the recording being accessible via the filesystem.
+#        @rtype: float
+#        @note: cached 
+#        @note: most recordings are either 29.97 or 59.97
+#        """
+#        
+#        #
+#        # TODO: Integrate for Issue 111
+#        #
+#        
+#        ffmpeg_cache_dir=os.path.join(self._platform.getScriptDataDir(), 'cache', 'ffmpeg')
+#        requireDir(ffmpeg_cache_dir) 
+#        
+#        if not self._fps:
+#            ffmpegParser = FFMPEG(
+#                ffmpeg=self._platform.getFFMpegPath(),
+#                closeFDs=(type(self._platform) != WindowsPlatform),  # WORKAROUND: close_fds borked on windows
+#                windows=(type(self._platform) == WindowsPlatform),   # WORKAROUND: let pyxcoder know we're on windows
+#                tempdir=ffmpeg_cache_dir,
+#                log=log)
+#            
+#            fileSink = os.path.join(ffmpeg_cache_dir, self.getBareFilename())           
+#            
+#            try:
+#                if not os.path.exists(os.path.join(ffmpeg_cache_dir, fileSink + ".out")):
+#                    log.debug('Saving recording fragment to: %s' % fileSink)
+#                    transferred = self.conn().transferFile(self.getFilename(), fileSink, self.db().toBackend(self.hostname()).ipAddress, numBytes=5000000)
+#    
+#                    if not transferred:
+#                        log.exception('Error', 'Transfer file fragment for %s failed' % safe_str(self.title()))
+#                        self._fps = 29.97
+#                        return self._fps
+#                    
+#                try:
+#                    metadata = ffmpegParser.get_metadata(fileSink)
+#                except:
+#                    log.exception('ffmpeg parsing failed')
+#                    metadata = None
+#                    
+#                log.debug('ffmpeg metadata for %s = %s' % (fileSink, metadata))
+#                if metadata:
+#                    self._fps = float(metadata.frame_rate)
+#
+#                    # Hack for FFMPEG returning incorrect or conflicting framerates for specific types of video files
+#                    for name, profile_data in self._fps_overrides.iteritems():
+#                        try:
+#                            if len([key for key,value in profile_data['tags'].iteritems() if getattr(metadata, key) == value]) == len(profile_data['tags']):  # all key/value pairs match
+#                                old_fps = self._fps
+#                                self._fps = profile_data['fps']
+#                                log.debug('FPS override %s activated for %s from %s to %s' % (name, safe_str(self.title()), old_fps, self._fps))
+#                                break
+#                        except:
+#                            log.exception('Blew up trying to test for fps overrides')
+#                else:
+#                    self._fps = 29.97
+#                    log.error("""Could not determine FPS for file %s so defaulting to %s FPS.
+#                                 Make sure you have the ffmpeg executable in your path. 
+#                                 Commercial skipping may be inaccurate""" % (self._fps, fileSink))
+#                    showPopup(self.translator.get(m.ERROR), 'FFMpeg could not determine framerate. Comm skip may be inaccurate')
+#            finally:
+#                if os.path.exists(fileSink):
+#                    os.remove(fileSink)
+#            log.debug('FPS = %s' % self._fps)
+#        return self._fps
 
     def formattedFileSize(self):
         """
