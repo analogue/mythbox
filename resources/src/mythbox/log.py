@@ -16,7 +16,6 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-import os
 import time
 
 class LogScraper(object):
@@ -31,7 +30,11 @@ class LogScraper(object):
         before = time.clock()
         try:
             f = open(self.fname, 'rb+')
-            f.seek(0, os.SEEK_END)
+
+            # os.SEEK_END was introduced in python 2.5 so have no choice but to use f.read()
+            # TODO: Update to use f.seek(0, os.SEEK_END) after we've ditched python 2.4
+            f.read()
+            
             while elapsed < timeout:
                 line = f.readline()
                 if s in line:
