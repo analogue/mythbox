@@ -40,7 +40,7 @@ def getPlatform():
             __instance = UnixPlatform()
         elif 'darwin' in sys.platform:
             # gotta be a better way to detect ipad/iphone/atv
-            if 'USER' in os.environ and os.environ['USER'] == 'mobile':
+            if 'USER' in os.environ and os.environ['USER'] in ('mobile','frontrow',):
                 __instance = IOSPlatform()
             else: 
                 __instance = MacPlatform()
@@ -95,6 +95,62 @@ class Platform(object):
     
     def getName(self):
         return "N/A"
+    
+    def getXbmcLog(self):
+        raise Exception('abstract method')
+
+        #  Linux
+        # 
+        #  CStdString userHome;
+        #    769   if (getenv("HOME"))
+        #    770     userHome = getenv("HOME");
+        #    771   else
+        #    772     userHome = "/root";
+        #    773 
+        #    774   CStdString xbmcBinPath, xbmcPath;
+        #    775   CUtil::GetHomePath(xbmcBinPath, "XBMC_BIN_HOME");
+        #    776   xbmcPath = getenv("XBMC_HOME");
+        #    777 
+        #    778   if (xbmcPath.IsEmpty())
+        #    779   {
+        #    780     xbmcPath = INSTALL_PATH;
+        #    781     /* Check if xbmc binaries and arch independent data files are being kept in
+        #    782      * separate locations. */
+        #    783     if (!CFile::Exists(URIUtils::AddFileToFolder(xbmcPath, "language")))
+        #    784     {
+        #    785       /* Attempt to locate arch independent data files. */
+        #    786       CUtil::GetHomePath(xbmcPath);
+        #    787       if (!CFile::Exists(URIUtils::AddFileToFolder(xbmcPath, "language")))
+        #    788       {
+        #    789         fprintf(stderr, "Unable to find path to XBMC data files!\n");
+        #    790         exit(1);
+        #    791       }
+        #    792     }
+        #    793   }
+    
+        #    OSX
+        #
+        #            // xbmc.log file location
+        #    894     #if defined(__arm__)
+        #    895       strTempPath = userHome + "/Library/Preferences";
+        #    896     #else
+        #    897       strTempPath = userHome + "/Library/Logs";
+        #    898     #endif
+        #    899     URIUtils::AddSlashAtEnd(strTempPath);
+        #    900     g_settings.m_logFolder = strTempPath;
+            
+        # 
+        # CSettings
+        #
+        #          #ifdef __APPLE__
+        #    111     CStdString logDir = getenv("HOME");
+        #    112     logDir += "/Library/Logs/";
+        #    113     m_logFolder = logDir;
+        #    114   #else
+        #    115     m_logFolder = "special://home/";              // log file location
+        #    116   #endif
+            
+        return os.path.join(xbmc.translatePath())
     
     def getScriptDir(self):
         '''
@@ -203,6 +259,9 @@ class UnixPlatform(Platform):
 
     def getDefaultRecordingsDir(self):
         return '/var/lib/mythtv/recordings'
+
+    def getXbmcLog(self):    
+        return os.path.join(xbmc.translatePath('special://temp'), 'xbmc.log')
     
 
 class WindowsPlatform(Platform):

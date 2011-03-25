@@ -17,26 +17,120 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+import os
 import logging
 import unittest2 as unittest
-#from mythbox.log import SafeLogger
+import tempfile
+import shutil
+import time
+
+from mythbox.util import run_async
+from mythbox.log import LogScraper
 
 log = logging.getLogger('mythbox.unittest')
 
-#class SafeLoggerTest(unittest.TestCase):
-#    
-#    def test_messages_sanitized_before_passing_up_the_chain(self):
-#        safe_logger = SafeLogger(log)
-#        safe_logger.debug('debug hellow world')
-#        safe_logger.info('info hello world')
-#        safe_logger.warning('warn hello world')
-#        safe_logger.error('error hello world')
-#        us = u'madeleine (Grabación Manual)'
-#        safe_logger.error(us)
-#        u2 = u'Königreich der Himmel'
-#        safe_logger.error(u2)
-#        # what asserts?
+class LogScraperTest(unittest.TestCase):    
 
+    def setUp(self):
+        self.sandbox = tempfile.mkdtemp()
+        self.abortGrow = False
+        
+    def tearDown(self):
+        shutil.rmtree(self.sandbox, ignore_errors=True)
+
+    @run_async
+    def growFile(self, fname, contents, writeLineEveryEnnSeconds):
+        f = open(fname, 'w+')
+        for line in contents:
+            print('Writing "%s" to %s' % (line, fname))
+            f.write(line)
+            f.flush()
+            time.sleep(writeLineEveryEnnSeconds)
+            if self.abortGrow:
+                break
+        f.close()
+                
+    def test_matchLine_When_search_string_found_Then_return_matching_text(self):
+        
+        fname = os.path.join(self.sandbox, 'xbmc.log')
+        
+        try:
+            t = self.growFile(fname, ['aaa','bbb','ccc','xxx','yyy'], 1)
+            
+            while not os.path.exists(fname):
+                time.sleep(1)
+            
+            scraper = LogScraper(fname)
+            text = scraper.matchLine('xxx', 10)
+            print 'text = %s ' % text
+            self.assertEqual('xxx',text)
+        finally:
+            self.abortGrow = True
+            t.join()
+
+    def test_matchLine_When_search_string_eventually_shows_up_in_log_but_times_out_first_Then_return_None(self):
+        
+        fname = os.path.join(self.sandbox, 'xbmc.log')
+        
+        try:
+            t = self.growFile(fname, ['aaa','bbb','ccc','xxx','yyy'], 1)
+            
+            while not os.path.exists(fname):
+                time.sleep(1)
+            
+            scraper = LogScraper(fname)
+            text = scraper.matchLine('yyy', 1)
+            self.assertIsNone(text)
+        finally:
+            self.abortGrow = True
+            t.join()
+
+    def test_matchLine_When_search_string_not_found_Then_times_out_and_returns_None(self):
+        
+        fname = os.path.join(self.sandbox, 'xbmc.log')
+        
+        try:
+            t = self.growFile(fname, ['aaa','bbb','ccc'], 1)
+            
+            while not os.path.exists(fname):
+                time.sleep(1)
+            
+            scraper = LogScraper(fname)
+            text = scraper.matchLine('zzz', 5)
+            self.assertIsNone(text)
+        finally:
+            self.abortGrow = True
+            t.join()
+
+    def test_matchLine_When_called_in_succession_many_times_Then_doesnt_fail(self):
+        
+        fname = os.path.join(self.sandbox, 'xbmc.log')
+        
+        try:
+            t = self.growFile(fname, ['aaa','bbb','ccc','xxx','yyy','zzz','jjj'], 1)
+            
+            while not os.path.exists(fname):
+                time.sleep(1)
+            
+            scraper = LogScraper(fname)
+            self.assertEqual('ccc', scraper.matchLine('ccc', 5))
+            self.assertEqual('yyy', scraper.matchLine('yyy', 5))
+            self.assertEqual('jjj', scraper.matchLine('jjj', 5))
+        finally:
+            self.abortGrow = True
+            t.join()
+
+    def test_matchLine_When_file_does_not_exist_Then_throws_IOError(self):
+        fname = os.path.join(self.sandbox, 'bogus.log')
+        scraper = LogScraper(fname)
+
+        try:
+            scraper.matchLine('ccc', 5)
+            self.fail('Expected IOError on non-existant file')
+        except IOError, ioe:
+            # SUCCESS
+            pass
+        
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('mythbox_log.ini')

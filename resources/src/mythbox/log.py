@@ -16,31 +16,33 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-import logging
-from mythbox.util import safe_str
+import os
+import time
 
-#class SafeLogger(logging.LoggerAdapter):
-#    '''ConsoleLogger cannot handle non-ascii chars and it is a 
-#    PITA when the app fails because a log message was not
-#    sanitized with util.safe_str(...) before being passed on.
-#    Just decorate an existing logger and sanitize before passing
-#    on up the chain...
-#    '''
-#    
-#    def __init__(self, logger):
-#        logging.LoggerAdapter.__init__(self, logger, None)
-#
-#    def debug(self, msg, *args, **kwargs):
-#        logging.LoggerAdapter.debug(self, safe_str(msg), *args, **kwargs)
-#        
-#    def info(self, msg, *args, **kwargs):
-#        logging.LoggerAdapter.info(self, safe_str(msg), *args, **kwargs)
-#
-#    def warning(self, msg, *args, **kwargs):
-#        logging.LoggerAdapter.warning(self, safe_str(msg), *args, **kwargs)
-#
-#    def error(self, msg, *args, **kwargs):
-#        logging.LoggerAdapter.error(self, safe_str(msg), *args, **kwargs)
-#
-#    def exception(self, msg, *args, **kwargs):
-#        logging.LoggerAdapter.exception(self, safe_str(msg), *args, **kwargs)
+class LogScraper(object):
+
+    def __init__(self, fname):
+        self.fname = fname
+        
+    def matchLine(self, s, timeout=10):  
+        '''Waits for a line of text containing s to be written to the file. 
+        Returns the line if found, or None in the case of a timeout (seconds)'''
+        elapsed = 0
+        before = time.clock()
+        try:
+            f = open(self.fname, 'rb+')
+            f.seek(0, os.SEEK_END)
+            while elapsed < timeout:
+                line = f.readline()
+                if s in line:
+                    return s
+                now = time.clock()
+                elapsed += now - before
+                before = now
+        finally:
+            try: 
+                f.close() 
+            except: 
+                pass
+
+        return None
