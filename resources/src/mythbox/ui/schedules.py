@@ -119,36 +119,35 @@ class SchedulesWindow(BaseWindow):
         @ui_locked2
         def buildListItems():
             for i, s in enumerate(self.schedules):
-                listItem = xbmcgui.ListItem()
-                self.setListItemProperty(listItem, 'title', s.title())
-                self.setListItemProperty(listItem, 'scheduleType', s.formattedScheduleType())
-                self.setListItemProperty(listItem, 'fullTitle', s.fullTitle())
-                self.setListItemProperty(listItem, 'priority', '%s' % s.getPriority())
-                self.setListItemProperty(listItem, 'channelName', s.getChannelName())
-                self.setListItemProperty(listItem, 'poster', 'loading.gif')
-                self.setListItemProperty(listItem, 'index', str(i+1))
-                #self.setListItemProperty(listItem, 'description', s.formattedDescription())
-                #self.setListItemProperty(listItem, 'airDate', s.formattedAirDateTime())
-                #self.setListItemProperty(listItem, 'originalAirDate', s.formattedOriginalAirDate())
-                
-                try:
-                    # isolate failure for schedules with a channel that may no longer exist
+                li = xbmcgui.ListItem()
+                self.setListItemProperty(li, 'title', s.title())
+                self.setListItemProperty(li, 'scheduleType', s.formattedScheduleType())
+                self.setListItemProperty(li, 'fullTitle', s.fullTitle())
+                self.setListItemProperty(li, 'priority', '%s' % s.getPriority())
+                self.setListItemProperty(li, 'poster', 'loading.gif')
+                self.setListItemProperty(li, 'index', str(i+1))
+                self.setListItemProperty(li, 'numRecorded', '%s' % s.numRecorded())                
+
+                # protect against deleted channels/tuners
+                if s.getChannelId() in self.channelsById:
+
+                    if s.getChannelName():
+                        self.setListItemProperty(li, 'channelName', s.getChannelName())
+
                     channel = self.channelsById[s.getChannelId()]
                     if channel.getIconPath():
                         channelIcon = self.mythChannelIconCache.get(channel)
                         if channelIcon:
-                            self.setListItemProperty(listItem, 'channelIcon', channelIcon)
-                except:
-                    log.warn('Schedule for %s refers to non-existant channel with id %s' % (safe_str(s.title()), s.getChannelId()))
+                            self.setListItemProperty(li, 'channelIcon', channelIcon)
                 
                 if self.fanArt.hasPosters(s):
                     s.needsPoster = False
-                    self.setListItemProperty(listItem, 'poster', self.lookupPoster(s))
+                    self.setListItemProperty(li, 'poster', self.lookupPoster(s))
                 else:
                     s.needsPoster = True
                 
-                listItems.append(listItem)
-                self.listItemsBySchedule[s] = listItem
+                listItems.append(li)
+                self.listItemsBySchedule[s] = li
 
         buildListItems()
         self.schedulesListBox.reset()

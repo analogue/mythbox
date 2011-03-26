@@ -567,7 +567,7 @@ class MythDatabase(object):
                 c.callsign,
                 c.name as channame,
                 c.icon,
-                (select count(*) from oldrecorded where oldrecorded.recordid=r.recordid) as numRecorded
+                (select count(*) from oldrecorded where oldrecorded.title=r.title) as numRecorded
             FROM
                 record r
             LEFT JOIN channel c ON r.chanid = c.chanid
