@@ -566,12 +566,13 @@ class MythDatabase(object):
                 c.channum,
                 c.callsign,
                 c.name as channame,
-                c.icon
+                c.icon,
+                (select count(*) from oldrecorded where oldrecorded.recordid=r.recordid) as numRecorded
             FROM
                 record r
             LEFT JOIN channel c ON r.chanid = c.chanid
             """
-            
+    
         if chanId != "":
             sql += "WHERE r.chanid = '%s' "%chanId
             

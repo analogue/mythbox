@@ -1335,6 +1335,19 @@ class RecordingSchedule(Schedule):
         
         if not 'icon' in self._data or not self._data['icon'] or self._data['icon'] == "none":
             self._data['icon'] = None
+
+    def __repr__(self):
+        return "%s {recordid=%s, type=%s, title=%s, subtitle=%s, starttime=%s, endtime=%s startdate=%s, enddate=%s, nr=%d}" % (
+            type(self).__name__,
+            self.getScheduleId(),
+            self.formattedScheduleType(),
+            repr(self.title()),
+            repr(self.subtitle()),
+            self.starttime(),
+            self.endtime(),
+            self.startdate(),
+            self.enddate(),
+            self.numRecorded())
     
     def data(self):
         """
@@ -1343,6 +1356,9 @@ class RecordingSchedule(Schedule):
         """
         return self._data
 
+    def numRecorded(self):
+        return int(self._data['numRecorded'])
+    
     def getScheduleId(self):
         """
         @return: schedule id if persisted, None otherwise

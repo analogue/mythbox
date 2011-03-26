@@ -650,7 +650,7 @@ class GoogleImageSearchProvider(BaseFanartProvider):
     def getPosters(self, program):
         posters = []
         try:
-            url_values = urllib.urlencode({'v':'1.0', 'safe':'moderate', 'rsz':'8', 'imgsz':'medium', 'key':self.API_KEY, 'q':program.title()}, doseq=True)
+            url_values = urllib.urlencode({'v':'1.0', 'safe':'moderate', 'rsz':'4', 'imgsz':'medium', 'key':self.API_KEY, 'q':program.title()}, doseq=True)
             searchUrl = 'http://ajax.googleapis.com/ajax/services/search/images?' + url_values
             req = urllib2.Request(searchUrl, headers={'Referer':'http://mythbox.googlecode.com'})
             resp = urllib2.urlopen(req)
