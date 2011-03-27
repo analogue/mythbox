@@ -226,7 +226,7 @@ class MythDatabase(object):
     
     def toBackend(self, hostnameOrIpAddress):
         for b in self.getBackends():
-            if hostnameOrIpAddress in (b.hostname, b.ipAddress,):
+            if hostnameOrIpAddress.lower() in (b.hostname.lower(), b.ipAddress.lower(),):
                 return b
         master = self.getMasterBackend()
         log.warn('Host %s could not be mapped to a backend. Returning master backend %s instead.' % (hostnameOrIpAddress, master.hostname))

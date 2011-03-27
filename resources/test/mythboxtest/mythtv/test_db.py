@@ -57,9 +57,11 @@ class MythDatabaseTest(unittest2.TestCase):
 
     def test_toBackend(self):
         master = self.db.getMasterBackend()
-        self.assertEquals(master, self.db.toBackend(master.hostname))
-        self.assertEquals(master, self.db.toBackend(master.ipAddress))
+        self.assertEqual(master, self.db.toBackend(master.hostname))
+        self.assertEqual(master, self.db.toBackend(master.ipAddress))
         self.assertTrue(master,   self.db.toBackend('bogus'))
+        self.assertEqual(master, self.db.toBackend(master.hostname.upper()))
+        self.assertEqual(master, self.db.toBackend(master.hostname.lower()))
         
     def test_getBackends(self):
         bes = self.db.getBackends()
