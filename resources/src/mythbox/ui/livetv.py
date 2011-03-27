@@ -340,7 +340,7 @@ class LiveTvWindow(BaseWindow):
         try:
             brain.watchLiveTV(channel)
         except Exception, e:
-            log.error(e)
+            log.error(safe_str(e))
             xbmcgui.Dialog().ok(self.translator.get(m.ERROR), '', safe_str(e))
 
     @inject_db
