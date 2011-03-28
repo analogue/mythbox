@@ -341,7 +341,8 @@ To submit translations for your native language
   <string id="902">[B]Type[/B]</string>
   <string id="903">[B]Priority[/B]</string>
   <string id="904">[B]Channel[/B]</string>
-    
+  <string id="905">[B]# Recorded[/B]</string>
+  <string id="906"># Recorded</string>
   
   <!-- Upcoming Recording Screen -->
   <string id="1000">[B]Upcoming Recordings[/B]</string>

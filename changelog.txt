@@ -2,7 +2,8 @@ xx/xx/2011 MythBox 1.0.3
 -----------------------------
 
   New
-    - # Recordings column added to Recording Schedules window
+    - Recording schedules now sortable by Title, # Recorded, or Priority
+    - # Recorded column added to the Recording Schedules window
     - Selecting an upcoming recording in the TV Guide allows you to
       edit its recording schedule
     - Issue 155 - User Jobs added to the Create/Edit Schedule window
@@ -10,9 +11,12 @@ xx/xx/2011 MythBox 1.0.3
     - Optimized retrieval of upcoming recordings based on schedule
       change events from the backend
     - Google Image Search updated with API key and size restrictions
-    - Added Playback tab to the Settings window to allow the duration
-      in seconds of seeking forward and backward to be user configurable
-      (creates or updates XBMC's advancedsettings.xml) 
+    - Added Playback tab to the Settings window to allow configuration of
+      the XBMC's advancedsettings.xml for:
+       * Small Skip Forward 
+       * Small Skip Backward
+       * Big Skip Forward
+       * Big Skip Backward
     
   Fixed
     - Issue 161 - schedule from TV Guide impossible if show category 

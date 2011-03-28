@@ -128,7 +128,10 @@ class MythSettings(object):
             'feeds_twitter'              : 'mythboxfeed',
             'lirc_hack'                  : 'False',
             'logging_enabled'            : 'False',
+
             'schedules_last_selected'    : '0',
+            'schedules_sort_by'          : 'Title',
+            
             'livetv_last_selected'       : '0',
 
             'recordings_last_selected'   : '0',

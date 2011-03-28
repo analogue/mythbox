@@ -124,7 +124,7 @@
             <selectedcolor>FFe2ff43</selectedcolor>
             <align>right</align>
             <aligny>center</aligny>
-            <label>[B]# Recorded[/B]</label>
+            <label>SCRIPT905</label>
         </control>
 
         <!-- ============================================= -->
@@ -421,7 +421,42 @@
             <ondown>2000</ondown>
             <onleft>600</onleft>
             <onright>600</onright>
-            
+
+            <control type="button" id="251">
+                <description>Sort by button</description>
+<!--                <posx>0</posx>-->
+<!--                <posy>0</posy>-->
+                <width>285</width>
+                <label>$INFO[Window.Property(sortBy)]</label>
+                <align>left</align>
+                <textoffsetx>40</textoffsetx>
+                <texturefocus>button_focus.png</texturefocus>
+                <texturenofocus>button_nofocus.png</texturenofocus>
+                <pulseonselect>true</pulseonselect>
+                <onleft>600</onleft>
+                <onright>600</onright>
+                <onup>250</onup>
+                <ondown>250</ondown>
+            </control>
+
+<!--             
+            <control type="togglebutton" id="252">
+                <description>Sort asc</description>
+                <posx>250</posx>
+                <posy>10</posy>
+                <label>-</label>
+                <texturefocus>mb-scroll-up-focus.png</texturefocus>
+                <texturenofocus>mb-scroll-up.png</texturenofocus>
+                <alttexturefocus>mb-scroll-down-focus.png</alttexturefocus>
+                <alttexturenofocus>mb-scroll-down.png</alttexturenofocus>                
+                <usealttexture>substring(Window.Property(sortAscending),true)</usealttexture>
+                <onleft>251</onleft>
+                <onright>600</onright>
+                <onup>250</onup>
+                <ondown>250</ondown>
+            </control>  
+-->
+             
             <control type="button" id="250">
                 <description>Refresh button</description>
                 <label>SCRIPT210</label>
