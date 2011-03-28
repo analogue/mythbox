@@ -177,6 +177,7 @@ class Channel(object):
     
     @staticmethod
     def sortableChannelNumber(channelNumber, alternative):
+        # TODO: Handle channels like S2 S34 SE20 E11
         c = channelNumber
         try:
             n = int(c)
@@ -186,7 +187,7 @@ class Channel(object):
                 c = c.replace('-', '.')
                 n = float(c)
             except:
-                log.warn('Was not able to convert channel number %s into a number' % channelNumber)
+                log.warn('Was not able to convert channel number %s into a number. Returning %s instead' % (channelNumber, alternative))
                 n = alternative
         return n
         

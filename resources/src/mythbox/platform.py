@@ -64,6 +64,10 @@ class Platform(object):
         requireDir(self.getScriptDataDir())
         requireDir(self.getCacheDir())
 
+    def xbmcVersion(self):
+        # sample input: '10.1 Git:Unknown'
+        return float(xbmc.getInfoLabel('System.BuildVersion').split()[0])
+            
     def addLibsToSysPath(self):
         '''Add 3rd party libs in ${scriptdir}/resources/lib to the PYTHONPATH'''
         libs = [

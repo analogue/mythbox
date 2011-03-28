@@ -204,14 +204,14 @@ class BootStrapper(object):
     def bootstrapDebugShell(self):
         # only startup debug shell on my mythboxen
         import socket
-        if socket.gethostname() in ('htpc2', 'faraday', 'SP-IPad', 'octavian', 'fiona'):
+        if socket.gethostname() in ('htpc2', 'faraday', 'SP-IPad', 'octavian', 'fiona', 'athena'):
             try:
                 from mythbox.shell import DebugShell
                 globals()['bootstrapper'] = self
                 self.shell = DebugShell(self.bus, namespace=globals())
                 self.shell.start()
-            except:
-                self.log.exception('Debug shell startup')
+            except ImportError:
+                self.log.debug('Punting on debug shell -- not packaged')
 
     def bootstrapXbmcShutdownListener(self):
         from threading import Thread

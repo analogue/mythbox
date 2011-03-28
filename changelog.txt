@@ -2,6 +2,7 @@ xx/xx/2011 MythBox 1.0.3
 -----------------------------
 
   New
+    - # Recordings column added to Recording Schedules window
     - Selecting an upcoming recording in the TV Guide allows you to
       edit its recording schedule
     - Issue 155 - User Jobs added to the Create/Edit Schedule window
