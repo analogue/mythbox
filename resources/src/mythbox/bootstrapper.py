@@ -103,7 +103,7 @@ class BootStrapper(object):
             self.failSilent = True
             raise e
         
-        self.log.info('Mythbox Platform Initialized')
+        self.log.info('MythBox %s Initialized' % self.platform.addonVersion())
 
     def bootstrapEventBus(self):
         self.bus = EventBus()

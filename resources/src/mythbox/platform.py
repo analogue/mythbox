@@ -191,7 +191,7 @@ class Platform(object):
     def isUnix(self):
         return False
     
-    def getVersion(self):
+    def addonVersion(self):
         return self.addon.getAddonInfo('version')
             
     def __repr__(self):

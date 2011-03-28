@@ -260,7 +260,7 @@ class SettingsWindow(BaseWindow):
         self.renderStreaming()
                     
         import default
-        self.setWindowProperty('AboutText', "%s\n\n%s\n\n%s\n\n%s" % (default.__scriptname__, default.__author__, default.__url__, self.platform.getVersion()))
+        self.setWindowProperty('AboutText', "%s\n\n%s\n\n%s\n\n%s" % (default.__scriptname__, default.__author__, default.__url__, self.platform.addonVersion()))
         self.setWindowProperty('ReadmeText', '%s\n%s' % (
             open(os.path.join(self.platform.getScriptDir(), 'README'), 'r').read(),
             open(os.path.join(self.platform.getScriptDir(), 'FAQ'), 'r').read()))
