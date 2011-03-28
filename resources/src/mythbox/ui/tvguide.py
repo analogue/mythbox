@@ -350,6 +350,14 @@ class TvGuideWindow(ui.BaseWindow):
     @window_busy
     @inject_conn
     def watchLiveTv(self, program):
+
+        if not self.conn().protocol.supportsStreaming(self.platform):
+            xbmcgui.Dialog().ok(self.translator.get(m.ERROR), 
+                'Watching Live TV is currently not supported', 
+                'with your configuration of MythTV %s and' % self.conn().protocol.mythVersion(), 
+                'XBMC %s. Consider downgrading to MythTV 0.23.1' % self.platform.xbmcVersion())
+            return
+        
         channel = filter(lambda c: c.getChannelId() == program.getChannelId(), self.channels).pop()
         brain = self.conn().protocol.getLiveTvBrain(self.settings, self.translator)
         try:

@@ -334,7 +334,10 @@ class LiveTvWindow(BaseWindow):
     @inject_conn
     def watchSelectedChannel(self):
         if not self.conn().protocol.supportsStreaming(self.platform):
-            xbmcgui.Dialog().ok(self.translator.get(m.ERROR), 'Watching Live TV is not supported with the combination of', 'MythTV %s and XBMC %s' % (self.conn().protocol.mythVersion(), self.platform.xbmcVersion()))
+            xbmcgui.Dialog().ok(self.translator.get(m.ERROR), 
+                'Watching Live TV is currently not supported', 
+                'with your configuration of MythTV %s and' % self.conn().protocol.mythVersion(), 
+                'XBMC %s. Consider downgrading to MythTV 0.23.1' % self.platform.xbmcVersion())
             return
         
         self.lastSelected = self.channelsListBox.getSelectedPosition()
