@@ -123,14 +123,12 @@ class RecordingDetailsWindow(BaseWindow):
 
     @inject_conn
     def canStream(self):
-        if not self.streaming:
-            return False
-        
+        # TODO: Merge with duplicate method in RecordingDetailsWindow
         if not self.conn().protocol.supportsStreaming(self.platform):
             xbmcgui.Dialog().ok(self.translator.get(m.ERROR), 
-                'Streaming directly from a MythTV %s backend to' % self.conn().protocol.mythVersion(), 
-                'XBMC %s is not supported. Try playing via filesystem' % self.platform.xbmcVersion(),
-                'by *deselecting* MythBox > Settings > MythTV > Enable Streaming')
+                'Streaming from a MythTV %s backend to XBMC' % self.conn().protocol.mythVersion(), 
+                '%s is broken. Try playing again after deselecting' % self.platform.xbmcVersion(),
+                'MythBox > Settings > MythTV > Enable Streaming')
             return False
         return True
         
@@ -138,7 +136,9 @@ class RecordingDetailsWindow(BaseWindow):
     def play(self):
         log.debug("Playing %s .." % safe_str(self.program.title()))
 
-        if self.canStream():
+        if self.streaming:
+            if not self.canStream():
+                return
             # Play via myth://
             p = StreamingPlayer(program=self.program, mythThumbnailCache=self.mythThumbnailCache, translator=self.translator, settings=self.settings)
             p.playRecording(NoOpCommercialSkipper(p, self.program, self.translator))
@@ -151,7 +151,9 @@ class RecordingDetailsWindow(BaseWindow):
     def playWithCommSkip(self):
         log.debug("Playing with skip %s .." % safe_str(self.program.title()))
       
-        if self.canStream():  
+        if self.streaming:
+            if not self.canStream():  
+                return
             # Play via myth://
             p = StreamingPlayer(program=self.program, mythThumbnailCache=self.mythThumbnailCache, translator=self.translator, settings=self.settings)
             p.playRecording(NoOpCommercialSkipper(p, self.program, self.translator))
