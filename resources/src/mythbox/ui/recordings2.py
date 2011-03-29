@@ -141,9 +141,9 @@ class RecordingsWindow(BaseWindow):
         if self.programs:
             try:
                 group = self.groupsListbox.getSelectedItem().getProperty('title')
-                self.settings.put('recordings_selected_group', [group, ''][group is None])
+                self.settings.put('recordings_selected_group', [group, u''][group is None])
                 title = self.programsListbox.getSelectedItem().getProperty('title')
-                self.settings.put('recordings_selected_program', [title, ''][title is None])
+                self.settings.put('recordings_selected_program', [title, u''][title is None])
             except:
                 pass
             

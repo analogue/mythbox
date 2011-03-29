@@ -337,7 +337,7 @@ class LiveTvWindow(BaseWindow):
             xbmcgui.Dialog().ok(self.translator.get(m.ERROR), 
                 'Watching Live TV is currently not supported', 
                 'with your configuration of MythTV %s and' % self.conn().protocol.mythVersion(), 
-                'XBMC %s. Consider downgrading to MythTV 0.23.1' % self.platform.xbmcVersion())
+                'XBMC %s. Should be working in XBMC 11.0+' % self.platform.xbmcVersion())
             return
         
         self.lastSelected = self.channelsListBox.getSelectedPosition()

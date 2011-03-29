@@ -121,11 +121,24 @@ class RecordingDetailsWindow(BaseWindow):
         else:
             xbmcgui.Dialog().ok(self.translator.get(m.ERROR), self.translator.get(m.JOB_NOT_FOUND)) 
 
+    @inject_conn
+    def canStream(self):
+        if not self.streaming:
+            return False
+        
+        if not self.conn().protocol.supportsStreaming(self.platform):
+            xbmcgui.Dialog().ok(self.translator.get(m.ERROR), 
+                'Streaming directly from a MythTV %s backend to' % self.conn().protocol.mythVersion(), 
+                'XBMC %s is not supported. Try playing via filesystem' % self.platform.xbmcVersion(),
+                'by *deselecting* MythBox > Settings > MythTV > Enable Streaming')
+            return False
+        return True
+        
     @catchall_ui
     def play(self):
         log.debug("Playing %s .." % safe_str(self.program.title()))
 
-        if self.streaming:
+        if self.canStream():
             # Play via myth://
             p = StreamingPlayer(program=self.program, mythThumbnailCache=self.mythThumbnailCache, translator=self.translator, settings=self.settings)
             p.playRecording(NoOpCommercialSkipper(p, self.program, self.translator))
@@ -138,7 +151,7 @@ class RecordingDetailsWindow(BaseWindow):
     def playWithCommSkip(self):
         log.debug("Playing with skip %s .." % safe_str(self.program.title()))
       
-        if self.streaming:  
+        if self.canStream():  
             # Play via myth://
             p = StreamingPlayer(program=self.program, mythThumbnailCache=self.mythThumbnailCache, translator=self.translator, settings=self.settings)
             p.playRecording(NoOpCommercialSkipper(p, self.program, self.translator))

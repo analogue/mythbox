@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -18,11 +19,11 @@
 #
 import logging
 import os
+import shutil
 import tempfile
 import unittest
 
-from mockito import Mock, when, verify, any, verifyZeroInteractions
-from mythbox.platform import getPlatform, UnixPlatform
+from mockito import Mock, when, verify, any
 from mythbox.settings import MythSettings, SettingsException
 from mythbox.util import OnDemandConfig
 
@@ -37,14 +38,30 @@ class MythSettingsTest(unittest.TestCase):
         self.bus = Mock()
         when(self.platform).getDefaultRecordingsDir().thenReturn('')
         when(self.platform).getFFMpegPath().thenReturn('')
+        self.sandbox = tempfile.mkdtemp(prefix='mythbox')
+        
+    def tearDown(self):
+        shutil.rmtree(self.sandbox, ignore_errors=True)
 
+    def test_When_setting_has_a_unicode_value_Then_saving_and_loading_should_still_work(self):
+        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
+        s = MythSettings(self.platform, self.translator)
+        unicodeStr = u'Königreich der Himmel'
+        s.put('recordings_selected_group', unicodeStr)
+        s.save()
+        
+        s2 = MythSettings(self.platform, self.translator)
+        actualStr = s2.get('recordings_selected_group')
+        self.assertTrue(unicodeStr == actualStr)
+        self.assertTrue(isinstance(unicodeStr, unicode))
+            
     def test_toString(self):
-        when(self.platform).getScriptDataDir().thenReturn(tempfile.gettempdir())
+        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
         s = MythSettings(self.platform, self.translator)
         log.debug('MythSettings = \n%s' % s)
         
     def test_constructor_NonExistentSettingsFilesLoadsDefaults(self):
-        when(self.platform).getScriptDataDir().thenReturn(tempfile.gettempdir())
+        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
         s = MythSettings(self.platform, self.translator)
         self.assertEquals('localhost', s.get('mysql_host'))
         self.assertEquals('3306', s.get('mysql_port'))
@@ -70,24 +87,15 @@ class MythSettingsTest(unittest.TestCase):
 
     def test_saveSettings_LoadedDefaultsCreatesNewSettingsFile(self):
         filename = 'settings.xml'
-        settingsPath = os.path.join(tempfile.gettempdir(), 'mythbox_settings_dir')
-        filepath = os.path.join(settingsPath, filename)
-        when(self.platform).getScriptDataDir().thenReturn(settingsPath)
-        
-        try:
-            self.assertFalse(os.path.exists(filepath))
-            s = MythSettings(self.platform, self.translator)
-            s.save()
-            self.assertTrue(os.path.exists(filepath))
-        finally:
-            try:
-                os.remove(filepath)
-                os.rmdir(settingsPath)
-            except:
-                pass
+        filepath = os.path.join(self.sandbox, filename)
+        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
+        self.assertFalse(os.path.exists(filepath))
+        s = MythSettings(self.platform, self.translator)
+        s.save()
+        self.assertTrue(os.path.exists(filepath))
         
     def test_getRecordingDirs_SingleDirectory(self):
-        when(self.platform).getScriptDataDir().thenReturn(tempfile.gettempdir())
+        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
         settings = MythSettings(self.platform, self.translator)
         settings.put('paths_recordedprefix', '/mnt/mythtv')
         log.debug("Recording prefix = %s" % settings.get('paths_recordedprefix'))
@@ -96,7 +104,7 @@ class MythSettingsTest(unittest.TestCase):
         self.assertEquals('/mnt/mythtv', dirs[0])
 
     def test_getRecordingDirs_ManyDirectories(self):
-        when(self.platform).getScriptDataDir().thenReturn(tempfile.gettempdir())
+        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
         settings = MythSettings(self.platform, self.translator)
         settings.put('paths_recordedprefix', os.pathsep.join(['a','b', 'c']))
         log.debug("Recording prefix = %s" % settings.get('paths_recordedprefix'))
@@ -105,7 +113,7 @@ class MythSettingsTest(unittest.TestCase):
         self.assertEquals(['a','b','c'], dirs)
 
     def test_verifyMySQLConnectivity_OK(self):
-        when(self.platform).getScriptDataDir().thenReturn(tempfile.gettempdir())
+        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
         settings = MythSettings(self.platform, self.translator)
         
         privateConfig = OnDemandConfig()
@@ -116,7 +124,7 @@ class MythSettingsTest(unittest.TestCase):
         settings.verifyMySQLConnectivity()
 
     def test_verifyMySQLConnectivity_InvalidUsernamePasswordThrowsSettingsException(self):
-        when(self.platform).getScriptDataDir().thenReturn(tempfile.gettempdir())
+        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
         settings = MythSettings(self.platform, self.translator)
         privateConfig = OnDemandConfig()
         settings.put('mysql_host', privateConfig.get('mysql_host'))
@@ -132,7 +140,7 @@ class MythSettingsTest(unittest.TestCase):
             self.fail('expected SettingsException')
         
     def test_verifyMythTVConnectivity_OK(self):
-        when(self.platform).getScriptDataDir().thenReturn(tempfile.gettempdir())
+        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
         settings = MythSettings(self.platform, self.translator)
         privateConfig = OnDemandConfig()
         settings.put('mysql_host', privateConfig.get('mysql_host'))
@@ -163,13 +171,13 @@ class MythSettingsTest(unittest.TestCase):
             log.debug('PASS: %s' % se)
 
     def test_verifyRecordingDirs_OKSingleDirectory(self):
-        MythSettings.verifyRecordingDirs(tempfile.gettempdir())
+        MythSettings.verifyRecordingDirs(self.sandbox)
         
     def test_verifyRecordingDirs_OKManyDirectories(self):
         MythSettings.verifyRecordingDirs(
-            tempfile.gettempdir() + os.pathsep + 
+            self.sandbox + os.pathsep + 
             os.getcwd() + os.pathsep + 
-            tempfile.gettempdir() + os.pathsep + 
+            self.sandbox + os.pathsep + 
             os.getcwd())
             
     def test_verifyMySQLUser_OK(self):
@@ -198,7 +206,7 @@ class MythSettingsTest(unittest.TestCase):
 
     def test_When_existing_setting_changed_to_different_value_Then_event_published_to_bus(self):
         # Setup
-        when(self.platform).getScriptDataDir().thenReturn(tempfile.gettempdir())
+        when(self.platform).getScriptDataDir().thenReturn(self.sandbox)
         s = MythSettings(self.platform, self.translator, bus=self.bus)
         
         # Test

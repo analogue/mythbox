@@ -24,7 +24,7 @@ import mythbox.msg as m
 
 from mythbox.bus import Event, EventBus
 from mythbox.mythtv.db import MythDatabase
-from mythbox.util import requireDir
+from mythbox.util import requireDir, safe_str
 from xml.dom import minidom
 
 slog = logging.getLogger('mythbox.settings')
@@ -135,8 +135,8 @@ class MythSettings(object):
             'livetv_last_selected'       : '0',
 
             'recordings_last_selected'   : '0',
-            'recordings_selected_group'  : '',
-            'recordings_selected_program': '',
+            'recordings_selected_group'  : u'',
+            'recordings_selected_program': u'',
             'recordings_group_sort'      : 'Title',
             'recordings_title_sort'      : 'Orig. Air Date',
             'recordings_sort_ascending'  : 'False',
@@ -167,7 +167,7 @@ class MythSettings(object):
                         self.d[tag] = string.strip(results[0].firstChild.nodeValue)
                     else:
                         # empty nodes default to empty string instead of None
-                        self.d[tag] = ''
+                        self.d[tag] = u''
                 else:
                     slog.error('no tag found for %s ' % tag)
                     
@@ -175,7 +175,7 @@ class MythSettings(object):
         settingsDir = self.platform.getScriptDataDir()
         requireDir(settingsDir)
 
-        dom = minidom.parseString('<mythtv></mythtv>')
+        dom = minidom.parseString('<mythtv></mythtv>'.encode('utf-8'))
         for key in self.d.keys():
             e = dom.createElement(key)
             n = dom.createTextNode(string.strip(self.d[key]))
@@ -183,7 +183,7 @@ class MythSettings(object):
             dom.childNodes[0].appendChild(e)
         slog.debug('Saving settings to %s' % self.settingsPath)
         fh = file(self.settingsPath, 'w')
-        fh.write(dom.toxml())
+        fh.write(dom.toxml().encode('utf-8'))
         fh.close()
 
     def getBoolean(self, tag):
@@ -234,7 +234,7 @@ class MythSettings(object):
     def __repr__(self):
         sb = ''
         for tag in self.defaults.keys():
-            sb += '%s = %s\n' % (tag, [self.get(tag), '<EMPTY>'][self.get(tag) is None]) 
+            sb += '%s = %s\n' % (tag, [safe_str(self.get(tag)), '<EMPTY>'][self.get(tag) is None]) 
         return sb
     
     @staticmethod    

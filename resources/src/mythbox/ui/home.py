@@ -252,10 +252,24 @@ class HomeWindow(BaseWindow):
         from mythbox.ui.livetv import LiveTvWindow 
         LiveTvWindow('mythbox_livetv.xml', self.platform.getScriptDir(), **self.deps).doModal()
 
+    @inject_conn
+    def canStream(self):
+        # TODO: Merge with duplicate method in RecordingDetailsWindow
+        if not self.settings.getBoolean('streaming_enabled'):
+            return False
+        
+        if not self.conn().protocol.supportsStreaming(self.platform):
+            xbmcgui.Dialog().ok(self.translator.get(m.ERROR), 
+                'Streaming directly from a MythTV %s backend to' % self.conn().protocol.mythVersion(), 
+                'XBMC %s is not supported. Try playing via filesystem' % self.platform.xbmcVersion(),
+                'by *deselecting* MythBox > Settings > MythTV > Enable Streaming')
+            return False
+        return True
+
     @window_busy
     def goPlayRecording(self):
         program=self.recordings[self.coverFlow.getSelectedPosition()]
-        if self.settings.getBoolean('streaming_enabled'):
+        if self.canStream(): 
             p = StreamingPlayer(program=program, settings=self.settings, mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
             p.playRecording(NoOpCommercialSkipper())
         else:    
