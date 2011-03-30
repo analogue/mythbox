@@ -42,13 +42,13 @@ ID_SORT_ASCENDING_TOGGLE  = 252
 ID_RECORDING_GROUP_BUTTON = 253
 
 TITLE_SORT_BY = odict.odict([
-    ('Date',           {'translation_id': m.DATE,          'reverse':True,  'sorter' : lambda x: x.starttimeAsTime() }), 
-    ('Title',          {'translation_id': m.TITLE,         'reverse':False, 'sorter' : lambda x: '%s%s' % (x.title(), x.originalAirDate())}), 
-    ('Orig. Air Date', {'translation_id': m.ORIG_AIR_DATE, 'reverse':True,  'sorter' : lambda x: x.originalAirDate()})])
+    ('Date',           {'translation_id': m.DATE,          'reverse':True,  'sorter' : lambda r: r.starttimeAsTime() }), 
+    ('Title',          {'translation_id': m.TITLE,         'reverse':False, 'sorter' : lambda r: '%s%s' % (safe_str(r.title()), r.originalAirDate())}), 
+    ('Orig. Air Date', {'translation_id': m.ORIG_AIR_DATE, 'reverse':True,  'sorter' : lambda r: r.originalAirDate()})])
 
 GROUP_SORT_BY = odict.odict([
-    ('Title', {'translation_id': m.TITLE, 'reverse': False, 'sorter' : lambda g: [g.title, '0000'][g.title == 'All recordings']}),
-    ('Date',  {'translation_id': m.DATE,  'reverse': True,  'sorter' : lambda g: [g.programs[0].starttimeAsTime(), datetime.datetime(datetime.MAXYEAR, 12, 31, 23, 59, 59, 999999, tzinfo=None)][g.title == 'All recordings']})])
+    ('Title', {'translation_id': m.TITLE, 'reverse': False, 'sorter' : lambda g: [g.title, u'0000'][g.title == u'All recordings']}),
+    ('Date',  {'translation_id': m.DATE,  'reverse': True,  'sorter' : lambda g: [g.programs[0].starttimeAsTime(), datetime.datetime(datetime.MAXYEAR, 12, 31, 23, 59, 59, 999999, tzinfo=None)][g.title == u'All recordings']})])
 
 class Group(object):
     

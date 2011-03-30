@@ -34,6 +34,7 @@ import mythboxtest.test_fanart
 import mythboxtest.ui.test_toolkit
 import mythboxtest.ui.test_upcoming
 import mythboxtest.ui.test_tvguide
+import mythboxtest.ui.test_recordings
 import mythboxtest.test_bootstrapper
 import mythboxtest.test_feeds
 import mythboxtest.test_settings
@@ -60,6 +61,7 @@ def suite():
     mysuite.addTest(unittest.findTestCases(mythboxtest.ui.test_toolkit))
     mysuite.addTest(unittest.findTestCases(mythboxtest.ui.test_upcoming))
     mysuite.addTest(unittest.findTestCases(mythboxtest.ui.test_tvguide))
+    mysuite.addTest(unittest.findTestCases(mythboxtest.ui.test_recordings))    
     mysuite.addTest(unittest.findTestCases(mythboxtest.test_bootstrapper))
     mysuite.addTest(unittest.findTestCases(mythboxtest.test_feeds))
     mysuite.addTest(unittest.findTestCases(mythboxtest.test_settings))
