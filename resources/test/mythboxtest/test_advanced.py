@@ -17,17 +17,19 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
-import logging
+import os
+import shutil
+import tempfile
 import unittest2 as unittest
+import mythboxtest
 
 from mockito import Mock, when
 from mythbox.advanced import AdvancedSettings
 
-log = logging.getLogger('mythbox.unittest')
-
+log = mythboxtest.getLogger('mythbox.unittest')
 
 class AdvancedSettingsTest(unittest.TestCase):
-    
+
     def test_constructor_When_seeded_with_xml_as_string(self):
         p = Mock()
         when(p).getUserDataDir().thenReturn('')
@@ -42,6 +44,34 @@ class AdvancedSettingsTest(unittest.TestCase):
         s = '%s' % advanced
         log.debug(s)
         self.assertTrue("<advancedsettings />" in s)
+
+    def test_save_When_advancedsettings_file_does_not_exist_Then_backup_is_not_created(self):
+        sandbox = tempfile.mkdtemp(suffix='mythbox')
+        try:
+            p = Mock()
+            when(p).getUserDataDir().thenReturn(sandbox)
+            advanced = AdvancedSettings(platform=p)
+            advanced.save()
+            self.assertTrue(os.path.exists(os.path.join(sandbox, 'advancedsettings.xml')))
+            self.assertFalse(os.path.exists(os.path.join(sandbox, 'advancedsettings.xml.mythbox')))
+        finally:
+            shutil.rmtree(sandbox)
+
+    def test_save_When_advancedsettings_file_does_exist_and_no_backup_exists_Then_backup_created(self):
+        sandbox = tempfile.mkdtemp(suffix='mythbox')
+        f = open(os.path.join(sandbox, 'advancedsettings.xml'), 'w')
+        f.write('<advancedsettings><loglevel>0</loglevel></advancedsettings>')
+        f.close()
+        self.assertTrue(os.path.exists(os.path.join(sandbox, 'advancedsettings.xml')))
+        
+        try:
+            p = Mock()
+            when(p).getUserDataDir().thenReturn(sandbox)
+            advanced = AdvancedSettings(platform=p)
+            advanced.save()
+            self.assertTrue(os.path.exists(os.path.join(sandbox, 'advancedsettings.xml.mythbox')))
+        finally:
+            shutil.rmtree(sandbox)
 
     # hasSetting
     
@@ -166,10 +196,3 @@ class AdvancedSettingsTest(unittest.TestCase):
         self.assertTrue('<displayremotecodes>' in xml)
         self.assertTrue('true' in xml)
         self.assertTrue('</displayremotecodes>' in xml)
-
-        
-if __name__ == '__main__':
-    import logging.config
-    logging.config.fileConfig('mythbox_log.ini')
-    unittest.main()
-

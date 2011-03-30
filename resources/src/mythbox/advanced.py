@@ -19,6 +19,7 @@
 
 import os
 import logging
+import shutil
 import string
 import StringIO
 from elementtree import ElementTree
@@ -54,9 +55,7 @@ class AdvancedSettings(object):
     def __init__(self, *args, **kwargs):
         self.init_with = None
         [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('platform', 'init_with',) ]
-               
         self.filename = os.path.join(self.platform.getUserDataDir(), 'advancedsettings.xml')
-        log.error(self.filename)
         if self.init_with:
             self.dom = parseString(self.init_with)
         else:
@@ -78,6 +77,12 @@ class AdvancedSettings(object):
             return u'<advancedsettings/>'
                 
     def save(self):
+        # create backup the first time only
+        backupFilename = self.filename + '.mythbox'
+        if os.path.exists(self.filename) and not os.path.exists(backupFilename):
+            log.debug("Backup of %s saved as %s" % (self.filename, backupFilename))
+            shutil.copy(self.filename, backupFilename)
+
         log.debug('Saving %s' % self.filename)
         self._write()
         
@@ -85,8 +90,7 @@ class AdvancedSettings(object):
         f = open(self.filename, 'w')
         f.write('%s' % self)
         f.close()
-        log.debug('done')
-        
+
     def __str__(self):
         return self.ppxml(self.dom.toxml())
 

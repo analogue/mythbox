@@ -9,6 +9,7 @@ resources/lib/mockito:\
 resources/lib/pyxcoder:\
 resources/lib/decorator:\
 resources/lib/odict:\
+resources/lib/bidict:\
 resources/lib/BeautifulSoup:\
 resources/lib/elementtree:\
 resources/lib/tvdb_api:\
