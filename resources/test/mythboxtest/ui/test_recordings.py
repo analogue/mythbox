@@ -17,19 +17,15 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-import datetime
-import logging
 import unittest2 as unittest
 import mythboxtest
 
-from mockito import Mock, when, any
-from mythbox.ui.recordings2 import RecordingsWindow, Group, GROUP_SORT_BY, TITLE_SORT_BY
-from mockito.mockito import verifyZeroInteractions
+from mockito import Mock
+from mythbox.ui.recordings2 import Group, GROUP_SORT_BY, TITLE_SORT_BY
 from mythbox.mythtv.domain import RecordedProgram
-
+from mythbox.mythtv.protocol import Protocol23056
 
 log = mythboxtest.getLogger('mythbox.unittest')
-
 
 class RecordingsWindowTest(unittest.TestCase):
     
@@ -53,21 +49,30 @@ class RecordingsWindowTest(unittest.TestCase):
         self.assertTrue(c[1].title == u2)
         self.assertTrue(c[2].title == u1)
     
-#    def test_When_program_title_contains_unicode_chars_Then_title_sorting_doesnt_break(self):
-#        u1 = u'Königreich der Himmel'
-#        u2 = u'Avocats et associés'
-#        u3 = u'All Recordings'
-#        
-#        p1 = RecordedProgram(data, settings, translator, platform, protocol, conn)
-#        
-#        g1 = Group(u1)
-#        g2 = Group(u2)
-#        g3 = Group(u3)
-#        
-#        c = [g1,g2, g3]
-#        
-#        c.sort(key=TITLE_SORT_BY['Title']['sorter'], reverse=TITLE_SORT_BY['Title']['reverse'])
-#
-#        self.assertTrue(c[0].title == u3)
-#        self.assertTrue(c[1].title == u2)
-#        self.assertTrue(c[2].title == u1)
+    def test_When_program_title_contains_unicode_chars_Then_title_sorting_doesnt_break(self):
+        u1 = u'Königreich der Himmel'
+        u2 = u'Avocats et associés'
+        u3 = u'All Recordings'
+        
+        protocol = Protocol23056()
+        ititle = protocol.recordFields().index('title')
+        d1 = ["0"] * protocol.recordSize()
+        d1[ititle]  = u1
+        
+        d2 = d1[:]
+        d2[ititle] = u2
+        
+        d3 = d1[:]
+        d3[ititle] = u3
+        
+        p1 = RecordedProgram(d1, Mock(), Mock(), Mock(), protocol, Mock())
+        p2 = RecordedProgram(d2, Mock(), Mock(), Mock(), protocol, Mock())
+        p3 = RecordedProgram(d3, Mock(), Mock(), Mock(), protocol, Mock())
+        
+        c = [p1, p2, p3]
+        
+        c.sort(key=TITLE_SORT_BY['Title']['sorter'], reverse=TITLE_SORT_BY['Title']['reverse'])
+
+        self.assertTrue(c[0].title() == u3)
+        self.assertTrue(c[1].title() == u2)
+        self.assertTrue(c[2].title() == u1)
