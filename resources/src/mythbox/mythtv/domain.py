@@ -1794,9 +1794,8 @@ class RecordingSchedule(Schedule):
     
 
 class ScheduleFromProgram(RecordingSchedule):
-    """
-    Schedule seeded from TVProgram.
-    """
+    '''New Schedule seeded from a TVProgram.'''
+    
     def __init__(self, program, translator):
         RecordingSchedule.__init__(self, dict(), translator)
         
@@ -1840,6 +1839,7 @@ class ScheduleFromProgram(RecordingSchedule):
         self.data()['findid']        = '0'
         self.data()['inactive']      = 0
         self.data()['parentid']      = '0'
+        self.data()['numRecorded']   = 0
 
 
 class Tuner(object):

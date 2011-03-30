@@ -844,7 +844,7 @@ class MythDatabase(object):
                 s.setScheduleId(scheduleId)
                 log.debug('New scheduleId = %s' % scheduleId)
             finally:
-                c.close()
+                c2.close()
         return s
     
         # INSERT INTO `record` (
