@@ -59,16 +59,17 @@ class BasePlayer(xbmc.Player):
     @catchall
     def onPlayBackStarted(self):
         if self.active:
-            log.debug('> onPlayBackStarted')
+            log.debug('> base:onPlayBackStarted %s' % self)
             for target in (self.bookmarker, self.tracker, self.commSkipper):
                 try:
                     target.onPlayBackStarted()
                 except:
                     log.exception('onPlayBackStarted')
-            log.debug('< onPlayBackStarted')
+            log.debug('< base:onPlayBackStarted %s' % self)
 
     def onPlayBackStopped(self):
         if self.active:
+            self.active = False
             log.debug('> onPlayBackStopped')
             for target in (self.tracker, self.commSkipper, self.bookmarker):
                 try:
@@ -79,6 +80,7 @@ class BasePlayer(xbmc.Player):
 
     def onPlayBackEnded(self):
         if self.active:
+            self.active = False
             log.debug('> onPlayBackEnded')
             for target in (self.tracker, self.commSkipper, self.bookmarker):
                 try:

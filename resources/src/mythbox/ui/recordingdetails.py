@@ -157,6 +157,7 @@ class RecordingDetailsWindow(BaseWindow):
             # Play via myth://
             p = StreamingPlayer(program=self.program, mythThumbnailCache=self.mythThumbnailCache, translator=self.translator, settings=self.settings)
             p.playRecording(NoOpCommercialSkipper(p, self.program, self.translator))
+            del p
         else:
             # Play via local fs
             p = MountedPlayer(program=self.program, mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
