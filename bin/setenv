@@ -1,5 +1,5 @@
 #!/bin/bash
-
+export PATH=resources/lib/unittest2:$PATH
 export PYTHONPATH=\
 $PYTHONPATH:\
 resources/src:\

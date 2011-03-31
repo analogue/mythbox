@@ -600,14 +600,14 @@ class NativeTranslator(object):
         @param id: translation id
         @type id: int
         @return: translated text
-        @rtype: string
+        @rtype: unicode
         """
         # if id is a string, assume no need to lookup translation
-        if type(id) is str:
+        if isinstance(id, basestring):
             return id
         else:
             return self.addon.getLocalizedString(id)
-    
+     
     def toList(self, someMap):
         """
         @param someMap: dict with translation ids as values. Keys are ignored

@@ -219,13 +219,12 @@ class RecordingsWindow(BaseWindow):
             self.preCacheCommBreaks()
 
         self.groupsByTitle.clear()
-        self.groupsByTitle[self.allGroupTitle] = allGroup = Group(self.allGroupTitle)
+        self.groupsByTitle[self.allGroupTitle] = Group(self.allGroupTitle)
         for p in self.programs:
             if not p.title() in self.groupsByTitle:
-                self.groupsByTitle[p.title()] = Group()
+                self.groupsByTitle[p.title()] = Group(p.title())
             self.groupsByTitle[p.title()].add(p)
-            allGroup.add(p)
-            
+             
         self.render()
     
     def applyGroupSort(self):
@@ -264,7 +263,7 @@ class RecordingsWindow(BaseWindow):
             self.setListItemProperty(group.listItem, 'num_episodes', str(len(group.programs)))
             if self.lastSelectedGroup == title:
                 lastSelectedIndex = i
-                log.warn('Last selected group index = %s %s' % (title, lastSelectedIndex))
+                log.warn('Last selected group index = %s %s' % (safe_str(title), lastSelectedIndex))
 
         self.groupsListbox.reset()
         self.groupsListbox.addItems(listItems)

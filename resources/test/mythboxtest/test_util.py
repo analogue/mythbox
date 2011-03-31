@@ -410,7 +410,13 @@ class NativeTranslatorTest(unittest.TestCase):
         s = translator.get('MythBox')
         log.debug('localized = %s' % s)
         self.assertEquals('MythBox', s)
-             
+        
+    def test_get_ByUnicodeStringReturnsUnicodeString(self):
+        translator = NativeTranslator(os.getcwd())
+        s = translator.get(u'MythBox')
+        #log.debug('localized = %s' % s)
+        self.assertEquals(u'MythBox', s)
+              
 
 class BoundedEvictingQueueTest(unittest.TestCase):
     
