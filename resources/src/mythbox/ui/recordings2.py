@@ -219,7 +219,9 @@ class RecordingsWindow(BaseWindow):
             self.preCacheCommBreaks()
 
         self.groupsByTitle.clear()
-        self.groupsByTitle[self.allGroupTitle] = Group(self.allGroupTitle)
+        self.groupsByTitle[self.allGroupTitle] = allRecordingsGroup = Group(self.allGroupTitle)
+        [allRecordingsGroup.add(p) for p in self.programs]
+        
         for p in self.programs:
             if not p.title() in self.groupsByTitle:
                 self.groupsByTitle[p.title()] = Group(p.title())
@@ -300,6 +302,7 @@ class RecordingsWindow(BaseWindow):
         if not self.activeGroup.backgroundsDone:
             self.renderBackgrounds(self.activeRenderToken, self.activeGroup)
         
+    @ui_locked2
     def renderPrograms(self):        
         @timed 
         def constructorTime():
