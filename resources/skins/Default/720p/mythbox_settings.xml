@@ -808,10 +808,9 @@
             <animation effect="fade" time="200">VisibleChange</animation>
 	    </control>
 
-<!-- 
-        <control type="label">
-            <description>lirc hack help1</description>
-            <posx>310</posx>
+        <control type="button">
+            <description>enable debug log help</description>
+            <posx>300</posx>
             <posy>580</posy>
             <height>50</height>
             <width>900</width>
@@ -819,30 +818,12 @@
             <aligny>center</aligny>
             <font>font12</font>
             <textcolor>ffffffff</textcolor>
-            <label>SCRIPT444</label>
-            <visible>Control.HasFocus(501)</visible>
+            <label>$INFO[Window.Property(debugLogLocation)]</label>
+            <visible>Control.HasFocus(502)</visible>
             <texturenofocus>-</texturenofocus>
             <animation effect="fade" time="200">VisibleChange</animation>
-            <scroll>true</scroll>
         </control>
 
-        <control type="label">
-            <description>lirc hack help2</description>
-            <posx>310</posx>
-            <posy>610</posy>
-            <height>50</height>
-            <width>900</width>
-            <align>left</align>
-            <aligny>center</aligny>
-            <font>font12</font>
-            <textcolor>ffffffff</textcolor>
-            <label>SCRIPT445</label>
-            <visible>Control.HasFocus(501)</visible>
-            <texturenofocus>-</texturenofocus>
-            <animation effect="fade" time="200">VisibleChange</animation>
-            <scroll>true</scroll>
-        </control>
--->
         <control type="label">
             <description>twitter help</description>
             <posx>310</posx>

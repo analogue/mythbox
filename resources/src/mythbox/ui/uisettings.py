@@ -204,6 +204,7 @@ class SettingsWindow(BaseWindow):
             # Advanced Settings
             self.register(Setting(self.settings, 'logging_enabled', bool, None, self.getControl(502)))
             self.register(Setting(self.settings, 'feeds_twitter', str, None, self.getControl(503)))
+            self.setWindowProperty('debugLogLocation', self.translator.get(m.DEBUG_LOG_LOCATION) % self.platform.getDebugLog())
                         
             # Playback settings
             self.advanced.get = self.advanced.getSetting

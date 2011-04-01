@@ -435,6 +435,7 @@ To submit translations for your native language
   <string id="444">If you're using a remote control with lirc and sometimes get two button events instead of just one</string>
   <string id="445">then enable this workaround to consume the extra event.</string>
   <string id="446">Comma separated list of public Twitter names. Try some: cnnbrk, woot, thelittleidiot, wired, current...</string> 
+  <string id="447">Located at %s</string>
   
   <string id="450">XBMC Settings</string>
   <string id="455">Readme and FAQ</string>
