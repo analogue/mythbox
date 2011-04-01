@@ -126,7 +126,6 @@ class MythSettings(object):
             'fanart_tvrage'              : 'True',
             'fanart_google'              : 'True',
             'feeds_twitter'              : 'mythboxfeed',
-            'lirc_hack'                  : 'False',
             'logging_enabled'            : 'False',
 
             'schedules_last_selected'    : '0',

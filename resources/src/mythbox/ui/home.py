@@ -33,7 +33,7 @@ from mythbox.settings import SettingsException
 from mythbox.ui.player import MountedPlayer, TrackingCommercialSkipper,\
     StreamingPlayer, NoOpCommercialSkipper
 from mythbox.ui.toolkit import BaseWindow, Action, window_busy, showPopup
-from mythbox.util import catchall_ui, catchall, lirc_hack, run_async, coalesce, safe_str 
+from mythbox.util import catchall_ui, catchall, run_async, coalesce, safe_str 
 from mythbox.util import hasPendingWorkers, waitForWorkersToDie, formatSize
 from mythbox.mythtv.publish import MythEventPublisher
 
@@ -95,7 +95,6 @@ class HomeWindow(BaseWindow):
         self.coverFlow.addItems(self.coverItems)
    
     @catchall_ui
-    @lirc_hack            
     def onAction(self, action):
         if self.shutdownPending:
             return
@@ -138,7 +137,6 @@ class HomeWindow(BaseWindow):
             self.conn().rerecordRecording(program)
 
     @catchall_ui
-    @lirc_hack    
     def onClick(self, controlId):
         try:
             self.dispatcher[controlId]()

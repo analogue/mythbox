@@ -28,7 +28,7 @@ from mythbox.mythtv.conn import inject_conn
 from mythbox.mythtv.db import inject_db 
 from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, EpisodeFilter, ScheduleType
 from mythbox.ui.toolkit import BaseDialog, BaseWindow, window_busy, Action 
-from mythbox.util import catchall_ui, lirc_hack, catchall, run_async, ui_locked, ui_locked2, safe_str
+from mythbox.util import catchall_ui, catchall, run_async, ui_locked, ui_locked2, safe_str
 
 log = logging.getLogger('mythbox.ui')
 
@@ -69,7 +69,6 @@ class SchedulesWindow(BaseWindow):
             self.refresh()
 
     @catchall_ui
-    @lirc_hack    
     def onClick(self, controlId):
         if controlId == ID_SCHEDULES_LISTBOX: 
             self.goEditSchedule()
@@ -89,7 +88,6 @@ class SchedulesWindow(BaseWindow):
         #    self.lastSelected = self.schedulesListBox.getSelectedPosition()
 
     @catchall
-    @lirc_hack            
     def onAction(self, action):
         if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
             self.closed = True
@@ -244,13 +242,11 @@ class ScheduleDialog(BaseDialog):
         pass
         
     @catchall_ui 
-    @lirc_hack
     def onAction(self, action):
         if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
             self.close() 
 
     @catchall_ui
-    @lirc_hack    
     @inject_conn
     def onClick(self, controlId):
         t = self.translator.get

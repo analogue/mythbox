@@ -404,6 +404,7 @@ To submit translations for your native language
   <string id="410">MythTV</string>
   <string id="411">Master Backend Hostname</string>
   <string id="412">Master Backend Port</string>
+  <string id="480">Stream recordings directly from the MythTV backend. No need to mount remote dirs locally.</string>
   <string id="413">Local Recording Directory(s)</string>
   <string id="414">Enable Streaming</string>
   <string id="415">Confirm on Delete</string>
@@ -440,5 +441,6 @@ To submit translations for your native language
   <string id="460">About</string>
   
   <string id="470">Playback</string>
+  <string id="471">Restart XBMC for this change to take effect.</string>
   
 </strings>

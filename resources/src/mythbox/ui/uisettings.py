@@ -23,7 +23,7 @@ import mythbox.msg as m
 
 from mythbox.settings import MythSettings, SettingsException
 from mythbox.ui.toolkit import window_busy, BaseWindow, enterNumeric, enterText, Action
-from mythbox.util import catchall, lirc_hack, timed, safe_str
+from mythbox.util import catchall, timed, safe_str
 from mythbox.advanced import AdvancedSettings
 
 log = logging.getLogger('mythbox.ui')
@@ -202,7 +202,6 @@ class SettingsWindow(BaseWindow):
             self.register(Setting(self.settings, 'fanart_google', bool, None, self.getControl(404)))
     
             # Advanced Settings
-            self.register(Setting(self.settings, 'lirc_hack', bool, None, self.getControl(501)))
             self.register(Setting(self.settings, 'logging_enabled', bool, None, self.getControl(502)))
             self.register(Setting(self.settings, 'feeds_twitter', str, None, self.getControl(503)))
                         
@@ -242,7 +241,6 @@ class SettingsWindow(BaseWindow):
         pass
             
     @catchall
-    @lirc_hack            
     def onAction(self, action):
         if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
             self.close()

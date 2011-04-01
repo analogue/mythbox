@@ -37,7 +37,7 @@ from mythbox.mythtv.domain import ScheduleFromProgram, Channel
 from mythbox.mythtv.enums import Upcoming
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import Action, Align, AspectRatio, window_busy
-from mythbox.util import catchall_ui, timed, lirc_hack, catchall, ui_locked2, safe_str, run_async
+from mythbox.util import catchall_ui, timed, catchall, ui_locked2, safe_str, run_async
 from mythbox.bus import Event
 
 log = logging.getLogger('mythbox.ui')
@@ -221,7 +221,6 @@ class TvGuideWindow(ui.BaseWindow):
                 raise Exception, self.translator.get(m.NO_EPG_DATA)
 
     @catchall_ui
-    @lirc_hack            
     def onAction(self, action):
         log.debug('onAction %s', action.getId())
         #log.debug('Key got hit: %s   Current focus: %s' % (ui.toString(action), self.getFocusId()))
@@ -367,7 +366,6 @@ class TvGuideWindow(ui.BaseWindow):
             xbmcgui.Dialog().ok(self.translator.get(m.ERROR), '', str(e))
             
     @catchall_ui
-    @lirc_hack
     @inject_db
     def onControlHook(self, control):
         actionConsumed = True

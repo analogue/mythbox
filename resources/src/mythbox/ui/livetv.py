@@ -32,7 +32,7 @@ from mythbox.mythtv.domain import Channel
 from mythbox.mythtv.conn import ServerException
 from mythbox.ui.player import MountedPlayer, NoOpCommercialSkipper
 from mythbox.ui.toolkit import Action, BaseWindow, window_busy
-from mythbox.util import safe_str,catchall, catchall_ui, run_async, lirc_hack, ui_locked, ui_locked2, formatSize
+from mythbox.util import safe_str,catchall, catchall_ui, run_async, ui_locked, ui_locked2, formatSize
 from odict import odict
 
 log = logging.getLogger('mythbox.ui')    
@@ -294,7 +294,6 @@ class LiveTvWindow(BaseWindow):
         self.renderMoviePosters(self.activeRenderToken) # async
         self.renderBanners(self.activeRenderToken)      # async
     
-    @lirc_hack    
     @catchall    
     def onClick(self, controlId):
         source = self.getControl(controlId)
@@ -307,7 +306,6 @@ class LiveTvWindow(BaseWindow):
         log.debug('FOCUS %s' % controlId)
             
     @catchall_ui
-    @lirc_hack            
     def onAction(self, action):
         
         if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):

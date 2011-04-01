@@ -262,7 +262,6 @@
             </control>
         </control>
 
-<!-- xxx -->        
         <control type="grouplist" id="9006">
             <description>Playback Settings</description>
             <posx>300</posx>
@@ -476,6 +475,7 @@
             <visible>Control.HasFocus(256)|ControlGroup(9004).HasFocus()</visible> 
             <animation effect="fade" time="200">VisibleChange</animation>
 
+<!-- 
             <control type="radiobutton" id="501">
                 <description>Enable lirc hack for repeated button presses</description>
                 <label>SCRIPT441</label>
@@ -492,6 +492,7 @@
                 <textureradionofocus>checkbox-nofocus.png</textureradionofocus>
                 <enable>system.platform.linux</enable>
             </control>
+-->
 
             <control type="radiobutton" id="502">
                 <description>Enable debug logging</description>
@@ -674,6 +675,22 @@
             <animation effect="fade" time="200">VisibleChange</animation>
 	    </control>
       
+        <control type="button">
+            <description>Enable streaming help</description>
+            <posx>300</posx>
+            <posy>580</posy>
+            <height>50</height>
+            <width>900</width>
+            <align>left</align>
+            <aligny>center</aligny>
+            <font>font12</font>
+            <textcolor>ffffffff</textcolor>
+            <label>SCRIPT480</label>
+            <visible>Control.HasFocus(208)</visible>
+            <texturenofocus>-</texturenofocus>
+            <animation effect="fade" time="200">VisibleChange</animation>
+        </control>
+      
 	    <control type="label">
 	      	<description>mythtv recording dirs help1</description>
 	      	<posx>310</posx>
@@ -742,6 +759,22 @@
             <scroll>true</scroll>
         </control>
 
+        <control type="button">
+            <description>Playback:Skip Help x 4</description>
+            <posx>300</posx>
+            <posy>580</posy>
+            <height>50</height>
+            <width>900</width>
+            <align>left</align>
+            <aligny>center</aligny>
+            <font>font12</font>
+            <textcolor>ffffffff</textcolor>
+            <label>SCRIPT471</label>
+            <visible>Control.HasFocus(602) | Control.HasFocus(603) | Control.HasFocus(604) | Control.HasFocus(605)</visible>
+            <texturenofocus>-</texturenofocus>
+            <animation effect="fade" time="200">VisibleChange</animation>
+        </control>
+
 	    <control type="button">
 	      	<description>mysql port help</description>
 	      	<posx>300</posx>
@@ -790,6 +823,7 @@
             <animation effect="fade" time="200">VisibleChange</animation>
 	    </control>
 
+<!-- 
         <control type="label">
             <description>lirc hack help1</description>
             <posx>310</posx>
@@ -823,7 +857,7 @@
             <animation effect="fade" time="200">VisibleChange</animation>
             <scroll>true</scroll>
         </control>
-
+-->
         <control type="label">
             <description>twitter help</description>
             <posx>310</posx>

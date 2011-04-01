@@ -237,58 +237,6 @@ class ModuleTest(unittest.TestCase):
         self.assertTrue(len(queues[1]) == 2 and queues[1][0] == 2 and queues[1][1] == 4)
         
 
-class LircHackDecoratorTest(unittest.TestCase):
-
-    def setUp(self):
-        _lircEvents = BoundedEvictingQueue(2)
-        self.platform = MockPlatform()
-        self.settings = Mock()
-        
-    @lirc_hack
-    def onAction(self, action):
-        return True
-
-    @lirc_hack
-    def onClick(self, controlId):
-        return True
-    
-    class Action(object):
-        
-        def __init__(self, id): 
-            self.id = id
-            
-        def getId(self): 
-            return self.id
-                
-    def test_When_two_events_are_close_together_Then_the_second_event_gets_consumed(self):
-        # Setup
-        when(self.settings).getBoolean(any()).thenReturn(True)
-        
-        # Test
-        from mythbox.ui.toolkit import Action
-        result1 = self.onAction(LircHackDecoratorTest.Action(Action.PREVIOUS_MENU))
-        time.sleep(0.1)
-        result2 = self.onAction(LircHackDecoratorTest.Action(Action.PREVIOUS_MENU))
-        
-        # Verify
-        self.assertTrue(result1)
-        self.assertTrue(result2 is None)
-    
-    def test_When_two_events_are_far_apart_Then_both_events_are_left_alone(self):
-        # Setup
-        when(self.settings).getBoolean(any()).thenReturn(True)
-        
-        # Test
-        from mythbox.ui.toolkit import Action
-        result1 = self.onAction(LircHackDecoratorTest.Action(Action.PREVIOUS_MENU))
-        time.sleep(1.1)
-        result2 = self.onAction(LircHackDecoratorTest.Action(Action.PREVIOUS_MENU))
-        
-        # Verify
-        self.assertTrue(result1)
-        self.assertTrue(result2)
-    
-
 class TimedDecoratorTest(unittest.TestCase):
     
     def test_DecoratorPrintsOutWarningWhenExecutionTimeExceedsOneSecond(self):

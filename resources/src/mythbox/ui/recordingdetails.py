@@ -28,7 +28,7 @@ from mythbox.mythtv.enums import JobType, JobStatus
 from mythbox.ui.player import MountedPlayer, StreamingPlayer, NoOpCommercialSkipper, TrackingCommercialSkipper
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import Action, BaseWindow, window_busy
-from mythbox.util import safe_str, catchall, catchall_ui, run_async, lirc_hack, coalesce
+from mythbox.util import safe_str, catchall, catchall_ui, run_async, coalesce
 
 log = logging.getLogger('mythbox.ui')
 
@@ -197,7 +197,6 @@ class RecordingDetailsWindow(BaseWindow):
         self.render()
                 
     @catchall_ui 
-    @lirc_hack
     def onAction(self, action):
         id = action.getId()
         if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
@@ -213,7 +212,6 @@ class RecordingDetailsWindow(BaseWindow):
         pass
             
     @catchall_ui 
-    @lirc_hack   
     @window_busy
     def onClick(self, controlId):
         #log.debug('onClick %s ' % controlId)

@@ -26,7 +26,7 @@ import mythbox.msg as m
 from mythbox.mythtv.conn import inject_conn
 from mythbox.ui.recordingdetails import RecordingDetailsWindow
 from mythbox.ui.toolkit import window_busy, BaseWindow, Action
-from mythbox.util import catchall_ui, run_async, lirc_hack, timed, catchall, ui_locked, ui_locked2, coalesce,\
+from mythbox.util import catchall_ui, run_async, timed, catchall, ui_locked, ui_locked2, coalesce,\
     safe_str
 from mythbox.util import CyclingBidiIterator
 
@@ -72,7 +72,6 @@ class RecordingsWindow(BaseWindow):
         self.lastFocusId = controlId
         
     @catchall_ui
-    @lirc_hack    
     def onClick(self, controlId):
         if controlId == ID_PROGRAMS_LISTBOX: 
             self.goRecordingDetails()
@@ -88,7 +87,6 @@ class RecordingsWindow(BaseWindow):
             self.applySort()
                              
     @catchall_ui
-    @lirc_hack            
     def onAction(self, action):
         if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
             self.closed = True

@@ -30,7 +30,7 @@ from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.domain import Channel
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import BaseWindow, window_busy, Action
-from mythbox.util import catchall_ui, lirc_hack, run_async, catchall, ui_locked, ui_locked2
+from mythbox.util import catchall_ui, run_async, catchall, ui_locked, ui_locked2
 
 log = logging.getLogger('mythbox.ui')
 
@@ -72,7 +72,6 @@ class UpcomingRecordingsWindow(BaseWindow):
             self.refresh()
         
     @catchall_ui
-    @lirc_hack    
     def onClick(self, controlId):
         if controlId == ID_PROGRAMS_LISTBOX:
             self.onEditSchedule()
@@ -119,7 +118,6 @@ class UpcomingRecordingsWindow(BaseWindow):
             mythChannelIconCache=self.mythChannelIconCache).doModal()
             
     @catchall_ui
-    @lirc_hack            
     def onAction(self, action):
         #log.debug('Key got hit: %s   Current focus: %s' % (ui.toString(action), self.getFocusId()))
         if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR,):
