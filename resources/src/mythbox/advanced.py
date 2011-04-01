@@ -24,11 +24,11 @@ import string
 import StringIO
 from elementtree import ElementTree
 from xml.dom.minidom import parseString
+from os.path import exists, isfile, join
 
 log = logging.getLogger('mythbox.settings')
 
 defaults = {
-    'video/usetimeseeking' : 'true',
     'video/timeseekforward': '30',
     'video/timeseekbackward': '-30',
     'video/timeseekforwardbig': '600',
@@ -55,7 +55,7 @@ class AdvancedSettings(object):
     def __init__(self, *args, **kwargs):
         self.init_with = None
         [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('platform', 'init_with',) ]
-        self.filename = os.path.join(self.platform.getUserDataDir(), 'advancedsettings.xml')
+        self.filename = join(self.platform.getUserDataDir(), 'advancedsettings.xml')
         if self.init_with:
             self.dom = parseString(self.init_with)
         else:
@@ -66,7 +66,7 @@ class AdvancedSettings(object):
                 self.dom = parseString(u'<advancedsettings/>')
                 
     def _read(self):
-        if os.path.exists(self.filename) and os.path.isfile(self.filename):
+        if exists(self.filename) and isfile(self.filename):
             log.debug('advancedsettings.xml exists')
             f = open (self.filename, 'r')
             contents = f.read()
@@ -79,7 +79,7 @@ class AdvancedSettings(object):
     def save(self):
         # create backup the first time only
         backupFilename = self.filename + '.mythbox'
-        if os.path.exists(self.filename) and not os.path.exists(backupFilename):
+        if exists(self.filename) and not exists(backupFilename):
             log.debug("Backup of %s saved as %s" % (self.filename, backupFilename))
             shutil.copy(self.filename, backupFilename)
 

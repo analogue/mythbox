@@ -442,5 +442,10 @@ To submit translations for your native language
   
   <string id="470">Playback</string>
   <string id="471">Restart XBMC for this change to take effect.</string>
+  <string id="472">Seek Forward</string>
+  <string id="473">Seek Backward</string>
+  <string id="474">Big Seek Forward</string>
+  <string id="475">Big Seek Backward</string>
   
+
 </strings>

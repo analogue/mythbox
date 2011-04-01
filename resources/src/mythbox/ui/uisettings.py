@@ -208,7 +208,6 @@ class SettingsWindow(BaseWindow):
             # Playback settings
             self.advanced.get = self.advanced.getSetting
             self.advanced.put = self.advanced.setSetting
-            self.register(Setting(self.advanced, 'video/usetimeseeking', str, None, self.getControl(601)))
             self.register(Setting(self.advanced, 'video/timeseekforward', Seconds, None, self.getControl(602)))
             self.register(Setting(self.advanced, 'video/timeseekbackward', NegativeSeconds, None, self.getControl(603)))
             self.register(Setting(self.advanced, 'video/timeseekforwardbig', Seconds, None, self.getControl(604)))
@@ -226,6 +225,7 @@ class SettingsWindow(BaseWindow):
         if mappedSetting:
             mappedSetting.readInput()
             if mappedSetting.store == self.advanced:
+                self.advanced.set('video/usetimeseeking', 'true') # required for seek values to take effect
                 self.advanced.save()
                 log.debug(self.advanced)
             else:
