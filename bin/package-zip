@@ -1,14 +1,11 @@
 #!/bin/bash
-#!/bin/bash
 #
 # Packages mythbox for distribution as an addon zip file.
 #
-find . -name "*.pyc" | xargs rm -fv
-find . -name "*.pyo" | xargs rm -fv
-
+find . -name "*.pyc" -o -name "*.pyo" | xargs rm -fv
 
 export rev=$1
-export fname=script.mythbox.1.0.$rev-dharma.zip
+export fname=script.mythbox.1.0.$rev.zip
 echo Packaging $fname
 
 rm -rf target/script.mythbox
