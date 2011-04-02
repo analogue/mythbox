@@ -18,7 +18,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 import os
-import logging
+import mythboxtest
 import unittest2 as unittest
 import tempfile
 import shutil
@@ -27,7 +27,7 @@ import time
 from mythbox.util import run_async
 from mythbox.log import LogScraper
 
-log = logging.getLogger('mythbox.unittest')
+log = mythboxtest.getLogger('mythbox.unittest')
 
 class LogScraperTest(unittest.TestCase):    
 
@@ -127,11 +127,6 @@ class LogScraperTest(unittest.TestCase):
         try:
             scraper.matchLine('ccc', 5)
             self.fail('Expected IOError on non-existant file')
-        except IOError, ioe:
+        except IOError:
             # SUCCESS
             pass
-        
-if __name__ == '__main__':
-    import logging.config
-    logging.config.fileConfig('mythbox_log.ini')
-    unittest.main()

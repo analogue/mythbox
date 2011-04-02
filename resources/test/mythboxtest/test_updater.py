@@ -16,13 +16,13 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-import logging
+import mythboxtest
 import unittest2 as unittest
 
 from mockito import Mock, when
 from mythbox.updater import UpdateChecker
 
-log = logging.getLogger('mythbox.unittest')
+log = mythboxtest.getLogger('mythbox.unittest')
 
 
 class UpdateCheckerTest(unittest.TestCase):
@@ -33,9 +33,3 @@ class UpdateCheckerTest(unittest.TestCase):
         checker = UpdateChecker(platform)
         update = checker.run()
         log.debug('update available: %s' % update)
-
-
-if __name__ == '__main__':
-    import logging.config
-    logging.config.fileConfig('mythbox_log.ini')
-    unittest.main()

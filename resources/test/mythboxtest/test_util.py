@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -21,12 +21,13 @@ import os
 import threading
 import time
 import unittest
+import mythboxtest
 
 from mockito import Mock, when, any
 from mythbox.util import *
 from mythbox.platform import getPlatform, Platform, WindowsPlatform, MacPlatform, UnixPlatform
 
-log = logging.getLogger('mythbox.unittest')
+log = mythboxtest.getLogger('mythbox.unittest')
 
 
 class RunAsyncDecoratorTest(unittest.TestCase):
@@ -595,9 +596,3 @@ class MaxThreadsDecoratorTest(unittest.TestCase):
             workers.append(self.foo())
         for w in workers:
             w.join()    
-        
-
-if __name__ == '__main__':
-    import logging.config
-    logging.config.fileConfig('mythbox_log.ini')
-    unittest.main()

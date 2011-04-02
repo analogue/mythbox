@@ -17,7 +17,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-import logging
+import mythboxtest
 import os
 import shutil
 import tempfile
@@ -27,7 +27,7 @@ from mockito import Mock, when, verify, any
 from mythbox.settings import MythSettings, SettingsException
 from mythbox.util import OnDemandConfig
 
-log = logging.getLogger('mythbox.unittest')
+log = mythboxtest.getLogger('mythbox.unittest')
 
 
 class MythSettingsTest(unittest.TestCase):
@@ -210,14 +210,8 @@ class MythSettingsTest(unittest.TestCase):
         s = MythSettings(self.platform, self.translator, bus=self.bus)
         
         # Test
-        current = s.get('mysql_host')
+        s.get('mysql_host')
         s.put('mysql_host', 'foo')
 
         # Verify
         verify(self.bus, 1).publish(any(dict))
-        
-
-if __name__ == '__main__':
-    import logging.config
-    logging.config.fileConfig('mythbox_log.ini')
-    unittest.main()

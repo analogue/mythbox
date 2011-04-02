@@ -16,11 +16,11 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-import logging
+import mythboxtest
 import unittest
 import ffmpeg.metadata
 
-log = logging.getLogger('mythbox.unittest')
+log = mythboxtest.getLogger('mythbox.unittest')
 
 class FFMPEGMetadataParserTest(unittest.TestCase):
 
@@ -67,9 +67,3 @@ class FFMPEGMetadataParserTest(unittest.TestCase):
         input = 'Stream #0.0[0x31]: Video: mpeg2video, yuv420p, 1280x720 [PAR 1:1 DAR 16:9], 24000 kb/s, 81.76 fps, 59.94 tbr, 90k tbn, 119.88 tbc'
         self.parser.parse_video_stream(input)
         self.assertEqual('59.94', self.parser.metadata.frame_rate)
-
-
-if __name__ == '__main__':
-    import logging.config
-    logging.config.fileConfig('mythbox_log.ini')
-    unittest.main()

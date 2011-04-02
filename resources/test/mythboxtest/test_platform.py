@@ -16,12 +16,12 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-import logging
+import mythboxtest
 import unittest2 as unittest
 
 from mythbox.platform import getPlatform
 
-log = logging.getLogger('mythbox.unittest')
+log = mythboxtest.getLogger('mythbox.unittest')
 
 class PlatformTest(unittest.TestCase):
 
@@ -56,8 +56,3 @@ class PlatformTest(unittest.TestCase):
 
     def test_getUserDataDir(self):
         self.assertIsNotNone(getPlatform().getUserDataDir())
-
-if __name__ == '__main__':
-    import logging.config
-    logging.config.fileConfig('mythbox_log.ini')
-    unittest.main()

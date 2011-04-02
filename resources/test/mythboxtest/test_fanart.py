@@ -28,7 +28,7 @@ from mythbox.util import run_async, safe_str
 import mythbox.mythtv.protocol as protocol
 
 import datetime
-import logging
+import mythboxtest
 import os
 import random
 import shutil
@@ -38,7 +38,7 @@ import unittest2 as unittest
 
 ustr = u'Königreich der Himmel'
 
-log = logging.getLogger('mythbox.unittest')
+log = mythboxtest.getLogger('mythbox.unittest')
 
 
 class ChainDecoratorTest(unittest.TestCase):
@@ -929,8 +929,3 @@ class TvRageProviderTest(unittest.TestCase):
         # Verify
         self.assertIsNone(season)
         self.assertIsNone(episode)
-
-if __name__ == '__main__':
-    import logging.config
-    logging.config.fileConfig('mythbox_log.ini')
-    unittest.main(verbosity=3)

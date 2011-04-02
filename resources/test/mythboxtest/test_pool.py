@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -17,14 +17,14 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
-import logging
+import mythboxtest
 import time
 import unittest
 
 from mythbox.pool import PoolableFactory, Pool, EvictingPool
 from mythbox.util import run_async
 
-log = logging.getLogger('mythbox.unittest')
+log = mythboxtest.getLogger('mythbox.unittest')
 
 class Widget(object):
     
@@ -295,9 +295,3 @@ class EvictingPoolTest(unittest.TestCase):
             self.assertEquals(0, p.size())
         finally:
             p.shutdown()
-
-
-if __name__ == '__main__':
-    import logging.config
-    logging.config.fileConfig('mythbox_log.ini')
-    unittest.main()

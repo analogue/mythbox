@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -16,19 +16,19 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-import logging
+import mythboxtest
 import os
 import random
 import shutil
+import string
 import tempfile
 import time
 import unittest2 as unittest
-import string
 
 from mythbox.filecache import FileResolver, FileSystemResolver, FileCache
 from mythbox.util import run_async
 
-log = logging.getLogger('mythbox.unittest')
+log = mythboxtest.getLogger('mythbox.unittest')
 
 class FileResolverTest(unittest.TestCase):
     
@@ -163,9 +163,3 @@ class FileCacheTest(unittest.TestCase):
         fd.write('sample file contents')
         fd.close()
         return fileUrl
-
-
-if __name__ == '__main__':
-    import logging.config
-    logging.config.fileConfig('mythbox_log.ini')
-    unittest.main()
