@@ -19,6 +19,7 @@
 import datetime
 import logging
 import odict
+from mythbox.mythtv.enums import RecordingStatus
 
 try:
     # native mysql client libs
@@ -567,11 +568,11 @@ class MythDatabase(object):
                 c.callsign,
                 c.name as channame,
                 c.icon,
-                (select count(*) from oldrecorded where oldrecorded.title=r.title) as numRecorded
+                (select count(*) from oldrecorded where oldrecorded.title=r.title and oldrecorded.recstatus = %d) as numRecorded
             FROM
                 record r
             LEFT JOIN channel c ON r.chanid = c.chanid
-            """
+            """ % RecordingStatus.RECORDED
     
         if chanId != "":
             sql += "WHERE r.chanid = '%s' "%chanId
