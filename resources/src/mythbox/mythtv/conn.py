@@ -57,9 +57,9 @@ def decodeLongLong(low32Bits, high32Bits):
     @return: Decodes two 32bit ints to a 64bit long
     @rtype: long
     """
-    if isinstance(low32Bits, str): 
+    if isinstance(low32Bits, basestring): 
         low32Bits = long(low32Bits)
-    if isinstance(high32Bits, str): 
+    if isinstance(high32Bits, basestring): 
         high32Bits = long(high32Bits)
     return low32Bits & 0xffffffffL | (high32Bits << 32)
 
@@ -1157,32 +1157,28 @@ class Connection(object):
         return '%-8d%s' % (len(msg), msg)
 
     def _readMsg(self, s):
-        retMsg = ''
-        try:
-            retMsg = self.recv_all(s, 8)
-            #wirelog.debug("REPLY: %s"%retMsg)
-            reply = ''
-            if retMsg.upper() == 'OK':
-                return 'OK'
-            wirelog.debug('retMsg: [%d] %s' % (len(retMsg), retMsg))
+        retMsg = self.recv_all(s, 8)
+        #wirelog.debug("REPLY: %s"%retMsg)
+        reply = u''
+        if retMsg.upper() == u'OK':
+            return u'OK'
+        #wirelog.debug('retMsg: [%d] %s' % (len(retMsg), safe_str(retMsg)))
 
-            n = 0
-            if len(retMsg) > 0:
-                n = int(retMsg)
+        n = 0
+        if len(retMsg) > 0:
+            n = int(retMsg)
 
-            #wirelog.debug("reply len: %d" % n)
-            i = 0
-            while i < n:
-                wirelog.debug (" i=%d n=%d " % (i,n))
-                reply += self.recv_all(s, n - i)
-                i = len(reply)
-                wirelog.debug("total read = %d" % i)
+        #wirelog.debug("reply len: %d" % n)
+        i = 0
+        while i < n:
+            #wirelog.debug (" i=%d n=%d " % (i,n))
+            r = self.recv_all(s, n - i)
+            reply += r.decode('utf-8')
+            i +=  len(r)
+            #wirelog.debug("total read = %d" % i)
 
-            wirelog.debug('read  <- %s' % safe_str(reply[:80]))
-            return reply.split(protocol.separator)
-        except:
-            log.exception('Error reading message: %s' % retMsg)
-            raise
+        #wirelog.debug('read  <- %s' % safe_str(reply[:80]))
+        return reply.split(protocol.separator)
 
     def recv_all(self, socket, bytes):
         """Receive an exact number of bytes.
@@ -1217,18 +1213,18 @@ class Connection(object):
     def _sendMsg(self, s, req):
         msg = self._buildMsg(req)
         wirelog.debug('write -> %s' % safe_str(msg[:80]))
-	try:
-             s.send(msg)
-	except Exception, e:
-             if str(e) == "(10053, 'Software caused connection abort')":
-                 print('Lost connection resetting')
-                 try:
-                     self.close()
-                 except Exception, e:
-                     print('noclose')
-                 self.db_init()
-                 return
-             raise e    
+        try:
+            s.send(msg)
+        except Exception, e:
+            if str(e) == "(10053, 'Software caused connection abort')":
+                log.warn('Lost connection resetting')
+                try:
+                    self.close()
+                except Exception, e:
+                    log.warn('noclose')
+                self.db_init()
+                return
+            raise e    
             
     def _sendRequest(self, s, msg):
         self._sendMsg(s, msg)
