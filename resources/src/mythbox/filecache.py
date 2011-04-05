@@ -108,7 +108,7 @@ class FileCache(object):
                     s = fileUrl.getChannelName()
                 else:
                     s = fileUrl
-                log.debug('Cache HIT %s ' % safe_str(s))
+                #log.debug('Cache HIT %s ' % safe_str(s))
         return filepath
 
     @sync_instance
