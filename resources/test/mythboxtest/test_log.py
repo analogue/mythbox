@@ -49,7 +49,49 @@ class LogScraperTest(unittest.TestCase):
             if self.abortGrow:
                 break
         f.close()
+        
+    def test_matchLineAsync_When_search_string_found_Then_callback_invoked_with_matching_text(self):
+
+        fname = os.path.join(self.sandbox, 'xbmc.log')
+
+        try:
+            t = self.growFile(fname, ['aaa','bbb','ccc','xxx','yyy'], 1)
+            while not os.path.exists(fname):
+                time.sleep(1)
+            
+            def mycallback(s):
+                log.debug('mycallback received %s' % s)
+                self.callbackResult = s
                 
+            scraper = LogScraper(fname)
+            worker = scraper.matchLineAsync('xxx', 10, mycallback)
+            worker.join()
+            self.assertEqual('xxx', self.callbackResult)
+        finally:
+            self.abortGrow = True
+            t.join()
+
+    def test_matchLineAsync_When_search_string_not_found_Then_callback_invoked_with_None(self):
+
+        fname = os.path.join(self.sandbox, 'xbmc.log')
+
+        try:
+            t = self.growFile(fname, ['aaa','bbb','ccc','xxx','yyy'], 1)
+            while not os.path.exists(fname):
+                time.sleep(1)
+            
+            def mycallback(s):
+                log.debug('mycallback received %s' % s)
+                self.callbackResult = s
+                
+            scraper = LogScraper(fname)
+            worker = scraper.matchLineAsync('zzz', 3, mycallback)
+            worker.join()
+            self.assertIsNone(self.callbackResult)
+        finally:
+            self.abortGrow = True
+            t.join()
+        
     def test_matchLine_When_search_string_found_Then_return_matching_text(self):
         
         fname = os.path.join(self.sandbox, 'xbmc.log')

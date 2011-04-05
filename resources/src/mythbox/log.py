@@ -17,12 +17,26 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 import time
+from threading import Thread
 
 class LogScraper(object):
 
     def __init__(self, fname):
         self.fname = fname
         
+    def threadTarget(self, s, timeout, callback):
+        line = self.matchLine(s, timeout)
+        if callback:
+            callback(line)
+        
+    def matchLineAsync(self, s, timeout=10, callback=None):
+        '''Same as matchline but returns immediately and notifies caller of match
+        via callback method. Returns thread on which callback will be executed in case
+        client would like to join() it'''
+        worker = Thread(target = self.threadTarget, args = (s,), kwargs = {'timeout':timeout, 'callback':callback})
+        worker.start()
+        return worker
+                
     def matchLine(self, s, timeout=10):  
         '''Waits for a line of text containing s to be written to the file. 
         Returns the line if found, or None in the case of a timeout (seconds)'''
