@@ -52,7 +52,7 @@ class LogScraper(object):
             while elapsed < timeout:
                 line = f.readline()
                 if s in line:
-                    return s
+                    return line
                 now = time.clock()
                 elapsed += now - before
                 before = now
