@@ -860,7 +860,6 @@ class Connection(object):
         Return the frame number of the bookmark as a long for the passed in program or 
         zero if no bookmark is found.
         """
-        #command = 'QUERY_BOOKMARK %s %s' %(program.getChannelId(), program.starttimets())
         command = 'QUERY_BOOKMARK %s %s' %(program.getChannelId(), program.recstarttimets())
         reply = self._sendRequest(self.cmdSock, [command])
         bookmarkFrame = decodeLongLong(int(reply[1]), int(reply[0])) 
@@ -874,7 +873,6 @@ class Connection(object):
         Raises ServerException on failure.
         """
         lowWord, highWord = encodeLongLong(frameNumber)
-        #command = 'SET_BOOKMARK %s %s %s %s' %(program.getChannelId(), program.starttimets(), highWord, lowWord)
         command = 'SET_BOOKMARK %s %s %s %s' %(program.getChannelId(), program.recstarttimets(), highWord, lowWord)
         reply = self._sendRequest(self.cmdSock, [command])
         
@@ -883,7 +881,7 @@ class Connection(object):
         elif reply[0] == 'FAILED':
             raise ServerException(
                 "Failed to save position in program '%s' to frame %s. Server response: %s" %(
-                program.title(), frameNumber, reply[0]))
+                safe_str(program.title()), frameNumber, reply[0]))
         else:
             raise ProtocolException('Unexpected return value: %s' % reply[0])
     
@@ -896,14 +894,17 @@ class Connection(object):
         """
         COMM_START = 4
         COMM_END   = 5
-        
+        commBreaks = []
         command = 'QUERY_COMMBREAK %s %s' %(program.getChannelId(), program.starttimets())
         reply = self._sendRequest(self.cmdSock, [command])
-        numRecs = int(reply[0])
-        commBreaks = []
-        
-        if numRecs == -1:
+
+        if len(reply) == 0:
             return commBreaks
+        
+        numRecs = int(reply[0])
+        
+        if numRecs in (-1,0,):
+            return commBreaks        
         
         if numRecs % 2 != 0:
             raise ClientException, 'Expected an even number of comm break records but got %s instead' % numRecs
