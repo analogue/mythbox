@@ -177,12 +177,12 @@ class MythSettings(object):
         dom = minidom.parseString('<mythtv></mythtv>'.encode('utf-8'))
         for key in self.d.keys():
             e = dom.createElement(key)
-            n = dom.createTextNode(string.strip(self.d[key]))
+            n = dom.createTextNode(self.d[key].strip())
             e.appendChild(n)
             dom.childNodes[0].appendChild(e)
         slog.debug('Saving settings to %s' % self.settingsPath)
         fh = file(self.settingsPath, 'w')
-        fh.write(dom.toxml().encode('utf-8'))
+        fh.write(dom.toxml(encoding='utf-8'))
         fh.close()
 
     def getBoolean(self, tag):

@@ -140,10 +140,11 @@ class RecordingsWindow(BaseWindow):
     def saveSettings(self):
         if self.programs:
             try:
+                # WORKAROUND: decode() before saving since getProperty(...) always returns str (not unicode)
                 group = self.groupsListbox.getSelectedItem().getProperty('title')
-                self.settings.put('recordings_selected_group', [group, u''][group is None])
+                self.settings.put('recordings_selected_group', [group.decode('utf-8'), u''][group is None])
                 title = self.programsListbox.getSelectedItem().getProperty('title')
-                self.settings.put('recordings_selected_program', [title, u''][title is None])
+                self.settings.put('recordings_selected_program', [title.decode('utf-8'), u''][title is None])
             except:
                 pass
             
@@ -257,12 +258,20 @@ class RecordingsWindow(BaseWindow):
                     
         for i, group in enumerate(sortedGroups):
             title = group.title
+  
+            #log.debug('YYY %s %s' % (type(title), safe_str(title)))
+            #log.debug('ZZZ %s %s' % (type(group.title), safe_str(group.title)))
+            
             group.listItem = xbmcgui.ListItem()
             group.index = i
             listItems.append(group.listItem)
             self.setListItemProperty(group.listItem, 'index', str(i))
             self.setListItemProperty(group.listItem, 'title', title)
             self.setListItemProperty(group.listItem, 'num_episodes', str(len(group.programs)))
+
+            #vtitle = group.listItem.getProperty('title')
+            #log.debug('\n\nAAA %s %s\n' % (type(vtitle), safe_str(vtitle)))
+
             if self.lastSelectedGroup == title:
                 lastSelectedIndex = i
                 log.warn('Last selected group index = %s %s' % (safe_str(title), lastSelectedIndex))
@@ -284,7 +293,16 @@ class RecordingsWindow(BaseWindow):
         if not self.programs:
             return
         elif lsg is None:
-            self.activeGroup = self.groupsByTitle[self.groupsListbox.getSelectedItem().getProperty('title')]
+            t = self.groupsListbox.getSelectedItem().getProperty('title')
+
+            #log.debug('XXX %s %s' % (type(t), safe_str(t)))
+            
+            # WORKAROUND: decode() before saving since getProperty(...) always returns str (not unicode)
+            t = t.decode('utf-8')
+            
+            #log.debug('BBB %s %s' % (type(t), safe_str(t)))
+            
+            self.activeGroup = self.groupsByTitle[t]
             self.lastSelectedGroup = self.activeGroup.title
         else:
             self.activeGroup = self.groupsByTitle[lsg]
@@ -347,7 +365,7 @@ class RecordingsWindow(BaseWindow):
             posterPath = self.mythThumbnailCache.get(p)
             if not posterPath:
                 posterPath = 'mythbox-logo.png'
-        log.debug('lookupPoster setting %s tto %s' % (safe_str(p.title()), posterPath))
+        #log.debug('lookupPoster setting %s tto %s' % (safe_str(p.title()), posterPath))
         self.updateListItemProperty(listItem, 'poster', posterPath)
 
         if log.isEnabledFor(logging.DEBUG):
