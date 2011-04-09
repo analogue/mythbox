@@ -2,7 +2,7 @@
 #
 # Packages mythbox for distribution as an addon zip file.
 #
-find . -name "*.pyc" -o -name "*.pyo" | xargs rm -fv
+find . -name "*.pyc" -o -name "*.pyo" -o -name "mythbox.log" | xargs rm -fv
 
 export rev=$1
 export fname=script.mythbox.1.0.$rev.zip

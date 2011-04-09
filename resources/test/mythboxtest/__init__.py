@@ -8,11 +8,11 @@ def getParent(d):
     return abspath(join(d, '..'))
 
 def getLogger(loggerName):
-    print "getlogger called"
+    #print "getlogger called"
     import logging
     logger  = logging.getLogger(loggerName)
     if not logger.handlers:
-        print 'loading log config'
+        #print 'loading log config'
         import logging.config
         
         d = getcwd()
@@ -23,7 +23,7 @@ def getLogger(loggerName):
             f = join(d, 'mythbox_log.ini')
             
         if d:
-            print 'loading log config from %s' % f
+            #print 'loading log config from %s' % f
             logging.config.fileConfig(f)
             logger = logging.getLogger(loggerName)
             
