@@ -21,7 +21,7 @@ import unittest2 as unittest
 import mythboxtest
 
 from mockito import Mock
-from mythbox.ui.recordings2 import Group, GROUP_SORT_BY, TITLE_SORT_BY
+from mythbox.ui.recordings2 import Group, TITLE_SORT_BY, RecordingsWindow
 from mythbox.mythtv.domain import RecordedProgram
 from mythbox.mythtv.protocol import Protocol23056
 
@@ -42,8 +42,9 @@ class RecordingsWindowTest(unittest.TestCase):
         g3 = Group(u3)
         
         c = [g1,g2, g3]
-        
-        c.sort(key=GROUP_SORT_BY['Title']['sorter'], reverse=GROUP_SORT_BY['Title']['reverse'])
+        kwargs = {'settings':Mock(), 'translator':Mock(), 'platform':Mock(), 'fanArt':Mock(), 'cachesByName':{}}
+        w = RecordingsWindow(**kwargs)
+        c.sort(key=w.GROUP_SORT_BY['Title']['sorter'], reverse=w.GROUP_SORT_BY['Title']['reverse'])
 
         self.assertTrue(c[0].title == u3)
         self.assertTrue(c[1].title == u2)
