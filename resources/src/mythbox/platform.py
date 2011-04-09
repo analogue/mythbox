@@ -39,7 +39,7 @@ def getPlatform():
         elif 'linux' in sys.platform:
             __instance = UnixPlatform()
         elif 'darwin' in sys.platform:
-            # gotta be a better way to detect ipad/iphone/atv
+            # gotta be a better way to detect ipad/iphone/atv2
             if 'USER' in os.environ and os.environ['USER'] in ('mobile','frontrow',):
                 __instance = IOSPlatform()
             else: 
@@ -249,10 +249,10 @@ class WindowsPlatform(Platform):
         return 'c:\\change\\me'
 
     def getXbmcLog(self):    
-        return 'TODO'
+        raise Exception('TODO: WindowsPlatform.getXbmcLog()')
     
     def getDebugLog(self):
-        return 'TODO'
+        raise Exception('TODO: WindowsPlatform.getDebugLog()')
 
         
 class MacPlatform(Platform):
@@ -272,7 +272,8 @@ class MacPlatform(Platform):
     def getDefaultRecordingsDir(self):
         return '/change/me'
 
-    def getXbmcLog(self):    
+    def getXbmcLog(self):
+        # TODO: verify    
         return os.path.expanduser(os.path.join('~', 'Library', 'Logs', 'xbmc.log'))
 
     def getDebugLog(self):
@@ -299,8 +300,16 @@ class IOSPlatform(Platform):
     def getDefaultRecordingsDir(self):
         return '/var/mobile'
 
-    def getXbmcLog(self):    
-        return os.path.expanduser(os.path.join('~', 'Library', 'Logs', 'xbmc.log'))
+    def getXbmcLog(self):
+        #19:30:47 T:165597184 M: 73052160  NOTICE: Starting XBMC, Platform: Mac OS X (10.4.0 AppleTV2,1). Built on Feb 27 2011 (Git:6ba831d)
+        #19:30:47 T:165597184 M: 73052160  NOTICE: special://xbmc/ is mapped to: /Applications/XBMC.frappliance/XBMCData/XBMCHome
+        #19:30:47 T:165597184 M: 73052160  NOTICE: special://xbmcbin/ is mapped to: /Applications/XBMC.frappliance/XBMCData/XBMCHome
+        #19:30:47 T:165597184 M: 72990720  NOTICE: special://masterprofile/ is mapped to: /var/mobile/Library/Preferences/XBMC/userdata
+        #19:30:47 T:165597184 M: 72990720  NOTICE: special://home/ is mapped to: /var/mobile/Library/Preferences/XBMC
+        #19:30:47 T:165597184 M: 72990720  NOTICE: special://temp/ is mapped to: /var/mobile/Library/Preferences/XBMC/temp
+        #19:30:47 T:165597184 M: 72990720  NOTICE: The executable running is: /Applications/XBMC.frappliance/XBMC
+        #19:30:47 T:165597184 M: 72990720  NOTICE: Log File is located: /var/mobile/Library/Preferences/xbmc.log        
+        return os.path.expanduser(os.path.join('~', 'Library', 'Preferences', 'xbmc.log'))
 
     def getDebugLog(self):
         return os.path.expanduser(os.path.join('~', 'Library', 'Logs', 'mythbox.log'))
