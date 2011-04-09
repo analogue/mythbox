@@ -23,7 +23,6 @@ import Queue
 import re
 import sys
 import time
-import xbmc
 import xbmcgui
 
 from datetime import datetime, timedelta
@@ -38,9 +37,15 @@ elog = logging.getLogger('mythbox.event')
 
 #
 #  Thread local storage used by @inject_conn and @inject_db decorators
-#from odict import odict
-
+#
 threadlocals = {}   
+
+def to_kwargs(obj, attrNames):
+    '''Useful for building **kwargs dependencies by plucking the attributes by name from self'''
+    kwargs = {}
+    for attrName in attrNames:
+        kwargs[attrName] = getattr(obj, attrName)
+    return kwargs
 
 
 def requireDir(dir):

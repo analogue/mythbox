@@ -16,14 +16,12 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-import logging
 import os
-import threading
 import time
-import unittest
+import unittest2 as unittest
 import mythboxtest
 
-from mockito import Mock, when, any
+#from mockito import Mock, when, any
 from mythbox.util import *
 from mythbox.platform import getPlatform, Platform, WindowsPlatform, MacPlatform, UnixPlatform
 
@@ -153,16 +151,30 @@ class CoalesceDecoratorTest(unittest.TestCase):
 
 class ModuleTest(unittest.TestCase):
 
-#    def formatSize(sizeKB, gb=False):
-#        size = float(sizeKB)
-#        if size > 1024*1000 and gb:
-#            value = str("%.2f %s"% (size/(1024.0*1000.0), "GB"))
-#        elif size > 1024:
-#            value = str("%.2f %s"% (size/(1000.0), 'MB')) 
-#        else:
-#            value = str("%.2f %s"% (size, 'KB')) 
-#        return re.sub(r'(?<=\d)(?=(\d\d\d)+\.)', ',', value)
+    def test_to_kwargs_When_args_not_empty_Then_returns_dict_with_args(self):
 
+        class Boo(object):
+            
+            def __init__(self, *args, **kwargs):
+                self.one = "1"
+                self.two = "2"
+                self.three = "3"
+
+        obj = Boo()
+        kwargs = to_kwargs(obj, ['three', 'two', 'one'])
+        self.assertTrue(kwargs['one'] == obj.one)
+        self.assertTrue(kwargs['two'] == obj.two)
+        self.assertTrue(kwargs['three'] == obj.three)
+
+    def test_my_understanding_of_mixing_kwargs_with_double_asterisk_on_method_invocation(self):
+
+        def foo(a=1, b=2, c=3):
+            self.assertTrue(a == 5)
+            self.assertTrue(b == 6)
+            self.assertTrue(c == 7)
+            
+        foo(a=5, **{'b':6, 'c':7})
+        
     def test_formatSize(self):
         self.assertEquals("1,024.00 KB", formatSize(1024, False))
         self.assertEquals("100.00 GB", formatSize(1024*1000*100, True))
@@ -251,34 +263,6 @@ class TimedDecoratorTest(unittest.TestCase):
 
 
 class SynchronizedDecoratorTest(unittest.TestCase):
-
-#    @synchronized
-#    def foo(self):
-#        log.debug('enter %d' % self.i)
-#        self.assertEquals(100, self.i)
-#        self.i = self.i + 1
-#        time.sleep(0.25)
-#        self.i = self.i - 1
-#        self.assertEquals(100, self.i)
-#        log.debug('exit %d' % self.i)
-#        
-#    def runner(self):
-#        self.foo()
-#    
-#    def test_synhronized(self):
-#        self.i = 100
-#            
-#        threads = []
-#        
-#        for x in range(1,10):
-#            t = threading.Thread(name='%d'%x, target=self.runner)
-#            threads.append(t)
-#            t.start()
-#            log.debug('started thread %s' % t)
-#            
-#        for t in threads:
-#            t.join(timeout=999)
-#            log.debug('joined thread %s' % t)
 
     def setUp(self):
         self.fooLock = 0
