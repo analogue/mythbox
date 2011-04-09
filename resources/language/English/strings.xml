@@ -33,7 +33,7 @@ To submit translations for your native language
   <string id="21">Myth TV</string>
   <string id="22">MySQL</string>
   <string id="23">Paths</string>
-  <string id="24">Test Settings</string>
+  <string id="24">Test Settings..</string>
   <string id="25">Settings saved successfully.</string>
   
   <string id="29">Settings have been modified.  Lose unsaved changes?</string>
@@ -437,7 +437,7 @@ To submit translations for your native language
   <string id="446">Comma separated list of public Twitter names. Try some: cnnbrk, woot, thelittleidiot, wired, current...</string> 
   <string id="447">Located at %s</string>
   
-  <string id="450">XBMC Settings</string>
+  <string id="450">XBMC Settings..</string>
   <string id="455">Readme and FAQ</string>
   <string id="460">About</string>
   
