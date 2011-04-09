@@ -185,9 +185,14 @@ class BootStrapper(object):
         self.fanArt = FanArt(self.platform, self.httpCache, self.settings, self.bus)
         #self.fanArt = DelayedInstantiationProxy(self.platform, self.httpCache, self.settings, self.bus)
         
-        import socket
-        socket.setdefaulttimeout(20)
+        try:
+            import socket
+            socket.setdefaulttimeout(float(os.getenv('MYTHBOX_TIMEOUT', '30')))
+        except:
+            self.log.exception('Error setting socket timeout')
+            
         self.bus.register(self)
+
         # Generate fake event to reflect value in settings.xml instead of mythbox_log.ini
         from bus import Event
         self.onEvent({'id': Event.SETTING_CHANGED, 'tag':'logging_enabled', 'old':'DontCare', 'new':self.settings.get('logging_enabled')})
