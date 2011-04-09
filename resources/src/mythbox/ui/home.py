@@ -17,8 +17,6 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 import logging
-import os
-
 import xbmc
 import xbmcgui
 import mythbox.msg as m
@@ -34,7 +32,7 @@ from mythbox.ui.player import MountedPlayer, TrackingCommercialSkipper,\
     StreamingPlayer, NoOpCommercialSkipper
 from mythbox.ui.toolkit import BaseWindow, Action, window_busy, showPopup
 from mythbox.util import catchall_ui, catchall, run_async, coalesce, safe_str 
-from mythbox.util import hasPendingWorkers, waitForWorkersToDie, formatSize
+from mythbox.util import hasPendingWorkers, waitForWorkersToDie, formatSize, to_kwargs
 from mythbox.mythtv.publish import MythEventPublisher
 
 log = logging.getLogger('mythbox.ui')
@@ -268,12 +266,12 @@ class HomeWindow(BaseWindow):
         if self.settings.getBoolean('streaming_enabled'):
             if not self.canStream():
                 return 
-            p = StreamingPlayer(program=program, settings=self.settings, mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
+            p = StreamingPlayer(program=program, **to_kwargs(self, ['settings', 'mythThumbnailCache', 'translator', 'platform']))
             p.playRecording(NoOpCommercialSkipper())
         else:    
-            p = MountedPlayer(program=program, mythThumbnailCache=self.mythThumbnailCache, translator=self.translator)
+            p = MountedPlayer(program=program, **to_kwargs(self, ['mythThumbnailCache', 'translator']))
             p.playRecording(TrackingCommercialSkipper(p, program, self.translator))
-        del p 
+        del p
             
     def goWatchRecordings(self):
         #from mythbox.ui.recordings import RecordingsWindow

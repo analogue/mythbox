@@ -30,7 +30,7 @@ from mythbox.mythtv.conn import inject_conn
 from mythbox.ui.recordingdetails import RecordingDetailsWindow
 from mythbox.ui.toolkit import window_busy, BaseWindow, Action
 from mythbox.util import catchall_ui, run_async, timed, catchall, ui_locked2, coalesce, safe_str
-from mythbox.util import CyclingBidiIterator, formatSize
+from mythbox.util import CyclingBidiIterator, formatSize, to_kwargs
 
 log = logging.getLogger('mythbox.ui')
 
@@ -45,10 +45,6 @@ TITLE_SORT_BY = odict.odict([
     ('Date',           {'translation_id': m.DATE,          'reverse':True,  'sorter' : lambda r: r.starttimeAsTime() }), 
     ('Title',          {'translation_id': m.TITLE,         'reverse':False, 'sorter' : lambda r: '%s%s' % (safe_str(r.title()), r.originalAirDate())}), 
     ('Orig. Air Date', {'translation_id': m.ORIG_AIR_DATE, 'reverse':True,  'sorter' : lambda r: r.originalAirDate()})])
-
-GROUP_SORT_BY = odict.odict([
-    ('Title', {'translation_id': m.TITLE, 'reverse': False, 'sorter' : lambda g: [g.title, u'0000'][g.title == u'All recordings']}),
-    ('Date',  {'translation_id': m.DATE,  'reverse': True,  'sorter' : lambda g: [g.programs[0].starttimeAsTime(), datetime.datetime(datetime.MAXYEAR, 12, 31, 23, 59, 59, 999999, tzinfo=None)][g.title == u'All recordings']})])
 
 class Group(object):
     
@@ -87,13 +83,18 @@ class RecordingsWindow(BaseWindow):
         [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'platform', 'fanArt', 'cachesByName')]
         [setattr(self,k,v) for k,v in self.cachesByName.iteritems()]
 
+        self.t = self.translator.get
         self.programs = []                       # [RecordedProgram]
-        self.allGroupTitle = self.translator.get(m.ALL_RECORDINGS)
+        self.allGroupTitle = self.t(m.ALL_RECORDINGS)
         self.activeRenderToken = None
         self.groupsByTitle = odict.odict()       # {unicode:Group}
         self.activeGroup = None
         self.lastFocusId = None
         self.sameBackgroundCache = {}            # {title:filepath}
+
+        self.GROUP_SORT_BY = odict.odict([
+            ('Title', {'translation_id': m.TITLE, 'reverse': False, 'sorter' : lambda g: [g.title, u'0000'][g.title == self.allGroupTitle]}),
+            ('Date',  {'translation_id': m.DATE,  'reverse': True,  'sorter' : lambda g: [g.programs[0].starttimeAsTime(), datetime.datetime(datetime.MAXYEAR, 12, 31, 23, 59, 59, 999999, tzinfo=None)][g.title == self.allGroupTitle]})])
         
     @catchall_ui
     def onInit(self):
@@ -127,7 +128,7 @@ class RecordingsWindow(BaseWindow):
             self.lastSelected = self.programsListbox.getSelectedPosition()
             self.refresh()
         elif controlId == ID_SORT_BY_BUTTON:
-            keys = GROUP_SORT_BY.keys()
+            keys = self.GROUP_SORT_BY.keys()
             self.groupSortBy = keys[(keys.index(self.groupSortBy) + 1) % len(keys)]
             self.applyGroupSort()
 
@@ -206,7 +207,7 @@ class RecordingsWindow(BaseWindow):
     def refresh(self):
         self.programs = self.conn().getAllRecordings()
         if not self.programs:
-            xbmcgui.Dialog().ok(self.translator.get(m.INFO), self.translator.get(m.NO_RECORDINGS_FOUND))
+            xbmcgui.Dialog().ok(self.t(m.INFO), self.t(m.NO_RECORDINGS_FOUND))
             self.close()
             return
         self.programs.sort(key=TITLE_SORT_BY[self.titleSortBy]['sorter'], reverse=TITLE_SORT_BY[self.titleSortBy]['reverse'])
@@ -246,7 +247,7 @@ class RecordingsWindow(BaseWindow):
         self.renderGroups()
         
     def renderNav(self):
-        self.setWindowProperty('sortBy', self.translator.get(m.SORT) + ': ' + self.translator.get(GROUP_SORT_BY[self.groupSortBy]['translation_id']))
+        self.setWindowProperty('sortBy', self.t(m.SORT) + ': ' + self.t(self.GROUP_SORT_BY[self.groupSortBy]['translation_id']))
         self.setWindowProperty('sortAscending', ['false', 'true'][self.sortAscending])
 
     def renderGroups(self):
@@ -254,7 +255,7 @@ class RecordingsWindow(BaseWindow):
         listItems = []
         
         sortedGroups = self.groupsByTitle.values()[:]
-        sortedGroups.sort(key=GROUP_SORT_BY[self.groupSortBy]['sorter'], reverse=GROUP_SORT_BY[self.groupSortBy]['reverse'])
+        sortedGroups.sort(key=self.GROUP_SORT_BY[self.groupSortBy]['sorter'], reverse=self.GROUP_SORT_BY[self.groupSortBy]['reverse'])
                     
         for i, group in enumerate(sortedGroups):
             title = group.title
@@ -514,11 +515,7 @@ class RecordingsWindow(BaseWindow):
             self.platform.getScriptDir(), 
             forceFallback=True,
             programIterator=programIterator,
-            settings=self.settings,
-            translator=self.translator,
-            platform=self.platform,
-            cachesByName=self.cachesByName,
-            fanArt=self.fanArt)
+            **to_kwargs(self, ['settings', 'translator', 'platform', 'cachesByName', 'fanArt']))            
         win.doModal()
 
         if win.isDeleted:

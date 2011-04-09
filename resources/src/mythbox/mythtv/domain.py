@@ -936,7 +936,7 @@ class RecordedProgram(Program):
         @param seconds: Bookmark in seconds
         @type seconds: float
         """
-        self.conn().setBookmark(self, seconds2frames(seconds, self.getFrameRate()))
+        self.conn().setBookmark(self, seconds2frames(seconds, self.getFPS()))
         self.setProgramFlags(self.getProgramFlags() | FlagMask.FL_BOOKMARK)
 
     @inject_conn
@@ -949,6 +949,17 @@ class RecordedProgram(Program):
             return 0.0
         else:
             return frames2seconds(self.conn().getBookmark(self), self.getFrameRate())
+
+    @inject_conn
+    def getBookmark2(self):
+        """
+        @return: Bookmark in seconds or 0.0 if a bookmark does not exist.
+        @rtype: float
+        """
+        if not self.isBookmarked():
+            return 0.0
+        else:
+            return frames2seconds(self.conn().getBookmark(self), self.getFPS())
 
     def getFileSize(self):
         """
@@ -993,6 +1004,12 @@ class RecordedProgram(Program):
         """
         return self.getFilename() + '.png'
 
+    def setFPS(self, fps):
+        self._fps = fps
+        
+    def getFPS(self):
+        return self._fps
+    
     def getFrameRate(self):
         if self.settings.getBoolean('streaming_enabled'):
             # framerate not needed when using streaming.
