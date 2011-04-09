@@ -171,7 +171,7 @@ class StreamingPlayer(BasePlayer):
 
     def __init__(self, *args, **kwargs):
         BasePlayer.__init__(self, *args, **kwargs)    
-        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'mythThumbnailCache', 'program')]
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'mythThumbnailCache', 'program', 'platform')]
         self.bookmarker = MythBookmarker(self, self.program, self.translator)
         
     @inject_db        
@@ -196,7 +196,14 @@ class StreamingPlayer(BasePlayer):
         mlog.debug('> playRecording %s' % safe_str(self.program.title()))
         assert not self.isPlaying(), 'Player is already playing a video'
         self.commSkipper = commSkipper
+        
+        # extract recording's framerate from xbmc.log and inject into bookmarker
+        from mythbox.log import LogScraper
+        logtail = LogScraper(self.platform.getXbmcLog())
+        worker = logtail.matchLineAsync("fps:", timeout=30, callback=self.bookmarker.onFPS)
         self.play(self.buildPlaybackUrl(), self.buildPlayList())
+        worker.join()
+        
         #self._waitForPlaybackCompleted()
         #self.active = False
         mlog.debug('< playRecording')
@@ -239,14 +246,21 @@ class XbmcBookmarker(Bookmarker):
     def onPlayBackEnded(self):
         pass
     
-    
+from mythbox.util import catchall
+
 class MythBookmarker(Bookmarker):
     '''Mimics XBMC video player's builtin auto resume functionality'''
     
     def __init__(self, player, program, translator):
-        self._player = player
-        self._program = program
+        self.player = player
+        self.program = program
         self.translator = translator
+        self.fps = None
+
+        log.debug('\n\n\n\t\t\txxxx\n\n\n')
+                
+        #from threading import Lock
+        #self.gotFps = Lock()
         
     def onPlayBackStarted(self):
         self._resumeFromBookmark()
@@ -257,28 +271,52 @@ class MythBookmarker(Bookmarker):
     def onPlayBackEnded(self):
         self._clearBookmark()
 
+    @catchall
+    def onFPS(self, line):
+        #self.gotFps.acquire()
+        log.debug('onFPS: %s' % line)
+        if line is not None:
+            log.debug('onFPS: line not none')
+            words = line.split()
+            tagIndex = words.index('fps:')
+            self.fps = float(words[tagIndex+1].strip(','))
+            self.program.setFPS(self.fps)
+            #self.gotFps.release()
+            log.debug('fps = %s' % self.fps)
+        else:
+            log.debug('onFPS: line is none')
+            self.fps = 0.0
+            
     def _clearBookmark(self):
-        if self._program.isBookmarked():
-            self._program.setBookmark(0.0) 
+        if self.program.isBookmarked():
+            self.program.setBookmark(0.0) 
 
     def _resumeFromBookmark(self):
-        bookmarkSecs = self._program.getBookmark()
-        if bookmarkSecs > 0 and bookmarkSecs < (self._program.getDuration() * 60):
+        log.debug('bookmarker : before wait for gotFPS')
+        #self.gotFps.acquire()
+        
+        # wait for fps to be set by log scaper
+        while self.fps is None:
+            time.sleep(0.1)
+        log.debug('bookmarker : after wait for gotFPS')
+                
+        bookmarkSecs = self.program.getBookmark2()
+        if bookmarkSecs > 0 and bookmarkSecs < (self.program.getDuration() * 60):
             fb = formatSeconds(bookmarkSecs)
             log.debug('Resuming recording at bookmarked position of %s' % fb)
-            showPopup(self._program.title(), self.translator.get(m.RESUMING_AT) % fb)
-            self._player.seekTime(bookmarkSecs)
-            while self._player.getTime() < bookmarkSecs:
-                log.debug('Waiting for player time %s to seek past bookmark of %s' %(formatSeconds(self._player.getTime()), fb))
+            showPopup(self.program.title(), self.translator.get(m.RESUMING_AT) % fb)
+            self.player.seekTime(bookmarkSecs)
+            while self.player.getTime() < bookmarkSecs:
+                log.debug('Waiting for player time %s to seek past bookmark of %s' %(formatSeconds(self.player.getTime()), fb))
                 xbmc.sleep(SLEEP_MILLIS)
         else:
             log.debug('Recording has no bookmark or bookmark exceeds program length')
 
     def _saveLastPositionAsBookmark(self):
-        lastPos = self._player.tracker.getLastPosition()
-        log.debug('Setting bookmark on %s to %s' %(safe_str(self._program.title()), formatSeconds(lastPos)))
+        lastPos = self.player.tracker.getLastPosition()
+        log.debug('Setting bookmark on %s to %s' %(safe_str(self.program.title()), formatSeconds(lastPos)))
         try:
-            self._program.setBookmark(lastPos)
+            self.program.setBookmark(lastPos)
         except:
             log.exception('_saveLastPositionAsBookmark catchall')
 
