@@ -22,7 +22,7 @@ from mythbox.mythtv.enums import TVState, TVState44, TVState58
 # MythTV Protcol Constants
 initVersion = 8
 initToken = ''
-separator = '[]:[]'
+separator = u'[]:[]'
 serverVersion = None
 
 

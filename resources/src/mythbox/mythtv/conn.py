@@ -1155,6 +1155,7 @@ class Connection(object):
 
     def _buildMsg(self, msg):
         msg = protocol.separator.join(msg)
+        msg = msg.encode('utf-8')  # unicdoe -> str
         return '%-8d%s' % (len(msg), msg)
 
     def _readMsg(self, s):
