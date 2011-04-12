@@ -198,7 +198,8 @@ class RecordingsWindow(BaseWindow):
                     return
                 try:
                     if program.isCommFlagged():
-                        program.getFrameRate()
+                        program.getCommercialBreaks()
+                        #program.getFrameRate()
                 except:
                     log.exception('Comm break caching for recording %s failed' % safe_str(program.fullTitle()))
 

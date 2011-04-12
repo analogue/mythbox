@@ -95,7 +95,7 @@ class MountedPlayer(BasePlayer):
     
     def __init__(self, *args, **kwargs):
         BasePlayer.__init__(self, *args, **kwargs)    
-        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('translator', 'mythThumbnailCache', 'program')]
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('translator', 'mythThumbnailCache', 'program', 'platform')]
         self.bookmarker = MythBookmarker(self, self.program, self.translator)
         self._playbackCompletedLock = threading.Event()
         self._playbackCompletedLock.clear()
@@ -110,8 +110,20 @@ class MountedPlayer(BasePlayer):
         """
         mlog.debug('> playRecording(%s)' % safe_str(self.program.title()))
         assert not self.isPlaying(), 'Player is already playing a video'
+        
+        # TODO: FPS callback from LogScraper needs to poke commSkipper so times are adjusted
         self.commSkipper = commSkipper
+
+        # extract recording's framerate from xbmc.log and inject into bookmarker
+        from mythbox.log import LogScraper
+        logtail = LogScraper(self.platform.getXbmcLog())
+        worker = logtail.matchLineAsync("fps:", timeout=30, callback=self.bookmarker.onFPS)
         self.play(self.buildPlaybackUrl(), self.buildPlayList())
+        worker.join()
+
+        #self.play(self.buildPlaybackUrl(), self.buildPlayList())
+        
+        
         self.waitForPlaybackCompleted()
         self.active = False
         mlog.debug('< playRecording(...)')
@@ -246,8 +258,6 @@ class XbmcBookmarker(Bookmarker):
     def onPlayBackEnded(self):
         pass
     
-from mythbox.util import catchall
-
 class MythBookmarker(Bookmarker):
     '''Mimics XBMC video player's builtin auto resume functionality'''
     
@@ -256,12 +266,8 @@ class MythBookmarker(Bookmarker):
         self.program = program
         self.translator = translator
         self.fps = None
-
         log.debug('\n\n\n\t\t\txxxx\n\n\n')
                 
-        #from threading import Lock
-        #self.gotFps = Lock()
-        
     def onPlayBackStarted(self):
         self._resumeFromBookmark()
         
@@ -273,7 +279,6 @@ class MythBookmarker(Bookmarker):
 
     @catchall
     def onFPS(self, line):
-        #self.gotFps.acquire()
         log.debug('onFPS: %s' % line)
         if line is not None:
             log.debug('onFPS: line not none')
@@ -281,11 +286,12 @@ class MythBookmarker(Bookmarker):
             tagIndex = words.index('fps:')
             self.fps = float(words[tagIndex+1].strip(','))
             self.program.setFPS(self.fps)
-            #self.gotFps.release()
             log.debug('fps = %s' % self.fps)
         else:
             log.debug('onFPS: line is none')
             self.fps = 0.0
+        #if log.isEnabledFor(logging.DEBUG):
+        #    showPopup('FPS', 'FPS %s' % self.fps)           
             
     def _clearBookmark(self):
         if self.program.isBookmarked():
@@ -293,12 +299,17 @@ class MythBookmarker(Bookmarker):
 
     def _resumeFromBookmark(self):
         log.debug('bookmarker : before wait for gotFPS')
-        #self.gotFps.acquire()
         
-        # wait for fps to be set by log scaper
-        while self.fps is None:
+        # wait for fps to be set by log scaper for a max of 10 seconds
+        cnt = 0
+        while self.fps is None and cnt < 100:
             time.sleep(0.1)
-        log.debug('bookmarker : after wait for gotFPS')
+            cnt += 1
+        
+        if self.fps is None:
+            log.warn('Timed out waiting for fps to be set on bookmarker')
+        else:
+            log.debug('bookmarker : after wait for gotFPS')
                 
         bookmarkSecs = self.program.getBookmark2()
         if bookmarkSecs > 0 and bookmarkSecs < (self.program.getDuration() * 60):

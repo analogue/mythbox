@@ -269,7 +269,7 @@ class HomeWindow(BaseWindow):
             p = StreamingPlayer(program=program, **to_kwargs(self, ['settings', 'mythThumbnailCache', 'translator', 'platform']))
             p.playRecording(NoOpCommercialSkipper())
         else:    
-            p = MountedPlayer(program=program, **to_kwargs(self, ['mythThumbnailCache', 'translator']))
+            p = MountedPlayer(program=program, **to_kwargs(self, ['mythThumbnailCache', 'translator', 'platform']))
             p.playRecording(TrackingCommercialSkipper(p, program, self.translator))
         del p
             

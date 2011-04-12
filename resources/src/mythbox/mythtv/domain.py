@@ -648,7 +648,7 @@ class RecordedProgram(Program):
         self.protocol = protocol
         self._conn = conn
         
-        self._fps = None
+        self._fps = 29.97  # default values until real fps can be scraped from xbmc.log on playback 
         self._commercials = None
         self._localPath = None
         
@@ -948,7 +948,7 @@ class RecordedProgram(Program):
         if not self.isBookmarked():
             return 0.0
         else:
-            return frames2seconds(self.conn().getBookmark(self), self.getFrameRate())
+            return frames2seconds(self.conn().getBookmark(self), self.getFPS())
 
     @inject_conn
     def getBookmark2(self):
@@ -1010,64 +1010,64 @@ class RecordedProgram(Program):
     def getFPS(self):
         return self._fps
     
-    def getFrameRate(self):
-        if self.settings.getBoolean('streaming_enabled'):
-            # framerate not needed when using streaming.
-            # use an obviously invalid default so CommercialBreak objects 
-            # can still be constructed to get number of breaks 
-            return 29.97
-        else:
-            return self.getFrameRate1()
+#    def getFrameRate(self):
+#        if self.settings.getBoolean('streaming_enabled'):
+#            # framerate not needed when using streaming.
+#            # use an obviously invalid default so CommercialBreak objects 
+#            # can still be constructed to get number of breaks 
+#            return 29.97
+#        else:
+#            return self.getFrameRate1()
         
-    @timed
-    @synchronized
-    def getFrameRate1(self):
-        """
-        @rtype: float
-        @note: cached 
-        @note: most recordings are either 29.97 or 59.97
-        @todo: GUIInfoManager.cpp - look at refs to GetFPS()
-        """
-        if not self._fps:
-            
-            ffmpeg_cache_dir=os.path.join(self._platform.getScriptDataDir(), 'cache', 'ffmpeg')
-            requireDir(ffmpeg_cache_dir) 
-                
-            ffmpegParser = FFMPEG(
-                ffmpeg=self._platform.getFFMpegPath(),
-                closeFDs=(type(self._platform) != WindowsPlatform),  # WORKAROUND: close_fds borked on windows
-                windows=(type(self._platform) == WindowsPlatform),   # WORKAROUND: let pyxcoder know we're on windows
-                tempdir=ffmpeg_cache_dir,
-                log=log)
-            
-            try:
-                metadata = ffmpegParser.get_metadata(self.getLocalPath())
-            except:
-                log.exception('ffmpeg parsing failed')
-                metadata = None
-                
-            log.debug('ffmpeg metadata for %s = %s' % (self.getLocalPath(), metadata))
-            if metadata:
-                self._fps = float(metadata.frame_rate)
-
-                # Hack for FFMPEG returning incorrect or conflicting framerates for specific types of video files
-                for name, profile_data in self._fps_overrides.iteritems():
-                    try:
-                        if len([key for key,value in profile_data['tags'].iteritems() if getattr(metadata, key) == value]) == len(profile_data['tags']):  # all key/value pairs match
-                            old_fps = self._fps
-                            self._fps = profile_data['fps']
-                            log.debug('FPS override %s activated for %s from %s to %s' % (name, safe_str(self.title()), old_fps, self._fps))
-                            break
-                    except:
-                        log.exception('Blew up trying to test for fps overrides')
-            else:
-                self._fps = 29.97
-                log.error("""Could not determine FPS for file %s so defaulting to %s FPS.
-                             Make sure you have the ffmpeg executable in your path. 
-                             Commercial skipping may be inaccurate""" % (self._fps, self.getLocalPath()))
-                showPopup(self.translator.get(m.ERROR), 'FFMPEG error - comm skips may be incorrect')
-            log.debug('FPS = %s' % self._fps)
-        return self._fps
+#    @timed
+#    @synchronized
+#    def getFrameRate1(self):
+#        """
+#        @rtype: float
+#        @note: cached 
+#        @note: most recordings are either 29.97 or 59.97
+#        @todo: GUIInfoManager.cpp - look at refs to GetFPS()
+#        """
+#        if not self._fps:
+#            
+#            ffmpeg_cache_dir=os.path.join(self._platform.getScriptDataDir(), 'cache', 'ffmpeg')
+#            requireDir(ffmpeg_cache_dir) 
+#                
+#            ffmpegParser = FFMPEG(
+#                ffmpeg=self._platform.getFFMpegPath(),
+#                closeFDs=(type(self._platform) != WindowsPlatform),  # WORKAROUND: close_fds borked on windows
+#                windows=(type(self._platform) == WindowsPlatform),   # WORKAROUND: let pyxcoder know we're on windows
+#                tempdir=ffmpeg_cache_dir,
+#                log=log)
+#            
+#            try:
+#                metadata = ffmpegParser.get_metadata(self.getLocalPath())
+#            except:
+#                log.exception('ffmpeg parsing failed')
+#                metadata = None
+#                
+#            log.debug('ffmpeg metadata for %s = %s' % (self.getLocalPath(), metadata))
+#            if metadata:
+#                self._fps = float(metadata.frame_rate)
+#
+#                # Hack for FFMPEG returning incorrect or conflicting framerates for specific types of video files
+#                for name, profile_data in self._fps_overrides.iteritems():
+#                    try:
+#                        if len([key for key,value in profile_data['tags'].iteritems() if getattr(metadata, key) == value]) == len(profile_data['tags']):  # all key/value pairs match
+#                            old_fps = self._fps
+#                            self._fps = profile_data['fps']
+#                            log.debug('FPS override %s activated for %s from %s to %s' % (name, safe_str(self.title()), old_fps, self._fps))
+#                            break
+#                    except:
+#                        log.exception('Blew up trying to test for fps overrides')
+#            else:
+#                self._fps = 29.97
+#                log.error("""Could not determine FPS for file %s so defaulting to %s FPS.
+#                             Make sure you have the ffmpeg executable in your path. 
+#                             Commercial skipping may be inaccurate""" % (self._fps, self.getLocalPath()))
+#                showPopup(self.translator.get(m.ERROR), 'FFMPEG error - comm skips may be incorrect')
+#            log.debug('FPS = %s' % self._fps)
+#        return self._fps
 
 #    @timed
 #    @inject_db

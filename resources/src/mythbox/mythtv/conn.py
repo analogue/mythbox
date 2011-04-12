@@ -909,7 +909,7 @@ class Connection(object):
         if numRecs % 2 != 0:
             raise ClientException, 'Expected an even number of comm break records but got %s instead' % numRecs
         
-        fps = program.getFrameRate()
+        fps = program.getFPS()
         recSize = 3                      # marker, highByte, lowByte
         for i in xrange(0, numRecs, 2):  # skip by 2's - start/end come in pairs
             baseIndex = i * recSize
