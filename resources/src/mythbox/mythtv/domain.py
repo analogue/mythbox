@@ -635,7 +635,7 @@ class RecordedProgram(Program):
         }
     }
     
-    def __init__(self, data, settings, translator, platform, protocol, conn=None):
+    def __init__(self, data, settings, translator, platform, protocol, conn=None, db=None):
         '''
         @param data: list of fields from mythbackend. libs/libmythtv/programinfo.cpp in the mythtv source 
                      describes the ordering of these fields.
@@ -647,8 +647,9 @@ class RecordedProgram(Program):
         self._platform = platform
         self.protocol = protocol
         self._conn = conn
+        self._db = db
         
-        self._fps = 29.97  # default values until real fps can be scraped from xbmc.log on playback 
+        self._fps = None 
         self._commercials = None
         self._localPath = None
         
@@ -678,6 +679,9 @@ class RecordedProgram(Program):
     
     def conn(self):
         return self._conn
+    
+    def db(self):
+        return self._db
     
     def data(self):
         """

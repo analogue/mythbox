@@ -798,7 +798,8 @@ class Connection(object):
                 self.translator, 
                 self.platform,
                 self.protocol, 
-                [self, None][self._db is None])) 
+                [self, None][self._db is None],
+                [self._db, None][self._db is None])) 
             offset += recordSize
         programs = filter(lambda p: p.getRecordingGroup() != 'LiveTV', programs)
         programs.sort(key=RecordedProgram.starttimeAsTime, reverse=True)
