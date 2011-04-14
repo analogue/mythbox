@@ -36,7 +36,8 @@ import tempfile
 import time
 import unittest2 as unittest
 from tvdb_exceptions import tvdb_error
-from unittest2.case import skip, skipIf
+from unittest2.case import SkipTest
+from decorator import decorator
 
 ustr = u'Königreich der Himmel'
 
@@ -255,14 +256,15 @@ class ImdbFanartProviderTest(BaseFanartProviderTestCase):
         self.assertListEqual([], provider.getPosters(program))
         
 
-def isTvdbDown():
+@decorator
+def skipIfTvdbDown(func, *args, **kw):
     try:
-        platform = Mock()
-        when(platform).getCacheDir().thenReturn('')
-        TvdbFanartProvider(platform, nextProvider=None)
-        return False
+        func(*args, **kw)
     except tvdb_error, e:
-        return 'timed out' in str(e)
+        if 'timed out' in str(e):
+            raise SkipTest('TVDB down')
+        else:
+            raise e
 
 
 class TvdbFanartProviderTest(BaseFanartProviderTestCase):
@@ -280,11 +282,11 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
     def getProvider(self):
         return TvdbFanartProvider(self.platform, nextProvider=None)
 
-    @skipIf(isTvdbDown(), 'TVDB down')
+    @skipIfTvdbDown
     def test_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
         self.base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably()
 
-    @skipIf(isTvdbDown(), 'TVDB down')
+    @skipIfTvdbDown
     def test_getPosters_When_program_is_not_movie_Then_returns_posters(self):
         # Setup
         program = TVProgram({'title':'Seinfeld', 'category_type':'series'}, translator=Mock())
@@ -298,13 +300,13 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         for posterUrl in posterUrls:
             self.assertEqual("http", posterUrl[0:4])
  
-    @skipIf(isTvdbDown(), 'TVDB down')
+    @skipIfTvdbDown
     def test_getPosters_When_program_is_movie_Then_returns_empty_list(self):
         program = TVProgram({'title':'Departed', 'category_type':'movie'}, translator=Mock())
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
         self.assertListEqual([], provider.getPosters(program))
 
-    @skipIf(isTvdbDown(), 'TVDB down')
+    @skipIfTvdbDown
     def test_getPosters_When_program_the_office_Then_returns_first_result_which_is_wrong_fixme(self):
         # Setup
         program = TVProgram({'title':'The Office', 'category_type':'series'}, translator=Mock())
@@ -318,7 +320,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         for posterUrl in posterUrls:
             self.assertEqual("http", posterUrl[0:4])
 
-    @skipIf(isTvdbDown(), 'TVDB down')
+    @skipIfTvdbDown
     def test_getPosters_When_title_has_funny_chars_Then_dont_fail_miserably(self):
         # Setup
         program = TVProgram({'title': u'Königreich der Himmel', 'category_type':'series'}, translator=Mock())
@@ -332,7 +334,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         for p in posters:
             self.assertEqual('http', p[0:4])
 
-    @skipIf(isTvdbDown(), 'TVDB down')
+    @skipIfTvdbDown
     def test_getPosters_When_pounded_by_many_threads_looking_up_same_program_Then_doesnt_fail_miserably(self):
         
         programs = []
@@ -357,7 +359,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
 
         self.assertFalse(self.fail)
         
-    @skipIf(isTvdbDown(), 'TVDB down')
+    @skipIfTvdbDown
     def test_getSeasonAndEpisode_Success(self):
         # Setup
         data = [''] * self.protocol.recordSize()
@@ -376,7 +378,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.assertEqual('24', season)
         self.assertEqual('3', episode)
         
-    @skipIf(isTvdbDown(), 'TVDB down')
+    @skipIfTvdbDown
     def test_getSeasonAndEpisode_When_episode_not_found_Then_returns_none(self):
         # Setup
         data = [''] * self.protocol.recordSize()
@@ -395,7 +397,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.assertIsNone(season)
         self.assertIsNone(episode)
 
-    @skipIf(isTvdbDown(), 'TVDB down')
+    @skipIfTvdbDown
     def test_getSeasonAndEpisode_When_show_not_found_Then_returns_none(self):
         # Setup
         data = [''] * self.protocol.recordSize()
@@ -414,7 +416,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.assertIsNone(season)
         self.assertIsNone(episode)
         
-    @skipIf(isTvdbDown(), 'TVDB down')
+    @skipIfTvdbDown
     def test_getBanners_When_program_is_not_movie_Then_returns_banners(self):
         # Setup
         program = TVProgram({'title':'Seinfeld', 'category_type':'series'}, translator=Mock())
@@ -429,7 +431,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         for bannerUrl in bannerUrls:
             self.assertEqual("http", bannerUrl[0:4])
 
-    @skipIf(isTvdbDown(), 'TVDB down')
+    @skipIfTvdbDown
     def test_getBackgrounds_When_program_is_not_movie_Then_returns_backgrounds(self):
         # Setup
         program = TVProgram({'title':'Seinfeld', 'category_type':'series'}, translator=Mock())
