@@ -207,16 +207,14 @@ class BootStrapper(object):
         self.feedHose = FeedHose(self.settings, self.bus)
 
     def bootstrapDebugShell(self):
-        # only startup debug shell on my mythboxen
-        import socket
-        if socket.gethostname() in ('htpc2', 'faraday', 'SP-IPad', 'octavian', 'fiona', 'athena'):
-            try:
-                from mythbox.shell import DebugShell
-                globals()['bootstrapper'] = self
-                self.shell = DebugShell(self.bus, namespace=globals())
-                self.shell.start()
-            except ImportError:
-                self.log.debug('Punting on debug shell -- not packaged')
+        # debug shell only packaged with bin/package-debug-zip
+        try: 
+            from mythbox.shell import DebugShell
+            globals()['bootstrapper'] = self
+            self.shell = DebugShell(self.bus, namespace=globals())
+            self.shell.start()
+        except ImportError:
+            self.log.debug('Punting on debug shell -- not packaged')
 
     def bootstrapXbmcShutdownListener(self):
         from threading import Thread

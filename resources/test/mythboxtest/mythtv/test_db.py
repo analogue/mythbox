@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -17,11 +17,11 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 import datetime
-import logging
 import mythbox.mythtv.protocol as protocol
 import time
 import unittest2
 import util_mock
+import mythboxtest
 
 from mockito import Mock
 from mythbox.mythtv.db import MythDatabase
@@ -30,7 +30,7 @@ from mythbox.platform import Platform
 from mythbox.settings import MythSettings
 from mythbox.util import OnDemandConfig
 
-log = logging.getLogger('mythbox.unittest')
+log = mythboxtest.getLogger('mythbox.unittest')
 
 
 class MythDatabaseTest(unittest2.TestCase):
@@ -50,7 +50,10 @@ class MythDatabaseTest(unittest2.TestCase):
         self.db = MythDatabase(self.settings, self.translator)
 
     def tearDown(self):
-        self.db.close()
+        try:
+            self.db.close()
+        except:
+            pass
         
     def test_constructor(self):
         self.assertTrue(self.db)
@@ -250,9 +253,20 @@ class MythDatabaseTest(unittest2.TestCase):
         
         for p in programs:
             log.debug(p)
+            
+    def test_getFramerate(self):
+        from mythbox.mythtv.conn import Connection
+        from mythbox.util import safe_str
+        from mythbox.mythtv.enums import RecordingStatus
         
-
-if __name__ == '__main__':
-    import logging.config
-    logging.config.fileConfig('mythbox_log.ini')
-    unittest2.main()        
+        conn = Connection(settings=self.settings, translator=Mock(), platform=Mock(), bus=Mock(), db=self.db)
+        try:
+            recordings = conn.getAllRecordings()[-10:]
+            for r in recordings:
+                if r.isCommFlagged() and r.getRecordingStatus() == RecordingStatus.RECORDED:
+                    fps  = self.db.getFramerate(r)
+                    log.debug('%s - %s - %s %d' % (safe_str(r.title()), safe_str(r.subtitle()), fps, r.getRecordingStatus()))
+                    self.assertGreaterEqual(fps, 0.0, fps)
+        finally:
+            conn.close()
+            

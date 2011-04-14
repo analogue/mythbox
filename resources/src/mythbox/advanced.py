@@ -56,6 +56,9 @@ class AdvancedSettings(object):
         self.init_with = None
         [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('platform', 'init_with',) ]
         self.filename = join(self.platform.getUserDataDir(), 'advancedsettings.xml')
+        self.put = self.setSetting
+        self.get = self.getSetting
+         
         if self.init_with:
             self.dom = parseString(self.init_with)
         else:

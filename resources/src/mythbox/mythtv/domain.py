@@ -950,17 +950,6 @@ class RecordedProgram(Program):
         else:
             return frames2seconds(self.conn().getBookmark(self), self.getFPS())
 
-    @inject_conn
-    def getBookmark2(self):
-        """
-        @return: Bookmark in seconds or 0.0 if a bookmark does not exist.
-        @rtype: float
-        """
-        if not self.isBookmarked():
-            return 0.0
-        else:
-            return frames2seconds(self.conn().getBookmark(self), self.getFPS())
-
     def getFileSize(self):
         """
         @return: filesize in KB
@@ -1004,10 +993,13 @@ class RecordedProgram(Program):
         """
         return self.getFilename() + '.png'
 
-    def setFPS(self, fps):
-        self._fps = fps
+#    def setFPS(self, fps):
+#        self._fps = fps
         
+    @inject_db
     def getFPS(self):
+        if self._fps is None:
+            self._fps = self.db().getFramerate(self)
         return self._fps
     
 #    def getFrameRate(self):

@@ -383,6 +383,46 @@ class MythDatabase(object):
         titlegroups[0][1] = grpcnt
         return titlegroups
 
+    @inject_cursor
+    def getFramerate(self, recording):
+        '''Returns fps as a float or defaults to 29.97 if problems occur'''
+
+        sql = '''        
+            select 
+                rs.mark/time_to_sec(timediff(r.progend,r.progstart)) as fps_actual,
+                rs.mark/time_to_sec(timediff(r.endtime,r.starttime)) as fps_duration
+            from 
+                recorded r, 
+                recordedseek rs
+            where
+                r.chanid = %d 
+            and r.starttime={ts '%s'}
+            and r.chanid = rs.chanid
+            and r.starttime = rs.starttime
+            order by rs.mark desc
+            limit 1 
+            ''' % (recording.getChannelId(), recording.starttimeAsTime())       
+        fps = float(29.97)
+        self.cursor.execute(sql)
+        for row in self.cursor.fetchall():
+            row = self.toDict(self.cursor, row)
+            try:
+                holder = float(row['fps_duration'])
+                if holder is not None:
+                    fps = holder
+                    break
+            except TypeError:
+                log.warn('Decimal to float conversion failed for "%s". Returning default' % fps)
+                break
+        
+        # since we're deriving an approximation from the recordedseek table, just fudge to the
+        # most obvious correct values
+        if fps >= 29.0 and fps <= 30.0:
+            fps = float(29.97)
+        elif fps >= 59.0 and fps <= 60.0:
+            fps = float(59.94)
+        return fps
+    
     @timed
     @inject_cursor
     def getTuners(self):

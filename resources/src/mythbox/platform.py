@@ -249,10 +249,11 @@ class WindowsPlatform(Platform):
         return 'c:\\change\\me'
 
     def getXbmcLog(self):    
-        raise Exception('TODO: WindowsPlatform.getXbmcLog()')
+        return os.path.join(xbmc.translatePath('special://home'), 'xbmc.log')
     
     def getDebugLog(self):
-        raise Exception('TODO: WindowsPlatform.getDebugLog()')
+        # TODO: mythbox.log not working on windows
+        return self.getXbmcLog() 
 
         
 class MacPlatform(Platform):

@@ -226,7 +226,7 @@ class SettingsWindow(BaseWindow):
         if mappedSetting:
             mappedSetting.readInput()
             if mappedSetting.store == self.advanced:
-                self.advanced.set('video/usetimeseeking', 'true') # required for seek values to take effect
+                self.advanced.put('video/usetimeseeking', 'true') # required for seek values to take effect
                 self.advanced.save()
                 log.debug(self.advanced)
             else:
