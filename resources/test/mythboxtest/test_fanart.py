@@ -35,6 +35,8 @@ import shutil
 import tempfile
 import time
 import unittest2 as unittest
+from tvdb_exceptions import tvdb_error
+from unittest2.case import skip, skipIf
 
 ustr = u'Königreich der Himmel'
 
@@ -253,8 +255,19 @@ class ImdbFanartProviderTest(BaseFanartProviderTestCase):
         self.assertListEqual([], provider.getPosters(program))
         
 
+def isTvdbDown():
+    try:
+        platform = Mock()
+        when(platform).getCacheDir().thenReturn('')
+        TvdbFanartProvider(platform, nextProvider=None)
+        return False
+    except tvdb_error, e:
+        return 'timed out' in str(e)
+
+
+@skipIf(isTvdbDown(), 'TVDB down')
 class TvdbFanartProviderTest(BaseFanartProviderTestCase):
-    
+            
     def setUp(self):
         self.platform = Mock()
         self.sandbox = tempfile.mkdtemp()
