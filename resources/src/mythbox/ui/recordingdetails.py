@@ -302,6 +302,10 @@ class RecordingDetailsWindow(BaseWindow):
                         commBreaks = job.comment
                 else:                                    
                     commBreaks = job.formattedJobStatus()
+                    
+        if log.isEnabledFor(logging.DEBUG):
+            commBreaks += ' (%s)' % self.program.getFPS()
+        
         self.setWindowProperty('commBreaks', commBreaks)
 
     @run_async

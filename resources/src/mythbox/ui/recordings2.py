@@ -480,7 +480,7 @@ class RecordingsWindow(BaseWindow):
     def lookupBackground(self, listItem, p):
         path = self.sameBackground(p)
         if path is not None:
-            log.debug('lookupBackground setting %s to %s' % (safe_str(p.title()), path))
+            #log.debug('lookupBackground setting %s to %s' % (safe_str(p.title()), path))
             self.updateListItemProperty(listItem, 'background', path)
 
     @run_async

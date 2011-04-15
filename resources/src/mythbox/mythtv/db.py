@@ -407,19 +407,22 @@ class MythDatabase(object):
         for row in self.cursor.fetchall():
             row = self.toDict(self.cursor, row)
             try:
+                log.debug('FPS actual   %s' % row['fps_actual'])
+                log.debug('FPS duration %s' % row['fps_duration'])
+                
                 holder = float(row['fps_duration'])
                 if holder is not None:
                     fps = holder
                     break
-            except TypeError:
-                log.warn('Decimal to float conversion failed for "%s". Returning default' % fps)
+            except TypeError, te:
+                log.warn('Decimal to float conversion failed for "%s" with error %s. Returning default of 29.97' % (fps, safe_str(te)))
                 break
         
         # since we're deriving an approximation from the recordedseek table, just fudge to the
         # most obvious correct values
-        if fps >= 29.0 and fps <= 30.0:
+        if fps >= 28.0 and fps <= 32.0:
             fps = float(29.97)
-        elif fps >= 59.0 and fps <= 60.0:
+        elif fps >= 58.0 and fps <= 62.0:
             fps = float(59.94)
         return fps
     
