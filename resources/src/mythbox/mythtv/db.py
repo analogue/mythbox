@@ -319,6 +319,27 @@ class MythDatabase(object):
             self._channels = map(lambda rd: Channel(rd), rows)
         return self._channels
 
+    @inject_cursor
+    def getRecordingProfileNames(self):
+        sql = """
+            select 
+                distinct(rp.name) as recording_profile_name
+            from 
+                capturecard cc,
+                cardinput ci,
+                profilegroups pg,
+                recordingprofiles rp
+            where
+                cc.cardid = ci.cardid
+                and cc.cardtype = pg.cardtype
+                and rp.profilegroup = pg.id
+                and rp.name != 'Live TV'
+            order by 
+                rp.name asc;
+        """
+        self.cursor.execute(sql)
+        return [self.toDict(self.cursor,row)['recording_profile_name'] for row in self.cursor.fetchall()]
+        
     @inject_cursor            
     def getRecordingGroups(self):
         """

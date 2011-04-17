@@ -19,7 +19,7 @@
 import datetime
 import mythbox.mythtv.protocol as protocol
 import time
-import unittest2
+import unittest2 as unittest
 import util_mock
 import mythboxtest
 
@@ -33,7 +33,7 @@ from mythbox.util import OnDemandConfig
 log = mythboxtest.getLogger('mythbox.unittest')
 
 
-class MythDatabaseTest(unittest2.TestCase):
+class MythDatabaseTest(unittest.TestCase):
 
     def setUp(self):
         self.platform = Platform()
@@ -96,7 +96,10 @@ class MythDatabaseTest(unittest2.TestCase):
             self.assertTrue('Expected str but was %s' % type(channel.getChannelName()), isinstance(channel.getChannelName(), str))
             self.assertTrue('Expected str but was %s' % type(channel.getIconPath()), isinstance(channel.getIconPath(), str))
             self.assertTrue('Expected int but was %s' % type(channel.getTunerId()), isinstance(channel.getTunerId(), int))
-        
+
+    def test_getRecordingProfileNames(self):
+        self.assertTrue(self.db.getRecordingProfileNames())
+                
     def test_getRecordingGroups(self):
         groups = self.db.getRecordingGroups()
         self.assertTrue('Default' in groups)
