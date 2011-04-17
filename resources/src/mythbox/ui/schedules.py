@@ -248,6 +248,7 @@ class ScheduleDialog(BaseDialog):
 
     @catchall_ui
     @inject_conn
+    @inject_db
     def onClick(self, controlId):
         t = self.translator.get
         log.debug('onClick %s ' % controlId)
@@ -294,7 +295,12 @@ class ScheduleDialog(BaseDialog):
         elif controlId == 203: self._chooseFromList(CheckForDupesUsing.translations, t(m.CHECK_FOR_DUPES_USING), 'checkForDupesUsing', s.setCheckForDupesUsing)            
         elif controlId == 204: self._chooseFromList(CheckForDupesIn.translations, t(m.CHECK_FOR_DUPES_IN), 'checkForDupesIn', s.setCheckForDupesIn)
         elif controlId == 208: self._chooseFromList(EpisodeFilter.translations, t(m.EPISODE_FILTER), 'episodeFilter', s.setEpisodeFilter)
-            
+        elif controlId == 219: 
+            fakeTr = odict.odict()
+            for name in self.db().getRecordingProfileNames():
+                fakeTr[name] = name
+            self._chooseFromList(fakeTr, t(m.RECORDING_PROFILE), 'recordingProfile', s.setRecordingProfile)
+                
         elif controlId == 206:
             maxEpisodes = self._enterNumber(t(m.KEEP_AT_MOST), s.getMaxEpisodes(), 0, 99)
             s.setMaxEpisodes(maxEpisodes)
@@ -375,7 +381,9 @@ class ScheduleDialog(BaseDialog):
         self.setWindowProperty('maxEpisodes', (t(m.N_EPISODES) % s.getMaxEpisodes(), t(m.ALL_EPISODES))[s.getMaxEpisodes() == 0])
         self.setWindowProperty('startEarly', (t(m.N_MINUTES_EARLY) % s.getStartOffset(), t(m.ON_TIME))[s.getStartOffset() == 0])
         self.setWindowProperty('endLate', (t(m.N_MINUTES_LATE) % s.getEndOffset(), t(m.ON_TIME))[s.getEndOffset() == 0])
-
+        
+        self.setWindowProperty('recordingProfile', s.getRecordingProfile())
+        
         self.enabledCheckBox.setSelected(s.isEnabled())
         self.renderUserJobs(s, t)
         

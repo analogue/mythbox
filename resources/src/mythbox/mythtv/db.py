@@ -852,8 +852,8 @@ class MythDatabase(object):
                 parentid) 
             VALUES (
                 %s, %s, %s, %s, %s, %s, %s, 
-                %%s, %%s, %%s, %%s, %%s, 
-                %s, %s, %s, %s, %s, 
+                %%s, %%s, %%s, %%s, %%s, %%s, 
+                %s, %s, %s, %s, 
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s)""" % (
                 recordid, 
@@ -868,7 +868,7 @@ class MythDatabase(object):
                 #quote(s.description()),      #
                 #quote(s.category()),         #
                 #quote(s.station()),          #
-                quote(s.profile()),
+                #quote(s.getRecordingProfile()),
                 s.getPriority(), 
                 int(s.isAutoExpire()),
                 s.getMaxEpisodes(), 
@@ -893,7 +893,11 @@ class MythDatabase(object):
                 int(s.parentid()))
 
         log.debug("sql = %s" % safe_str(sql))
-        args = (s.title(), s.subtitle(), s.description(), s.category(), s.station())
+        args = (s.title(), s.subtitle(), s.description(), s.category(), s.station(), s.getRecordingProfile())
+
+        if log.isEnabledFor(logging.DEBUG):
+            for i,arg in enumerate(args):
+                log.debug('Positional arg %d: %s' % (i,safe_str(arg)))
 
         c = self.conn.cursor(*cursorArgs)       
         try:

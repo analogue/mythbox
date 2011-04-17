@@ -1520,14 +1520,13 @@ class RecordingSchedule(Schedule):
         """
         return self._data['category']
     
-    def profile(self):
-        """
-        @return: recording profile
-        @rtype: string
-        @note: Default
-        """
+    def setRecordingProfile(self, name):
+        self._data['profile'] = name
+
+    def getRecordingProfile(self):
+        '''Ex: Default, High Quality, Low Quality'''
         return self._data['profile']
-    
+        
     def getPriority(self):
         """
         @rtype: int
@@ -1829,7 +1828,7 @@ class ScheduleFromProgram(RecordingSchedule):
         self.data()['starttime']     = program.starttime()[8:14]
         self.data()['enddate']       = program.endtime()[0:8]
         self.data()['endtime']       = program.endtime()[8:14]
-        self.data()['profile']       = 'Default'
+        self.data()['profile']       = u'Default'
         self.data()['recpriority']   = 0
         self.data()['autoexpire']    = 0
         self.data()['maxepisodes']   = 0
