@@ -39,9 +39,9 @@ ID_SORT_ASCENDING_TOGGLE = 252
 
 
 SORT_BY = odict.odict([
-    ('Title',          {'translation_id': m.TITLE,              'sorter' : lambda rs: rs.title()       }), 
-    ('# Recorded',     {'translation_id': m.NUM_RECORDED,       'sorter' : lambda rs: rs.numRecorded() }), 
-    ('Priority',       {'translation_id': m.RECORDING_PRIORITY, 'sorter' : lambda rs: rs.getPriority() })])
+    ('Title',          {'translation_id': m.TITLE,              'sorter' : lambda rs: safe_str(rs.title())                                 }), 
+    ('# Recorded',     {'translation_id': m.NUM_RECORDED,       'sorter' : lambda rs: '%05d %s' % (rs.numRecorded(), safe_str(rs.title())) }), 
+    ('Priority',       {'translation_id': m.RECORDING_PRIORITY, 'sorter' : lambda rs: '%05d %s' % (rs.getPriority(), safe_str(rs.title())) })])
 
 
 class SchedulesWindow(BaseWindow):

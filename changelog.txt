@@ -2,8 +2,9 @@ xx/xx/2011 MythBox 1.0.3
 -----------------------------
 
   New
-    - Recording schedules now sortable by Title, # Recorded, or Priority
+    - Removed dependency on ffmpeg for determining recording framerate 
     - # Recorded column added to the Recording Schedules window
+    - Recording schedules now sortable by Title, # Recorded, or Priority
     - Selecting an upcoming recording in the TV Guide allows you to
       edit its recording schedule
     - Issue 155 - User Jobs added to the Create/Edit Schedule window
