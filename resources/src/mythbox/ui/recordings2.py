@@ -38,7 +38,6 @@ ID_GROUPS_LISTBOX         = 700
 ID_PROGRAMS_LISTBOX       = 600
 ID_REFRESH_BUTTON         = 250
 ID_SORT_BY_BUTTON         = 251
-ID_SORT_ASCENDING_TOGGLE  = 252
 ID_RECORDING_GROUP_BUTTON = 253
 
 TITLE_SORT_BY = odict.odict([
@@ -111,7 +110,6 @@ class RecordingsWindow(BaseWindow):
         self.lastSelectedTitle = self.settings.get('recordings_selected_title')
         self.groupSortBy = self.settings.get('recordings_group_sort')
         self.titleSortBy = self.settings.get('recordings_title_sort')
-        self.sortAscending = self.settings.getBoolean('recordings_sort_ascending')
         
     def onFocus(self, controlId):
         self.lastFocusId = controlId
@@ -131,10 +129,6 @@ class RecordingsWindow(BaseWindow):
             keys = self.GROUP_SORT_BY.keys()
             self.groupSortBy = keys[(keys.index(self.groupSortBy) + 1) % len(keys)]
             self.applyGroupSort()
-
-        elif controlId == ID_SORT_ASCENDING_TOGGLE:
-            self.sortAscending = not self.sortAscending
-            self.applySort()
         else:
             log.warn('uncaught onClick %s' % controlId)
 
@@ -151,7 +145,6 @@ class RecordingsWindow(BaseWindow):
             
         self.settings.put('recordings_title_sort', self.titleSortBy)
         self.settings.put('recordings_group_sort', self.groupSortBy)
-        self.settings.put('recordings_sort_ascending', '%s' % self.sortAscending)
                                      
     @catchall_ui
     def onAction(self, action):
@@ -233,12 +226,8 @@ class RecordingsWindow(BaseWindow):
         self.render()
     
     def applyGroupSort(self):
-        if self.groupSortBy == 'Date':
-            self.titleSortBy = 'Date'
-        elif self.groupSortBy == 'Title':
-            self.titleSortBy = 'Orig. Air Date'
-            
-        self.programs.sort(key=TITLE_SORT_BY[self.titleSortBy]['sorter'], reverse=TITLE_SORT_BY[self.titleSortBy]['reverse'])
+        self.titleSortBy = 'Date'
+        self.programs.sort(key=TITLE_SORT_BY[self.titleSortBy]['sorter'], reverse=False)
         self.refresh()
         
     @ui_locked2
@@ -249,7 +238,6 @@ class RecordingsWindow(BaseWindow):
         
     def renderNav(self):
         self.setWindowProperty('sortBy', self.t(m.SORT) + ': ' + self.t(self.GROUP_SORT_BY[self.groupSortBy]['translation_id']))
-        self.setWindowProperty('sortAscending', ['false', 'true'][self.sortAscending])
 
     def renderGroups(self):
         lastSelectedIndex = 0

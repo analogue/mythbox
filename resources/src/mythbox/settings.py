@@ -136,9 +136,8 @@ class MythSettings(object):
             'recordings_last_selected'   : '0',
             'recordings_selected_group'  : u'',
             'recordings_selected_program': u'',
-            'recordings_group_sort'      : 'Title',
-            'recordings_title_sort'      : 'Orig. Air Date',
-            'recordings_sort_ascending'  : 'False',
+            'recordings_group_sort'      : 'Date',
+            'recordings_title_sort'      : 'Date',
             
             'tv_guide_last_selected'     : '0',
             'upcoming_sort_by'           : 'Date',
