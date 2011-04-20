@@ -114,9 +114,9 @@ class RecordingsWindow(BaseWindow):
     def onFocus(self, controlId):
         self.lastFocusId = controlId
         if controlId == ID_GROUPS_LISTBOX:
-            log.warn('groups focus')
+            log.debug('groups focus')
         else:
-            log.warn('uncaught focus %s' % controlId)
+            log.debug('uncaught focus %s' % controlId)
             
     @catchall_ui
     def onClick(self, controlId):
@@ -130,7 +130,7 @@ class RecordingsWindow(BaseWindow):
             self.groupSortBy = keys[(keys.index(self.groupSortBy) + 1) % len(keys)]
             self.applyGroupSort()
         else:
-            log.warn('uncaught onClick %s' % controlId)
+            log.debug('uncaught onClick %s' % controlId)
 
     def saveSettings(self):
         if self.programs:
@@ -155,15 +155,15 @@ class RecordingsWindow(BaseWindow):
             self.close()
         elif id in (Action.UP, Action.DOWN, Action.PAGE_UP, Action.PAGE_DOWN, Action.HOME, Action.END):
             if self.lastFocusId == ID_GROUPS_LISTBOX:
-                log.warn('groups select!')
+                log.debug('groups select!')
                 self.onGroupSelect()
             elif self.lastFocusId == ID_PROGRAMS_LISTBOX:
-                log.warn('title select!')
+                log.debug('title select!')
                 self.onTitleSelect()
         elif id == ID_GROUPS_LISTBOX:
-            log.warn('groups action!')
+            log.debug('groups action!')
         else:
-            log.warn('uncaught action id %s' % id)
+            log.debug('uncaught action id %s' % id)
     
     def onTitleSelect(self):
         self.lastSelectedTitle = self.programsListbox.getSelectedItem().getProperty('title')
@@ -263,7 +263,7 @@ class RecordingsWindow(BaseWindow):
 
             if self.lastSelectedGroup == title:
                 lastSelectedIndex = i
-                log.warn('Last selected group index = %s %s' % (safe_str(title), lastSelectedIndex))
+                log.debug('Last selected group index = %s %s' % (safe_str(title), lastSelectedIndex))
 
         self.groupsListbox.reset()
         self.groupsListbox.addItems(listItems)
@@ -275,7 +275,7 @@ class RecordingsWindow(BaseWindow):
         self.selectListItemAtIndex(self.groupsListbox, lastSelectedIndex)
         xbmcgui.lock()
         
-        log.warn('index checkl = %s' % self.groupsListbox.getSelectedPosition())
+        log.debug('index checkl = %s' % self.groupsListbox.getSelectedPosition())
         self.onGroupSelect()
 
     def onGroupSelect(self, lsg=None):

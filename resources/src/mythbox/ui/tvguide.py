@@ -459,8 +459,6 @@ class TvGuideWindow(ui.BaseWindow):
             label='',      # Text empty on purpose. Label overlay responsible for this
             focusTexture=self.platform.getMediaPath('gradient_cell.png'),
             noFocusTexture=self.platform.getMediaPath('gradient_grid.png'),
-            #textXOffset=2,
-            #textYOffset=0,
             alignment=Align.CENTER_Y|Align.TRUNCATED)
 
 #        if program:
