@@ -4,6 +4,7 @@ xx/xx/2011 MythBox 1.0.3
   New
     - Recordings Window
         - Issue 128 - Recordings grouped by title
+        - Wallpapers from TVDB/TMDB added as backdrop
     
     - Recording Schedules Window 
         - Added # Recorded column
@@ -26,10 +27,10 @@ xx/xx/2011 MythBox 1.0.3
         - Launches faster (smart caching)
     
     - Settings Window
-        - Issue 111 - Playback recordings without having to mount 
-          remote filesystems. 
-          Select MythBox > Settings > MythTV > Enable Streaming
-        - Playback tab added to adjust seconds for
+        - Issue 111 - Stream recordings directly from the backend by 
+          selecting MythTV > Enable Streaming
+        - Advanced tab - Log location add as help text
+        - Playback tab - Editable values for seeking during playback
            * Small Skip Forward 
            * Small Skip Backward
            * Big Skip Forward
