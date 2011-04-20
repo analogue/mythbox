@@ -192,7 +192,6 @@ class RecordingsWindow(BaseWindow):
                 try:
                     if program.isCommFlagged():
                         program.getCommercialBreaks()
-                        #program.getFrameRate()
                 except:
                     log.exception('Comm break caching for recording %s failed' % safe_str(program.fullTitle()))
 
@@ -284,20 +283,13 @@ class RecordingsWindow(BaseWindow):
             return
         elif lsg is None:
             t = self.groupsListbox.getSelectedItem().getProperty('title')
-
-            #log.debug('XXX %s %s' % (type(t), safe_str(t)))
-            
-            # WORKAROUND: decode() before saving since getProperty(...) always returns str (not unicode)
             t = t.decode('utf-8')
-            
-            #log.debug('BBB %s %s' % (type(t), safe_str(t)))
-            
             self.activeGroup = self.groupsByTitle[t]
             self.lastSelectedGroup = self.activeGroup.title
         else:
             self.activeGroup = self.groupsByTitle[lsg]
             
-        log.debug('onGroupSelect - group = %s' % safe_str(self.lastSelectedGroup))    
+        #log.debug('onGroupSelect - group = %s' % safe_str(self.lastSelectedGroup))    
         self.renderPrograms()
         self.activeRenderToken = time.clock()
         
