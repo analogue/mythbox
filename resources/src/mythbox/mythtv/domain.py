@@ -997,11 +997,12 @@ class RecordedProgram(Program):
         """
         return self.getFilename() + '.png'
 
-#    def setFPS(self, fps):
-#        self._fps = fps
-        
     @inject_db
     def getFPS(self):
+        # only cache fps if recording has finished
+        if self.getRecordingStatus() != RecordingStatus.RECORDED:
+            return self.db().getFramerate(self)
+
         if self._fps is None:
             self._fps = self.db().getFramerate(self)
         return self._fps
