@@ -121,11 +121,15 @@ class BootStrapper(object):
         self.mythThumbnailCache = MythThumbnailFileCache(join(cacheDir, 'thumbnail'), MythThumbnailResolver(), self.bus)
         self.mythChannelIconCache = FileCache(join(cacheDir, 'channel'), MythChannelIconResolver())
         self.httpCache = FileCache(join(cacheDir, 'http'), HttpResolver())
-
+        
+        from mythbox.mythtv.cache import DomainCache
+        self.domainCache = DomainCache(bus=self.bus)
+        
         self.cachesByName = {
             'mythThumbnailCache'  : self.mythThumbnailCache, 
             'mythChannelIconCache': self.mythChannelIconCache, 
-            'httpCache'           : self.httpCache
+            'httpCache'           : self.httpCache,
+            'domainCache'         : self.domainCache
         }
 
     def bootstrapSettings(self):

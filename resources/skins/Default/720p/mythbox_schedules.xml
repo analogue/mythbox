@@ -439,24 +439,6 @@
                 <ondown>250</ondown>
             </control>
 
-<!--             
-            <control type="togglebutton" id="252">
-                <description>Sort asc</description>
-                <posx>250</posx>
-                <posy>10</posy>
-                <label>-</label>
-                <texturefocus>mb-scroll-up-focus.png</texturefocus>
-                <texturenofocus>mb-scroll-up.png</texturenofocus>
-                <alttexturefocus>mb-scroll-down-focus.png</alttexturefocus>
-                <alttexturenofocus>mb-scroll-down.png</alttexturenofocus>                
-                <usealttexture>substring(Window.Property(sortAscending),true)</usealttexture>
-                <onleft>251</onleft>
-                <onright>600</onright>
-                <onup>250</onup>
-                <ondown>250</ondown>
-            </control>  
--->
-             
             <control type="button" id="250">
                 <description>Refresh button</description>
                 <label>SCRIPT210</label>

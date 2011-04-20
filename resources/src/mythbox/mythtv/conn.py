@@ -1059,6 +1059,7 @@ class Connection(object):
         by the backend.
         """
         log.debug('rescheduleNotify(schedule= %s)' % safe_str(schedule))
+        self.bus.publish({'id': Event.SCHEDULE_CHANGED})
         scheduleId = -1
         if schedule:
             scheduleId = schedule.getScheduleId()

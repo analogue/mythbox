@@ -409,7 +409,7 @@ class TvGuideWindow(ui.BaseWindow):
         return actionConsumed
 
     def scheduleForTitle(self, program):
-        for schedule in self.db().getRecordingSchedules():
+        for schedule in self.domainCache.getRecordingSchedules():
             if schedule.title() == program.title():
                 return schedule
         return None

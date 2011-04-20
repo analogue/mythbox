@@ -27,7 +27,7 @@ class Event(object):
     SETTING_CHANGED      = 'SETTING_CHANGED'    # keys: id, tag, old, new
     SHUTDOWN             = 'SHUDTOWN'           # keys: None
     SCHEDULER_RAN        = 'SCHEDULER_RAN'      # keys: None
-
+    SCHEDULE_CHANGED     = 'SCHEDULE CHANGED'   # keys: None    recording schedule added/deleted/updated
 
 class EventBus(object):
     
@@ -48,9 +48,9 @@ class EventBus(object):
         @type event: dict
         @param event: Put in whatever you like. The only mandatory key is 'id'
         """
+        log.debug('Publishing event %s to %d listeners' % (event, len(self.listeners)))
         for listener in self.listeners[:]:
             try:
-                log.debug('Sending event %s to %s' % (event, listener))
                 listener.onEvent(event)
             except:
                 log.exception('Error publishing event %s to %s' % (event, listener))

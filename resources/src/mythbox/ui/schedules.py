@@ -35,7 +35,6 @@ log = logging.getLogger('mythbox.ui')
 ID_SCHEDULES_LISTBOX = 600
 ID_REFRESH_BUTTON = 250
 ID_SORT_BY_BUTTON = 251
-ID_SORT_ASCENDING_TOGGLE = 252
 
 
 SORT_BY = odict.odict([
@@ -49,7 +48,7 @@ class SchedulesWindow(BaseWindow):
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
         [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings','translator','platform','fanArt','cachesByName',)]
-        [setattr(self,k,v) for k,v in self.cachesByName.iteritems() if k in ('mythChannelIconCache',)]
+        [setattr(self,k,v) for k,v in self.cachesByName.iteritems() if k in ('mythChannelIconCache', 'domainCache',)]
         
         self.schedules = []                       # [RecordingSchedule]
         self.listItemsBySchedule = odict.odict()  # {RecordingSchedule:ListItem}
@@ -57,7 +56,6 @@ class SchedulesWindow(BaseWindow):
         self.lastFocusId = ID_SCHEDULES_LISTBOX
         self.lastSelected = int(self.settings.get('schedules_last_selected'))
         self.sortBy = self.settings.get('schedules_sort_by')
-        self.sortAscending = True # self.settings.getBoolean('schedules_sort_ascending')
         self.activeRenderToken = None
         
     @catchall
@@ -73,13 +71,10 @@ class SchedulesWindow(BaseWindow):
         if controlId == ID_SCHEDULES_LISTBOX: 
             self.goEditSchedule()
         elif controlId == ID_REFRESH_BUTTON:
-            self.refresh()
+            self.refresh(force=True)
         elif controlId == ID_SORT_BY_BUTTON:
             keys = SORT_BY.keys()
             self.sortBy = keys[(keys.index(self.sortBy) + 1) % len(keys)] 
-            self.applySort()
-        elif controlId == ID_SORT_ASCENDING_TOGGLE:
-            self.sortAscending = not self.sortAscending
             self.applySort()
              
     def onFocus(self, controlId):
@@ -93,11 +88,10 @@ class SchedulesWindow(BaseWindow):
             self.closed = True
             self.settings.put('schedules_last_selected', '%d'%self.schedulesListBox.getSelectedPosition())
             self.settings.put('schedules_sort_by', self.sortBy)
-            #self.settings.put('upcoming_sort_ascending', '%s' % self.sortAscending)
             self.close()
 
     def applySort(self):
-        self.schedules.sort(key=SORT_BY[self.sortBy]['sorter'], reverse=not self.sortAscending)
+        self.schedules.sort(key=SORT_BY[self.sortBy]['sorter'], reverse=False)
         self.render()
             
     def goEditSchedule(self):
@@ -124,9 +118,9 @@ class SchedulesWindow(BaseWindow):
         
     @window_busy
     @inject_db
-    def refresh(self):
+    def refresh(self, force=False):
         self.cacheChannels()
-        self.schedules = self.db().getRecordingSchedules()
+        self.schedules = self.domainCache.getRecordingSchedules(invalidate=force, async=False)
         self.applySort()
         self.render()
         
@@ -182,7 +176,6 @@ class SchedulesWindow(BaseWindow):
 
     def renderNav(self):
         self.setWindowProperty('sortBy', self.translator.get(m.SORT) + ': ' + self.translator.get(SORT_BY[self.sortBy]['translation_id']))
-        #self.setWindowProperty('sortAscending', ['false', 'true'][self.sortAscending])
 
     @run_async
     @catchall
