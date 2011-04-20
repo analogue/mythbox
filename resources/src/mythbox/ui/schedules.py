@@ -153,12 +153,14 @@ class SchedulesWindow(BaseWindow):
 
                     if s.getChannelName():
                         self.setListItemProperty(li, 'channelName', s.getChannelName())
-
+                    
                     channel = self.channelsById[s.getChannelId()]
                     if channel.getIconPath():
                         channelIcon = self.mythChannelIconCache.get(channel)
                         if channelIcon:
                             self.setListItemProperty(li, 'channelIcon', channelIcon)
+                elif s.station():
+                    self.setListItemProperty(li, 'channelName', s.station())
                 
                 if self.fanArt.hasPosters(s):
                     s.needsPoster = False
