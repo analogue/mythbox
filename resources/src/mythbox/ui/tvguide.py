@@ -383,9 +383,16 @@ class TvGuideWindow(ui.BaseWindow):
                 self.watchLiveTv(program)
             else:
                 log.debug('launching edit schedule dialog')
+                
+                # scheduled recording
                 if c.scheduleId:
                     schedule = self.db().getRecordingSchedules(scheduleId=c.scheduleId).pop()
-                else:
+                
+                # not scheduled but happens to have an existing recording schedule
+                schedule = self.scheduleForTitle(program)
+
+                # new recording schedule
+                if schedule is None:
                     schedule = ScheduleFromProgram(program, self.translator)
                 
                 d = ScheduleDialog(
@@ -400,6 +407,12 @@ class TvGuideWindow(ui.BaseWindow):
                 d.doModal()
 
         return actionConsumed
+
+    def scheduleForTitle(self, program):
+        for schedule in self.db().getRecordingSchedules():
+            if schedule.title() == program.title():
+                return schedule
+        return None
 
     def _addGridCell(self, program, cell, relX, relY, width, height):
         """ 
