@@ -191,7 +191,7 @@ class RecordingsWindow(BaseWindow):
                     return
                 try:
                     if program.isCommFlagged():
-                        program.getCommercialBreaks()
+                        program.getCommercials()
                 except:
                     log.exception('Comm break caching for recording %s failed' % safe_str(program.fullTitle()))
 
@@ -272,8 +272,10 @@ class RecordingsWindow(BaseWindow):
         # HACK ALERT: Selection won't register unless gui unlocked
         #        
         xbmcgui.unlock()
-        self.selectListItemAtIndex(self.groupsListbox, lastSelectedIndex)
-        xbmcgui.lock()
+        try:
+            self.selectListItemAtIndex(self.groupsListbox, lastSelectedIndex)
+        finally:
+            xbmcgui.lock()
         
         log.debug('index checkl = %s' % self.groupsListbox.getSelectedPosition())
         self.onGroupSelect()
