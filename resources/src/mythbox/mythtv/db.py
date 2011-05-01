@@ -445,6 +445,8 @@ class MythDatabase(object):
             fps = float(29.97)
         elif fps >= 58.0 and fps <= 62.0:
             fps = float(59.94)
+        elif fps >= 22.0 and fps <= 26.0:
+            fps = float(24.0)
         return fps
     
     @timed
