@@ -21,7 +21,7 @@ import unittest2 as unittest
 import mythboxtest
 
 from mockito import Mock
-from mythbox.ui.recordings2 import Group, TITLE_SORT_BY, RecordingsWindow
+from mythbox.ui.recordings import Group, TITLE_SORT_BY, RecordingsWindow
 from mythbox.mythtv.domain import RecordedProgram
 from mythbox.mythtv.protocol import Protocol23056
 
