@@ -370,13 +370,13 @@ class HttpCachingFanartProvider(BaseFanartProvider):
         while not self.closeRequested:
             try:
                 if not self.workQueue.empty():
-                    log.debug('Work queue size: %d' % self.workQueue.qsize())
+                    log.debug('httpcache work queue size: %d' % self.workQueue.qsize())
                 workUnit = self.workQueue.get(block=True, timeout=1)
                 results = workUnit['results']
                 httpUrl = workUnit['httpUrl']
                 filePath = self.tryToCache(httpUrl)
                 if filePath:
-                    log.debug('Adding %s to results of size %d' % (filePath, len(results)))
+                    log.debug("Adding image %s as %s[%d]" % (filePath.split(os.sep)[-1], safe_str(workUnit['program'].title()), len(results)))
                     results.append(filePath)
             except Queue.Empty:
                 pass
@@ -387,24 +387,24 @@ class HttpCachingFanartProvider(BaseFanartProvider):
         posters = []
         if self.nextProvider:
             httpPosters = self.nextProvider.getPosters(program)
-            posters = self.cacheImages(httpPosters)
+            posters = self.cacheImages(httpPosters, program)
         return posters
 
     def getBanners(self, program):
         banners = []
         if self.nextProvider:
             httpBanners = self.nextProvider.getBanners(program)
-            banners = self.cacheImages(httpBanners)
+            banners = self.cacheImages(httpBanners, program)
         return banners
     
     def getBackgrounds(self, program):
         backgrounds = []
         if self.nextProvider:
             httpBackgrounds = self.nextProvider.getBackgrounds(program)
-            backgrounds = self.cacheImages(httpBackgrounds)
+            backgrounds = self.cacheImages(httpBackgrounds, program)
         return backgrounds
         
-    def cacheImages(self, httpUrls):
+    def cacheImages(self, httpUrls, program):
         '''
         Immediately retrieve the first URL and add the remaining to the 
         work queue so we can return *something* very quickly.
@@ -421,7 +421,7 @@ class HttpCachingFanartProvider(BaseFanartProvider):
         
         for nextUrl in remainingUrls:
             httpUrls.remove(nextUrl)
-            self.workQueue.put({'results' : filepaths, 'httpUrl' : nextUrl })
+            self.workQueue.put({'results' : filepaths, 'httpUrl' : nextUrl, 'program' : program })
         
         return filepaths
     

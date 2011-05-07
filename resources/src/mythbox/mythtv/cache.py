@@ -10,6 +10,9 @@ class DomainCache(object):
         self.bus.register(self)
         self.cache = {}
         
+    def clear(self):
+        self.cache = {}
+        
     def onEvent(self, event):
         if event['id'] == Event.SCHEDULE_CHANGED:
             self.getRecordingSchedules(invalidate=True, async=True)

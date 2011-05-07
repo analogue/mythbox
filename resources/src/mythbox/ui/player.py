@@ -267,7 +267,6 @@ class MythBookmarker(Bookmarker):
         self.program = program
         self.translator = translator
         #self.fps = None
-        log.debug('\n\n\n\t\t\txxxx\n\n\n')
                 
     def onPlayBackStarted(self):
         self._resumeFromBookmark()

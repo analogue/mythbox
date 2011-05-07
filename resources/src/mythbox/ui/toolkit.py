@@ -222,7 +222,7 @@ class WindowMixin(object):
         if listItem and name and not value is None:
             listItem.setProperty(name, value)
         else:
-            log.warn('Setting listitem with a None: listItem=%s name=%s value=%s' % (listItem, name, value))
+            log.debug('Setting listitem with a None: listItem=%s name=%s value=%s' % (listItem, name, value))
 
     def updateListItemProperty(self, listItem, name, value):
         self.setListItemProperty(listItem, name, value)
@@ -236,7 +236,7 @@ class WindowMixin(object):
         if self.win and name and not value is None:
             self.win.setProperty(name, value)
         else:
-            log.warn('Setting window property with a None: win=%s name=%s value=%s' % (self.win, name, value))
+            log.debug('Setting window property with a None: win=%s name=%s value=%s' % (self.win, name, value))
 
     def selectListItemAtIndex(self, listbox, index):
         ''''

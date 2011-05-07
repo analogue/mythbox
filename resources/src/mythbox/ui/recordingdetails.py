@@ -232,7 +232,7 @@ class RecordingDetailsWindow(BaseWindow):
     def render(self):
         self.renderDetail()
         self.renderThumbnail()
-        self.renderChannel()          # async
+        self.renderChannel()
         self.renderCommBreaks()       # async
         self.renderSeasonAndEpisode(self.program) # async
     
@@ -250,10 +250,8 @@ class RecordingDetailsWindow(BaseWindow):
         self.setWindowProperty('commBreaks', '...')     
         self.setWindowProperty('recordingNofM', self.t(m.RECORDING_N_OF_M) % (str(self.programIterator.index() + 1), str(self.programIterator.size())))  
 
-    @run_async
     @catchall        
     @inject_db
-    @coalesce
     def renderChannel(self):
         channels = filter(lambda c: c.getChannelId() == self.program.getChannelId(), self.db().getChannels())
         if channels:
