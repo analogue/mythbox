@@ -1,6 +1,5 @@
-xx/xx/2011 MythBox 1.0.3
+5/9/2011 - MythBox 1.0.3
 -----------------------------
-
   New
     - Recordings Window
         - Issue 128 - Recordings grouped by title
@@ -38,6 +37,7 @@ xx/xx/2011 MythBox 1.0.3
           
     - Removed dependency on ffmpeg for determining recording framerate 
     - Google Image Search updated with API key and size restrictions
+    - Slovak translations - tnx Juraj Belobrad
     
   Fixed
     - Issue 161 - schedule from TV Guide impossible if show category 
