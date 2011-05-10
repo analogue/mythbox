@@ -215,6 +215,12 @@ def setThumbnailImage(playlistItem, imagePath):
 
 class WindowMixin(object):
     
+    def getListItemProperty(self, listItem, name):
+        '''Workaround for default impl always returning a string even though value set was unicode.'''
+        p = listItem.getProperty(name)
+        if p is not None:
+            return p.decode('utf-8')
+        
     def setListItemProperty(self, listItem, name, value):
         """
         Convenience method to make sure None values don't get set on a listItem
