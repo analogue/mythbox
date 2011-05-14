@@ -31,6 +31,7 @@ from mythbox.ui.recordingdetails import RecordingDetailsWindow
 from mythbox.ui.toolkit import window_busy, BaseWindow, Action
 from mythbox.util import catchall_ui, run_async, timed, catchall, ui_locked2, coalesce, safe_str
 from mythbox.util import CyclingBidiIterator, formatSize, to_kwargs
+from mythbox.ui import toolkit
 
 log = logging.getLogger('mythbox.ui')
 
@@ -151,17 +152,34 @@ class RecordingsWindow(BaseWindow):
     @catchall_ui
     def onAction(self, action):
         id = action.getId()
+        
         if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
             self.closed = True
             self.saveSettings()
             self.close()
+        
         elif id in (Action.UP, Action.DOWN, Action.PAGE_UP, Action.PAGE_DOWN, Action.HOME, Action.END):
+
             if self.lastFocusId == ID_GROUPS_LISTBOX:
-                #log.debug('groups select!')
                 self.onGroupSelect()
+            
             elif self.lastFocusId == ID_PROGRAMS_LISTBOX:
-                #log.debug('title select!')
                 self.onTitleSelect()
+        
+        elif id == Action.ACTION_NEXT_ITEM:
+            log.debug('next: ' + toolkit.toString(action))
+            if self.lastFocusId == ID_GROUPS_LISTBOX:
+                self.selectListItemAtIndex(self.groupsListbox, self.groupsListbox.size()-1)
+            elif self.lastFocusId == ID_PROGRAMS_LISTBOX:
+                self.selectListItemAtIndex(self.programsListbox, self.programsListbox.size()-1)
+        
+        elif id == Action.ACTION_PREV_ITEM:
+            log.debug('prev: ' + toolkit.toString(action))
+            if self.lastFocusId == ID_GROUPS_LISTBOX:
+                self.selectListItemAtIndex(self.groupsListbox, 0)
+            elif self.lastFocusId == ID_PROGRAMS_LISTBOX:
+                self.selectListItemAtIndex(self.programsListbox, 0)
+        
         elif id == ID_GROUPS_LISTBOX:
             pass #log.debug('groups action!')
         else:
