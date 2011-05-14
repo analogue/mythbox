@@ -267,23 +267,6 @@ class RecordedProgramTest(unittest.TestCase):
         self.assertEqual(commBreaks, result)
         verify(self.conn).getCommercialBreaks(p)
 
-#    def test_getFrameRate_29point97(self):
-#        sandbox = tempfile.mkdtemp()
-#        self.addCleanup(shutil.rmtree, *[sandbox], **{'ignore_errors': True})
-#        
-#        data = pdata({'filename':'myth://192.168.1.11:6543/movie_29.97_fps.mpg', 'hostname':'localhost'})
-#        when(self.settings).getRecordingDirs().thenReturn([os.path.join(os.getcwd(), 'resources', 'test')])
-#        when(self.platform).getFFMpegPath().thenReturn('ffmpeg')
-#        when(self.platform).getScriptDataDir().thenReturn(sandbox)
-#        
-#        # Should invoke ffmpeg
-#        p = RecordedProgram(data, **self.pkwargs)
-#        self.assertEqual(29.97, p.getFrameRate())
-#        
-#        # TODO: Verify ffmpeg executable not invoked again (separate instance of a RecordedProgram)
-#        p2 = RecordedProgram(data, **self.pkwargs)
-#        self.assertEqual(29.97, p2.getFrameRate())            
-        
     def test_eq_True_self(self):
         p = RecordedProgram(pdata({'channum':'99', 'starttime':999999}), **self.pkwargs)
         self.assertEqual(p, p)

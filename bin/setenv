@@ -6,7 +6,6 @@ resources/src:\
 resources/test:\
 resources/itest:\
 resources/lib/mockito:\
-resources/lib/pyxcoder:\
 resources/lib/decorator:\
 resources/lib/odict:\
 resources/lib/bidict:\

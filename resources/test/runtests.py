@@ -40,7 +40,6 @@ import mythboxtest.test_feeds
 import mythboxtest.test_settings
 import mythboxtest.test_advanced
 import mythboxtest.mythtv.test_resolver
-import mythboxtest.test_pyxcoder
 
 def suite():
     mysuite = unittest.TestSuite()
@@ -67,7 +66,6 @@ def suite():
     mysuite.addTest(unittest.findTestCases(mythboxtest.test_settings))
     mysuite.addTest(unittest.findTestCases(mythboxtest.test_advanced))
     mysuite.addTest(unittest.findTestCases(mythboxtest.mythtv.test_resolver))
-    mysuite.addTest(unittest.findTestCases(mythboxtest.test_pyxcoder))
     return mysuite
 
 if __name__ == '__main__':
@@ -79,7 +77,7 @@ if __name__ == '__main__':
     
     import HTMLTestRunner 
     fp = file('mythbox_report.html', 'wb')
-    runner = HTMLTestRunner.HTMLTestRunner(stream=fp, title='MythBox Unit Test Results')
+    runner = HTMLTestRunner.HTMLTestRunner(stream=fp, verbosity=3, title='MythBox Unit Test Results')
     rc = runner.run(testSuite)
     
     print('runtests rc = %s' % rc.wasSuccessful())

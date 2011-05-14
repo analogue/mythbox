@@ -403,9 +403,6 @@ class MockPlatform(Platform):
     def isUnix(self):
         return True
     
-    def getFFMpegPath(self):
-        return ''
-
     def getDefaultRecordingsDir(self):
         return ''
 

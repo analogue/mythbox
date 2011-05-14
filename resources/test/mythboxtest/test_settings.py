@@ -37,7 +37,6 @@ class MythSettingsTest(unittest.TestCase):
         self.platform = Mock()
         self.bus = Mock()
         when(self.platform).getDefaultRecordingsDir().thenReturn('')
-        when(self.platform).getFFMpegPath().thenReturn('')
         self.sandbox = tempfile.mkdtemp(prefix='mythbox')
         
     def tearDown(self):
