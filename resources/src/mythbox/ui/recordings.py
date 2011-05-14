@@ -123,15 +123,19 @@ class RecordingsWindow(BaseWindow):
             
     @catchall_ui
     def onClick(self, controlId):
+        
         if controlId in (ID_GROUPS_LISTBOX, ID_PROGRAMS_LISTBOX,): 
             self.goRecordingDetails()
+        
         elif controlId == ID_REFRESH_BUTTON:
             self.lastSelected = self.programsListbox.getSelectedPosition()
             self.refresh(force=True)
+        
         elif controlId == ID_SORT_BY_BUTTON:
             keys = self.GROUP_SORT_BY.keys()
             self.groupSortBy = keys[(keys.index(self.groupSortBy) + 1) % len(keys)]
             self.applyGroupSort()
+        
         else:
             log.debug('uncaught onClick %s' % controlId)
 
@@ -166,20 +170,17 @@ class RecordingsWindow(BaseWindow):
             elif self.lastFocusId == ID_PROGRAMS_LISTBOX:
                 self.onTitleSelect()
         
-        elif id == Action.ACTION_NEXT_ITEM:
-            log.debug('next: ' + toolkit.toString(action))
+        elif id in (Action.ACTION_NEXT_ITEM, Action.ACTION_PREV_ITEM,):
+            log.debug('next/prev: ' + toolkit.toString(action))
+            
             if self.lastFocusId == ID_GROUPS_LISTBOX:
-                self.selectListItemAtIndex(self.groupsListbox, self.groupsListbox.size()-1)
+                self.selectListItemAtIndex(self.groupsListbox, [0, self.groupsListbox.size()-1][id == Action.ACTION_NEXT_ITEM])
+                self.onGroupSelect()
+            
             elif self.lastFocusId == ID_PROGRAMS_LISTBOX:
-                self.selectListItemAtIndex(self.programsListbox, self.programsListbox.size()-1)
-        
-        elif id == Action.ACTION_PREV_ITEM:
-            log.debug('prev: ' + toolkit.toString(action))
-            if self.lastFocusId == ID_GROUPS_LISTBOX:
-                self.selectListItemAtIndex(self.groupsListbox, 0)
-            elif self.lastFocusId == ID_PROGRAMS_LISTBOX:
-                self.selectListItemAtIndex(self.programsListbox, 0)
-        
+                self.selectListItemAtIndex(self.programsListbox, [0, self.programsListbox.size()-1][id == Action.ACTION_NEXT_ITEM])
+                self.onTitleSelect()
+            
         elif id == ID_GROUPS_LISTBOX:
             pass #log.debug('groups action!')
         else:
