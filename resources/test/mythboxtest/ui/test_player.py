@@ -24,7 +24,7 @@ import unittest2 as unittest
 
 from mockito import Mock, when, verify, any, times
 from mythbox.mythtv.domain import CommercialBreak
-from mythbox.ui.player import EdlCommercialSkipper, PositionTracker, TrackerSample, \
+from mythbox.ui.player import PositionTracker, TrackerSample, \
     TrackingCommercialSkipper, SLEEP_MILLIS
 
 log = logging.getLogger('mythbox.unittest')
@@ -81,46 +81,6 @@ class MockPlayer(object):
         
     def getTime(self):
         return time.time() - self.timestamp
-
-
-class EdlCommercialSkipperTest(unittest.TestCase):
-    
-    def test_constructor_SkipFileCreatedForRecordingWithCommercials(self):
-        # Setup
-        player = Mock()
-        program = Mock()
-        commBreaks = [CommercialBreak(100,200), 
-                      CommercialBreak(1000.23,1100.99), 
-                      CommercialBreak(5000.123, 6000.456)]
-        when(program).getCommercials().thenReturn(commBreaks)
-        when(program).getLocalPath().thenReturn(os.path.join(tempfile.gettempdir(), 'movie.mpg'))
-
-        # Test
-        EdlCommercialSkipper(player, program, Mock())
-        
-        # Verify
-        edlFile = os.path.join(tempfile.gettempdir(), 'movie.edl')
-        self.addCleanup(os.remove, edlFile)
-        self.assertTrue(os.path.isfile(edlFile))
-        f = open(edlFile, 'r')
-        self.assertEqual('100.00 200.00 0', f.readline().strip())
-        self.assertEqual('1000.23 1100.99 0', f.readline().strip())
-        self.assertEqual('5000.12 6000.46 0', f.readline().strip())
-        f.close()
-
-    def test_constructor_SkipFileNotCreatedForRecordingWithNoCommercials(self):
-        # Setup
-        player = Mock()
-        program = Mock()
-        when(program).getCommercials().thenReturn([])
-        when(program).getLocalPath().thenReturn(os.path.join(tempfile.gettempdir(), 'movie2.mpg'))
-
-        # Test
-        EdlCommercialSkipper(player, program, Mock())
-        
-        # Verify
-        edlFile = os.path.join(tempfile.gettempdir(), 'movie2.edl')
-        self.assertFalse(os.path.isfile(edlFile))
 
 
 class TrackingCommercialSkipperTest(unittest.TestCase):
