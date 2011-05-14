@@ -126,7 +126,7 @@ class RecordingsWindow(BaseWindow):
             self.goRecordingDetails()
         elif controlId == ID_REFRESH_BUTTON:
             self.lastSelected = self.programsListbox.getSelectedPosition()
-            self.refresh()
+            self.refresh(force=True)
         elif controlId == ID_SORT_BY_BUTTON:
             keys = self.GROUP_SORT_BY.keys()
             self.groupSortBy = keys[(keys.index(self.groupSortBy) + 1) % len(keys)]
@@ -187,9 +187,9 @@ class RecordingsWindow(BaseWindow):
                 log.debug('--- PRECACHE %d THUMBNAILS END ---' % len(self.programs))
 
     @window_busy
-    @inject_conn
-    def refresh(self):
-        self.programs = self.conn().getAllRecordings()
+    def refresh(self, force=False):
+        self.programs = self.domainCache.getAllRecordings(force=force)
+        
         if not self.programs:
             xbmcgui.Dialog().ok(self.t(m.INFO), self.t(m.NO_RECORDINGS_FOUND))
             self.close()

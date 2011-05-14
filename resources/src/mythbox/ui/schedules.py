@@ -120,7 +120,7 @@ class SchedulesWindow(BaseWindow):
     @inject_db
     def refresh(self, force=False):
         self.cacheChannels()
-        self.schedules = self.domainCache.getRecordingSchedules(invalidate=force, async=False)
+        self.schedules = self.domainCache.getRecordingSchedules(force=force)
         self.applySort()
         self.render()
         
