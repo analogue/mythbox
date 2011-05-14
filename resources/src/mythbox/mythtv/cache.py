@@ -37,6 +37,7 @@ class DomainCache(object):
         
         if event['id'] == Event.SCHEDULE_CHANGED:
             self.getRecordingSchedules(force=True, lazy=True)
+            self.getUpcomingRecordings(force=True, lazy=True)
             
         elif event['id'] == Event.RECORDING_DELETED:
             self.getAllRecordings(force=True, lazy=True)
@@ -54,6 +55,12 @@ class DomainCache(object):
     @inject_conn
     def getAllRecordings(self, force=False, lazy=False):
         return self.process('allRecordings', self.conn().getAllRecordings, force, lazy)
+
+    @synchronized
+    @inject_conn
+    def getUpcomingRecordings(self, force=False, lazy=False):
+        return self.process('upcomingRecordings', self.conn().getUpcomingRecordings, force, lazy)
+    
     
     def process(self, key, func, force, lazy):
         if force:
