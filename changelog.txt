@@ -1,3 +1,24 @@
+x/x/2011 - MythBox 1.0.4
+-----------------------------
+  New
+    - Recordings Window
+        - |<< and >>| buttons on MCE remotes function as HOME/END keys 
+            
+    - Recording Schedules Window 
+
+    - Recording Schedule Dialog
+
+    - TV Guide Window
+
+    - Watch TV Window
+
+    - Upcoming Recordings Window    
+
+    - Settings Window
+    
+  Fixed
+    - Issue 170 - Programs no longer sorted by title after a program is deleted
+
 5/9/2011 - MythBox 1.0.3
 -----------------------------
   New
