@@ -49,7 +49,9 @@ class HomeWindow(BaseWindow):
         [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'platform', 'fanArt', 'cachesByName', 'bus', 'feedHose',)]
         [setattr(self,k,v) for k,v in self.cachesByName.iteritems() if k in ('mythChannelIconCache', 'mythThumbnailCache', 'httpCache', 'domainCache')]
 
-        self.deps = kwargs
+        # merge cachesByName into deps dict
+        self.deps = dict(kwargs.items() + self.cachesByName.items())
+
         self.lastFocusId = None
         self.shutdownPending = False
         self.bus.register(self)
