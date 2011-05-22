@@ -36,14 +36,15 @@ class RecordingDetailsWindow(BaseWindow):
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
         [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'platform', 'fanArt', 'cachesByName', 'programIterator',)]
-        [setattr(self,k,v) for k,v in self.cachesByName.iteritems() if k in ('mythChannelIconCache', 'mythThumbnailCache',)]
+        [setattr(self,k,v) for k,v in self.cachesByName.iteritems() if k in ('mythChannelIconCache', 'mythThumbnailCache', 'domainCache')]
         
         self.t = self.translator.get
         self.program = self.programIterator.current() 
         self.isDeleted = False
         self.initialized = False
         self.streaming = self.settings.getBoolean('streaming_enabled')
-            
+        self.channels = None
+        
     @catchall_ui
     def onInit(self):
         if not self.initialized:
@@ -231,8 +232,8 @@ class RecordingDetailsWindow(BaseWindow):
     @window_busy
     def render(self):
         self.renderDetail()
-        self.renderThumbnail()
         self.renderChannel()
+        self.renderThumbnail()
         self.renderCommBreaks()       # async
         self.renderSeasonAndEpisode(self.program) # async
     
@@ -253,9 +254,13 @@ class RecordingDetailsWindow(BaseWindow):
     @catchall        
     @inject_db
     def renderChannel(self):
-        channels = filter(lambda c: c.getChannelId() == self.program.getChannelId(), self.db().getChannels())
-        if channels:
-            icon = self.mythChannelIconCache.get(channels.pop())
+        if not self.channels:
+            self.channels = {}
+            for c in self.domainCache.getChannels():
+                self.channels[c.getChannelId()] = c
+            
+        if self.program.getChannelId() in self.channels:
+            icon = self.mythChannelIconCache.get(self.channels[self.program.getChannelId()])
             if icon:
                 self.setWindowProperty('channelIcon', icon)
 
