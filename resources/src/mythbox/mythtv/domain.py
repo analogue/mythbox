@@ -1729,7 +1729,7 @@ class Tuner(object):
     """MythTV Tuner (aka encoder, recorder, card). Maps to the mythtv capturecard 
     database table."""
 
-    def __init__(self, tunerId, hostname, signalTimeout, channelTimeout, tunerType='', conn=None, db=None, translator=None):
+    def __init__(self, tunerId, hostname, signalTimeout, channelTimeout, tunerType, domainCache, conn=None, db=None, translator=None):
         """
         @param tunerId: unique tunerid as int
         @param hostname: physical hostname where tuner is located as string
@@ -1741,6 +1741,7 @@ class Tuner(object):
         self.hostname = hostname
         self.signalTimeout = signalTimeout
         self.channelTimeout = channelTimeout
+        self.domainCache = domainCache
         self.tunerType = tunerType  # HDHOMERUN, HDPVR, etc
         self._conn = conn
         self._db = db
@@ -1849,7 +1850,6 @@ class Tuner(object):
         result = filter(lambda c: c.getChannelNumber() == channel.getChannelNumber(), self.getChannels())
         return len(result) == 1
     
-    @inject_db
     def getChannels(self):
         """
         @return: Channels this tuner can view
@@ -1857,7 +1857,7 @@ class Tuner(object):
         @attention: Cached value returned after first call.
         """
         if self._channels is None:
-            self._channels = filter(lambda c: c.getTunerId() == self.tunerId, self.db().getChannels())
+            self._channels = filter(lambda c: c.getTunerId() == self.tunerId, self.domainCache.getChannels())
         return self._channels
     
     @inject_conn

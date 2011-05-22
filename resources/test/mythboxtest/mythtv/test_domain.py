@@ -346,7 +346,8 @@ class TunerTest(unittest.TestCase):
         self.db = Mock()
         self.conn = Mock()
         self.translator = Mock()
-        self.tuner = Tuner(4, 'mrbun', 1000, 6000, 'HDHOMERUN', self.conn, self.db, self.translator)
+        self.domainCache = Mock()
+        self.tuner = Tuner(4, 'mrbun', 1000, 6000, 'HDHOMERUN', self.domainCache, self.conn, self.db, self.translator)
         
     def test_toString(self):
         log.debug('tuner = %s'%self.tuner)
@@ -382,7 +383,7 @@ class TunerTest(unittest.TestCase):
             channels.append(Channel(
                 {'chanid':x, 'channum':'%d'%x, 'callsign':'WXYZ', 
                  'name':'NBC9', 'icon':'nbc.jpg', 'cardid':4}))
-        when(self.conn).getChannels().thenReturn(channels)
+        when(self.domainCache).getChannels().thenReturn(channels)
         self.assertTrue(self.tuner.hasChannel(Channel(dict(channum='3'))))
     
     def test_hasChannel_False(self):
@@ -391,7 +392,7 @@ class TunerTest(unittest.TestCase):
             channels.append(Channel(
                 {'chanid':x, 'channum':'%d'%x, 'callsign':'WXYZ', 
                  'name':'NBC9', 'icon':'nbc.jpg', 'cardid':4}))
-        when(self.conn).getChannels().thenReturn(channels)
+        when(self.domainCache).getChannels().thenReturn(channels)
         self.assertFalse(self.tuner.hasChannel(Channel(dict(channum='6'))))
         
     def test_getChannels_CachingWorks(self):
@@ -400,12 +401,13 @@ class TunerTest(unittest.TestCase):
             channels.append(Channel(
                 {'chanid':x, 'channum':'%d'%x, 'callsign':'WXYZ', 
                  'name':'NBC9', 'icon':'nbc.jpg', 'cardid':4}))
-        when(self.conn).getChannels().thenReturn(channels)
+
+        when(self.domainCache).getChannels().thenReturn(channels)
         
         for x in range(10):
             channels = self.tuner.getChannels()
         
-        verify(self.conn, 1).getChannels()
+        verify(self.domainCache, 1).getChannels()
 
 
 class CommercialBreakTest(unittest.TestCase):
