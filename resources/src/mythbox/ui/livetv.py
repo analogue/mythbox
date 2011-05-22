@@ -257,7 +257,7 @@ class LiveTvWindow(BaseWindow):
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
         [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'platform', 'fanArt', 'cachesByName',)]
-        [setattr(self,k,v) for k,v in self.cachesByName.iteritems() if k in ('mythChannelIconCache',)]
+        [setattr(self,k,v) for k,v in self.cachesByName.iteritems() if k in ('mythChannelIconCache', 'domainCache')]
          
         self.channels = None                     # Channels sorted and merged (if multiple tuners)
         self.channelsById = None                 # {int channelId:Channel}
@@ -348,10 +348,9 @@ class LiveTvWindow(BaseWindow):
             log.error(safe_str(e))
             xbmcgui.Dialog().ok(self.translator.get(m.ERROR), '', safe_str(e))
 
-    @inject_db
     def loadChannels(self):
         if self.channels == None:
-            self.channels = Channel.mergeChannels(self.db().getChannels())
+            self.channels = Channel.mergeChannels(self.domainCache.getChannels())
             self.channels.sort(key=Channel.getSortableChannelNumber)
             self.channelsById = odict()
             for c in self.channels:
