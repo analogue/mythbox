@@ -63,9 +63,10 @@ class MythDatabaseFactory(PoolableFactory):
     def __init__(self, *args, **kwargs):
         self.settings = kwargs['settings']
         self.translator = kwargs['translator']
+        self.domainCache = kwargs['domainCache']
     
     def create(self):
-        db = MythDatabase(self.settings, self.translator)
+        db = MythDatabase(self.settings, self.translator, self.domainCache)
         return db
     
     def destroy(self, db):
@@ -99,17 +100,6 @@ def inject_db(func, *args, **kwargs):
         import threading
         threadlocals[tlsKey] = threading.local()
         ilog.debug('Allocating threading.local() to thread %d'  % tlsKey)
-                    
-#    try:
-#        self.db
-#        if self.db == None:
-#            raise AttributeError # force allocation
-#        ilog.debug('db accessor already bolted on')
-#    except AttributeError:
-#        ilog.debug('bolting on db accessor')
-#        def db_accessor():
-#            return threadlocals[thread.get_ident()].db 
-#        self.db = db_accessor  
 
     # Bolt-on getter method so client can access db.
     def db_accessor():
@@ -167,8 +157,8 @@ class MythDatabase(object):
         self._master = None
         self._slaves = None
         
-        if len(args) == 2:
-            self.initWithSettings(args[0], args[1])
+        if len(args) == 3:
+            self.initWithSettings(args[0], args[1], args[2])
         else:
             self.initWithDict(args[0])
     
@@ -185,9 +175,10 @@ class MythDatabase(object):
             port = int(self.settings['mysql_port']),
             connection_timeout = 60)
                 
-    def initWithSettings(self, settings, translator):
+    def initWithSettings(self, settings, translator, domainCache):
         self.settings = settings
         self.translator = translator
+        self.domainCache = domainCache
 
         log.debug("Initializing myth database connection")
         self.conn = MySQLdb.connect(
@@ -482,6 +473,7 @@ class MythDatabase(object):
                     int(row['signal_timeout']),
                     int(row['channel_timeout']),
                     row['cardtype'],
+                    domainCache=self.domainCache,
                     conn=None,
                     db=self,   # TODO: Should be None. self is for unit tests
                     translator=self.translator)) 

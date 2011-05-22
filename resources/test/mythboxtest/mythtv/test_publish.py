@@ -48,7 +48,8 @@ class MythEventPublisherTest(unittest.TestCase):
         self.settings.put('mysql_password', privateConfig.get('mysql_password'))
         self.settings.put('paths_recordedprefix', privateConfig.get('paths_recordedprefix'))
         self.bus = EventBus()
-        pools['dbPool']   = Pool(MythDatabaseFactory(settings=self.settings, translator=self.translator))
+        self.domainCache = Mock()
+        pools['dbPool']   = Pool(MythDatabaseFactory(settings=self.settings, translator=self.translator, domainCache=self.domainCache))
         pools['connPool'] = Pool(ConnectionFactory(settings=self.settings, translator=self.translator, platform=self.platform, bus=self.bus))
         
     def tearDown(self):

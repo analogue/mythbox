@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -41,6 +41,7 @@ class MythChannelIconResolverTest(unittest.TestCase):
     def setUp(self):
         self.platform = getPlatform()
         self.translator = Mock()
+        self.domainCache = Mock()
         self.settings = MythSettings(self.platform, self.translator)
         
         privateConfig = OnDemandConfig()
@@ -50,7 +51,7 @@ class MythChannelIconResolverTest(unittest.TestCase):
         self.settings.setMySqlUser(privateConfig.get('mysql_user'))  
         self.settings.setMySqlPassword(privateConfig.get('mysql_password'))
         
-        self.db = MythDatabase(self.settings, self.translator)
+        self.db = MythDatabase(self.settings, self.translator, self.domainCache)
         self.bus = EventBus()
         self.conn = Connection(self.settings, self.translator, self.platform, self.bus, self.db)
 
@@ -108,6 +109,7 @@ class MythThumbnailResolverTest(unittest.TestCase):
     def setUp(self):
         self.platform = getPlatform()
         self.translator = Mock()
+        self.domainCache = Mock()
         self.settings = MythSettings(self.platform, self.translator)
         
         privateConfig = OnDemandConfig()
@@ -119,7 +121,7 @@ class MythThumbnailResolverTest(unittest.TestCase):
         
         log.debug('%s' % self.settings)
         
-        self.db = MythDatabase(self.settings, self.translator)
+        self.db = MythDatabase(self.settings, self.translator, self.domainCache)
         self.bus = EventBus()
         self.conn = Connection(self.settings, self.translator, self.platform, self.bus, self.db)
 

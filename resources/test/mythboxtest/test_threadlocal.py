@@ -21,6 +21,7 @@ import time
 import unittest2 as unittest
 import util_mock
 
+from mockito import Mock
 from mythbox import pool
 from mythbox.mythtv.db import inject_db, MythDatabaseFactory
 from mythbox.platform import Platform
@@ -77,6 +78,7 @@ class ThreadLocalTest(unittest.TestCase):
         langInfo = util_mock.XBMCLangInfo(p)
         translator = util_mock.Translator(p, langInfo)
         settings = MythSettings(p, translator)
+        domainCache = Mock()
         
         privateConfig = OnDemandConfig()
         settings.put('mysql_host', privateConfig.get('mysql_host'))
@@ -84,7 +86,7 @@ class ThreadLocalTest(unittest.TestCase):
         settings.put('mysql_user', privateConfig.get('mysql_user'))  
         settings.put('mysql_password', privateConfig.get('mysql_password'))
         
-        self.dbPool = pool.pools['dbPool'] = pool.Pool(MythDatabaseFactory(settings=settings, translator=translator))
+        self.dbPool = pool.pools['dbPool'] = pool.Pool(MythDatabaseFactory(settings=settings, translator=translator, domainCache=domainCache))
     
     def tearDown(self):
         self.dbPool.shutdown()

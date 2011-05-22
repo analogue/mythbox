@@ -47,7 +47,8 @@ class MythDatabaseTest(unittest.TestCase):
         self.settings.put('mysql_database', privateConfig.get('mysql_database'))
         self.settings.put('mysql_user', privateConfig.get('mysql_user'))  
         self.settings.put('mysql_password', privateConfig.get('mysql_password'))
-        self.db = MythDatabase(self.settings, self.translator)
+        self.domainCache = Mock()
+        self.db = MythDatabase(self.settings, self.translator, self.domainCache)
 
     def tearDown(self):
         try:
@@ -132,11 +133,12 @@ class MythDatabaseTest(unittest.TestCase):
         self.assertTrue(len(tuners) > 0, 'No tuners found')
         for i, tuner in enumerate(tuners):
             log.debug('%d - %s' %(i+1, tuner))
-            self.assertTrue(not tuner.tunerId is None)
-            self.assertTrue(not tuner.hostname is None)
-            self.assertTrue(not tuner.signalTimeout is None)
-            self.assertTrue(not tuner.channelTimeout is None)
-
+            self.assertIsNotNone(tuner.tunerId)
+            self.assertIsNotNone(tuner.hostname)
+            self.assertIsNotNone(tuner.signalTimeout)
+            self.assertIsNotNone(tuner.channelTimeout)
+            self.assertIsNotNone(tuner.domainCache)
+            
     def test_getMythSetting_KeyOnly_Found(self):
         s = self.db.getMythSetting('mythfilldatabaseLastRunStatus')
         log.debug('mythfillstatus = %s' % s)
