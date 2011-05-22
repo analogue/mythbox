@@ -61,7 +61,11 @@ class DomainCache(object):
     def getUpcomingRecordings(self, force=False, lazy=False):
         return self.process('upcomingRecordings', self.conn().getUpcomingRecordings, force, lazy)
     
-    
+    @synchronized
+    @inject_db
+    def getChannels(self, force=False, lazy=False):
+        return self.process('channels', self.db().getChannels, force, lazy)
+     
     def process(self, key, func, force, lazy):
         if force:
             if key in self.cache:
