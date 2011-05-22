@@ -1849,7 +1849,7 @@ class Tuner(object):
         result = filter(lambda c: c.getChannelNumber() == channel.getChannelNumber(), self.getChannels())
         return len(result) == 1
     
-    @inject_conn
+    @inject_db
     def getChannels(self):
         """
         @return: Channels this tuner can view
@@ -1857,7 +1857,7 @@ class Tuner(object):
         @attention: Cached value returned after first call.
         """
         if self._channels is None:
-            self._channels = filter(lambda c: c.getTunerId() == self.tunerId, self.conn().getChannels())
+            self._channels = filter(lambda c: c.getTunerId() == self.tunerId, self.db().getChannels())
         return self._channels
     
     @inject_conn
