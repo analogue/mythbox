@@ -26,7 +26,6 @@ import xbmc
 import xbmcgui
 import mythbox.msg as m
 
-from mythbox.mythtv.conn import inject_conn
 from mythbox.ui.recordingdetails import RecordingDetailsWindow
 from mythbox.ui.toolkit import window_busy, BaseWindow, Action
 from mythbox.util import catchall_ui, run_async, timed, catchall, ui_locked2, coalesce, safe_str
@@ -468,8 +467,12 @@ class RecordingsWindow(BaseWindow):
     def lookupBackground(self, listItem, p):
         path = self.sameBackground(p)
         if path is not None:
-            #log.debug('lookupBackground setting %s to %s' % (safe_str(p.title()), path))
             self.updateListItemProperty(listItem, 'background', path)
+            if log.isEnabledFor(logging.DEBUG):
+                try:
+                    self.setListItemProperty(listItem, 'wallpaperSize', formatSize(os.path.getsize(path)/1000))
+                except:
+                    pass
 
     @run_async
     @catchall
