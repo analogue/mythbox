@@ -201,15 +201,27 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
             bucket = {'title':program.title()}
             self.struckOut[key] = bucket
         bucket['timestamp'] = datetime.datetime.now()
-    
+
     def hasPosters(self, program):
-        return False # return self.hasStruckOut(self.createKey('getPosters', program))
+        return self._hasStrikeOutable('getPosters', 'hasPosters', program)
     
     def hasBanners(self, program):
-        return False # return self.hasStruckOut(self.createKey('getBanners', program))
+        return self._hasStrikeOutable('getBanners', 'hasBanners', program)
 
     def hasBackgrounds(self, program):
-        return False # return self.hasStruckOut(self.createKey('getBackgrounds', program))
+        return self._hasStrikeOutable('getBackgrounds', 'hasBackgrounds', program)
+
+    def _hasStrikeOutable(self, getterMethodName, hasMethodName, program):
+        key = self.createKey(getterMethodName, program)
+        if self.hasStruckOut(key):
+            if self.nextProvider:
+                hasMethod = getattr(self.nextProvider, hasMethodName)
+                return hasMethod(program)
+            else:
+                return False
+        else:
+            hasMethod = getattr(self.delegate, hasMethodName)
+            return hasMethod(program)
 
     @chain
     def getPosters(self, program):
@@ -243,6 +255,7 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
         return season, episode 
 
     def clear(self):
+        
         super(OneStrikeAndYoureOutFanartProvider, self).clear()
         self.delegate.clear()
 
