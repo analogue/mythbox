@@ -349,7 +349,7 @@ class LiveTvWindow(BaseWindow):
             xbmcgui.Dialog().ok(self.translator.get(m.ERROR), '', safe_str(e))
 
     def loadChannels(self):
-        if self.channels == None:
+        if self.channels is None:
             self.channels = Channel.mergeChannels(self.domainCache.getChannels())
             self.channels.sort(key=Channel.getSortableChannelNumber)
             self.channelsById = odict()

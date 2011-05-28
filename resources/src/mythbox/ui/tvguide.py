@@ -137,12 +137,11 @@ class TvGuideWindow(ui.BaseWindow):
         if event['id'] == Event.SCHEDULER_RAN:
             self._upcomingStale = True
             
-    @inject_conn            
     def upcomingByProgram(self):
         if self._upcomingStale:
             self._upcomingStale = False
             self._upcomingByProgram = {} 
-            for p in self.conn().getUpcomingRecordings(filter=Upcoming.SCHEDULED):
+            for p in self.domainCache.getUpcomingRecordings():
                 self._upcomingByProgram[p] = p
         return self._upcomingByProgram
         

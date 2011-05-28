@@ -52,7 +52,7 @@ class UpcomingRecordingsWindow(BaseWindow):
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
         [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings','translator','platform','fanArt','cachesByName', 'upcoming', )]
-        self.mythChannelIconCache = self.cachesByName['mythChannelIconCache']
+        [setattr(self,k,v) for k,v in self.cachesByName.iteritems() if k in ('mythChannelIconCache','domainCache', )]
         
         self.programs = []                       # [RecordedProgram]
         self.channelsById = None                 # {int:Channel}
@@ -128,24 +128,19 @@ class UpcomingRecordingsWindow(BaseWindow):
 
     @inject_db
     def cacheChannels(self):
-        if not self.channelsById:
-            self.channelsById = {}
-            for channel in self.db().getChannels():
-                self.channelsById[channel.getChannelId()] = channel
+        if self.channelsById is None:
+            self.channelsById = dict([(c.getChannelId(),c) for c in self.db().getChannels()])
 
     @inject_db
     def cacheTuners(self):
-        if not self.tunersById:
-            self.tunersById = {}
-            for tuner in self.db().getTuners():
-                self.tunersById[tuner.tunerId] = tuner
+        if self.tunersById is None:
+            self.tunersById = dict([(t.tunerId, t) for t in self.db().getTuners()])
     
     @window_busy  
-    @inject_conn           
     def refresh(self):
         self.cacheChannels()
         self.cacheTuners()
-        self.programs = self.conn().getUpcomingRecordings()
+        self.programs = self.domainCache.getUpcomingRecordings()
         self.applySort()
         
     @inject_conn

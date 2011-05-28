@@ -1931,13 +1931,12 @@ class Tuner(object):
         h = '%d' % int(time.strftime('%I', lt)) 
         return '%s%s' % (h, time.strftime(':%M %p', lt))                    
             
-    @inject_conn    
     def getNextScheduledRecording(self):
         """
         @return: Next show that is scheduled to be recorded by this tuner
         @rtype: RecordedProgram or None
         """
-        upcoming = self.conn().getUpcomingRecordings(filter=Upcoming.SCHEDULED)
+        upcoming = self.domainCache.getUpcomingRecordings()
         upcoming = filter(lambda x: x.getTunerId() == self.tunerId, upcoming)
         upcoming.sort(key=lambda x: x.starttimeAsTime())
         if len(upcoming) > 0:
