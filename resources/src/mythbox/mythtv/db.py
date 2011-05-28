@@ -19,7 +19,7 @@
 import datetime
 import logging
 import odict
-from mythbox.mythtv.enums import RecordingStatus
+from mythbox.mythtv.enums import RecordingStatus, JobStatus
 
 try:
     # native mysql client libs
@@ -668,6 +668,37 @@ class MythDatabase(object):
         self.cursor.execute(sql, args)
         log.debug('Row count = %s' % self.cursor.rowcount)
 
+    
+    @inject_cursor
+    def addJob(self, job):
+        '''Add a new job to the job queue'''        
+        sql = """
+            insert into jobqueue (
+                id,
+                chanid,
+                starttime,
+                type,
+                insertttime,
+                hostname, 
+                status,
+                comment, 
+                schedruntime) 
+            values (%%s, %%s, %%s, %%s, %%s, %%s, %%s, %%s, %%s)
+            """
+            
+        log.debug("sql = %s" % safe_str(sql))
+        args = (u'NULL', job.channelId, job.startTime, job.type, job.insertTime, u'', JobStatus.QUEUED, u'', datetime.datetime.now())
+
+        if log.isEnabledFor(logging.DEBUG):
+            for i,arg in enumerate(args):
+                log.debug('Positional arg %d: %s' % (i,safe_str(arg)))
+
+        c = self.conn.cursor(*cursorArgs)       
+        try:
+            c.execute(sql, args)
+        finally:
+            c.close()
+    
     @inject_cursor
     def getJobs(self, program=None, jobType=None, jobStatus=None):
         """

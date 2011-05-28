@@ -1956,6 +1956,24 @@ class Tuner(object):
 class Job(object):
     """Represents a scheduled commercial flagging, transcoding, or user defined job."""
 
+    @classmethod
+    def fromProgram(cls, program, jobType):
+        job = Job(
+            id=None,
+            channelId=program.getChannelId(),
+            startTime=program.starttimeAsTime(),
+            insertTime=datetime.datetime.now(),
+            jobType=jobType,
+            cmds=None,
+            flags=None,
+            jobStatus=JobStatus.QUEUED,
+            statusTime=None,
+            hostname=u'',
+            comment=u'',
+            scheduledRunTime=datetime.datetime.now(),
+            translator=program.translator)
+        return job
+        
     def __init__(self, id, channelId, startTime, insertTime, 
                  jobType, cmds, flags, jobStatus, statusTime,
                  hostname, comment, scheduledRunTime, translator, 
