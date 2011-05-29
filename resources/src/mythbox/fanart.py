@@ -181,10 +181,10 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
             now = datetime.datetime.now()
             diff = now - ts
             if diff < datetime.timedelta(days=7):
-                log.debug('Strikeout stands for %s:%s' % (key,safe_str(bucket['title'])))
+                #log.debug('Strikeout stands for %s:%s' % (key,safe_str(bucket['title'])))
                 return True
             
-            log.debug('Strikeout expired for %s:%s' % (key,safe_str(bucket['title'])))
+            log.debug('** Strikeout expired for %s:%s' % (key,safe_str(bucket['title'])))
             del self.struckOut[key]
             return False
         else:

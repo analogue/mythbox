@@ -22,7 +22,7 @@ import mythbox.msg as m
 
 from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.conn import inject_conn
-from mythbox.mythtv.domain import StatusException
+from mythbox.mythtv.domain import StatusException, Job
 from mythbox.mythtv.enums import JobType, JobStatus
 from mythbox.ui.player import MountedPlayer, StreamingPlayer, NoOpCommercialSkipper, TrackingCommercialSkipper
 from mythbox.ui.schedules import ScheduleDialog
@@ -67,7 +67,8 @@ class RecordingDetailsWindow(BaseWindow):
                 self.rerecordButton.getId()    : self.rerecord,
                 self.firstInQueueButton.getId(): self.moveToFrontOfJobQueue,
                 self.refreshButton.getId()     : self.refresh,
-                self.editScheduleButton.getId(): self.editSchedule
+                self.editScheduleButton.getId(): self.editSchedule,
+                257:self.goAdvanced
             }
             self.render()
         
@@ -164,6 +165,19 @@ class RecordingDetailsWindow(BaseWindow):
             p = MountedPlayer(**deps)
             p.playRecording(TrackingCommercialSkipper(p, self.program, self.translator))
             del p
+        
+    @inject_db
+    def goAdvanced(self):
+        job = Job.fromProgram(self.program, JobType.USERJOB & JobType.USERJOB1)
+        self.db().addJob(job)
+        xbmcgui.Dialog().ok('User Job', 'Queued user job 1 with id %s' % job.id)
+        
+#        advancedDialog = xbmcgui.WindowXMLDialog(
+#            'mythbox_recording_advanced.xml', 
+#            self.platform.getScriptDir(), 
+#            forceFallback=True)
+#        advancedDialog.doModal()
+#        del advancedDialog
         
     @inject_db
     def editSchedule(self):

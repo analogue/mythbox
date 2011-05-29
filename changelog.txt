@@ -16,6 +16,8 @@ x/x/2011 - MythBox 1.0.4
 
     - Settings Window
     
+    - mysql-connector-python 0.3.2
+    
   Fixed
     - Issue 170 - Programs no longer sorted by title after a program is deleted
 

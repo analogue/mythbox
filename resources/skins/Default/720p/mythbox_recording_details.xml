@@ -330,6 +330,18 @@
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
         </control>
+
+        <control type="button" id="257">
+            <description>advanced</description>
+            <label>SCRIPT440</label>
+            <width>285</width>
+            <align>left</align>
+            <textoffsetx>40</textoffsetx>
+            <texturefocus>button_focus.png</texturefocus>
+            <texturenofocus>button_nofocus.png</texturenofocus>
+            <pulseonselect>true</pulseonselect>
+        </control>
+
     </control>
 
 
