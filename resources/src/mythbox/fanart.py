@@ -93,6 +93,15 @@ class BaseFanartProvider(object):
 
 class NoOpFanartProvider(BaseFanartProvider):
 
+    def hasPosters(self, program):
+        return False
+    
+    def hasBanners(self, program):
+        return False
+    
+    def hasBackgrounds(self, program):
+        return False
+    
     def getPosters(self, program):
         return []
 

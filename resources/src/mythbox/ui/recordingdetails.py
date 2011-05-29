@@ -28,6 +28,7 @@ from mythbox.ui.player import MountedPlayer, StreamingPlayer, NoOpCommercialSkip
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import Action, BaseWindow, window_busy
 from mythbox.util import safe_str, catchall, catchall_ui, run_async, coalesce, to_kwargs
+from mythbox.ui import toolkit
 
 log = logging.getLogger('mythbox.ui')
 
@@ -99,8 +100,8 @@ class RecordingDetailsWindow(BaseWindow):
     def queueJob(self, jobType):
         job = Job.fromProgram(self.program, jobType)
         self.db().addJob(job)
-        from mythbox.ui import toolkit
-        toolkit.showPopup('Info', 'Job queued successfully!', 5000)
+        numJobs = len(self.db().getJobs(jobStatus=JobStatus.QUEUED))
+        toolkit.showPopup('Job Queue', 'Queued as job %d of %d ' % (numJobs,numJobs), 5000)
                
     @inject_db    
     def autoexpire(self):
