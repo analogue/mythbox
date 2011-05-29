@@ -668,26 +668,21 @@ class MythDatabase(object):
         self.cursor.execute(sql, args)
         log.debug('Row count = %s' % self.cursor.rowcount)
 
-    
-    @inject_cursor
     def addJob(self, job):
         '''Add a new job to the job queue'''        
-        sql = """
-            insert into jobqueue (
-                id,
-                chanid,
-                starttime,
-                type,
-                insertttime,
-                hostname, 
-                status,
-                comment, 
-                schedruntime) 
-            values (%%s, %%s, %%s, %%s, %%s, %%s, %%s, %%s, %%s)
-            """
-            
+        sql = """INSERT INTO jobqueue (
+                    chanid,
+                    starttime,
+                    type,
+                    inserttime,
+                    hostname, 
+                    status,
+                    comment, 
+                    schedruntime)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+        
         log.debug("sql = %s" % safe_str(sql))
-        args = (u'NULL', job.channelId, job.startTime, job.type, job.insertTime, u'', JobStatus.QUEUED, u'', datetime.datetime.now())
+        args = (job.channelId, job.startTime, job.jobType, job.insertTime, job.hostname, job.jobStatus, job.comment, datetime.datetime.now(),)
 
         if log.isEnabledFor(logging.DEBUG):
             for i,arg in enumerate(args):
@@ -698,6 +693,15 @@ class MythDatabase(object):
             c.execute(sql, args)
         finally:
             c.close()
+
+        if job.id is None:
+            c2 = self.conn.cursor(*cursorArgs)
+            try:
+                c2.execute("select max(id) from jobqueue")
+                job.id = c2.fetchall()[0][0]
+                log.debug('New job id = %s' % job.id)
+            finally:
+                c2.close()
     
     @inject_cursor
     def getJobs(self, program=None, jobType=None, jobStatus=None):

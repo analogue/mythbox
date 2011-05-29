@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -19,32 +19,45 @@
 import datetime
 import logging
 import unittest
+import mythboxtest
+import util_mock
+import unittest2 as unittest
 
 from mockito import Mock
 from mythbox.mythtv.db import MythDatabase
-from mythbox.mythtv.domain import ScheduleFromProgram
+from mythbox.mythtv.domain import ScheduleFromProgram, Job
 from mythbox.platform import Platform
 from mythbox.settings import MythSettings
 from mythbox.util import OnDemandConfig
-from unittest import TestCase
+from mythbox.mythtv.conn import Connection
+from mythbox.mythtv.enums import JobType
 
-log = logging.getLogger('mythbox.unittest')
+log = mythboxtest.getLogger('mythbox.unittest')
 
-# =============================================================================
-class MythDatabaseTest(TestCase):
+class MythDatabaseTest(unittest.TestCase):
 
     def setUp(self):
-        self.translator = Mock()
         self.platform = Platform()
+
+        #self.translator = Mock()
+        self.langInfo = util_mock.XBMCLangInfo(self.platform)
+        self.translator = util_mock.Translator(self.platform, self.langInfo)
+
+        self.bus = Mock()
+        self.domainCache = Mock()
         self.settings = MythSettings(self.platform, self.translator)
+        
         privateConfig = OnDemandConfig()
         self.settings.put('mysql_host', privateConfig.get('mysql_host'))
         self.settings.put('mysql_database', privateConfig.get('mysql_database'))
         self.settings.put('mysql_password', privateConfig.get('mysql_password'))
-        self.db = MythDatabase(self.settings, self.translator)
-
+        
+        self.db = MythDatabase(self.settings, self.translator, self.domainCache)
+        self.conn = Connection(self.settings, self.translator, self.platform, self.bus, self.db)
+    
     def tearDown(self):
-        self.db.close()
+        #self.db.close()
+        self.conn.close()
         
     def test_saveSchedule_NewSchedule(self):
         now = datetime.datetime.now()
@@ -58,8 +71,19 @@ class MythDatabaseTest(TestCase):
         result = self.db.saveSchedule(schedule)
         log.debug('Save schedule result = %s' % result)
         
-# =============================================================================
+    def test_addJob_UserJob1(self):
+        recordings = self.conn.getAllRecordings()
+        if not recordings:
+            log.warn('Cannot run unit tests without program listings in the database')
+            return
+
+        job = Job.fromProgram(recordings[-1], JobType.USERJOB & JobType.USERJOB1)
+        log.debug(job)
+
+        self.assertIsNone(job.id)
+        self.db.addJob(job)
+        log.debug(job)
+        self.assertIsNotNone(job.id)
+        
 if __name__ == '__main__':
-    import logging.config
-    logging.config.fileConfig('mythbox_log.ini')
     unittest.main()        
