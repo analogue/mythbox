@@ -67,11 +67,41 @@ class RecordingDetailsWindow(BaseWindow):
                 self.rerecordButton.getId()    : self.rerecord,
                 self.firstInQueueButton.getId(): self.moveToFrontOfJobQueue,
                 self.refreshButton.getId()     : self.refresh,
-                self.editScheduleButton.getId(): self.editSchedule,
-                257:self.goAdvanced
+                self.editScheduleButton.getId(): self.editSchedule, #,
+                301:self.doCommFlag,
+                302:self.doTranscode,
+                303:self.doUserJob1,
+                304:self.doUserJob2,
+                305:self.doUserJob3,
+                306:self.doUserJob4
             }
             self.render()
         
+    def doCommFlag(self):
+        self.queueJob(JobType.COMMFLAG)
+    
+    def doTranscode(self):
+        self.queueJob(JobType.TRANSCODE)
+    
+    def doUserJob1(self):
+        self.queueJob(JobType.USERJOB & JobType.USERJOB1)
+    
+    def doUserJob2(self):
+        self.queueJob(JobType.USERJOB & JobType.USERJOB2)
+    
+    def doUserJob3(self):
+        self.queueJob(JobType.USERJOB & JobType.USERJOB3)
+    
+    def doUserJob4(self):
+        self.queueJob(JobType.USERJOB & JobType.USERJOB4)
+
+    @inject_db
+    def queueJob(self, jobType):
+        job = Job.fromProgram(self.program, jobType)
+        self.db().addJob(job)
+        from mythbox.ui import toolkit
+        toolkit.showPopup('Info', 'Job queued successfully!', 5000)
+               
     @inject_db    
     def autoexpire(self):
         self.db().setRecordedAutoexpire(
@@ -248,6 +278,7 @@ class RecordingDetailsWindow(BaseWindow):
         self.renderDetail()
         self.renderChannel()
         self.renderThumbnail()
+        self.renderUserJobs()
         self.renderCommBreaks()       # async
         self.renderSeasonAndEpisode(self.program) # async
     
@@ -338,3 +369,21 @@ class RecordingDetailsWindow(BaseWindow):
             else:
                 log.debug('Program changed since spawning...recursing...')
                 self.renderSeasonAndEpisode(self.program)
+                
+    @inject_db
+    def renderUserJobs(self):
+        jobs = {
+            'UserJob1': {'control':303, 'descColumn':'UserJobDesc1'}, 
+            'UserJob2': {'control':304, 'descColumn':'UserJobDesc2'},
+            'UserJob3': {'control':305, 'descColumn':'UserJobDesc3'}, 
+            'UserJob4': {'control':306, 'descColumn':'UserJobDesc4'}
+        }
+        
+        for jobName in jobs.keys():
+            jobCommand = self.db().getMythSetting(jobName)
+            jobButton = self.getControl(jobs[jobName]['control'])
+            if jobCommand is None or len(jobCommand) == 0:
+                jobButton.setVisible(False)
+            else:
+                jobButton.setLabel(self.db().getMythSetting(jobs[jobName]['descColumn']))    
+                
