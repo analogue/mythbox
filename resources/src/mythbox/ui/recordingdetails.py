@@ -60,6 +60,7 @@ class RecordingDetailsWindow(BaseWindow):
             self.firstInQueueButton = self.getControl(254)
             self.refreshButton = self.getControl(255)
             self.editScheduleButton = self.getControl(256)
+            self.advancedButton = self.getControl(257)
             
             self.dispatcher = {
                 self.playButton.getId()        : self.play,
@@ -239,11 +240,18 @@ class RecordingDetailsWindow(BaseWindow):
         self.program = self.programIterator.previous()
         self.render()
                 
-    @catchall_ui 
+    def isAdvancedBladeActive(self):
+        buttonIds = [300,301,302,303,304,305,306]
+        return self.getFocusId() in buttonIds
+
+    @catchall_ui
     def onAction(self, action):
         id = action.getId()
         if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
-            self.close()
+            if self.isAdvancedBladeActive():
+                self.setFocus(self.advancedButton)
+            else:
+                self.close()
         elif id == Action.PAGE_UP:
             self.previousRecording()
         elif id == Action.PAGE_DOWN:
