@@ -154,7 +154,6 @@ class MythDatabase(object):
     def __init__(self, *args, **kwargs):
         # Static data cached on demand
         self._channels = None
-        self._tuners = None
         self._master = None
         self._slaves = None
         
@@ -448,37 +447,36 @@ class MythDatabase(object):
         @rtype: Tuner[] 
         @return: Cached tuners ordered by cardid
         """
-        if not self._tuners:
-            sql = """
-                select 
-                    cardid, 
-                    hostname, 
-                    signal_timeout, 
-                    channel_timeout, 
-                    cardtype
-                from   
-                    capturecard
-                order by 
-                    cardid
-                """
-            self._tuners = []
-            self.cursor.execute(sql)
-            
-            from mythbox.mythtv.domain import Tuner
+        sql = """
+            select 
+                cardid, 
+                hostname, 
+                signal_timeout, 
+                channel_timeout, 
+                cardtype
+            from   
+                capturecard
+            order by 
+                cardid
+            """
+        tuners = []
+        self.cursor.execute(sql)
+        
+        from mythbox.mythtv.domain import Tuner
 
-            for row in self.cursor.fetchall():
-                row = self.toDict(self.cursor, row)
-                self._tuners.append(Tuner(
-                    int(row['cardid']),
-                    row['hostname'],
-                    int(row['signal_timeout']),
-                    int(row['channel_timeout']),
-                    row['cardtype'],
-                    domainCache=self.domainCache,
-                    conn=None,
-                    db=self,   # TODO: Should be None. self is for unit tests
-                    translator=self.translator)) 
-        return self._tuners
+        for row in self.cursor.fetchall():
+            row = self.toDict(self.cursor, row)
+            tuners.append(Tuner(
+                int(row['cardid']),
+                row['hostname'],
+                int(row['signal_timeout']),
+                int(row['channel_timeout']),
+                row['cardtype'],
+                domainCache=self.domainCache,
+                conn=None,
+                db=self,   # TODO: Should be None. self is for unit tests
+                translator=self.translator)) 
+        return tuners
 
     @timed
     @inject_cursor

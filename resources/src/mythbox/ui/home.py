@@ -342,10 +342,10 @@ class HomeWindow(BaseWindow):
         log.debug('<<< renderCoverFlow end')
         
     @run_async
-    @inject_conn
+    @catchall
     @coalesce
     def renderTuners(self):
-        tuners = self.conn().getTuners()[:]
+        tuners = self.domainCache.getTuners()
         
         for t in tuners:
             t.listItem = xbmcgui.ListItem()
@@ -452,7 +452,8 @@ class HomeWindow(BaseWindow):
         
         self.jobsListBox.addItems(listItems)
                
-    @run_async     
+    @run_async
+    @catchall     
     @inject_conn
     @coalesce
     def renderStats(self):

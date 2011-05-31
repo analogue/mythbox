@@ -180,14 +180,16 @@ class SchedulesWindow(BaseWindow):
     @run_async
     @catchall
     def renderPosters(self, myRenderToken):
-        for schedule in self.listItemsBySchedule.keys()[:]:
+        for schedule, listItem in self.listItemsBySchedule.items():
             if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken: 
                 return
             if schedule.needsPoster:
-                schedule.needsPoster = False
-                listItem = self.listItemsBySchedule[schedule]
-                self.setListItemProperty(listItem, 'poster', self.lookupPoster(schedule))
-
+                try:
+                    schedule.needsPoster = False
+                    self.setListItemProperty(listItem, 'poster', self.lookupPoster(schedule))
+                except Exception, ex:
+                    log.exception('renderPosters')
+                
     def lookupPoster(self, schedule):
         try:
             posterPath = self.fanArt.pickPoster(schedule)
@@ -197,7 +199,6 @@ class SchedulesWindow(BaseWindow):
                     posterPath = self.mythChannelIconCache.get(channel)
         except:
             posterPath = self.platform.getMediaPath('mythbox.png')
-            log.exception('Schedule = %s' % safe_str(schedule))
         
         return posterPath
         

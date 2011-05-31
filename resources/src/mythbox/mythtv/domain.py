@@ -21,17 +21,14 @@ import logging
 import os
 import re
 import sre
-import tempfile
 import time
 
 import mythbox.msg as m
 from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, \
     EpisodeFilter, FlagMask, JobStatus, JobType, RecordingStatus, \
-    ScheduleType, Upcoming
-from mythbox.platform import WindowsPlatform
-from mythbox.ui.toolkit import showPopup
-from mythbox.util import timed, formatSeconds, formatSize, synchronized, requireDir, safe_str
+    ScheduleType
+from mythbox.util import formatSeconds, formatSize, safe_str
 from odict import odict
 
 log = logging.getLogger('mythbox.core')
@@ -1040,6 +1037,8 @@ class Schedule(object):
     Abstract base class to represent a recording schedule in the mythtv system.
 
     This class is based on the Myth TV RECORD table.
+
+    TODO: Merge into RecordingSchedule. No need for base class
     """
 
     def __init__(self, translator):
@@ -1205,6 +1204,12 @@ class Schedule(object):
         if self.subtitle() and not sre.match('^\s+$', self.subtitle()):
             fullTitle += u' - ' + self.subtitle()
         return fullTitle
+
+    def __eq__(self, rhs):
+        return isinstance(rhs, Schedule) and self.getScheduleId() == rhs.getScheduleId()
+
+    def __hash__(self):
+        return hash(self.getScheduleId())
 
 
 class RecordingSchedule(Schedule):

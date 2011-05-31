@@ -71,6 +71,11 @@ class DomainCache(object):
     def getUserJobs(self, force=False, lazy=False):
         return self.process('userJobs', self.db().getUserJobs, force, lazy)
     
+    @synchronized
+    @inject_conn
+    def getTuners(self, force=False, lazy=False):
+        return self.process('tuners', self.conn().getTuners, force, lazy)
+    
     def process(self, key, func, force, lazy):
         if force:
             if key in self.cache:

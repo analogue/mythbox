@@ -17,9 +17,6 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 import datetime
-import os
-import shutil
-import tempfile
 import time
 import unittest2 as unittest
 import mythboxtest
@@ -34,7 +31,7 @@ from mythbox.mythtv.domain import ctime2MythTime, dbTime2MythTime, Backend, \
      RecordingSchedule, Tuner, MythUrl, StatusException, frames2seconds, seconds2frames
 
 from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, FlagMask, \
-     EpisodeFilter, JobStatus, JobType, TVState
+     EpisodeFilter, JobStatus, JobType
 
 from mythbox.platform import Platform
 
@@ -474,7 +471,15 @@ class RecordingScheduleTest(unittest.TestCase):
         self.assertEqual(EpisodeFilter.NONE, schedule.getEpisodeFilter())
         self.assertEqual(CheckForDupesIn.PREVIOUS_RECORDINGS, schedule.getCheckForDupesIn())
 
-
+    def test_hashable(self):
+        s1 = RecordingSchedule({'recordid' : 1}, Mock())
+        s2 = RecordingSchedule({'recordid' : 2}, Mock())
+        d = {s1:'schedule1',}
+        self.assertIn(s1, d)
+        self.assertEqual('schedule1', d[s1])
+        self.assertNotIn(s2, d)
+        
+        
 class UserJobTest(unittest.TestCase):
     
     def test_isActive_When_command_not_none_Then_return_true(self):
