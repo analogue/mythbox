@@ -199,19 +199,6 @@ class RecordingDetailsWindow(BaseWindow):
             del p
         
     @inject_db
-    def goAdvanced(self):
-        job = Job.fromProgram(self.program, JobType.USERJOB & JobType.USERJOB1)
-        self.db().addJob(job)
-        xbmcgui.Dialog().ok('User Job', 'Queued user job 1 with id %s' % job.id)
-        
-#        advancedDialog = xbmcgui.WindowXMLDialog(
-#            'mythbox_recording_advanced.xml', 
-#            self.platform.getScriptDir(), 
-#            forceFallback=True)
-#        advancedDialog.doModal()
-#        del advancedDialog
-        
-    @inject_db
     def editSchedule(self):
         if self.program.getScheduleId() is None:
             xbmcgui.Dialog().ok(self.t(m.INFO), self.t(m.ERR_NO_RECORDING_SCHEDULE))
@@ -241,7 +228,7 @@ class RecordingDetailsWindow(BaseWindow):
         self.render()
                 
     def isAdvancedBladeActive(self):
-        buttonIds = [300,301,302,303,304,305,306]
+        buttonIds = [self.firstInQueueButton.getId(),300,301,302,303,304,305,306]
         return self.getFocusId() in buttonIds
 
     @catchall_ui

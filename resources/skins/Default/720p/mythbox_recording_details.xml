@@ -267,7 +267,7 @@
             <texturenofocus>button_nofocus.png</texturenofocus>
             <enabled>true</enabled>
             <pulseonselect>true</pulseonselect>
-            <onup>257</onup>
+            <onup>255</onup>
         </control>
         
         <control type="button" id="251">
@@ -326,21 +326,24 @@
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
             <onup>253</onup>
-            <ondown>254</ondown>
+            <ondown>257</ondown>
         </control>
 
-        <control type="button" id="254">
-            <description>Move to first job in Queue Button</description>
+        <control type="button" id="257">
+            <description>advanced</description>
             <posx>0</posx>
             <posy>200</posy>
             <width>285</width>
             <height>40</height>
-            <label>SCRIPT606</label>
+            <label>SCRIPT440</label>
             <align>left</align>
             <textoffsetx>40</textoffsetx>
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
+            <onleft>300</onleft>
+            <onright>300</onright>
+            <onclick>SetFocus(300)</onclick>
             <onup>256</onup>
             <ondown>255</ondown>
         </control>
@@ -357,110 +360,10 @@
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
-            <onup>254</onup>
-            <ondown>257</ondown>
-        </control>
-
-        <control type="button" id="257">
-            <description>advanced</description>
-            <posx>0</posx>
-            <posy>280</posy>
-            <width>285</width>
-            <height>40</height>
-            <label>SCRIPT440</label>
-            <align>left</align>
-            <textoffsetx>40</textoffsetx>
-            <texturefocus>button_focus.png</texturefocus>
-            <texturenofocus>button_nofocus.png</texturenofocus>
-            <pulseonselect>true</pulseonselect>
-            <onleft>300</onleft>
-            <onright>300</onright>
-            <onclick>SetFocus(300)</onclick>
-            <onup>255</onup>
+            <onup>257</onup>
             <ondown>250</ondown>
         </control>
 
-    </control>
-    
-    <control type="group" id="300">
-       <posx>-285</posx>
-       <posy>0</posy>
-       <defaultcontrol>301</defaultcontrol>
-       <animation effect="slide" end="285,0" time="400" condition="Control.HasFocus(300)|Control.HasFocus(301)|Control.HasFocus(302)|Control.HasFocus(303)|Control.HasFocus(304)|Control.HasFocus(305)|Control.HasFocus(306)">Conditional</animation>
-       <control type="image">
-           <posx>0</posx>
-           <posy>0</posy>
-           <width>285</width>
-           <height>720</height>
-           <texture border="10">MediaBladeSub.png</texture>
-<!--            <visible>Control.HasFocus(300)|Control.HasFocus(301)|Control.HasFocus(302)|Control.HasFocus(303)|Control.HasFocus(304)</visible> -->
-<!--            <colordiffuse>0</colordiffuse> -->
-        </control>
-        <control type="grouplist">
-          <posx>0</posx>
-          <posy>200</posy>
-          <onleft>257</onleft>
-          <onright>257</onright>
-          <itemgap>0</itemgap>
-          <control type="button" id="301">
-             <width>270</width>
-             <label>Comm Flag</label>
-             <textoffsetx>40</textoffsetx>
-             <texturefocus>button_focus.png</texturefocus>
-             <texturenofocus>button_nofocus.png</texturenofocus>
-             <pulseonselect>true</pulseonselect>
-             <onclick>SetFocus(257)</onclick>
-          </control>
-          <control type="button" id="302">
-             <width>270</width>
-             <textoffsetx>40</textoffsetx>
-             <texturefocus>button_focus.png</texturefocus>
-             <texturenofocus>button_nofocus.png</texturenofocus>
-             <pulseonselect>true</pulseonselect>
-             <label>Transcode</label>
-             <onclick>SetFocus(257)</onclick>
-          </control>
-          <control type="button" id="303">
-             <width>270</width>
-             <textoffsetx>40</textoffsetx>
-             <texturefocus>button_focus.png</texturefocus>
-             <texturenofocus>button_nofocus.png</texturenofocus>
-             <pulseonselect>true</pulseonselect>
-             <label>UserJob1</label>
-             <visible>true</visible>
-             <onclick>SetFocus(257)</onclick>
-          </control>
-          <control type="button" id="304">
-             <width>270</width>
-             <textoffsetx>40</textoffsetx>
-             <texturefocus>button_focus.png</texturefocus>
-             <texturenofocus>button_nofocus.png</texturenofocus>
-             <pulseonselect>true</pulseonselect>
-             <label>UserJob2</label>
-             <visible>true</visible>
-             <onclick>SetFocus(257)</onclick>
-          </control>
-          <control type="button" id="305">
-             <width>270</width>
-             <textoffsetx>40</textoffsetx>
-             <texturefocus>button_focus.png</texturefocus>
-             <texturenofocus>button_nofocus.png</texturenofocus>
-             <pulseonselect>true</pulseonselect>
-             <label>UserJob3</label>
-             <visible>true</visible>
-             <onclick>SetFocus(257)</onclick>
-          </control>
-          <control type="button" id="306">
-             <width>270</width>
-             <textoffsetx>40</textoffsetx>
-             <texturefocus>button_focus.png</texturefocus>
-             <texturenofocus>button_nofocus.png</texturenofocus>
-             <pulseonselect>true</pulseonselect>
-             <label>UserJob4</label>
-             <visible>true</visible>
-             <onclick>SetFocus(257)</onclick>
-          </control>
-        </control>
     </control>
     
     <control type="group">
@@ -478,6 +381,102 @@
             <aspectratio>keep</aspectratio>
             <info>Window.Property(channelIcon)</info>
             <fadetime>400</fadetime>
+        </control>
+    </control>
+    
+    <control type="group" id="300">
+       <posx>-285</posx>
+       <posy>0</posy>
+       <defaultcontrol>254</defaultcontrol>
+       <animation effect="slide" end="285,0" time="400" condition="Control.HasFocus(254)|Control.HasFocus(300)|Control.HasFocus(301)|Control.HasFocus(302)|Control.HasFocus(303)|Control.HasFocus(304)|Control.HasFocus(305)|Control.HasFocus(306)">Conditional</animation>
+       <control type="image">
+           <posx>0</posx>
+           <posy>0</posy>
+           <width>285</width>
+           <height>720</height>
+           <texture border="10">MediaBladeSub.png</texture>
+        </control>
+        <control type="grouplist">
+          <posx>0</posx>
+          <posy>200</posy>
+          <onleft>257</onleft>
+          <onright>257</onright>
+          <itemgap>0</itemgap>
+          
+          <control type="button" id="254">
+              <description>Move to first job in Queue Button</description>
+              <width>270</width>
+              <label>SCRIPT606</label>
+              <textoffsetx>40</textoffsetx>
+              <texturefocus>button_focus.png</texturefocus>
+              <texturenofocus>button_nofocus.png</texturenofocus>
+              <pulseonselect>true</pulseonselect>
+              <onclick>SetFocus(257)</onclick>
+          </control>
+          <control type="button" id="301">
+              <description>Flag Commercials</description>
+              <width>270</width>
+              <label>SCRIPT129</label>
+              <textoffsetx>40</textoffsetx>
+              <texturefocus>button_focus.png</texturefocus>
+              <texturenofocus>button_nofocus.png</texturenofocus>
+              <pulseonselect>true</pulseonselect>
+              <onclick>SetFocus(257)</onclick>
+          </control>
+          <control type="button" id="302">
+              <description>Transcode</description>
+              <width>270</width>
+              <textoffsetx>40</textoffsetx>
+              <texturefocus>button_focus.png</texturefocus>
+              <texturenofocus>button_nofocus.png</texturenofocus>
+              <pulseonselect>true</pulseonselect>
+              <label>SCRIPT252</label>
+              <onclick>SetFocus(257)</onclick>
+          </control>
+          <control type="button" id="303">
+              <description>UserJob1</description>
+              <width>270</width>
+              <textoffsetx>40</textoffsetx>
+              <texturefocus>button_focus.png</texturefocus>
+              <texturenofocus>button_nofocus.png</texturenofocus>
+              <pulseonselect>true</pulseonselect>
+              <label>UserJob1</label>
+              <visible>true</visible>
+              <onclick>SetFocus(257)</onclick>
+          </control>
+          <control type="button" id="304">
+              <description>UserJob2</description>
+              <width>270</width>
+              <textoffsetx>40</textoffsetx>
+              <texturefocus>button_focus.png</texturefocus>
+              <texturenofocus>button_nofocus.png</texturenofocus>
+              <pulseonselect>true</pulseonselect>
+              <label>UserJob2</label>
+              <visible>true</visible>
+              <onclick>SetFocus(257)</onclick>
+          </control>
+          <control type="button" id="305">
+              <description>UserJob3</description>
+              <width>270</width>
+              <textoffsetx>40</textoffsetx>
+              <texturefocus>button_focus.png</texturefocus>
+              <texturenofocus>button_nofocus.png</texturenofocus>
+              <pulseonselect>true</pulseonselect>
+              <label>UserJob3</label>
+              <visible>true</visible>
+              <onclick>SetFocus(257)</onclick>
+          </control>
+          <control type="button" id="306">
+              <description>UserJob4</description>
+              <width>270</width>
+              <textoffsetx>40</textoffsetx>
+              <texturefocus>button_focus.png</texturefocus>
+              <texturenofocus>button_nofocus.png</texturenofocus>
+              <pulseonselect>true</pulseonselect>
+              <label>UserJob4</label>
+              <visible>true</visible>
+              <onclick>SetFocus(257)</onclick>
+          </control>
         </control>
     </control>
     
