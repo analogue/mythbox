@@ -29,6 +29,7 @@ from mythbox.mythtv.domain import RecordedProgram
 from mythbox.platform import Platform
 from mythbox.settings import MythSettings
 from mythbox.util import OnDemandConfig
+from mockito.mockito import when
 
 log = mythboxtest.getLogger('mythbox.unittest')
 
@@ -181,6 +182,7 @@ class MythDatabaseTest(unittest.TestCase):
         self.assertEquals(expectedSchedule.getScheduleId(), actualSchedules.pop().getScheduleId())
 
     def test_getJobs_All(self):
+        when(self.domainCache).getUserJobs().thenReturn(self.db.getUserJobs())
         jobs = self.db.getJobs()
         self.assertTrue(jobs is not None)
         for index, job in enumerate(jobs):
@@ -188,6 +190,7 @@ class MythDatabaseTest(unittest.TestCase):
             
     def test_getJobs_ForProgram(self):
         # Setup
+        when(self.domainCache).getUserJobs().thenReturn(self.db.getUserJobs())
         jobs = self.db.getJobs()
         if len(jobs) == 0:
             log.warn('No jobs in database to test with. Test skipped...')
@@ -210,6 +213,7 @@ class MythDatabaseTest(unittest.TestCase):
 
     def test_getJobs_ByJobType(self):
         # Setup
+        when(self.domainCache).getUserJobs().thenReturn(self.db.getUserJobs())
         jobs = self.db.getJobs()
         if len(jobs) == 0:
             log.warn('No jobs in database to test with. Test skipped...')
@@ -227,6 +231,7 @@ class MythDatabaseTest(unittest.TestCase):
         
     def test_getJobs_ForProgram_ByJobType(self):
         # Setup
+        when(self.domainCache).getUserJobs().thenReturn(self.db.getUserJobs())
         jobs = self.db.getJobs()
         if len(jobs) == 0:
             log.warn('No jobs in database to test with. Test skipped...')
@@ -248,6 +253,12 @@ class MythDatabaseTest(unittest.TestCase):
             self.assertEquals(job.startTime, actual.startTime)
             self.assertEquals(job.jobType, actual.jobType)
             
+    def test_getUserJobs(self):
+        userJobs = self.db.getUserJobs()
+        for j in userJobs:
+            log.debug(j)
+        self.assertEqual(4, len(userJobs))
+
     def test_getTVGuideDataFlattened(self):
         # TODO: Convert to mocks w/ assertions
         channels = self.db.getChannels()[:2]

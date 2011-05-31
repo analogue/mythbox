@@ -1953,31 +1953,27 @@ class Tuner(object):
             return backend
 
 
+class UserJob(object):
+    
+    def __init__(self, jobType, desc, command):
+        self.jobType = jobType  # Job.USERJOB[1|2|3|4]
+        self.desc = desc        # from SETTING table where data = UserJobDesc1..4  value = desc
+        self.command = command  # from SETTING table where data = UserJob1..4  value = command
+
+    def isActive(self):
+        return self.command is not None and self.desc is not None and len(self.command) > 0 and len(self.desc) > 0
+    
+    def __repr__(self):
+        return safe_str('UserJob type=%s desc=%s command=%s' % (self.jobType, self.desc, self.command))
+
+        
 class Job(object):
     """Represents a scheduled commercial flagging, transcoding, or user defined job."""
 
-    @classmethod
-    def fromProgram(cls, program, jobType):
-        job = Job(
-            id=None,
-            channelId=program.getChannelId(),
-            startTime=program.starttimeAsTime(),
-            insertTime=datetime.datetime.now(),
-            jobType=jobType,
-            cmds=None,
-            flags=None,
-            jobStatus=JobStatus.QUEUED,
-            statusTime=None,
-            hostname=u'',
-            comment=u'',
-            scheduledRunTime=datetime.datetime.now(),
-            translator=program.translator)
-        return job
-        
     def __init__(self, id, channelId, startTime, insertTime, 
                  jobType, cmds, flags, jobStatus, statusTime,
                  hostname, comment, scheduledRunTime, translator, 
-                 conn=None, db=None):
+                 domainCache, conn=None, db=None):
         """
         @type id: int
         @type channelId: int
@@ -1997,6 +1993,7 @@ class Job(object):
         """
         self._db = db
         self._conn = conn
+        self.domainCache = domainCache
         self.id = id
         self.channelId = channelId
         self.startTime = startTime
@@ -2010,6 +2007,25 @@ class Job(object):
         self.comment = comment
         self.scheduledRunTime = scheduledRunTime
         self.translator = translator
+
+    @classmethod
+    def fromProgram(cls, program, jobType):
+        job = Job(
+            id=None,
+            channelId=program.getChannelId(),
+            startTime=program.starttimeAsTime(),
+            insertTime=datetime.datetime.now(),
+            jobType=jobType,
+            cmds=None,
+            flags=None,
+            jobStatus=JobStatus.QUEUED,
+            statusTime=None,
+            hostname=u'',
+            comment=u'',
+            scheduledRunTime=datetime.datetime.now(),
+            translator=program.translator,
+            domainCache=None)
+        return job
 
     def db(self):
         return self._db
@@ -2027,10 +2043,19 @@ class Job(object):
         log.debug("Job     start time = %s" % self.startTime)
         return program.getChannelId() == self.channelId and \
                program.starttimeAsTime() == self.startTime
-            
-    def formattedJobType(self):
-        return self.translator.get(JobType.translations[self.jobType])
+
+    def getUserJobDesc(self):
+        return [userJob.desc for userJob in self.domainCache.getUserJobs() if userJob.jobType & JobType.USERJOB == self.jobType].pop()
     
+    def isUserJob(self):
+        return (self.jobType | JobType.USERJOB) == JobType.USERJOB
+                
+    def formattedJobType(self):
+        if not self.isUserJob():
+            return self.translator.get(JobType.translations[self.jobType])
+        else:
+            return self.getUserJobDesc() 
+        
     def formattedJobStatus(self):
         return self.translator.get(JobStatus.translations[self.jobStatus])
     

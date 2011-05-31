@@ -386,6 +386,7 @@ class HomeWindow(BaseWindow):
         self.tunersListBox.addItems(map(lambda t: t.listItem, tuners))
 
     @run_async
+    @catchall
     @inject_db
     @coalesce
     def renderJobs(self):
@@ -426,7 +427,7 @@ class HomeWindow(BaseWindow):
                 status = u'%s %s%s. %s' % (t(m.COMM_FLAGGING), title, getHostInfo(j), getJobStats(j))
             elif j.jobType == JobType.TRANSCODE: 
                 status = u'%s %s' % (t(m.TRANSCODING), title)
-            else: 
+            else:
                 status = u'%s %s %s' % (j.formattedJobType(), t(m.PROCESSING), title)
                 
             self.setListItemProperty(listItem, 'status', status)

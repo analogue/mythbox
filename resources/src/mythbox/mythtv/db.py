@@ -19,7 +19,8 @@
 import datetime
 import logging
 import odict
-from mythbox.mythtv.enums import RecordingStatus, JobStatus
+
+from mythbox.mythtv.enums import RecordingStatus, JobType
 
 try:
     # native mysql client libs
@@ -702,6 +703,16 @@ class MythDatabase(object):
                 log.debug('New job id = %s' % job.id)
             finally:
                 c2.close()
+ 
+    def getUserJobs(self):
+        '''Returns max of 4 user jobs defined in the SETTING table'''
+        from mythbox.mythtv.domain import UserJob
+        userJobs = []
+        types = [JobType.USERJOB1, JobType.USERJOB2, JobType.USERJOB3, JobType.USERJOB4]
+        keys = [('UserJob%d' % i, 'UserJobDesc%d' % i, types[i-1]) for i in xrange(1,5)]
+        for jobCommand, jobDesc, jobType in keys:            
+            userJobs.append(UserJob(jobType, self.getMythSetting(jobDesc), self.getMythSetting(jobCommand)))  
+        return userJobs
     
     @inject_cursor
     def getJobs(self, program=None, jobType=None, jobStatus=None):
@@ -773,7 +784,8 @@ class MythDatabase(object):
                 hostname=row['hostname'],
                 comment=row['comment'],
                 scheduledRunTime=row['schedruntime'],
-                translator=self.translator))
+                translator=self.translator,
+                domainCache=self.domainCache))
         return jobs
 
     def setRecordingAutoexpire(self, program, shouldExpire):

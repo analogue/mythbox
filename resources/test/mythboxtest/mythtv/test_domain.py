@@ -30,7 +30,7 @@ from mythbox.mythtv import protocol
 from mythbox.mythtv.protocol import protocols
 
 from mythbox.mythtv.domain import ctime2MythTime, dbTime2MythTime, Backend, \
-     Channel, CommercialBreak, Job, TVProgram, Program, RecordedProgram, \
+     Channel, CommercialBreak, Job, UserJob, TVProgram, Program, RecordedProgram, \
      RecordingSchedule, Tuner, MythUrl, StatusException, frames2seconds, seconds2frames
 
 from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, FlagMask, \
@@ -475,6 +475,18 @@ class RecordingScheduleTest(unittest.TestCase):
         self.assertEqual(CheckForDupesIn.PREVIOUS_RECORDINGS, schedule.getCheckForDupesIn())
 
 
+class UserJobTest(unittest.TestCase):
+    
+    def test_isActive_When_command_not_none_Then_return_true(self):
+        self.assertTrue(UserJob(JobType.USERJOB1, 'Send to Ipad', 'HandBrakeCLI blah blal blah').isActive())
+    
+    def test_isActive_When_command_empty_The_return_false(self):
+        self.assertFalse(UserJob(JobType.USERJOB1, 'Send to Ipad', '').isActive())
+    
+    def test_isActive_When_command_none_Then_return_false(self):
+        self.assertFalse(UserJob(JobType.USERJOB1, 'Send to Ipad', None).isActive())
+
+        
 class JobTest(unittest.TestCase):
 
     def setUp(self):
@@ -733,8 +745,18 @@ class JobTest(unittest.TestCase):
         job1 = self.createJob(id=99)
         job2 = None
         self.assertFalse(job1 == job2)
-        
-    def createJob(self, conn=Mock(), db=Mock(), id=1, jobType=JobType.COMMFLAG, jobStatus=JobStatus.FINISHED):
+      
+    def test_isUserJob(self):
+        self.assertTrue(self.createJob(jobType=JobType.USERJOB & JobType.USERJOB1).isUserJob())
+        self.assertTrue(self.createJob(jobType=JobType.USERJOB & JobType.USERJOB2).isUserJob())
+        self.assertTrue(self.createJob(jobType=JobType.USERJOB & JobType.USERJOB3).isUserJob())
+        self.assertTrue(self.createJob(jobType=JobType.USERJOB & JobType.USERJOB4).isUserJob())
+          
+        self.assertFalse(self.createJob(jobType=JobType.COMMFLAG).isUserJob())
+        self.assertFalse(self.createJob(jobType=JobType.SYSTEMJOB).isUserJob())
+        self.assertFalse(self.createJob(jobType=JobType.TRANSCODE).isUserJob())
+          
+    def createJob(self, conn=Mock(), db=Mock(), domainCache=Mock(), id=1, jobType=JobType.COMMFLAG, jobStatus=JobStatus.FINISHED):
         return Job(
             id=id,     
             channelId=2,     
@@ -750,7 +772,8 @@ class JobTest(unittest.TestCase):
             scheduledRunTime=None, 
             translator=self.translator,
             conn=conn,
-            db=db)        
+            db=db,
+            domainCache=domainCache)        
 
 
 class MythUrlTest(unittest.TestCase):
