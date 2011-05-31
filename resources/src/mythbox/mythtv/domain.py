@@ -2119,7 +2119,7 @@ class Job(object):
         if currentPos == 1:
             log.warn('Job %d is already at the front of the queue' % self.id)
             
-        jobs = self.db().getJobs(jobType=JobType.COMMFLAG, jobStatus=JobStatus.QUEUED)
+        jobs = self.db().getJobs(jobStatus=JobStatus.QUEUED)
 
         self.scheduledRunTime = jobs[0].scheduledRunTime
         self.db().updateJobScheduledRunTime(self)            

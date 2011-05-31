@@ -4,9 +4,13 @@ x/x/2011 - MythBox 1.0.4
     - Recordings Window
         - |<< and >>| buttons on MCE remotes function as HOME/END keys 
             
-    - Recording Schedules Window 
+    - Recording Details Window 
+        - Issue 168 - Click on the Advanced button to queue the recording
+          for commercial flagging, transcoding, or user job execution
 
-    - Recording Schedule Dialog
+    - Fan Art
+        - New artwork is checked for once a week if no artwork was 
+          previously available
 
     - TV Guide Window
 
@@ -16,7 +20,8 @@ x/x/2011 - MythBox 1.0.4
 
     - Settings Window
     
-    - mysql-connector-python 0.3.2
+    - Upgraded to mysql-connector-python 0.3.2
+    - Various caching optimizations
     
   Fixed
     - Issue 170 - Programs no longer sorted by title after a program is deleted

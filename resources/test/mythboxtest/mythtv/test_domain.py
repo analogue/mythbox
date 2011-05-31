@@ -20,6 +20,7 @@ import datetime
 import time
 import unittest2 as unittest
 import mythboxtest
+import copy
 
 from mockito import Mock, when, verify, any
 from mythbox.settings import MythSettings
@@ -517,9 +518,7 @@ class JobTest(unittest.TestCase):
             jobs.append(job)
       
         when(db).getJobs(jobStatus=JobStatus.QUEUED).thenReturn(jobs)
-        when(db).getJobs(jobType=JobType.COMMFLAG, jobStatus=JobStatus.QUEUED).thenReturn(jobs)
-
-        import copy
+        when(db).getJobs(jobStatus=JobStatus.QUEUED).thenReturn(jobs)
         job = copy.copy(jobs[-1])
         
         # Test
@@ -545,8 +544,7 @@ class JobTest(unittest.TestCase):
             #log.debug('%s' % job)
       
         when(db).getJobs(jobStatus=JobStatus.QUEUED).thenReturn(jobs)
-        when(db).getJobs(jobType=JobType.COMMFLAG, jobStatus=JobStatus.QUEUED).thenReturn(jobs)
-        import copy
+        when(db).getJobs(jobStatus=JobStatus.QUEUED).thenReturn(jobs)
         job = copy.copy(jobs[jobPos])
         
         # Test
@@ -578,9 +576,7 @@ class JobTest(unittest.TestCase):
             jobs.append(job)
       
         when(db).getJobs(jobStatus=JobStatus.QUEUED).thenReturn(jobs)
-        when(db).getJobs(jobType=JobType.COMMFLAG, jobStatus=JobStatus.QUEUED).thenReturn(jobs)
-        
-        import copy
+        when(db).getJobs(jobStatus=JobStatus.QUEUED).thenReturn(jobs)
         job = copy.copy(jobs[1])
         
         # Test
@@ -602,7 +598,7 @@ class JobTest(unittest.TestCase):
             jobs.append(self.createJob(id=i, jobStatus=JobStatus.QUEUED, jobType=JobType.COMMFLAG))
             
         when(db).getJobs(jobStatus=JobStatus.QUEUED).thenReturn(jobs)
-        when(db).getJobs(jobType=JobType.COMMFLAG, jobStatus=JobStatus.QUEUED).thenReturn(jobs)
+        when(db).getJobs(jobStatus=JobStatus.QUEUED).thenReturn(jobs)
 
         job = self.createJob(conn=conn, db=db, id=7, jobStatus=JobStatus.QUEUED, jobType=JobType.COMMFLAG)
         
@@ -621,7 +617,7 @@ class JobTest(unittest.TestCase):
         
         job = self.createJob(conn=conn, db=db, jobStatus=JobStatus.QUEUED, jobType=JobType.COMMFLAG)
         when(db).getJobs(jobStatus=JobStatus.QUEUED).thenReturn([job])
-        when(db).getJobs(jobType=JobType.COMMFLAG, jobStatus=JobStatus.QUEUED).thenReturn([job])
+        when(db).getJobs(jobStatus=JobStatus.QUEUED).thenReturn([job])
         
         # Test
         pos, numJobs = job.getPositionInQueue()

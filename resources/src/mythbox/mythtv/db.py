@@ -715,10 +715,10 @@ class MythDatabase(object):
     @inject_cursor
     def getJobs(self, program=None, jobType=None, jobStatus=None):
         """
-        Get jobs from the MythTV job queue matching a program, job type, and/or job status.
+        Get jobs from the MythTV job queue matching a program, job type, and/or job status in order of scheduled run time.
         
         @type program: RecordedProgram
-        @type jobType: int from enums.JobTye
+        @type jobType: int from enums.JobType
         @type jobStatus: int from enums.JobStatus
         @rtype: Job[]
         """
