@@ -34,9 +34,14 @@ class DomainCache(object):
         self.cache = {}
         
     def onEvent(self, event):
+        '''invalidate caches based on event'''
+        id = event['id']
         
-        if event['id'] == Event.SCHEDULE_CHANGED:
+        if id == Event.SCHEDULE_CHANGED:
             self.getRecordingSchedules(force=True, lazy=True)
+            self.getUpcomingRecordings(force=True, lazy=True)
+            
+        elif id == Event.SCHEDULER_RAN:
             self.getUpcomingRecordings(force=True, lazy=True)
             
         elif event['id'] == Event.RECORDING_DELETED:

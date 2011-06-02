@@ -495,7 +495,7 @@ class HomeWindow(BaseWindow):
         log.debug('renderNewsFeed exit')
         
     def onEvent(self, event):
-        log.debug('home window received event: %s' % event)
+        log.debug('ONEVENT: home window received event: %s' % event)
         if event['id'] == Event.RECORDING_DELETED:
             self.renderCoverFlow(exclude=event['program'])
         elif event['id'] == Event.SETTING_CHANGED and event['tag'] == 'feeds_twitter':
