@@ -51,7 +51,7 @@ class HomeWindow(BaseWindow):
 
         # merge cachesByName into deps dict
         self.deps = dict(kwargs.items() + self.cachesByName.items())
-
+        self.t = self.translator.get
         self.lastFocusId = None
         self.shutdownPending = False
         self.bus.register(self)
@@ -77,6 +77,8 @@ class HomeWindow(BaseWindow):
                 254 : self.goUpcomingRecordings,
                 256 : self.goSettings,
                 255 : self.refreshOnInit,
+                300 : self.deleteRecording,
+                301 : self.rerecordRecording,
                 ID_COVERFLOW_WRAPLIST : self.goPlayRecording
             }
             
@@ -99,29 +101,32 @@ class HomeWindow(BaseWindow):
         if self.shutdownPending:
             return
         
-        if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
+        id = action.getId()
+        
+        if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
             self.shutdown()
             self.close()
-        elif action.getId() in (Action.CONTEXT_MENU,) and self.lastFocusId in (ID_COVERFLOW_GROUP, ID_COVERFLOW_WRAPLIST):
+        
+        elif id in (Action.CONTEXT_MENU,) and self.lastFocusId in (ID_COVERFLOW_GROUP, ID_COVERFLOW_WRAPLIST):
             program = self.recordings[self.coverFlow.getSelectedPosition()]
-            selection = xbmcgui.Dialog().select(program.title(), [self.translator.get(m.DELETE), self.translator.get(m.RERECORD)])
+            selection = xbmcgui.Dialog().select(program.title(), [self.t(m.DELETE), self.t(m.RERECORD)])
             if selection == 0:
                 self.deleteRecording()
             elif selection == 1:
                 self.rerecordRecording()
             else:
                 log.debug('dialog cancelled')
-        elif action.getId() == Action.DOWN and self.lastFocusId == ID_COVERFLOW_WRAPLIST:
+        elif id == Action.DOWN and self.lastFocusId == ID_COVERFLOW_WRAPLIST:
             log.debug('active popup menu') 
         else:
-            log.debug('Unhandled action: %s  lastFocusId = %s' % (action.getId(), self.lastFocusId))
+            log.debug('Unhandled action: %s  lastFocusId = %s' % (id, self.lastFocusId))
 
     @window_busy
     @inject_conn
     def deleteRecording(self):
         yes = True
         if self.settings.isConfirmOnDelete():
-            yes = xbmcgui.Dialog().yesno(self.translator.get(m.CONFIRMATION), self.translator.get(m.ASK_DELETE_RECORDING))
+            yes = xbmcgui.Dialog().yesno(self.t(m.CONFIRMATION), self.t(m.ASK_DELETE_RECORDING))
             
         if yes:
             program = self.recordings[self.coverFlow.getSelectedPosition()]
@@ -132,7 +137,7 @@ class HomeWindow(BaseWindow):
     def rerecordRecording(self):
         yes = True
         if self.settings.isConfirmOnDelete():
-            yes = xbmcgui.Dialog().yesno(self.translator.get(m.CONFIRMATION), self.translator.get(m.ASK_RERECORD_RECORDING))
+            yes = xbmcgui.Dialog().yesno(self.t(m.CONFIRMATION), self.t(m.ASK_RERECORD_RECORDING))
             
         if yes:
             program = self.recordings[self.coverFlow.getSelectedPosition()]
@@ -155,7 +160,7 @@ class HomeWindow(BaseWindow):
             self.settings.verify()
             self.settingsOK = True
         except SettingsException, se:
-            showPopup(self.translator.get(m.ERROR), str(se), 7000)
+            showPopup(self.t(m.ERROR), str(se), 7000)
             self.goSettings()
             try:
                 self.settings.verify() # TODO: optimize unnecessary re-verify
@@ -256,7 +261,7 @@ class HomeWindow(BaseWindow):
     def canStream(self):
         # TODO: Merge with duplicate method in RecordingDetailsWindow
         if not self.conn().protocol.supportsStreaming(self.platform):
-            xbmcgui.Dialog().ok(self.translator.get(m.ERROR), 
+            xbmcgui.Dialog().ok(self.t(m.ERROR), 
                 'Streaming from a MythTV %s backend to XBMC' % self.conn().protocol.mythVersion(), 
                 '%s is broken. Try playing again after deselecting' % self.platform.xbmcVersion(),
                 'MythBox > Settings > MythTV > Enable Streaming')
