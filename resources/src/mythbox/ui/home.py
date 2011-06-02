@@ -111,8 +111,10 @@ class HomeWindow(BaseWindow):
                 self.rerecordRecording()
             else:
                 log.debug('dialog cancelled')
+        elif action.getId() == Action.DOWN and self.lastFocusId == ID_COVERFLOW_WRAPLIST:
+            log.debug('active popup menu') 
         else:
-            pass #log.debug('Unhandled action: %s  lastFocusId = %s' % (action, self.lastFocusId))
+            log.debug('Unhandled action: %s  lastFocusId = %s' % (action.getId(), self.lastFocusId))
 
     @window_busy
     @inject_conn
