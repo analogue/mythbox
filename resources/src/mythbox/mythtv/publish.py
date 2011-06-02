@@ -56,7 +56,10 @@ class MythEventPublisher(object):
         while not self.closed and not xbmc.abortRequested:
             try:
                 tokens = self.eventConn.readEvent()
-                log.warning('EVENT: %s' % tokens)
+                
+                if len(tokens) >= 2 and not tokens[1].startswith(u'UPDATE_FILE_SIZE'): 
+                    log.debug('EVENT: %s' % tokens)
+                
                 if len(tokens)>=3 and tokens[0] == 'BACKEND_MESSAGE':
                     if tokens[1].startswith('SYSTEM_EVENT'):
                         if 'SCHEDULER_RAN' in tokens[1]:

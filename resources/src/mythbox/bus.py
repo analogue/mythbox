@@ -30,14 +30,18 @@ class Event(object):
     SHUTDOWN             = 'SHUTDOWN'           # keys: None
     SCHEDULER_RAN        = 'SCHEDULER_RAN'      # keys: None
     SCHEDULE_CHANGED     = 'SCHEDULE CHANGED'   # keys: None    recording schedule added/deleted/updated
+
     
 class EventBus(object):
     
     def __init__(self):
         self.listeners = []
         
-    def register(self, listener):
-        self.listeners.append(listener)
+    def register(self, listener, firstDibs=False):
+        if firstDibs:
+            self.listeners.insert(0, listener)
+        else:
+            self.listeners.append(listener)
 
     def deregister(self, listener):
         try:

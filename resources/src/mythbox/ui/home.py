@@ -500,4 +500,5 @@ class HomeWindow(BaseWindow):
             self.renderCoverFlow(exclude=event['program'])
         elif event['id'] == Event.SETTING_CHANGED and event['tag'] == 'feeds_twitter':
             self.renderNewsFeed()
-                            
+        elif event['id'] == Event.SCHEDULER_RAN:
+            self.renderTuners()

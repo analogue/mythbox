@@ -27,7 +27,7 @@ class DomainCache(object):
     
     def __init__(self, *args, **kwargs):
         self.bus = kwargs['bus']
-        self.bus.register(self)
+        self.bus.register(self, firstDibs=True)
         self.cache = {}
         
     def clear(self):
