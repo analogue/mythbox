@@ -29,8 +29,9 @@ class Event(object):
     SETTING_CHANGED      = 'SETTING_CHANGED'    # keys: id, tag, old, new
     SHUTDOWN             = 'SHUTDOWN'           # keys: None
     SCHEDULER_RAN        = 'SCHEDULER_RAN'      # keys: None
-    SCHEDULE_CHANGED     = 'SCHEDULE CHANGED'   # keys: None    recording schedule added/deleted/updated
-
+    SCHEDULE_CHANGED     = 'SCHEDULE CHANGED'   # keys: None recording schedule added/deleted/updated
+    COMMFLAG_START       = 'COMMFLAG_START'     # [u'BACKEND_MESSAGE', u'COMMFLAG_START 4276 2011-06-02T17:00:00', u'empty']   
+    
     
 class EventBus(object):
     

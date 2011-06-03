@@ -376,8 +376,8 @@ class HomeWindow(BaseWindow):
                     return cmp(r1.starttimeAsTime(), r2.starttimeAsTime())
                 
             def idleTunersLast(t1, t2):
-                t1Idle = t1.listItem.getProperty('status').startswith('Idle') # TODO: use translation
-                t2Idle = t2.listItem.getProperty('status').startswith('Idle') # TODO: use translation
+                t1Idle = t1.listItem.getProperty('status').startswith(self.t(m.IDLE))
+                t2Idle = t2.listItem.getProperty('status').startswith(self.t(m.IDLE))
 
                 if t1Idle and t2Idle:
                     return nextToRecordFirst(t1,t2)
@@ -501,9 +501,16 @@ class HomeWindow(BaseWindow):
         
     def onEvent(self, event):
         log.debug('ONEVENT: home window received event: %s' % event)
-        if event['id'] == Event.RECORDING_DELETED:
+        id = event['id']
+        
+        if id == Event.RECORDING_DELETED: # TODO: Add RECORDING_STARTED
             self.renderCoverFlow(exclude=event['program'])
-        elif event['id'] == Event.SETTING_CHANGED and event['tag'] == 'feeds_twitter':
+        
+        elif id == Event.SETTING_CHANGED and event['tag'] == 'feeds_twitter':
             self.renderNewsFeed()
-        elif event['id'] == Event.SCHEDULER_RAN:
+        
+        elif id in (Event.SCHEDULER_RAN, Event.SCHEDULE_CHANGED,):
             self.renderTuners()
+            
+        elif id in (Event.COMMFLAG_START,):
+            self.renderJobs()
