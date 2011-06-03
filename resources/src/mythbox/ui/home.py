@@ -39,6 +39,7 @@ log = logging.getLogger('mythbox.ui')
 
 ID_COVERFLOW_GROUP    = 499
 ID_COVERFLOW_WRAPLIST = 500
+ID_COVERFLOW_POPUP    = 300
 MAX_COVERFLOW         = 6
 
 
@@ -67,6 +68,7 @@ class HomeWindow(BaseWindow):
             self.tunersListBox = self.getControl(249)
             self.jobsListBox = self.getControl(248)
             self.coverFlow = self.getControl(ID_COVERFLOW_WRAPLIST)
+            self.coverFlowPopup = self.getControl(ID_COVERFLOW_POPUP)
             
             # button ids -> funtion ptr
             self.dispatcher = {
@@ -96,6 +98,10 @@ class HomeWindow(BaseWindow):
             self.coverItems.append(coverItem)
         self.coverFlow.addItems(self.coverItems)
    
+    def isCoverFlowPopupActive(self):
+        buttonIds = [ID_COVERFLOW_POPUP,301,302]
+        return self.getFocusId() in buttonIds
+    
     @catchall_ui
     def onAction(self, action):
         if self.shutdownPending:
@@ -103,23 +109,21 @@ class HomeWindow(BaseWindow):
         
         id = action.getId()
         
-        if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
-            self.shutdown()
-            self.close()
-        
-        elif id in (Action.CONTEXT_MENU,) and self.lastFocusId in (ID_COVERFLOW_GROUP, ID_COVERFLOW_WRAPLIST):
-            program = self.recordings[self.coverFlow.getSelectedPosition()]
-            selection = xbmcgui.Dialog().select(program.title(), [self.t(m.DELETE), self.t(m.RERECORD)])
-            if selection == 0:
-                self.deleteRecording()
-            elif selection == 1:
-                self.rerecordRecording()
+        if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR,):
+            if self.isCoverFlowPopupActive():
+                self.setFocus(self.coverFlow)
             else:
-                log.debug('dialog cancelled')
-        elif id == Action.DOWN and self.lastFocusId == ID_COVERFLOW_WRAPLIST:
-            log.debug('active popup menu') 
+                self.shutdown()
+                self.close()
+        
+        elif id == Action.CONTEXT_MENU and self.lastFocusId in (ID_COVERFLOW_GROUP, ID_COVERFLOW_WRAPLIST):
+            self.setFocus(self.coverFlowPopup)
+            
+        #elif id == Action.DOWN and self.lastFocusId == ID_COVERFLOW_WRAPLIST:
+        #    log.debug('activate popup menu') 
+        
         else:
-            log.debug('Unhandled action: %s  lastFocusId = %s' % (id, self.lastFocusId))
+            pass #log.debug('Unhandled action: %s  lastFocusId = %s' % (id, self.lastFocusId))
 
     @window_busy
     @inject_conn
@@ -160,7 +164,7 @@ class HomeWindow(BaseWindow):
             self.settings.verify()
             self.settingsOK = True
         except SettingsException, se:
-            showPopup(self.t(m.ERROR), str(se), 7000)
+            showPopup(self.t(m.ERROR), safe_str(se), 7000)
             self.goSettings()
             try:
                 self.settings.verify() # TODO: optimize unnecessary re-verify
