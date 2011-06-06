@@ -1032,196 +1032,12 @@ class RecordedProgram(Program):
             log.debug('data[%d] = %s' % (i,d))
 
 
-class Schedule(object):
-    """
-    Abstract base class to represent a recording schedule in the mythtv system.
-
-    This class is based on the Myth TV RECORD table.
-
-    TODO: Merge into RecordingSchedule. No need for base class
-    """
-
-    def __init__(self, translator):
-        self.translator = translator
-
-    def getIconPath(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def starttime(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def startdate(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def endtime(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def enddate(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def title(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def subtitle(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def description(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def category(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def profile(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def getRecordingGroup(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def getCheckForDupesUsing(self):
-        raise NotImplementedError, "Abstract base class"
-
-    def getCheckForDupesIn(self):
-        raise NotImplementedError, "Abstract base class"
-
-    def getEpisodeFilter(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def getDupin(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def station(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def seriesid(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def programid(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def search(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def isAutoUserJob1(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def isAutoUserJob2(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def isAutoUserJob3(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def isAutoUserJob4(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def findday(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def findtime(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def findid(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def parentid(self):
-        raise NotImplementedError, "Abstract base class"
-    
-    def __repr__(self):
-        return "%s {recordid=%s, type=%s, title=%s, subtitle=%s, starttime=%s, endtime=%s startdate=%s, enddate=%s}" % (
-            type(self).__name__,
-            self.getScheduleId(),
-            self.formattedScheduleType(),
-            repr(self.title()),
-            repr(self.subtitle()),
-            self.starttime(),
-            self.endtime(),
-            self.startdate(),
-            self.enddate())
-
-    def startdateAsTime(self):
-        """
-        @rtype: datetime.datetime
-        """
-        sd = self.startdate()
-        return datetime.datetime(int(sd[0:4]), int(sd[4:6]), int(sd[6:8]), 0, 0)
-        
-    def formattedChannel(self):
-        text = u''
-        if self.getChannelNumber():
-            text += self.getChannelNumber()
-        if self.getCallSign():
-            text += u' - ' + self.getCallSign()
-        return text
-
-    def formattedDuplicateMethod(self):
-        return self.translator.get(CheckForDupesUsing.translations[self.getCheckForDupesUsing()()])
-    
-    def formattedDuplicateIn(self):
-        return self.translator.get(CheckForDupesIn.translations[self.getCheckForDupesIn()])
-    
-    def formattedStartDate(self):
-        value = u''
-        value += self.startdateAsTime().strftime("%a, %b %d")
-        return value
-    
-    def formattedTime(self):
-        startHours = int(self.starttime()[0:2])
-        startAMPM = "am"
-        if startHours > 12:
-            startAMPM = "pm"
-            startHours -= 12
-            
-        endHours = int(self.endtime()[0:2])
-        endAMPM = "am"
-        if endHours > 12:
-            endAMPM = "pm"
-            endHours -= 12
-        
-        text = "%s:%s%s - %s:%s%s"%(
-            startHours,
-            self.starttime()[2:4],
-            startAMPM,
-            endHours,
-            self.endtime()[2:4],
-            endAMPM)
-        
-        if self.startdate() != self.enddate():
-            text += " +1"
-        return text
-    
-    def formattedScheduleType(self):
-        return self.translator.get(ScheduleType.translations[self.getScheduleType()])
-    
-    def formattedScheduleTypeDescription(self):
-        return self.translator.get(ScheduleType.long_translations[self.getScheduleType()])
-    
-    def fullTitle(self):
-        """
-        @return: Title and subtitle
-        """
-        fullTitle = u''
-        if self.title():
-            fullTitle += self.title()
-        if self.subtitle() and not sre.match('^\s+$', self.subtitle()):
-            fullTitle += u' - ' + self.subtitle()
-        return fullTitle
-
-    def __eq__(self, rhs):
-        return isinstance(rhs, Schedule) and self.getScheduleId() == rhs.getScheduleId()
-
-    def __hash__(self):
-        return hash(self.getScheduleId())
-
-
-class RecordingSchedule(Schedule):
+class RecordingSchedule(object):
     """Recording schedule as persisted in the 'record' table."""
     
     def __init__(self, data, translator):
-        """
-        @param data: dict of data
-        @param translator: Translator
-        """
-        Schedule.__init__(self, translator)
-        self._data = data    
+        self._data = data # dict 
+        self.translator = translator
         
         if not 'icon' in self._data or not self._data['icon'] or self._data['icon'] == "none":
             self._data['icon'] = None
@@ -1238,6 +1054,12 @@ class RecordingSchedule(Schedule):
             self.startdate(),
             self.enddate(),
             self.numRecorded())
+
+    def __eq__(self, rhs):
+        return isinstance(rhs, RecordingSchedule) and self.getScheduleId() == rhs.getScheduleId()
+
+    def __hash__(self):
+        return hash(self.getScheduleId())
     
     def data(self):
         """
@@ -1680,54 +1502,119 @@ class RecordingSchedule(Schedule):
         """
         self._data['endoffset'] = minutes
     
-
-class ScheduleFromProgram(RecordingSchedule):
-    '''New Schedule seeded from a TVProgram.'''
-    
-    def __init__(self, program, translator):
-        RecordingSchedule.__init__(self, dict(), translator)
+    def startdateAsTime(self):
+        """
+        @rtype: datetime.datetime
+        """
+        sd = self.startdate()
+        return datetime.datetime(int(sd[0:4]), int(sd[4:6]), int(sd[6:8]), 0, 0)
         
-        self.data()['icon']          = program.getIconPath()
-        self.data()['title']         = program.data()['title']
-        self.data()['subtitle']      = program.data()['subtitle']
-        self.data()['description']   = program.data()['description']
-        self.data()['category']      = program.category()
-        self.data()['chanid']        = program.getChannelId()
-        self.data()['channum']       = program.getChannelNumber()  
-        self.data()['callsign']      = program.getCallSign()
-        self.data()['seriesid']      = program.seriesid()
-        self.data()['programid']     = program.programid()
-        self.data()['channame']      = program.getChannelName()
-        self.data()['recordid']      = None
-        self.data()['type']          = ScheduleType.CHANNEL
-        self.data()['startdate']     = program.starttime()[0:8]
-        self.data()['starttime']     = program.starttime()[8:14]
-        self.data()['enddate']       = program.endtime()[0:8]
-        self.data()['endtime']       = program.endtime()[8:14]
-        self.data()['profile']       = u'Default'
-        self.data()['recpriority']   = 0
-        self.data()['autoexpire']    = 0
-        self.data()['maxepisodes']   = 0
-        self.data()['maxnewest']     = 0
-        self.data()['startoffset']   = 0
-        self.data()['endoffset']     = 0
-        self.data()['recgroup']      = 'Default'
-        self.data()['dupmethod']     = CheckForDupesUsing.SUBTITLE
-        self.data()['dupin']         = CheckForDupesIn.ALL_RECORDINGS | EpisodeFilter.NONE
-        self.data()['station']       = self.getCallSign()
-        self.data()['search']        = '0'
-        self.data()['autotranscode'] = 0
-        self.data()['autocommflag']  = 0 
-        self.data()['autouserjob1']  = 0 
-        self.data()['autouserjob2']  = 0 
-        self.data()['autouserjob3']  = 0 
-        self.data()['autouserjob4']  = 0 
-        self.data()['findday']       = '0'
-        self.data()['findtime']      = '00:00:00'
-        self.data()['findid']        = '0'
-        self.data()['inactive']      = 0
-        self.data()['parentid']      = '0'
-        self.data()['numRecorded']   = 0
+    def formattedChannel(self):
+        text = u''
+        if self.getChannelNumber():
+            text += self.getChannelNumber()
+        if self.getCallSign():
+            text += u' - ' + self.getCallSign()
+        return text
+
+    def formattedDuplicateMethod(self):
+        return self.translator.get(CheckForDupesUsing.translations[self.getCheckForDupesUsing()()])
+    
+    def formattedDuplicateIn(self):
+        return self.translator.get(CheckForDupesIn.translations[self.getCheckForDupesIn()])
+    
+    def formattedStartDate(self):
+        value = u''
+        value += self.startdateAsTime().strftime("%a, %b %d")
+        return value
+    
+    def formattedTime(self):
+        startHours = int(self.starttime()[0:2])
+        startAMPM = "am"
+        if startHours > 12:
+            startAMPM = "pm"
+            startHours -= 12
+            
+        endHours = int(self.endtime()[0:2])
+        endAMPM = "am"
+        if endHours > 12:
+            endAMPM = "pm"
+            endHours -= 12
+        
+        text = "%s:%s%s - %s:%s%s"%(
+            startHours,
+            self.starttime()[2:4],
+            startAMPM,
+            endHours,
+            self.endtime()[2:4],
+            endAMPM)
+        
+        if self.startdate() != self.enddate():
+            text += " +1"
+        return text
+    
+    def formattedScheduleType(self):
+        return self.translator.get(ScheduleType.translations[self.getScheduleType()])
+    
+    def formattedScheduleTypeDescription(self):
+        return self.translator.get(ScheduleType.long_translations[self.getScheduleType()])
+    
+    def fullTitle(self):
+        """
+        @return: Title and subtitle
+        """
+        fullTitle = u''
+        if self.title():
+            fullTitle += self.title()
+        if self.subtitle() and not sre.match('^\s+$', self.subtitle()):
+            fullTitle += u' - ' + self.subtitle()
+        return fullTitle
+
+    @staticmethod
+    def fromProgram(program, translator):
+        data = {}
+        data['icon']          = program.getIconPath()
+        data['title']         = program.data()['title']
+        data['subtitle']      = program.data()['subtitle']
+        data['description']   = program.data()['description']
+        data['category']      = program.category()
+        data['chanid']        = program.getChannelId()
+        data['channum']       = program.getChannelNumber()  
+        data['callsign']      = program.getCallSign()
+        data['seriesid']      = program.seriesid()
+        data['programid']     = program.programid()
+        data['channame']      = program.getChannelName()
+        data['recordid']      = None
+        data['type']          = ScheduleType.CHANNEL
+        data['startdate']     = program.starttime()[0:8]
+        data['starttime']     = program.starttime()[8:14]
+        data['enddate']       = program.endtime()[0:8]
+        data['endtime']       = program.endtime()[8:14]
+        data['profile']       = u'Default'
+        data['recpriority']   = 0
+        data['autoexpire']    = 0
+        data['maxepisodes']   = 0
+        data['maxnewest']     = 0
+        data['startoffset']   = 0
+        data['endoffset']     = 0
+        data['recgroup']      = 'Default'
+        data['dupmethod']     = CheckForDupesUsing.SUBTITLE
+        data['dupin']         = CheckForDupesIn.ALL_RECORDINGS | EpisodeFilter.NONE
+        data['station']       = program.getCallSign()
+        data['search']        = '0'
+        data['autotranscode'] = 0
+        data['autocommflag']  = 0 
+        data['autouserjob1']  = 0 
+        data['autouserjob2']  = 0 
+        data['autouserjob3']  = 0 
+        data['autouserjob4']  = 0 
+        data['findday']       = '0'
+        data['findtime']      = '00:00:00'
+        data['findid']        = '0'
+        data['inactive']      = 0
+        data['parentid']      = '0'
+        data['numRecorded']   = 0
+        return RecordingSchedule(data, translator)
 
 
 class Tuner(object):
@@ -2144,40 +2031,6 @@ class Job(object):
             self.formattedJobStatus(),
             self.scheduledRunTime)
 
-
-class MythUrl(object):
-    
-    pattern = re.compile('myth://([A-Za-z0-9\.]*):([0-9]*)(.*)')
-     
-    def __init__(self, url):
-        self.url = url
-        self.parsed = False
-        self.matches = None
-    
-    def match(self):
-        self.matches = MythUrl.pattern.match(self.url)
-        if self.matches:
-            log.debug('groups = %s' % len(self.matches.groups()))
-        self.parsed = True
-            
-    def hostname(self):
-        if not self.parsed: 
-            self.match()
-        if self.matches:
-            return self.matches.group(1)
-    
-    def port(self):
-        if not self.parsed: 
-            self.match()
-        if self.matches:
-            return self.matches.group(2)
-     
-    def path(self):
-        if not self.parsed: 
-            self.match()
-        if self.matches:
-            return self.matches.group(3)
-        
                 
 class Backend(object):
     

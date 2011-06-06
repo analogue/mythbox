@@ -33,7 +33,7 @@ import Queue
 from datetime import datetime, timedelta
 from mythbox.mythtv.conn import inject_conn
 from mythbox.mythtv.db import inject_db
-from mythbox.mythtv.domain import ScheduleFromProgram, Channel
+from mythbox.mythtv.domain import RecordingSchedule, Channel
 from mythbox.mythtv.enums import Upcoming
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import Action, Align, AspectRatio, window_busy
@@ -392,7 +392,7 @@ class TvGuideWindow(ui.BaseWindow):
 
                 # new recording schedule
                 if schedule is None:
-                    schedule = ScheduleFromProgram(program, self.translator)
+                    schedule = RecordingSchedule.fromProgram(program, self.translator)
                 
                 d = ScheduleDialog(
                     'mythbox_schedule_dialog.xml',

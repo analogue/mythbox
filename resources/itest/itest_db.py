@@ -25,7 +25,7 @@ import unittest2 as unittest
 
 from mockito import Mock
 from mythbox.mythtv.db import MythDatabase
-from mythbox.mythtv.domain import ScheduleFromProgram, Job
+from mythbox.mythtv.domain import RecordingSchedule, Job
 from mythbox.platform import Platform
 from mythbox.settings import MythSettings
 from mythbox.util import OnDemandConfig
@@ -66,7 +66,7 @@ class MythDatabaseTest(unittest.TestCase):
             log.warn('Cannot run unit tests without program listings in the database')
             return
             
-        schedule = ScheduleFromProgram(programs[0], self.translator)
+        schedule = RecordingSchedule.fromProgram(programs[0], self.translator)
         log.debug('Test schedule = %s' % schedule)
         result = self.db.saveSchedule(schedule)
         log.debug('Save schedule result = %s' % result)
