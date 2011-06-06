@@ -29,7 +29,7 @@ from mythbox.mythtv.protocol import protocols
 
 from mythbox.mythtv.domain import ctime2MythTime, dbTime2MythTime, Backend, \
      Channel, CommercialBreak, Job, UserJob, TVProgram, Program, RecordedProgram, \
-     RecordingSchedule, Tuner, MythUrl, StatusException, frames2seconds, seconds2frames
+     RecordingSchedule, Tuner, StatusException, frames2seconds, seconds2frames
 
 from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, FlagMask, \
      EpisodeFilter, JobStatus, JobType
@@ -777,27 +777,6 @@ class JobTest(unittest.TestCase):
             domainCache=domainCache)        
 
 
-class MythUrlTest(unittest.TestCase):
-
-    def test_When_url_has_hostname_Then_parse_successful(self):
-        url = MythUrl('myth://twiggy:6543/var/lib/recordings/000_111222333444.mpg')
-        self.assertEqual('twiggy', url.hostname())
-        self.assertEqual('6543', url.port())
-        self.assertEqual('/var/lib/recordings/000_111222333444.mpg', url.path())
-
-    def test_When_url_has_ipaddress_Then_parse_successful(self):
-        url = MythUrl('myth://192.168.233.212:6543/var/lib/recordings/000_111222333444.mpg')
-        self.assertEqual('/var/lib/recordings/000_111222333444.mpg', url.path())
-        self.assertEqual('6543', url.port())
-        self.assertEqual('192.168.233.212', url.hostname())
-        
-    def test_When_url_invalid_Then_returns_None(self):
-        url = MythUrl('myth:/192.168.233.212:6543/var/lib/recordings/000_111222333444.mpg')
-        self.assertTrue(url.hostname() is None)
-        self.assertTrue(url.path() is None)
-        self.assertTrue(url.port() is None)
-
-        
 class BackendTest(unittest.TestCase):
 
     def test_eq_True_by_reference(self):
