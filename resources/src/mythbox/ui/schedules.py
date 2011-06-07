@@ -84,11 +84,17 @@ class SchedulesWindow(BaseWindow):
 
     @catchall
     def onAction(self, action):
-        if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
+        id = action.getId()
+        
+        if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
             self.closed = True
             self.settings.put('schedules_last_selected', '%d'%self.schedulesListBox.getSelectedPosition())
             self.settings.put('schedules_sort_by', self.sortBy)
             self.close()
+
+        elif id in (Action.ACTION_NEXT_ITEM, Action.ACTION_PREV_ITEM,):  # bottom, top
+            if self.lastFocusId == ID_SCHEDULES_LISTBOX:
+                self.selectListItemAtIndex(self.schedulesListBox, [0, self.schedulesListbox.size()-1][id == Action.ACTION_NEXT_ITEM])
 
     def applySort(self):
         self.schedules.sort(key=SORT_BY[self.sortBy]['sorter'], reverse=False)

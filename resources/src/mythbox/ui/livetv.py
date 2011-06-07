@@ -251,6 +251,7 @@ class FileLiveTvPlayer(MountedPlayer):
         self._playbackCompletedLock = threading.Event()
         self._playbackCompletedLock.clear()
 
+ID_CHANNELS_LISTBOX = 600
 
 class LiveTvWindow(BaseWindow):
     
@@ -273,7 +274,7 @@ class LiveTvWindow(BaseWindow):
     def onInit(self):
         if not self.win:
             self.win = xbmcgui.Window(xbmcgui.getCurrentWindowId())
-            self.channelsListBox = self.getControl(600)
+            self.channelsListBox = self.getControl(ID_CHANNELS_LISTBOX)
             self.refreshButton = self.getControl(250)
         
         if self.programs:
@@ -307,18 +308,23 @@ class LiveTvWindow(BaseWindow):
             
     @catchall_ui
     def onAction(self, action):
+        id = action.getId()
         
-        if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
+        if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR,):
             self.closed = True
             self.settings.put('livetv_last_selected', str(self.channelsListBox.getSelectedPosition()))
             self.close()
             
-        elif action.getId() in (Action.UP, Action.DOWN, Action.PAGE_DOWN, Action.PAGE_UP, ):
+        elif id in (Action.UP, Action.DOWN, Action.PAGE_DOWN, Action.PAGE_UP, ):
             self.lastSelected = self.channelsListBox.getSelectedPosition()
             channel = self.listItem2Channel(self.channelsListBox.getSelectedItem())
             if channel.currentProgram and channel.needsPoster:
                 log.debug('Adding %s:%s to poster lookup q' % (channel.getChannelNumber(), safe_str(channel.currentProgram.title())))
                 [self.tvQueue, self.movieQueue][channel.currentProgram.isMovie()].append(channel)
+
+        elif id in (Action.ACTION_NEXT_ITEM, Action.ACTION_PREV_ITEM,):  # bottom, top
+            if self.lastFocusId == ID_CHANNELS_LISTBOX:
+                self.selectListItemAtIndex(self.channelsListBox, [0, self.channelsListBox.size()-1][id == Action.ACTION_NEXT_ITEM])
 
     def listIndex2Channel(self, i):
         return self.listItem2Channel(self.channelsListBox.getListItem(i))

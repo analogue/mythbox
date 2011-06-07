@@ -9,7 +9,7 @@ x/x/2011 - MythBox 1.0.4
           for commercial flagging, transcoding, or user job execution
 
     - Fan Art
-        - New artwork is checked for once a week if no artwork was 
+        - New artwork is checked for once a month if no artwork was 
           previously available
 
     - TV Guide Window
@@ -96,9 +96,9 @@ x/x/2011 - MythBox 1.0.4
     - Added Episode column to the recordings screen
     - TV Guide shows upcoming recordings in a different color
     - Readme and FAQ viewable from MythBox > Settings > Readme and FAQ
-    - Czech translations (tnx Pavel Mlčoch)
+    - Czech translations (tnx Pavel MlÄ�och)
     - Swedish translations (tnx Magnus Gustafsson)
-    - Polish translations (tnx Michał Sawicz)
+    - Polish translations (tnx MichaÅ‚ Sawicz)
         
   Fixed
     - Issue 136 - mythbox.log moved to standard log dir on Mac OSX

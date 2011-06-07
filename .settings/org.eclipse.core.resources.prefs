@@ -1,4 +1,4 @@
-#Sat May 28 22:10:11 CDT 2011
+#Mon Jun 06 20:39:01 CDT 2011
 eclipse.preferences.version=1
 encoding//resources/lib/BeautifulSoup/BeautifulSoupTests.py=UTF-8
 encoding//resources/lib/mysql-connector-python/newunits.py=utf-8
@@ -13,3 +13,4 @@ encoding//resources/test/mythboxtest/test_fanart.py=utf-8
 encoding//resources/test/mythboxtest/test_log.py=utf-8
 encoding//resources/test/mythboxtest/test_settings.py=utf-8
 encoding//resources/test/mythboxtest/ui/test_recordings.py=utf-8
+encoding/changelog.txt=UTF-8

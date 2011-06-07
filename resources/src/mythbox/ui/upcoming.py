@@ -119,12 +119,17 @@ class UpcomingRecordingsWindow(BaseWindow):
             
     @catchall_ui
     def onAction(self, action):
-        #log.debug('Key got hit: %s   Current focus: %s' % (ui.toString(action), self.getFocusId()))
-        if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR,):
+        id = action.getId()
+        
+        if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR,):
             self.closed = True
             self.settings.put('upcoming_sort_by', self.sortBy)
             self.settings.put('upcoming_sort_ascending', '%s' % self.sortAscending)
             self.close()
+
+        elif id in (Action.ACTION_NEXT_ITEM, Action.ACTION_PREV_ITEM,):  # bottom, top
+            if self.lastFocusId == ID_PROGRAMS_LISTBOX:
+                self.selectListItemAtIndex(self.programsListBox, [0, self.programsListBox.size()-1][id == Action.ACTION_NEXT_ITEM])
 
     @inject_db
     def cacheChannels(self):
