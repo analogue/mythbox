@@ -18,21 +18,11 @@
 #
 import datetime
 import logging
+import mysql.connector as MySQLdb # pure python mysql client
 import odict
-
-from mythbox.mythtv.enums import RecordingStatus, JobType
-
-try:
-    # native mysql client libs
-    import MySQLdb  
-    cursorArgs = [MySQLdb.cursors.DictCursor]
-except:
-    # pure python mysql client
-    import mysql.connector as MySQLdb
-    cursorArgs = []
-    
 import string
 
+from mythbox.mythtv.enums import RecordingStatus, JobType
 from decorator import decorator
 from mythbox import pool
 from mythbox.pool import PoolableFactory
@@ -41,6 +31,7 @@ from mythbox.util import timed, threadlocals, safe_str
 log = logging.getLogger('mythbox.core')
 ilog = logging.getLogger('mythbox.inject')
 
+cursorArgs = []
 
 def mythtime2dbtime(mythtime):
     """Turn 001122 -> 00:11:22"""
@@ -153,7 +144,6 @@ class MythDatabase(object):
     
     def __init__(self, *args, **kwargs):
         # Static data cached on demand
-        self._channels = None
         self._master = None
         self._slaves = None
         
@@ -284,31 +274,30 @@ class MythDatabase(object):
         @return: cached list of viewable channels across all tuners.
         @rtype: Channel[]
         """
-        if not self._channels:
-            sql = """
-                select
-                    ch.chanid, 
-                    ch.channum, 
-                    ch.callsign, 
-                    ch.name, 
-                    ch.icon, 
-                    ci.cardid
-                from 
-                    channel ch,
-                    cardinput ci 
-                where 
-                    ch.channum is not null
-                    and ch.channum != ''
-                    and ch.visible = 1
-                    and ch.sourceid = ci.sourceid
-                order by 
-                    ch.chanid
-                """
-            self.cursor.execute(sql)
-            rows = map(lambda r: self.toDict(self.cursor, r), self.cursor.fetchall())
-            from mythbox.mythtv.domain import Channel
-            self._channels = map(lambda rd: Channel(rd), rows)
-        return self._channels
+        sql = """
+            select
+                ch.chanid, 
+                ch.channum, 
+                ch.callsign, 
+                ch.name, 
+                ch.icon, 
+                ci.cardid
+            from 
+                channel ch,
+                cardinput ci 
+            where 
+                ch.channum is not null
+                and ch.channum != ''
+                and ch.visible = 1
+                and ch.sourceid = ci.sourceid
+            order by 
+                ch.chanid
+            """
+        self.cursor.execute(sql)
+        rows = map(lambda r: self.toDict(self.cursor, r), self.cursor.fetchall())
+        from mythbox.mythtv.domain import Channel
+        channels = map(lambda rd: Channel(rd), rows)
+        return channels
 
     @inject_cursor
     def getRecordingProfileNames(self):

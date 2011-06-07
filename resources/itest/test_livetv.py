@@ -42,20 +42,20 @@ class LiveTVBrainTest(unittest.TestCase):
         settings.put('mysql_password', privateConfig.get('mysql_password'))
         settings.put('mysql_database', privateConfig.get('mysql_database'))
         self.db = MythDatabase(settings, translator)
-        self.session = Connection(settings, translator, platform, bus, self.db)
-        self.brain = FileLiveTvBrain(self.session, self.db)
+        self.conn = Connection(settings, translator, platform, bus, self.db)
+        self.brain = FileLiveTvBrain(self.conn, self.db)
     
     def tearDown(self):
-        self.session.close()
+        self.conn.close()
         
     def test_watchLiveTV(self):
         
-#        tuners = self.session.getTuners()
+#        tuners = self.conn.getTuners()
 #        for t in tuners:
 #            if t.tunerId == 5 and t.isRecording():
 #                t.stopLiveTV()
         
-        channel = self.session.getChannels()[1]
+        channel = self.db.getChannels()[1]
         log.debug('Attempting to watch %s' % channel)
         tuner = self.brain.watchLiveTV(channel)
         log.debug("Assuming we're watching some tv...")
@@ -69,7 +69,7 @@ class LiveTVBrainTest(unittest.TestCase):
         log.debug('all done')
         
     def xxxtest_stopAllTuners(self):
-        tuners = self.session.getTuners()
+        tuners = self.conn.getTuners()
         for t in tuners:
             if t.tunerId == 5:
                 t.stopLiveTV()

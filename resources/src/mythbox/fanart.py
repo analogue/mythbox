@@ -185,11 +185,11 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
         
         bucket = self.struckOut[key]
         if 'timestamp' in bucket:
-            # remove program from penalty box if the last lookup failure was over a week ago
+            # remove program from penalty box if the last lookup failure was over 30 days ago
             ts = bucket['timestamp']
             now = datetime.datetime.now()
             diff = now - ts
-            if diff < datetime.timedelta(days=7):
+            if diff < datetime.timedelta(days=30):
                 #log.debug('Strikeout stands for %s:%s' % (key,safe_str(bucket['title'])))
                 return True
             

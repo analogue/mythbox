@@ -201,7 +201,7 @@ class TvGuideWindow(ui.BaseWindow):
             self.guide_dy += (remainder / self.channelsPerPage)
 
             # retrieve, consolidate, and sort channels
-            self.channels = Channel.mergeChannels(self.db().getChannels())
+            self.channels = Channel.mergeChannels(self.domainCache.getChannels())
             self.channels.sort(key=Channel.getSortableChannelNumber)
             self.pager = Pager(len(self.channels), self.channelsPerPage)
             

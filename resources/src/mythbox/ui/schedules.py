@@ -113,7 +113,7 @@ class SchedulesWindow(BaseWindow):
     def cacheChannels(self):
         if not self.channelsById:
             self.channelsById = {}
-            for channel in self.db().getChannels():
+            for channel in self.domainCache.getChannels():
                 self.channelsById[channel.getChannelId()] = channel
         
     @window_busy

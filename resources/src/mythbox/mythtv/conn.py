@@ -297,14 +297,6 @@ class Connection(object):
         # TODO: Unfinished!
     
     @inject_db
-    def getChannels(self):
-        """
-        @return: Viewable channels across all tuners.
-        @rtype: Channel[]
-        """
-        return self.db().getChannels()
-    
-    @inject_db
     def getTuners(self):
         """
         @return: Tuner[]

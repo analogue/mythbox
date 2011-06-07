@@ -60,7 +60,7 @@ class MythChannelIconResolverTest(unittest.TestCase):
 
     def test_store_When_channel_has_icon_Then_download_icon(self):
         # Setup
-        channels = filter(lambda x: x.getIconPath(), self.conn.getChannels()) # filter out channels that don't have an icon
+        channels = filter(lambda x: x.getIconPath(), self.db.getChannels()) # filter out channels that don't have an icon
         self.assertTrue(len(channels) > 0, 'Channels with icon needed in db to run test')
         downloader = MythChannelIconResolver(self.conn)
          
