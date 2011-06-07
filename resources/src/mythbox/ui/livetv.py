@@ -304,7 +304,7 @@ class LiveTvWindow(BaseWindow):
             self.refresh()
              
     def onFocus(self, controlId):
-        log.debug('FOCUS %s' % controlId)
+        self.lastFocusId = controlId
             
     @catchall_ui
     def onAction(self, action):

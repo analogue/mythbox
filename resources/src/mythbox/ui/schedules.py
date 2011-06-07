@@ -241,7 +241,7 @@ class ScheduleDialog(BaseDialog):
         self._updateView()
 
     def onFocus(self, controlId):
-        pass
+        self.lastFocusId = controlId
         
     @catchall_ui 
     def onAction(self, action):

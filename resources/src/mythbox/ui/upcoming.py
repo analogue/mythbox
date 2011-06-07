@@ -90,7 +90,7 @@ class UpcomingRecordingsWindow(BaseWindow):
         self.render()
              
     def onFocus(self, controlId):
-        pass
+        self.lastFocusId = controlId
 
     @inject_db
     def onEditSchedule(self):
