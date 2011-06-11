@@ -1,3 +1,3 @@
 #!/bin/bash
-find . -name "*.pyc" -o -name "*.pyo" -o -name "mythbox.log" | xargs rm -fv
-find . -name target -type d | xargs rm -rfv
+find . -name "*.pyc" -o -name "*.pyo" -o -name "mythbox.log" | xargs --delim '\n' rm -fv
+find . -name target -type d | xargs --delim '\n' rm -rfv
