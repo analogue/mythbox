@@ -13,13 +13,14 @@ Features:
   - Compatible with MythTV 0.23, 0.23.1 and 0.24 (Live TV broken on 0.24 due to XBMC)
   - Add your own public Twitter feeds
   - Move comm flagging jobs to the front of the queue
+  - Trigger user jobs, comm flagging, or transcoding for a recording
 
 Requirements
 ================
   
   All Platforms
     - XBMC 10.10 (Dharma)
-    - A working MythTV backend
+    - A working MythTV 0.23 or 0.24 backend
 
   Linux
     - 32-bit or 64-bit distro (Ubuntu, Debian, Fedora, Gentoo, Arch, OpenSuse, etc) 
