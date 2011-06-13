@@ -109,15 +109,15 @@ class BootStrapper(object):
         from mythbox.filecache import FileCache, HttpResolver, MythThumbnailFileCache
         from mythbox.mythtv.resolver import MythChannelIconResolver, MythThumbnailResolver 
         from os.path import join
+
+        from mythbox.mythtv.cache import DomainCache
+        self.domainCache = DomainCache(bus=self.bus)
         
         cacheDir = self.platform.getCacheDir()
         self.translator = NativeTranslator(self.platform.getScriptDir())
-        self.mythThumbnailCache = MythThumbnailFileCache(join(cacheDir, 'thumbnail'), MythThumbnailResolver(), self.bus)
+        self.mythThumbnailCache = MythThumbnailFileCache(join(cacheDir, 'thumbnail'), MythThumbnailResolver(), self.bus, self.domainCache)
         self.mythChannelIconCache = FileCache(join(cacheDir, 'channel'), MythChannelIconResolver())
         self.httpCache = FileCache(join(cacheDir, 'http'), HttpResolver())
-        
-        from mythbox.mythtv.cache import DomainCache
-        self.domainCache = DomainCache(bus=self.bus)
         
         self.cachesByName = {
             'mythThumbnailCache'  : self.mythThumbnailCache, 

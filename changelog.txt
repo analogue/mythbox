@@ -1,3 +1,9 @@
+x/xx/2011 - MythBox 1.0.5
+-----------------------------
+  New
+    - A thumbnail for which there is no associated recording is
+      automatically deleted
+
 6/11/2011 - MythBox 1.0.4
 -----------------------------
   New
@@ -7,6 +13,7 @@
       Details window 
     - Jobs and Tuners table on the Home window update automatically
       based on events from the master backend
+    - Coverflow recordings can be deleted by clicking the down button
     - New artwork is checked for once a month if no artwork was 
       previously available
     - |<< and >>| buttons are mapped to go to the top/bottom of a list   

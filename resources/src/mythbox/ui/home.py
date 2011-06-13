@@ -183,6 +183,9 @@ class HomeWindow(BaseWindow):
             self.publisher = MythEventPublisher(**self.deps)
             self.publisher.startup()
             
+            self.mythThumbnailCache.reap()
+
+            
         return self.settingsOK
         
     @inject_db

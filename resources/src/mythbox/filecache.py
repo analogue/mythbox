@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -24,7 +24,8 @@ import urllib
 import threading
 
 from mythbox.bus import Event
-from mythbox.util import sync_instance, safe_str, SynchronizedDict, requireDir
+from mythbox.util import sync_instance, safe_str, SynchronizedDict, requireDir,\
+    run_async, catchall
 
 log = logging.getLogger('mythbox.cache')
 
@@ -151,7 +152,7 @@ class FileCache(object):
 class MythThumbnailFileCache(FileCache):
     """File cache + interested in bus events"""
     
-    def __init__(self, rootDir, resolver, bus):
+    def __init__(self, rootDir, resolver, bus, domainCache):
         """
         @type rootDir: str
         @param rootDir: root directory of the cache. will be created if it does not exist.
@@ -162,7 +163,26 @@ class MythThumbnailFileCache(FileCache):
         FileCache.__init__(self, rootDir, resolver)
         self.bus = bus
         self.bus.register(self)
-        
+        self.domainCache = domainCache
+    
+    @run_async
+    @catchall
+    def reap(self):
+        '''Delete thumbnails which no longer have an associated recording'''
+        active = set([self.resolver.hash(r) for r in self.domainCache.getAllRecordings()])
+        ondisk = set(os.listdir(self.rootDir))
+        delta = ondisk.difference(active)
+
+        if delta:
+            c = 0
+            for f in delta:
+                abspath = os.path.join(self.rootDir, f)
+                c += os.path.getsize(abspath)
+                os.remove(abspath)
+            log.info('Reclaimed %d kb by deleting %d thumbnails' % ((c/1000), len(delta)))
+        else:
+            log.debug('Nothing to reap from thumbnail cache')
+            
     def onEvent(self, event):
         """When a recording is deleted, remove its thumbnail from the cache"""
         if event['id'] == Event.RECORDING_DELETED:
