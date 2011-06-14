@@ -451,20 +451,14 @@ class TvGuideWindow(ui.BaseWindow):
         
         # Create a button for navigation and hilighting. For some reason, button labels don't get truncated properly.
         cell.control = xbmcgui.ControlButton(
-            relX + self.guide_x, 
-            relY + self.guide_y, 
-            width-2,       # hack for cell dividers 
-            height, 
+            int(relX + self.guide_x), 
+            int(relY + self.guide_y), 
+            int(width-2),       # hack for cell dividers 
+            int(height), 
             label='',      # Text empty on purpose. Label overlay responsible for this
             focusTexture=self.platform.getMediaPath('gradient_cell.png'),
             noFocusTexture=self.platform.getMediaPath('gradient_grid.png'),
             alignment=Align.CENTER_Y|Align.TRUNCATED)
-
-#        if program:
-#            if program.endtimeAsTime() > self.endTime:
-#                cell.control.setLabel(label2='>')
-#            if program.starttimeAsTime() < self.startTime:
-#                cell.control.setLabel(label= '<')
 
         if program in self.upcomingByProgram():
             cell.title = '[B][COLOR=ffe2ff43]' + cell.title + '[/COLOR][/B]'
@@ -473,10 +467,10 @@ class TvGuideWindow(ui.BaseWindow):
         # Create a label to hold the name of the program with insets  
         # Label text seems to get truncated correctly...
         cell.label = xbmcgui.ControlLabel(
-            relX + self.guide_x + 12, # indent 12 px for bumper 
-            relY + self.guide_y, 
-            width - 12 - 12,          # reverse-indent 12px for bumper
-            height,
+            int(relX + self.guide_x + 12), # indent 12 px for bumper 
+            int(relY + self.guide_y), 
+            int(width - 12 - 12),          # reverse-indent 12px for bumper
+            int(height),
             cell.title,
             font='font11',
             alignment=Align.CENTER_Y|Align.TRUNCATED)
@@ -488,8 +482,8 @@ class TvGuideWindow(ui.BaseWindow):
             overlayWidth = 40
             overlayHeight = 15
             cell.hdOverlay = xbmcgui.ControlImage(
-                relX + self.guide_x + width - overlayWidth - 5, 
-                relY + self.guide_y + 2, 
+                int(relX + self.guide_x + width - overlayWidth - 5), 
+                int(relY + self.guide_y + 2), 
                 overlayWidth, 
                 overlayHeight, 
                 self.platform.getMediaPath('OverlayHD.png'),
