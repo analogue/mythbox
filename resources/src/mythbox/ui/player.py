@@ -111,18 +111,8 @@ class MountedPlayer(BasePlayer):
         mlog.debug('> playRecording(%s)' % safe_str(self.program.title()))
         assert not self.isPlaying(), 'Player is already playing a video'
         
-        # TODO: FPS callback from LogScraper needs to poke commSkipper so times are adjusted
         self.commSkipper = commSkipper
-
-        # extract recording's framerate from xbmc.log and inject into bookmarker
-        #from mythbox.log import LogScraper
-        #logtail = LogScraper(self.platform.getXbmcLog())
-        #worker = logtail.matchLineAsync("fps:", timeout=30, callback=self.bookmarker.onFPS)
-        self.play(self.buildPlaybackUrl(), self.buildPlayList())
-        #worker.join()
-
-        #self.play(self.buildPlaybackUrl(), self.buildPlayList())
-        
+        self.play(self.buildPlaybackUrl(), self.buildPlayList(), windowed=False)
         
         self.waitForPlaybackCompleted()
         self.active = False
