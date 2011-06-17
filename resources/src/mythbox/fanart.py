@@ -522,6 +522,8 @@ class ImdbFanartProvider(BaseFanartProvider):
 
 class TvdbFanartProvider(BaseFanartProvider):
     
+    overrides = {u'Conan':u'Conan (2010)'}
+    
     def __init__(self, platform, nextProvider=None):
         BaseFanartProvider.__init__(self, nextProvider)
         self.tvdbCacheDir = requireDir(os.path.join(platform.getCacheDir(), 'tvdb'))
@@ -536,16 +538,24 @@ class TvdbFanartProvider(BaseFanartProvider):
             search_all_languages=False, 
             apikey='E2032A158BE34568')
 
+    def transform(self, title):
+        '''TVDB specific overrides for titles that do not match 1:1'''
+        if self.overrides.has_key(title):
+            return self.overrides[title]
+        else:
+            return title
+        
     @chain
     @timed    
     def getPosters(self, program):
         posters = []
         if not program.isMovie():
+            t = self.transform(program.title())
             try:
                 # Example: tvdb['scrubs']['_banners']['poster']['680x1000']['35308']['_bannerpath']
                 #posterUrl = self.tvdb[program.title()]['_banners']['poster'].itervalues().next().itervalues().next()['_bannerpath']
                 
-                postersByDimension = self._queryTvDb(program.title(), qtype='poster') 
+                postersByDimension = self._queryTvDb(t, qtype='poster') 
                 for dimension in postersByDimension.keys():
                     #log.debug('key=%s' % dimension)
                     for id in postersByDimension[dimension].keys():
@@ -553,39 +563,41 @@ class TvdbFanartProvider(BaseFanartProvider):
                         bannerPath = postersByDimension[dimension][id]['_bannerpath']
                         #log.debug('bannerPath = %s' % bannerPath)
                         posters.append(bannerPath)
-                log.debug('TVDB[%s] = %s' % (len(posters), str(program.title())))
+                log.debug('TVDB[%s] = %s' % (len(posters), safe_str(t)))
             except Exception, e:
-                log.warn('TVDB errored out on "%s" with error "%s"' % (safe_str(program.title()), safe_str(e)))
+                log.warn('TVDB: "%s" error "%s"' % (safe_str(t), safe_str(e)))
         return posters
     
     @chain
     def getBanners(self, program):
         banners = []
         if not program.isMovie():
+            t = self.transform(program.title())
             try:
-                bannersByType = self._queryTvDb(program.title(), qtype='series')
+                bannersByType = self._queryTvDb(t, qtype='series')
                 for subType in ['graphical', 'text', 'blank']:
                     if subType in bannersByType:
                         bannersById = bannersByType[subType]
                         for id in bannersById.keys():
                             banners.append(bannersById[id]['_bannerpath'])
             except Exception, e:
-                log.warn('TVDB - no banners for %s - %s' % (safe_str(program.title()), safe_str(e)))
+                log.warn('TVDB: No banners for %s - %s' % (safe_str(t), safe_str(e)))
         return banners
 
     @chain
     def getBackgrounds(self, program):
         backgrounds = []
         if not program.isMovie():
+            t = self.transform(program.title())
             try:
-                backgroundsByDimension = self._queryTvDb(program.title(), qtype='fanart')
+                backgroundsByDimension = self._queryTvDb(t, qtype='fanart')
                 for knownDim in ['1280x720', '1920x1080']:
                     if knownDim in backgroundsByDimension:
                         backgroundsById = backgroundsByDimension[knownDim]
                         for id in backgroundsById.keys():
                             backgrounds.append(backgroundsById[id]['_bannerpath'])
             except Exception, e:
-                log.debug('TVDB - no backgrounds for %s - %s' % (safe_str(program.title()), safe_str(e)))
+                log.debug('TVDB: No backgrounds for %s - %s' % (safe_str(t), safe_str(e)))
         return backgrounds
 
     def clear(self):
@@ -603,18 +615,20 @@ class TvdbFanartProvider(BaseFanartProvider):
         # TODO: try some other method if search by original air date comes up blank
         if program.isMovie(): 
             return None, None
-
+        
+        t = self.transform(program.title())
+        
         try:
-            show = self.tvdb[program.title()]
+            show = self.tvdb[t]
             originalAirDate = program.originalAirDate()
             episodes = show.airedOn(originalAirDate)
             episode = episodes.pop()
             return episode['seasonnumber'], episode['episodenumber']
         except (tvdb_api.tvdb_episodenotfound, tvdb_api.tvdb_shownotfound):
-            log.debug('TVDB: Show not found - %r' % safe_str(program.title()))
+            log.debug('TVDB: Show not found - %s' % safe_str(t))
             return None, None
         except (tvdb_api.tvdb_error):
-            log.exception(safe_str(program.title()))
+            log.exception(safe_str(t))
             return None, None
 
 

@@ -446,7 +446,13 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         for url in urls:
             self.assertEqual("http", url[0:4])
 
-
+    def test_getPosters_When_title_has_override_Then_returns_posters_for_override(self):
+        program = TVProgram({'title':u'Conan', 'category_type':u'series'}, translator=Mock())
+        provider = TvdbFanartProvider(self.platform, nextProvider=None)
+        urls = provider.getPosters(program)
+        self.assertTrue(len(urls) > 0)
+        
+        
 class TheMovieDbFanartProviderTest(BaseFanartProviderTestCase):
 
     def getPrograms(self):
