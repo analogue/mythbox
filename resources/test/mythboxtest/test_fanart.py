@@ -307,20 +307,6 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.assertListEqual([], provider.getPosters(program))
 
     @skipIfTvdbDown
-    def test_getPosters_When_program_the_office_Then_returns_first_result_which_is_wrong_fixme(self):
-        # Setup
-        program = TVProgram({'title':'The Office', 'category_type':'series'}, translator=Mock())
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
-        
-        # Test
-        posterUrls = provider.getPosters(program)
-        
-        # Verify
-        log.debug('Poster URLs = %s' % posterUrls)
-        for posterUrl in posterUrls:
-            self.assertEqual("http", posterUrl[0:4])
-
-    @skipIfTvdbDown
     def test_getPosters_When_title_has_funny_chars_Then_dont_fail_miserably(self):
         # Setup
         program = TVProgram({'title': u'Königreich der Himmel', 'category_type':'series'}, translator=Mock())
@@ -446,7 +432,9 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         for url in urls:
             self.assertEqual("http", url[0:4])
 
+    @skipIfTvdbDown
     def test_getPosters_When_title_has_override_Then_returns_posters_for_override(self):
+        # 'Conan' is mapped to 'Conan (2010)' as TVDB's official title
         program = TVProgram({'title':u'Conan', 'category_type':u'series'}, translator=Mock())
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
         urls = provider.getPosters(program)
