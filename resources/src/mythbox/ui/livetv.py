@@ -79,8 +79,14 @@ class MythLiveTvBrain(BaseLiveTvBrain):
 
     def watchLiveTV(self, channel):
         try:
-            self.tuner = self._findAvailableTunerWithChannel(channel)
             livePlayer = MythLiveTvPlayer()
+            if livePlayer.isPlaying():
+                livePlayer.stop()
+                while livePlayer.isPlaying():
+                    log.debug('Waiting for livetv to stop...')
+                    time.sleep(1)
+                    
+            self.tuner = self._findAvailableTunerWithChannel(channel)
             livePlayer.watchChannel(self.settings, channel)
             #del livePlayer # induce GC so on* callbacks unregistered
             return self.tuner
@@ -103,7 +109,7 @@ class MythLiveTvPlayer(xbmc.Player):
         # completion. 
 
         master = self.db().getMasterBackend()
-        
+
         # url must not be unicode!
         url = 'myth://%s:%s@%s:%s/channels/%s.ts' % (
             str(settings.get('mysql_user')),
@@ -111,7 +117,7 @@ class MythLiveTvPlayer(xbmc.Player):
             str(master.ipAddress),
             str(master.port),
             str(channel.getChannelNumber()))
-        self.play(url)
+        self.play(url, windowed=False)
 
 
 class FileLiveTvBrain(BaseLiveTvBrain):
