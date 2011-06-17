@@ -523,8 +523,9 @@ class ImdbFanartProvider(BaseFanartProvider):
 class TvdbFanartProvider(BaseFanartProvider):
     
     overrides = {
-        u'Conan':u'Conan (2010)',
-        u'The Office': u'The Office (US)'  # TODO: How to differentiate between the US and UK version?
+        u'Conan'      : u'Conan (2010)',
+        u'Skins'      : u'Skins (US)',
+        u'The Office' : u'The Office (US)'  # TODO: How to differentiate between the US and UK version?
     }
     
     def __init__(self, platform, nextProvider=None):
