@@ -69,15 +69,21 @@ class RecordingDetailsWindow(BaseWindow):
                 self.rerecordButton.getId()    : self.rerecord,
                 self.firstInQueueButton.getId(): self.moveToFrontOfJobQueue,
                 self.refreshButton.getId()     : self.refresh,
-                self.editScheduleButton.getId(): self.editSchedule, #,
+                self.editScheduleButton.getId(): self.editSchedule,
                 301:self.doCommFlag,
                 302:self.doTranscode,
                 303:self.doUserJob1,
                 304:self.doUserJob2,
                 305:self.doUserJob3,
-                306:self.doUserJob4
+                306:self.doUserJob4,
+                307:self.doResetFanart
             }
             self.render()
+        
+    def doResetFanart(self):
+        self.fanArt.clear(self.program)
+        self.refresh()
+        toolkit.showPopup('Fan Art', 'Refreshed Fan Art for %s' % self.program.title(), 5000)
         
     def doCommFlag(self):
         self.queueJob(JobType.COMMFLAG)

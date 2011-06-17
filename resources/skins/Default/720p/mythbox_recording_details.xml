@@ -388,7 +388,7 @@
        <posx>-285</posx>
        <posy>0</posy>
        <defaultcontrol>254</defaultcontrol>
-       <animation effect="slide" end="285,0" time="400" tween="quadratic" easing="out" condition="Control.HasFocus(254)|Control.HasFocus(300)|Control.HasFocus(301)|Control.HasFocus(302)|Control.HasFocus(303)|Control.HasFocus(304)|Control.HasFocus(305)|Control.HasFocus(306)">Conditional</animation>
+       <animation effect="slide" end="285,0" time="400" tween="quadratic" easing="out" condition="Control.HasFocus(254)|Control.HasFocus(300)|Control.HasFocus(301)|Control.HasFocus(302)|Control.HasFocus(303)|Control.HasFocus(304)|Control.HasFocus(305)|Control.HasFocus(306)|Control.HasFocus(307)">Conditional</animation>
        <control type="image">
            <posx>0</posx>
            <posy>0</posy>
@@ -411,6 +411,17 @@
               <texturefocus>button_focus.png</texturefocus>
               <texturenofocus>button_nofocus.png</texturenofocus>
               <pulseonselect>true</pulseonselect>
+              <onclick>SetFocus(257)</onclick>
+          </control>
+          <control type="button" id="307">
+              <description>Refresh Fanart</description>
+              <width>270</width>
+              <textoffsetx>40</textoffsetx>
+              <texturefocus>button_focus.png</texturefocus>
+              <texturenofocus>button_nofocus.png</texturenofocus>
+              <pulseonselect>true</pulseonselect>
+              <label>Refresh Fan Art</label>
+              <visible>true</visible>
               <onclick>SetFocus(257)</onclick>
           </control>
           <control type="button" id="301">

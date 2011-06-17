@@ -82,9 +82,9 @@ class BaseFanartProvider(object):
         else:
             return None,None
     
-    def clear(self):
+    def clear(self, program=None):
         if self.nextProvider:
-            self.nextProvider.clear()
+            self.nextProvider.clear(program)
     
     def close(self):
         if self.nextProvider:
@@ -142,10 +142,11 @@ class PersistentFanartProvider(BaseFanartProvider):
         except:
             log.exception('Error saving persistent cache to %s' % self.pfilename)
 
-    def clear(self):
-        super(PersistentFanartProvider, self).clear()
-        self.pcache.clear()
-        self.saveCache()
+    def clear(self, program=None):
+        super(PersistentFanartProvider, self).clear(program)
+        if program is None:
+            self.pcache.clear()
+            self.saveCache()
             
     def close(self):
         super(PersistentFanartProvider, self).close()
@@ -263,10 +264,17 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
                 self.strikeOut(key, program)
         return season, episode 
 
-    def clear(self):
+    def clear(self, program=None):
+        if program:
+            for key in [self.createKey(m, program) for m in ['getPosters', 'getBanners', 'getBackgrounds', 'getSeasonAndEpisode']]:
+                if self.hasStruckOut(key):
+                    del self.struckOut[key]
+        else:
+            super(OneStrikeAndYoureOutFanartProvider, self).clear(program)
+        self.delegate.clear(program)
         
-        super(OneStrikeAndYoureOutFanartProvider, self).clear()
-        self.delegate.clear()
+        if self.nextProvider:
+            self.nextProvider.clear(program)
 
     def close(self):
         super(OneStrikeAndYoureOutFanartProvider, self).close()
@@ -384,7 +392,16 @@ class SuperFastFanartProvider(PersistentFanartProvider):
     def getSeasonAndEpisode(self, program):
         return self.nextProvider.getSeasonAndEpisode(program)
         
+    def clear(self, program=None):
+        super(SuperFastFanartProvider, self).clear(program)
+        if program is None:
+            for key in [self.createKey(m, program) for m in ['getPosters', 'getBanners', 'getBackgrounds', 'getSeasonAndEpisode']]:
+                if key in self.imagePathsByKey:
+                    del self.imagePathsByKey[key]
+        if self.nextProvider:
+            self.nextProvider.clear(program)
         
+            
 class HttpCachingFanartProvider(BaseFanartProvider):
     """Caches images retrieved via http on the local filesystem"""
     
@@ -469,9 +486,12 @@ class HttpCachingFanartProvider(BaseFanartProvider):
                 filepath = None
         return filepath
     
-    def clear(self):
-        super(HttpCachingFanartProvider, self).clear()
-        self.httpCache.clear()
+    def clear(self, program=None):
+        super(HttpCachingFanartProvider, self).clear(program)
+        if program is None:
+            self.httpCache.clear()
+        else:
+            pass # TODO: remove program specific images from HTTP cache
         
     def close(self):
         self.closeRequested = True
@@ -502,9 +522,9 @@ class ImdbFanartProvider(BaseFanartProvider):
                     #    log.warn('movie[%d] id[%s] key[%s] -> %s' % (1, m.getID(), key, safe_str(value)))
                     posters.append(m['full-size cover url'])  
             except imdb.IMDbError, e:
-                log.error('IMDB error looking up movie: %s %s' % (safe_str(program.title()), safe_str(str(e))))
+                log.error('IMDB: Error looking up movie: %s %s' % (safe_str(program.title()), safe_str(str(e))))
             except Exception, e:
-                log.error('IMDB error looking up %s: %s' % (safe_str(program.title()), safe_str(str(e))))
+                log.error('IMDB: Error looking up %s: %s' % (safe_str(program.title()), safe_str(str(e))))
         return posters
     
     @chain
@@ -575,18 +595,20 @@ class TvdbFanartProvider(BaseFanartProvider):
     
     @chain
     def getBanners(self, program):
+        if program.isMovie(): 
+            return []
+        
         banners = []
-        if not program.isMovie():
-            t = self.transform(program.title())
-            try:
-                bannersByType = self._queryTvDb(t, qtype='series')
-                for subType in ['graphical', 'text', 'blank']:
-                    if subType in bannersByType:
-                        bannersById = bannersByType[subType]
-                        for id in bannersById.keys():
-                            banners.append(bannersById[id]['_bannerpath'])
-            except Exception, e:
-                log.warn('TVDB: No banners for %s - %s' % (safe_str(t), safe_str(e)))
+        t = self.transform(program.title())
+        try:
+            bannersByType = self._queryTvDb(t, qtype='series')
+            for subType in ['graphical', 'text', 'blank']:
+                if subType in bannersByType:
+                    bannersById = bannersByType[subType]
+                    for id in bannersById.keys():
+                        banners.append(bannersById[id]['_bannerpath'])
+        except Exception, e:
+            log.warn('TVDB: No banners for %s - %s' % (safe_str(t), safe_str(e)))
         return banners
 
     @chain
@@ -605,10 +627,13 @@ class TvdbFanartProvider(BaseFanartProvider):
                 log.debug('TVDB: No backgrounds for %s - %s' % (safe_str(t), safe_str(e)))
         return backgrounds
 
-    def clear(self):
-        super(TvdbFanartProvider, self).clear()        
-        shutil.rmtree(self.tvdbCacheDir, ignore_errors=True)
-        requireDir(self.tvdbCacheDir)
+    def clear(self, program=None):
+        super(TvdbFanartProvider, self).clear(program)
+        if program is None:        
+            shutil.rmtree(self.tvdbCacheDir, ignore_errors=True)
+            requireDir(self.tvdbCacheDir)
+        else:
+            pass # TODO: dont know if we can invalidate individual programs
 
     # tvdb site rejects queries if > 2 per originating IP
     @max_threads(2)
@@ -677,9 +702,9 @@ class TheMovieDbFanartProvider(BaseFanartProvider):
                         #if  'mid' in result['poster']:
                         #    posters.append(result['poster']['mid'])
                 else:
-                    log.debug('TMDB found nothing for: %s' % program.title())
+                    log.debug('TMDB: Found nothing for: %s' % safe_str(program.title()))
             except Exception, e:
-                log.error('TMDB fanart search error: %s %s' % (program.title(), e))
+                log.error('TMDB: Fanart search error: %s %s' % (safe_str(program.title()), safe_str(e)))
         return posters
 
     @chain
@@ -719,11 +744,11 @@ class GoogleImageSearchProvider(BaseFanartProvider):
         
             posters = [result['unescapedUrl'] for result in obj['responseData']['results'] if float(result['height'])/float(result['width']) > 1.0]
             if len(posters) == 0:
-                log.debug('No images meet aspect ratio constaints for %s' % safe_str(program.title()))
+                log.debug('GOOGLE: No images meet aspect ratio constaints for %s' % safe_str(program.title()))
                 posters.append(obj['responseData']['results'][0]['unescapedUrl'])
         
         except Exception, e:
-            log.exception('GOOGLE fanart search:  %s %s' % (safe_str(program.title()), str(e)))
+            log.exception('GOOGLE: Fanart search:  %s %s' % (safe_str(program.title()), safe_str(e)))
         return posters
 
     @chain
@@ -742,11 +767,21 @@ class TvRageProvider(NoOpFanartProvider):
         self.nextProvider = nextProvider
         self.memcache = {}
 
-    def clear(self):
-        self.memcache.clear()
-        shutil.rmtree(self.cacheDir, ignore_errors=True)
-        requireDir(self.cacheDir)         
-
+    def clear(self, program=None):
+        if program is None:
+            self.memcache.clear()
+            shutil.rmtree(self.cacheDir, ignore_errors=True)
+            requireDir(self.cacheDir)         
+        else:
+            # purge from memory
+            if program.title() in self.memcache:
+                del self.memcache[program.title()]
+            
+            # purge from disk
+            fname = os.path.join(self.cacheDir, safe_str(program.title().replace('/','_')))
+            if os.path.exists(fname):
+                os.remove(fname)
+            
     def load(self, program):
         '''Load tvrage.api.Show from memory or disk cache'''
         if program.title() in self.memcache.keys():
@@ -904,8 +939,8 @@ class FanArt(object):
     def hasBackgrounds(self, program):
         return self.provider.hasBackgrounds(program)
     
-    def clear(self):
-        self.provider.clear() 
+    def clear(self, program=None):
+        self.provider.clear(program) 
         
     @timed    
     def shutdown(self):

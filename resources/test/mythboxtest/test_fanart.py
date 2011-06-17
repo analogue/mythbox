@@ -635,7 +635,7 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
         
         # Verify
         self.assertFalse(len(provider.struckOut))
-        verify(self.delegate, times=1).clear()
+        verify(self.delegate, times=1).clear(any())
         
     def test_constructor_When_delegate_is_none_Then_raise_exception(self):
         try:
