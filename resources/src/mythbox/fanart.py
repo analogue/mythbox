@@ -265,17 +265,18 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
         return season, episode 
 
     def clear(self, program=None):
+        super(OneStrikeAndYoureOutFanartProvider, self).clear(program)
+
         if program:
             for key in [self.createKey(m, program) for m in ['getPosters', 'getBanners', 'getBackgrounds', 'getSeasonAndEpisode']]:
                 if self.hasStruckOut(key):
+                    log.debug('Removing %s from struckout bucket' % key)
                     del self.struckOut[key]
         else:
-            super(OneStrikeAndYoureOutFanartProvider, self).clear(program)
+            self.struckOut.clear()
+            
         self.delegate.clear(program)
-        
-        if self.nextProvider:
-            self.nextProvider.clear(program)
-
+      
     def close(self):
         super(OneStrikeAndYoureOutFanartProvider, self).close()
         self.delegate.close()
@@ -394,12 +395,13 @@ class SuperFastFanartProvider(PersistentFanartProvider):
         
     def clear(self, program=None):
         super(SuperFastFanartProvider, self).clear(program)
-        if program is None:
+  
+        if program:
             for key in [self.createKey(m, program) for m in ['getPosters', 'getBanners', 'getBackgrounds', 'getSeasonAndEpisode']]:
                 if key in self.imagePathsByKey:
                     del self.imagePathsByKey[key]
-        if self.nextProvider:
-            self.nextProvider.clear(program)
+        else:
+            self.imagePathsByKey.clear()
         
             
 class HttpCachingFanartProvider(BaseFanartProvider):
@@ -945,20 +947,6 @@ class FanArt(object):
     @timed    
     def shutdown(self):
         self.provider.close()
-        
-#    def configure(self, settings):
-#        self.provider.close()
-#        p = NoOpFanartProvider()
-#        if settings.getBoolean('fanart_google'): p = GoogleImageSearchProvider(p)
-#        if settings.getBoolean('fanart_imdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, ImdbFanartProvider(), p)
-#        if settings.getBoolean('fanart_tmdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, TheMovieDbFanartProvider(), p)
-#        if settings.getBoolean('fanart_tvdb')  : p = OneStrikeAndYoureOutFanartProvider(self.platform, TvdbFanartProvider(self.platform), p)
-#        if settings.getBoolean('fanart_tvrage'): p = OneStrikeAndYoureOutFanartProvider(self.platform, TvRageProvider(self.platform), p) 
-#                        
-#        p = HttpCachingFanartProvider(self.httpCache, p)
-#        self.sffp = p = SuperFastFanartProvider(self.platform, p)
-#        p = SpamSkippingFanartProvider(p)
-#        self.provider = p
 
     def configure(self, settings):
         self.provider.close()
