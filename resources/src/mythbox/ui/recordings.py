@@ -31,6 +31,7 @@ from mythbox.ui.toolkit import window_busy, BaseWindow, Action
 from mythbox.util import catchall_ui, run_async, timed, catchall, ui_locked2, coalesce, safe_str
 from mythbox.util import CyclingBidiIterator, formatSize, to_kwargs
 from mythbox.ui import toolkit
+from mythbox.bus import Event
 
 log = logging.getLogger('mythbox.ui')
 
@@ -79,7 +80,7 @@ class RecordingsWindow(BaseWindow):
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
         # inject dependencies from constructor
-        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'platform', 'fanArt', 'cachesByName')]
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'platform', 'fanArt', 'cachesByName', 'bus',)]
         [setattr(self,k,v) for k,v in self.cachesByName.iteritems()]
 
         self.t = self.translator.get
@@ -91,7 +92,7 @@ class RecordingsWindow(BaseWindow):
         self.activeGroup = None
         self.lastFocusId = None
         self.sameBackgroundCache = {}            # {title:filepath}
-
+        self.bus.register(self)
         self.GROUP_SORT_BY = odict.odict([
             ('Title', {'translation_id': m.TITLE, 'reverse': False, 'sorter' : lambda g: [g.title, u'0000'][g.title == self.allGroupTitle]}),
             ('Date',  {'translation_id': m.DATE,  'reverse': True,  'sorter' : lambda g: [g.programs[0].starttimeAsTime(), datetime.datetime(datetime.MAXYEAR, 12, 31, 23, 59, 59, 999999, tzinfo=None)][g.title == self.allGroupTitle]})])
@@ -160,7 +161,8 @@ class RecordingsWindow(BaseWindow):
             self.closed = True
             self.saveSettings()
             self.close()
-        
+            self.bus.deregister(self)
+            
         elif id in (Action.UP, Action.DOWN, Action.PAGE_UP, Action.PAGE_DOWN, Action.HOME, Action.END):
 
             if self.lastFocusId == ID_GROUPS_LISTBOX:
@@ -507,7 +509,7 @@ class RecordingsWindow(BaseWindow):
             self.platform.getScriptDir(), 
             forceFallback=True,
             programIterator=programIterator,
-            **to_kwargs(self, ['settings', 'translator', 'platform', 'cachesByName', 'fanArt']))            
+            **to_kwargs(self, ['settings', 'translator', 'platform', 'cachesByName', 'fanArt', 'bus']))            
         win.doModal()
 
         if win.isDeleted:
@@ -516,3 +518,11 @@ class RecordingsWindow(BaseWindow):
             self.programsListbox.selectItem(programIterator.index())
                 
         del win
+
+    def onEvent(self, event):
+        id = event['id']
+        log.debug('ONEVENT: recordings window received event: %s' % id)
+        
+        if id == Event.FANART_REFRESHED: 
+            self.refresh()
+        

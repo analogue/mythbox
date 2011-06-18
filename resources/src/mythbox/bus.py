@@ -31,6 +31,7 @@ class Event(object):
     SCHEDULER_RAN        = 'SCHEDULER_RAN'      # keys: None
     SCHEDULE_CHANGED     = 'SCHEDULE CHANGED'   # keys: None recording schedule added/deleted/updated
     COMMFLAG_START       = 'COMMFLAG_START'     # [u'BACKEND_MESSAGE', u'COMMFLAG_START 4276 2011-06-02T17:00:00', u'empty']   
+    FANART_REFRESHED     = 'FANART_REFRESHED'   # keys: id, program    
     
     
 class EventBus(object):

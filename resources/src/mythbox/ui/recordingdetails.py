@@ -20,6 +20,7 @@ import logging
 import xbmcgui
 import mythbox.msg as m
 
+from mythbox.bus import Event
 from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.conn import inject_conn
 from mythbox.mythtv.domain import StatusException, Job
@@ -36,7 +37,7 @@ class RecordingDetailsWindow(BaseWindow):
     
     def __init__(self, *args, **kwargs):
         BaseWindow.__init__(self, *args, **kwargs)
-        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'platform', 'fanArt', 'cachesByName', 'programIterator',)]
+        [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings', 'translator', 'platform', 'fanArt', 'cachesByName', 'programIterator', 'bus',)]
         [setattr(self,k,v) for k,v in self.cachesByName.iteritems() if k in ('mythChannelIconCache', 'mythThumbnailCache', 'domainCache')]
         
         self.t = self.translator.get
@@ -76,13 +77,14 @@ class RecordingDetailsWindow(BaseWindow):
                 304:self.doUserJob2,
                 305:self.doUserJob3,
                 306:self.doUserJob4,
-                307:self.doResetFanart
+                307:self.doRefreshFanart
             }
             self.render()
         
-    def doResetFanart(self):
+    def doRefreshFanart(self):
         self.fanArt.clear(self.program)
         self.refresh()
+        self.bus.publish({'id' : Event.FANART_REFRESHED, 'program' : self.program})
         toolkit.showPopup('Fan Art', 'Refreshed Fan Art for %s' % self.program.title(), 5000)
         
     def doCommFlag(self):
