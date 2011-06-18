@@ -42,7 +42,7 @@ class RecordingsWindowTest(unittest.TestCase):
         g3 = Group(u3)
         
         c = [g1,g2, g3]
-        kwargs = {'settings':Mock(), 'translator':Mock(), 'platform':Mock(), 'fanArt':Mock(), 'cachesByName':{}}
+        kwargs = {'settings':Mock(), 'translator':Mock(), 'platform':Mock(), 'fanArt':Mock(), 'cachesByName':{}, 'bus':Mock()}
         w = RecordingsWindow(**kwargs)
         c.sort(key=w.GROUP_SORT_BY['Title']['sorter'], reverse=w.GROUP_SORT_BY['Title']['reverse'])
 
