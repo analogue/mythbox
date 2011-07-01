@@ -70,7 +70,15 @@ class Pool(object):
         if self.isShutdown: raise Exception, 'Pool shutdown'
         self.inn.append(resource)
         self.out.remove(resource)
-    
+
+    @sync_instance
+    def discard(self, resource):
+        self.out.remove(resource)
+        try:
+            self.factory.destroy(resource)
+        except:
+            log.exception('while discarding')
+            
     @sync_instance
     def shutdown(self):
         for resource in self.inn:
@@ -167,6 +175,12 @@ class EvictingPool(Pool):
     def checkin(self, resource):
         super(EvictingPool, self).checkin(resource)
         self.dobs[resource] = datetime.datetime.now()
+
+    @sync_instance
+    def discard(self, resource):
+        super(EvictingPool, self).discard(resource)
+        if resource in self.dobs:
+            del self.dobs[resource]
 
     @sync_instance
     def grow(self, size):

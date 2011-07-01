@@ -1,4 +1,3 @@
-#
 #  MythBox for XBMC - http://mythbox.googlecode.com
 #  Copyright (C) 2011 analogue@yahoo.com
 # 
@@ -117,14 +116,28 @@ def inject_conn(func, *args, **kwargs):
         if not alreadyAcquired:
             # store conn in thread local storage
             threadlocals[tlsKey].conn = connPool.checkout()
+            threadlocals[tlsKey].discarded = False
             ilog.debug('--> injected conn %s into %s' % (threadlocals[tlsKey].conn, threadlocals[tlsKey]))
-            
-        result = func(*args, **kwargs) 
+        
+        try:        
+            result = func(*args, **kwargs) 
+        except socket.timeout, te:
+            # discard only once
+            if not threadlocals[tlsKey].discarded:
+                # discard connections that have timed out since we no longer know if they are usable/functional
+                ilog.error('\n\n\t\tSocket timed out. Discarding conn on thread %s\n\n' % tlsKey)
+                connPool.discard(threadlocals[tlsKey].conn)
+                threadlocals[tlsKey].conn = None
+                threadlocals[tlsKey].discarded = True
+            else:
+                ilog.debug('Conn %s already discarded. Skipping..' % tlsKey)
+            raise
     finally:
-        if not alreadyAcquired:
+        if not alreadyAcquired and not threadlocals[tlsKey].discarded:
             ilog.debug('--> removed conn %s from %s' % (threadlocals[tlsKey].conn, threadlocals[tlsKey]))
             connPool.checkin(threadlocals[tlsKey].conn)
             threadlocals[tlsKey].conn = None
+            threadlocals[tlsKey].discarded = None
     return result
 
 

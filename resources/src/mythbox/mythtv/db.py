@@ -27,6 +27,7 @@ from decorator import decorator
 from mythbox import pool
 from mythbox.pool import PoolableFactory
 from mythbox.util import timed, threadlocals, safe_str
+from mysql.connector import errors
         
 log = logging.getLogger('mythbox.core')
 ilog = logging.getLogger('mythbox.inject')
@@ -75,7 +76,8 @@ def inject_db(func, *args, **kwargs):
           1. Decorate method with @inject_db
           2. Within method, use self.db() to obtain a reference to the database."""
     self = args[0]
-
+    result = None
+    
     # bypass injection if dependency passed in via constructor
     if hasattr(self, '_db') and self._db:
         return func(*args, **kwargs)
@@ -112,15 +114,25 @@ def inject_db(func, *args, **kwargs):
         if not alreadyAcquired:
             # store db in thread local storage
             threadlocals[tlsKey].db = dbPool.checkout()
+            threadlocals[tlsKey].discarded = False
             ilog.debug('--> injected db %s into %s' % (threadlocals[tlsKey].db, threadlocals[tlsKey]))
         
         # TODO: Recover from broken pipe (for example, after suspend/resume cycle)
         #       File "mysql-connector-python/mysql/connector/connection.py", line 71, in send
         #           raise errors.OperationalError('%s' % e)
         #           OperationalError: (32, 'Broken pipe')
-        result = func(*args, **kwargs) 
+        #    InterfaceError: 2013: Lost connection to MySQL server during query         
+
+        try:
+            result = func(*args, **kwargs)
+        except errors.InterfaceError, ie:
+            log.error(str(ie))
+            log.error('\n\n\t\tDiscarding stale db conn...\n\n')
+            dbPool.discard(threadlocals[tlsKey].db)
+            threadlocals[tlsKey].discarded = True
+            
     finally:
-        if not alreadyAcquired:
+        if not alreadyAcquired and not threadlocals[tlsKey].discarded:
             ilog.debug('--> removed db %s from %s' % (threadlocals[tlsKey].db, threadlocals[tlsKey]))
             dbPool.checkin(threadlocals[tlsKey].db)
             threadlocals[tlsKey].db = None
