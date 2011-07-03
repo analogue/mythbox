@@ -120,7 +120,12 @@ def inject_conn(func, *args, **kwargs):
             ilog.debug('--> injected conn %s into %s' % (threadlocals[tlsKey].conn, threadlocals[tlsKey]))
         
         try:        
-            result = func(*args, **kwargs) 
+            result = func(*args, **kwargs)
+        except socket.error, se:
+            # TODO: reconnect
+            # error: (104, 'Connection reset by peer')
+            # error: (32, 'Broken pipe')
+            ilog.warn('TODO: reconnect')
         except socket.timeout, te:
             # discard only once
             if not threadlocals[tlsKey].discarded:

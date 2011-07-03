@@ -1,6 +1,23 @@
   Changelog for IMDbPY
   ====================
 
+* What's the new in release 4.7 "Saw VI" (23 Jan 2011)
+ [http]
+ - first fixes for the new set of parsers.
+ - first changes to support the new set of web pages.
+ - fix for lists of uncategorized episodes.
+ - fix for movies with multiple countries.
+ - fix for the currentRole property.
+ - more robust handling for vote details.
+
+ [mobile]
+ - first fixes for the new set of parsers.
+
+ [sql]
+ - the tables containing titles and names (and akas) now
+   include a 'md5sum' column calculated on the "long imdb canonical title/name".
+
+
 * What's the new in release 4.6 "The Road" (19 Jun 2010)
   [general]
   - introduced the 'full-size cover url' and 'full-size headshot'
