@@ -94,7 +94,7 @@ class SchedulesWindow(BaseWindow):
 
         elif id in (Action.ACTION_NEXT_ITEM, Action.ACTION_PREV_ITEM,):  # bottom, top
             if self.lastFocusId == ID_SCHEDULES_LISTBOX:
-                self.selectListItemAtIndex(self.schedulesListBox, [0, self.schedulesListbox.size()-1][id == Action.ACTION_NEXT_ITEM])
+                self.selectListItemAtIndex(self.schedulesListBox, [0, self.schedulesListBox.size()-1][id == Action.ACTION_NEXT_ITEM])
 
     def applySort(self):
         self.schedules.sort(key=SORT_BY[self.sortBy]['sorter'], reverse=False)
