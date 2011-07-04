@@ -103,7 +103,8 @@ def inject_conn(func, *args, **kwargs):
     def bolt_on_accessor():
         '''Bolt-on getter method so client can access connection as self.conn()'''
         def conn_accessor():
-            return threadlocals[tlsKey].conn
+            # can't use tlsKey -- out of scope at runtime -- find better way to do this!
+            return threadlocals['c' + str(thread.get_ident())].conn
         self.conn = conn_accessor  
 
         
