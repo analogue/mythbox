@@ -35,7 +35,10 @@ except ImportError:
 try:
     import xml.etree.cElementTree as et
 except ImportError:
-    import xml.etree.ElementTree as et
+    try:
+        import xml.etree.ElementTree as et
+    except ImportError:
+        import elementtree.ElementTree as et
     
 BASE_URL = 'http://www.tvrage.com/feeds/%s.php?%s=%s'
     
