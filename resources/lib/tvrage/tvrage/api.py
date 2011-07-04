@@ -163,7 +163,7 @@ class Show(object):
                         episode.find('prodnum').text,
                     )
                 if snum > 0:
-                    self.seasons += 1
+                    self.seasons = max(self.seasons, snum)
         
         self.episodes[self.seasons].is_current = True
 
