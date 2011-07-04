@@ -81,6 +81,7 @@ def inject_conn(func, *args, **kwargs):
       2. Within method, use self.conn() to obtain a reference to the Connection.
     """
     self = args[0]
+    result = None
     
     # if dependency already injected via constructor, do nothing 
     if hasattr(self, '_conn') and self._conn: 
@@ -88,61 +89,114 @@ def inject_conn(func, *args, **kwargs):
     
     connPool = pool.pools['connPool']
     
-    # Create thread local storage if not already allocated
-    tlsKey = thread.get_ident()
-    try:
-        threadlocals[tlsKey]
-        ilog.debug('threading.local() already allocated')
-    except KeyError:
-        threadlocals[tlsKey] = threading.local()
-        ilog.debug('Allocating threading.local() to thread %d'  % tlsKey)
+    
+    def allocate_threadlocal():
+        '''Create thread local storage if not already allocated'''
+        if threadlocals.has_key(tlsKey):
+            ilog.debug('threading.local() already allocated for %s' % tlsKey)
+        else:
+            threadlocals[tlsKey] = threading.local()
+            threadlocals[tlsKey].level = 0
+            ilog.debug('Allocating threading.local() to thread %s'  % tlsKey)
 
-    # Bolt-on getter method so client can access connection.
-    def conn_accessor():
-        return threadlocals[thread.get_ident()].conn
-    self.conn = conn_accessor  
 
-    # Only acquire resource once per thread
-    try:
-        if threadlocals[tlsKey].conn == None:
-            raise AttributeError # force allocation
-        alreadyAcquired = True; 
-        ilog.debug('Skipping acquire resource')
-    except AttributeError:
-        alreadyAcquired = False
-        ilog.debug('Going to acquire resource')
+    def bolt_on_accessor():
+        '''Bolt-on getter method so client can access connection as self.conn()'''
+        def conn_accessor():
+            return threadlocals[tlsKey].conn
+        self.conn = conn_accessor  
 
-    try:
-        if not alreadyAcquired:
-            # store conn in thread local storage
+        
+    def checkout():
+        '''Only acquire resource once per thread'''
+        threadlocals[tlsKey].level += 1
+        if threadlocals[tlsKey].level == 1:
+            # not acquired - store conn in thread local storage
             threadlocals[tlsKey].conn = connPool.checkout()
             threadlocals[tlsKey].discarded = False
+            ilog.debug('Going to acquire resource at level %d' % threadlocals[tlsKey].level)
             ilog.debug('--> injected conn %s into %s' % (threadlocals[tlsKey].conn, threadlocals[tlsKey]))
-        
-        try:        
-            result = func(*args, **kwargs)
-        except socket.error, se:
-            # TODO: reconnect
-            # error: (104, 'Connection reset by peer')
-            # error: (32, 'Broken pipe')
-            ilog.warn('TODO: reconnect')
-        except socket.timeout, te:
-            # discard only once
-            if not threadlocals[tlsKey].discarded:
-                # discard connections that have timed out since we no longer know if they are usable/functional
-                ilog.error('\n\n\t\tSocket timed out. Discarding conn on thread %s\n\n' % tlsKey)
-                connPool.discard(threadlocals[tlsKey].conn)
-                threadlocals[tlsKey].conn = None
-                threadlocals[tlsKey].discarded = True
-            else:
-                ilog.debug('Conn %s already discarded. Skipping..' % tlsKey)
-            raise
-    finally:
-        if not alreadyAcquired and not threadlocals[tlsKey].discarded:
-            ilog.debug('--> removed conn %s from %s' % (threadlocals[tlsKey].conn, threadlocals[tlsKey]))
-            connPool.checkin(threadlocals[tlsKey].conn)
+        else:
+            # already acquired
+            ilog.debug('Skipping acquire resource -- at level %d' % threadlocals[tlsKey].level)
+
+
+    def discard():
+        # discard only once
+        if not threadlocals[tlsKey].discarded:
+            # discard connections that have timed out since we no longer know if they are usable/functional
+            ilog.error('\n\n\t\tSocket timed out. Discarding conn on thread %s\n\n' % tlsKey)
+            connPool.discard(threadlocals[tlsKey].conn)
             threadlocals[tlsKey].conn = None
-            threadlocals[tlsKey].discarded = None
+            threadlocals[tlsKey].discarded = True
+        else:
+            ilog.debug('Conn %s already discarded. Skipping..' % tlsKey)
+
+    
+    def tryAgain():
+        log.debug('-- TRY AGAIN BEGIN --')
+        ta_result = inject_conn(*args, **kwargs)
+        log.debug('-- TRY AGAIN END --')
+        return ta_result
+
+
+    def shouldGiveUp(error):
+        # 111 - Connection refused
+        # 113 - No route to host
+        return error.errno in (111, 113)
+
+
+    def shouldReconnect(error):
+        # 104 - Connection reset by peer  
+        # 32  - Broken pipe
+        return error.errno in (104, 32,) 
+
+        
+    def checkin():
+        if threadlocals[tlsKey].level == 1:
+            if not threadlocals[tlsKey].discarded:
+                ilog.debug('--> removed conn %s from %s at level %d' % (threadlocals[tlsKey].conn, threadlocals[tlsKey], threadlocals[tlsKey].level))
+                connPool.checkin(threadlocals[tlsKey].conn)
+                threadlocals[tlsKey].conn = None
+                threadlocals[tlsKey].discarded = None
+                del threadlocals[tlsKey]
+            else:
+                ilog.debug('skipped chekin at level %d because discarded' % threadlocals[tlsKey].level)
+        else:
+            ilog.debug('skipping checkin at level %d' % threadlocals[tlsKey].level)
+            threadlocals[tlsKey].level -= 1
+    
+    
+    def createKey():
+        k = 'c' + str(thread.get_ident())
+        ilog.debug('tlskey = %s' % k)
+        return k
+
+    tlsKey = createKey()
+    allocate_threadlocal()
+    checkout()
+    bolt_on_accessor()
+    
+    try:        
+        result = func(*args, **kwargs)
+    except socket.error, se:
+        if shouldReconnect(se):
+            discard()
+            tryAgain()
+        elif shouldGiveUp(se):
+            discard()
+            raise
+        else:
+            raise
+    except socket.timeout, te:
+        discard()
+        raise
+    except:
+        checkin()
+        raise
+    else:
+        checkin()
+        
     return result
 
 
