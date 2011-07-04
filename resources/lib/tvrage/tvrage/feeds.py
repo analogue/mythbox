@@ -26,7 +26,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from util import _fetch
-from urllib2 import quote
+
+try:
+    from urllib2 import quote
+except ImportError:
+    from urllib import quote
 
 try:
     import xml.etree.cElementTree as et
