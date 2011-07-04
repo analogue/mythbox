@@ -26,19 +26,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from util import _fetch
-
-try:
-    from urllib2 import quote
-except:
-    from urllib import quote
+from urllib2 import quote
 
 try:
     import xml.etree.cElementTree as et
 except ImportError:
-    try:
-        import xml.etree.ElementTree as et
-    except:
-        import elementtree.ElementTree as et
+    import xml.etree.ElementTree as et
     
 BASE_URL = 'http://www.tvrage.com/feeds/%s.php?%s=%s'
     

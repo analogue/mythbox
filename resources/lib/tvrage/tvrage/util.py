@@ -26,6 +26,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from urllib2 import urlopen, URLError
+from HTMLParser import HTMLParser
 
 class TvrageError(Exception):
     """ Base class for custom exceptions"""
@@ -65,4 +66,23 @@ def _fetch(url):
         raise TvrageError(str(e))
     else:
         return result
+    
+
+class MLStripper(HTMLParser):
+    """Helper class for stripping HTML tags from http responses""" 
+    
+    def __init__(self):
+        self.reset()
+        self.fed = []
+        
+    def handle_data(self, d):
+        self.fed.append(d)
+        
+    def get_data(self):
+        return ''.join(self.fed)
+
+def strip_tags(html):
+    s = MLStripper()
+    s.feed(html)
+    return s.get_data()
         

@@ -83,10 +83,9 @@ class ShowTest(unittest.TestCase):
 
     def test_get_latest_ep(self):
         today = date.today()
-        # NOTE: this may break
-        ep = Show('Torchwood').latest_episode
+        ep = Show('FlashForward').latest_episode
         assert ep.airdate <= today
-        assert ep.title == 'Children of Earth (5)'
+        assert ep.title == 'Future Shock'
         
     def test_non_existant_show_raises_proper_exception(self):
         try:
@@ -94,7 +93,19 @@ class ShowTest(unittest.TestCase):
         except Exception, e:
             assert isinstance(e, ShowNotFound)
             assert e.value == 'yaddayadda'
-
+            
+    def test_synopsis(self):       
+        assert self.show.synopsis.startswith(
+        u"As an infectious disease specialist, Dr. Gregory House (Hugh Laurie)"\
+        " is a brilliant diagnostician who loves the challenges of the medical"\
+        " puzzles he must solve in order to save lives. House solves the"\
+        " inexplicable cases that other doctors cannot understand.\n\nHouse"\
+        " isn't alone in this quest. His team includes neurologist Dr. Eric"\
+        " Foreman (Omar Epps), a neurologist with a troubled youth and a"\
+        " desire to avoid becoming as abrasive as House; immunologist Dr."\
+        " Allison Cameron (Jennifer Morrison) - who sometimes cares too much"\
+        " and has conflicting feelings about House;")
+        
 
 class SeasonTest(unittest.TestCase):
 
@@ -142,7 +153,7 @@ class EpisodeTest(unittest.TestCase):
     def test_link(self):
         assert self.ep.link == \
             'http://www.tvrage.com/House/episodes/461013'
-    def test_summary(self):
+    def test_summary_old(self):
         s = "An immensely overweight man is brought in after he's found at"\
             +" home in a coma. Upon regaining consciousness, he demands"\
             +" to be released. When Cameron comes up with a way to force"\
@@ -151,6 +162,13 @@ class EpisodeTest(unittest.TestCase):
             +" arrests House, searches his home, and questions his"\
             +" co-workers about his Vicodin usage."
         assert self.ep.summary == s
+        
+    def test_summary_new(self):
+        ep = Show('chaos').season(1).episode(8)
+        s = 'The agents go against orders to capture an arms dealer, but their'\
+            +' actions trouble Rick who must decide whether to report their'\
+            +' unauthorized activities to the CIA director.'
+        assert ep.summary == s
 
 if __name__ == '__main__':
     unittest.main()
