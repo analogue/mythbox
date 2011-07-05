@@ -79,8 +79,8 @@ class HomeWindow(BaseWindow):
                 254 : self.goUpcomingRecordings,
                 256 : self.goSettings,
                 255 : self.refreshOnInit,
-                300 : self.deleteRecording,
-                301 : self.rerecordRecording,
+                301 : self.deleteRecording,
+                302 : self.rerecordRecording,
                 ID_COVERFLOW_WRAPLIST : self.goPlayRecording
             }
             
