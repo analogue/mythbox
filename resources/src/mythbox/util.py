@@ -28,7 +28,7 @@ import xbmcgui
 from datetime import datetime, timedelta
 from decorator import decorator
 from odict import odict
-from threading import RLock
+from threading import RLock, Thread
 
 
 log = logging.getLogger('mythbox.core')
@@ -270,16 +270,22 @@ def ui_locked2(func, *args, **kw):
     """
     global uilocked
     if uilocked: # prevent nested locks / double lock
-        return func(*args, **kw)    
-    else:
-        try:
-            uilocked = True
-            xbmcgui.lock()
-            result = func(*args, **kw)
-        finally:
-            xbmcgui.unlock()
-            uilocked = False
-        return result
+        return func(*args, **kw)
+
+    # only allow locks on the main thread    
+    import threading
+    if threading.currentThread().getName() != 'MainThread':
+        log.debug('uilock skipped cuz thread name is %s' % threading.currentThread().getName())
+        return func(*args, **kw)
+    
+    try:
+        uilocked = True
+        xbmcgui.lock()
+        result = func(*args, **kw)
+    finally:
+        xbmcgui.unlock()
+        uilocked = False
+    return result
 
 
 @decorator
