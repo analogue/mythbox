@@ -837,11 +837,6 @@ class TvRageProvider(NoOpFanartProvider):
         except tvrage.api.ShowNotFound:
             log.debug('TVRage: Show not found - %s' % safe_str(program.title()))
             return None, None
-        except KeyError, ke:
-            # TVRage throws KeyError on last line of constructor for incomplete
-            # datasets
-            log.warn('TVRage: KeyError %s - %s' % (safe_str(ke), safe_str(program.title())))
-            return None, None
         except TypeError, te:
             #  File "tvrage/api.py", line 145, in __init__
             #    for season in eplist:
@@ -885,9 +880,9 @@ class TvRageProvider(NoOpFanartProvider):
                 for en, episode in season.items():
                     if episode.title.lower() == subtitle.lower():
                         return str(sn), str(episode.number)
-            except KeyError, ke:
-                log.debug('Key error: %s' % safe_str(ke))
-                pass # For cases where an entire season is missing, keep going...
+            except KeyError:
+                # For cases where an entire season is missing, keep going...
+                log.debug('TVRage: Season %d of %s is missing' % (sn, safe_str(program.title())))
     
         log.debug('TVRage: No episode of %s found matching subtitle %s' % (safe_str(program.title()), safe_str(subtitle)))        
         return None, None
