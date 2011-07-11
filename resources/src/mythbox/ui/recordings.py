@@ -96,6 +96,7 @@ class RecordingsWindow(BaseWindow):
         self.GROUP_SORT_BY = odict.odict([
             ('Title', {'translation_id': m.TITLE, 'reverse': False, 'sorter' : lambda g: [g.title, u'0000'][g.title == self.allGroupTitle]}),
             ('Date',  {'translation_id': m.DATE,  'reverse': True,  'sorter' : lambda g: [g.programs[0].starttimeAsTime(), datetime.datetime(datetime.MAXYEAR, 12, 31, 23, 59, 59, 999999, tzinfo=None)][g.title == self.allGroupTitle]})])
+        self.dirty = False
         
     @catchall_ui
     def onInit(self):
@@ -105,6 +106,9 @@ class RecordingsWindow(BaseWindow):
             self.programsListbox = self.getControl(ID_PROGRAMS_LISTBOX)
             self.readSettings()
             self.refresh()
+        elif self.dirty:
+            self.refresh()
+                
         self.initDone = True
         
     def readSettings(self):
@@ -208,6 +212,7 @@ class RecordingsWindow(BaseWindow):
 
     @window_busy
     def refresh(self, force=False):
+        self.dirty = False
         self.programs = self.domainCache.getAllRecordings(force=force)
         
         if not self.programs:
@@ -523,6 +528,7 @@ class RecordingsWindow(BaseWindow):
         id = event['id']
         log.debug('ONEVENT: recordings window received event: %s' % id)
         
-        if id == Event.FANART_REFRESHED: 
-            self.refresh()
+        if id == Event.FANART_REFRESHED:
+            self.dirty = True 
+            #self.refresh()
         
