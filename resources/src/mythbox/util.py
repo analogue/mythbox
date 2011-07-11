@@ -272,12 +272,6 @@ def ui_locked2(func, *args, **kw):
     if uilocked: # prevent nested locks / double lock
         return func(*args, **kw)
 
-    # only allow locks on the main thread    
-    import threading
-    if threading.currentThread().getName() != 'MainThread':
-        log.debug('uilock skipped cuz thread name is %s' % threading.currentThread().getName())
-        return func(*args, **kw)
-    
     try:
         uilocked = True
         xbmcgui.lock()
