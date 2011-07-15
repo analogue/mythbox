@@ -368,6 +368,8 @@ class RecordingsWindow(BaseWindow):
             except:
                 pass
 
+    @timed
+    @ui_locked2
     def renderProgramDeleted2(self, deletedProgram, selectionIndex):
         savedLastSelectedGroupIndex = self.groupsByTitle[self.lastSelectedGroup].index
         
