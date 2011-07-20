@@ -52,6 +52,7 @@ class Action(object):
     ACTION_PREV_ITEM        = 15  # Remote: <<|
     FORWARD                 = 77  # Remote: >>
     REWIND                  = 78  # Remote: <<
+    NAV_BACK                = 92  # introduced in eden
     ACTION_SCROLL_UP        = 111
     ACTION_SCROLL_DOWN      = 112
     CONTEXT_MENU            = 117  # TV Guide on MCE remote
