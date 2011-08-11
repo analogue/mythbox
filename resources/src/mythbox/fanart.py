@@ -22,8 +22,8 @@ import logging
 import md5
 import os
 import random
-import imdb
-import imdb.helpers
+import imdb         #@UnusedImport
+import imdb.helpers #@UnusedImport
 import pickle
 import shutil
 import simplejson as json
@@ -128,10 +128,14 @@ class PersistentFanartProvider(BaseFanartProvider):
         try:
             if os.path.exists(self.pfilename):
                 f = open(self.pfilename, 'rb')
-                cache = pickle.load(f)
-                f.close()
+                try:
+                    cache = pickle.load(f)
+                finally:
+                    f.close()
+        except EOFError:
+            log.error('EOF error loading persistent cache from %s. Starting fresh' % self.pfilename)
         except:
-            log.exception('Error loading persistent cache from %s. Starting empty' % self.pfilename)
+            log.exception('Loading from %s' % self.pfilename)
         return cache
 
     def saveCache(self):
