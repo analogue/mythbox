@@ -794,11 +794,14 @@ class TvRageProvider(NoOpFanartProvider):
             return None
         f = open(fname, 'rb')
         try:
-            show = pickle.load(f)
-            self.memcache[program.title()] = show
+            try:
+                show = pickle.load(f)
+                self.memcache[program.title()] = show
+                return show
+            except EOFError: 
+                return None  # file corrupt
         finally: 
             f.close()
-        return show
     
     def save(self, program, show):
         '''Save tvrage.api.Show to memory/disk cache'''

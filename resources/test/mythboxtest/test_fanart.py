@@ -25,7 +25,9 @@ from mythbox.fanart import chain, ImdbFanartProvider, TvdbFanartProvider, \
 from mythbox.filecache import FileCache, HttpResolver
 from mythbox.mythtv.domain import TVProgram, Program, RecordedProgram
 from mythbox.util import run_async, safe_str
+from mythboxtest.mythtv.test_domain import pdata, socketDateTime
 import mythbox.mythtv.protocol as protocol
+
 
 import datetime
 import mythboxtest
@@ -218,7 +220,7 @@ class BaseFanartProviderTestCase(unittest.TestCase):
 
         self.fail = False
         threads = [] 
-        for p in programs[0:1]:
+        for p in programs[:5]:
             threads.append(work(p))
         for t in threads:
             t.join()
@@ -803,8 +805,8 @@ class SuperFastFanartProviderTest(unittest.TestCase):
         key = self.provider.createKey('getPosters', program)
         self.assertGreater(len(key), 0)
 
+
 P = protocol.Protocol56()
-R = P.recordFields()
 
 class TvRageProviderTest(unittest.TestCase):
     
@@ -815,136 +817,139 @@ class TvRageProviderTest(unittest.TestCase):
         when(self.platform).getCacheDir().thenReturn(self.sandbox)
     
     def test_getSeasonAndEpisode_Success(self):
-        # Setup
-        data = [''] * P.recordSize()
-        data[R.index('title')]  = u'The Real World'
-        # flag as non-movie
-        data[R.index('starttime')] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple()) 
-        data[R.index('endtime')] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
-        data[R.index('hasairdate')] = 1  # has original air date
-        data[R.index('airdate')] = '2010-07-14'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=P, conn=Mock())
+        # Given
+        fields = {
+            'title'     : u'The Real World',
+            'starttime' : socketDateTime(2008, 11, 4, 23, 45, 00), 
+            'endtime'   : socketDateTime(2008, 11, 4, 23, 45, 00),
+            'hasairdate': 1,
+            'airdate'   : u'2010-07-14'
+        }
+        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=self.platform, protocol=P, conn=Mock())
         provider = TvRageProvider(self.platform)
         
-        # Test
+        # When
         season, episode = provider.getSeasonAndEpisode(program)
         
-        # Verify
+        # Then
         self.assertEqual('24', season)
         self.assertEqual('3', episode)
 
     def test_getSeasonAndEpisode_Success_HouseHunters(self):
-        # Setup
-        data = [''] * P.recordSize()
-        data[R.index('title')]  = u'House Hunters'
-        # flag as non-movie
-        data[R.index('starttime')] = time.mktime(datetime.datetime(2010, 12, 2, 22, 45, 00).timetuple()) 
-        data[R.index('endtime')] = time.mktime(datetime.datetime(2010, 12, 2, 23, 45, 00).timetuple())
-        data[R.index('hasairdate')] = 1  # has original air date
-        data[R.index('airdate')] = '2008-11-02'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=protocol.Protocol56(), conn=Mock())
+        # Given
+        fields = {
+            'title'     : u'House Hunters',
+            'starttime' : socketDateTime(2010, 12, 2, 22, 45, 00), 
+            'endtime'   : socketDateTime(2010, 12, 2, 23, 50, 00),
+            'hasairdate': 1,
+            'airdate'   : u'2008-11-02'
+        }
+        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=self.platform, protocol=P, conn=Mock())
         provider = TvRageProvider(self.platform)
         
-        # Test
+        # When
         season, episode = provider.getSeasonAndEpisode(program)
         
-        # Verify
+        # Then
         self.assertEqual('30', season)
         self.assertEqual('2', episode)
 
     def test_getSeasonAndEpisode_dont_blowup_when_a_season_is_missing(self):
-        # Setup
-        data = [''] * protocol.Protocol56().recordSize()
-        data[0]  = u'The Daily Show With Jon Stewart'
-        # flag as non-movie
-        data[11] = time.mktime(datetime.datetime(2010, 12, 2, 22, 45, 00).timetuple()) 
-        data[12] = time.mktime(datetime.datetime(2010, 12, 2, 23, 45, 00).timetuple())
-        data[38] = 1  # has original air date
-        data[37] = '2005-01-04'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=protocol.Protocol56(), conn=Mock())
+        # Given
+        fields = {
+            'title'     : u'The Daily Show With Jon Stewart',
+            'starttime' : socketDateTime(2010, 12, 2, 22, 45, 00), 
+            'endtime'   : socketDateTime(2010, 12, 2, 23, 50, 00),
+            'hasairdate': 1,
+            'airdate'   : u'2005-01-04'
+        }
+        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=self.platform, protocol=P, conn=Mock())
         provider = TvRageProvider(self.platform)
         
-        # Test -- Season 3 for The Daily Show with Jon Stewart is missing
+        # When -- Season 3 for The Daily Show with Jon Stewart is missing
         season, episode = provider.getSeasonAndEpisode(program)
         
-        # Verify
+        # Then
         self.assertIsNotNone(season)
         self.assertIsNotNone(episode)
 
     def test_getSeasonAndEpisode_When_show_not_found_Then_returns_none(self):
-        # Setup
-        data = [''] * protocol.Protocol57().recordSize()
-        data[0]  = u'Crap Crappity Crapola'
-        data[11] = time.mktime(datetime.datetime(2008, 11, 4, 22, 45, 00).timetuple())
-        data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
-        data[38] = 1  # has original air date
-        data[37] = '2010-08-03'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=protocol.Protocol56(), conn=Mock())
+        # Given
+        fields = {
+            'title'     : u'Crap Crappity Crapola',
+            'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
+            'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
+            'hasairdate': 1,
+            'airdate'   : u'2010-08-03'
+        }
+        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=self.platform, protocol=P, conn=Mock())
         provider = TvRageProvider(self.platform)
         
-        # Test
+        # When
         season, episode = provider.getSeasonAndEpisode(program)
         
-        # Verify
+        # Then
         self.assertIsNone(season)
         self.assertIsNone(episode)
 
     def test_getSeasonAndEpisode_try_to_cache_output(self):
-        # Setup
-        data = [''] * protocol.Protocol57().recordSize()
-        data[0]  = u'Seinfeld'
-        # flag as non-movie
-        data[11] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple()) 
-        data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
-        data[38] = 1  # has original air date
-        data[37] = '1989-07-05'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=protocol.Protocol56(), conn=Mock())
+        # Given
+        fields = {
+            'title'     : u'Seinfeld',
+            'starttime' : socketDateTime(2008, 11, 4, 23, 45, 00), 
+            'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
+            'hasairdate': 1,
+            'airdate'   : u'1989-07-05'
+        }
+        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=self.platform, protocol=P, conn=Mock())
         provider = TvRageProvider(self.platform)
         
-        # Test
-        for i in xrange(100):
+        # When
+        for i in xrange(100):  #@UnusedVariable
             # TODO Verify hitting cache < 1sec per invocation.
             #      Since tvrage api is not injected, cannot mock
             season, episode = provider.getSeasonAndEpisode(program)
-            # Verify
+            # Then
             self.assertEqual('1', season)
             self.assertEqual('1', episode)
 
     def test_getSeasonAndEpisode_When_match_not_found_using_original_airdate_Then_match_by_subtitle(self):
-        # Setup
-        data = [''] * protocol.Protocol56().recordSize()
-        data[0]  = u'WCG Ultimate Gamer'
-        data[1]  = u'In The Crosshairs'  # title to match on
-        # flag as non-movie
-        data[11] = time.mktime(datetime.datetime(2010, 12, 2, 22, 45, 00).timetuple()) 
-        data[12] = time.mktime(datetime.datetime(2010, 12, 2, 23, 45, 00).timetuple())
-        data[38] = 1  # has original air date
-        data[37] = '2010-09-20'  # TVRage shows date as 2010-09-16
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=protocol.Protocol56(), conn=Mock())
+        # Given
+        fields = {
+            'title'     : u'WCG Ultimate Gamer',
+            'subtitle'  : u'In The Crosshairs',
+            'starttime' : socketDateTime(2010, 12, 2, 22, 45, 00), 
+            'endtime'   : socketDateTime(2010, 12, 2, 23, 50, 00),
+            'hasairdate': 1,
+            'airdate'   : u'2010-09-20',   # TVRage shows date as 2010-09-16
+        }
+        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=self.platform, protocol=P, conn=Mock())
         provider = TvRageProvider(self.platform)
         
-        # Test
+        # When
         season, episode = provider.getSeasonAndEpisode(program)
         
-        # Verify
+        # Then
         self.assertEqual('2', season)
         self.assertEqual('5', episode)
 
     def test_getSeasonAndEpisode_NBCNightlyNews_returns_None_cuz_TVRage_throws_KeyError(self):
-        # Setup
-        data = [''] * P.recordSize()
-        data[R.index('title')]  = u'NBC Nightly News'
-        # flag as non-movie
-        data[R.index('starttime')] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple()) 
-        data[R.index('endtime')] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
-        data[R.index('hasairdate')] = 1  # has original air date
-        data[R.index('airdate')] = '2010-07-14'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=P, conn=Mock())
+        # Given
+        fields = {
+            'title'       :u'NBC Nightly News',
+            'subtitle'    :u'blah',
+            'starttime'   :socketDateTime(2008, 11, 4, 23, 45, 00),
+            'endtime'     :socketDateTime(2008, 11, 4, 23, 50, 00),
+            'hasairdate'  :1,
+            'airdate'     :u'2010-07-14'
+        }
+        
+        program = RecordedProgram(pdata(fields, P.version()), settings=Mock(), translator=Mock(), platform=self.platform, protocol=P, conn=Mock())
         provider = TvRageProvider(self.platform)
         
-        # Test
+        # When
         season, episode = provider.getSeasonAndEpisode(program)
         
-        # Verify
+        # Then
         self.assertIsNone(season)
         self.assertIsNone(episode)
