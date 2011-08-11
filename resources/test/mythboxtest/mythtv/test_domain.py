@@ -49,7 +49,10 @@ def pdata(pdict={}, protocolVersion=56):
     p = protocols[protocolVersion]
     d = ['0'] * p.recordSize()
     for k,v in pdict.items():
-        d[p.recordFields().index(k)] = v
+        try:
+            d[p.recordFields().index(k)] = v
+        except ValueError:
+            log.warning('%s is not valid field in protocol %d' % (k,protocolVersion))
     return d
 
 def socketTime(h, m, s):

@@ -10,6 +10,7 @@ x/xx/2011 - MythBox 1.0.5
   Fixed
     - EPG was broken for Python 2.7
     - Re-record button on coverflow popup fixed
+    - Loading of persistant TVRage metadata failed on file corruption
     
 6/11/2011 - MythBox 1.0.4
 -----------------------------

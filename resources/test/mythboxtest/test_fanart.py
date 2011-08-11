@@ -41,9 +41,10 @@ from tvdb_exceptions import tvdb_error
 from unittest2.case import SkipTest
 from decorator import decorator
 
-ustr = u'Königreich der Himmel'
-
 log = mythboxtest.getLogger('mythbox.unittest')
+
+ustr = u'Königreich der Himmel'
+P = protocol.Protocol57()
 
 
 class ChainDecoratorTest(unittest.TestCase):
@@ -276,7 +277,6 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.sandbox = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.sandbox, ignore_errors=True)
         when(self.platform).getCacheDir().thenReturn(self.sandbox)
-        self.protocol = protocol.Protocol56()
             
     def getPrograms(self):
         return self.getTvShows()
@@ -326,7 +326,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
     def test_getPosters_When_pounded_by_many_threads_looking_up_same_program_Then_doesnt_fail_miserably(self):
         
         programs = []
-        for i in xrange(10):
+        for i in xrange(10): #@UnusedVariable
             programs.append(TVProgram({'title': 'Seinfeld', 'category_type':'series'}, translator=Mock()))
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
         
@@ -349,58 +349,61 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         
     @skipIfTvdbDown
     def test_getSeasonAndEpisode_Success(self):
-        # Setup
-        data = [''] * self.protocol.recordSize()
-        data[0]  = u'The Real World'
-        data[11] = time.mktime(datetime.datetime(2008, 11, 4, 22, 45, 00).timetuple())
-        data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
-        data[38] = 1  # has original air date
-        data[37] = '2010-07-14'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=self.protocol, conn=Mock())
+        # Given
+        fields = {
+            'title'     : u'The Real World',
+            'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
+            'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
+            'hasairdate': 1,
+            'airdate'   : u'2010-07-14'
+        }
+        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=Mock(), protocol=P, conn=Mock())
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
         
-        # Test
+        # When
         season, episode = provider.getSeasonAndEpisode(program)
         
-        # Verify
+        # Then
         self.assertEqual('24', season)
         self.assertEqual('3', episode)
         
     @skipIfTvdbDown
     def test_getSeasonAndEpisode_When_episode_not_found_Then_returns_none(self):
-        # Setup
-        data = [''] * self.protocol.recordSize()
-        data[0]  = u'MasterChef'
-        data[11] = time.mktime(datetime.datetime(2008, 11, 4, 22, 45, 00).timetuple())
-        data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
-        data[38] = 1  # has original air date
-        data[37] = '2010-08-03'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=self.protocol, conn=Mock())
+        # Given
+        fields = {
+            'title'     : u'MasterChef',
+            'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
+            'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
+            'hasairdate': 1,
+            'airdate'   : u'2010-08-03'
+        }
+        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=Mock(), protocol=P, conn=Mock())
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
         
-        # Test
+        # When
         season, episode = provider.getSeasonAndEpisode(program)
         
-        # Verify
+        # Then
         self.assertIsNone(season)
         self.assertIsNone(episode)
 
     @skipIfTvdbDown
     def test_getSeasonAndEpisode_When_show_not_found_Then_returns_none(self):
         # Setup
-        data = [''] * self.protocol.recordSize()
-        data[0]  = u'This Show Does Not Exist'
-        data[11] = time.mktime(datetime.datetime(2008, 11, 4, 22, 45, 00).timetuple())
-        data[12] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())
-        data[38] = 1  # has original air date
-        data[37] = '2010-08-03'
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=self.protocol, conn=Mock())
+        fields = {
+            'title'     : u'This Show Does Not Exist',
+            'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
+            'endtime'   : socketDateTime(2008, 11, 4, 23, 45, 00),
+            'hasairdate': 1,
+            'airdate'   : u'2010-08-03'
+        }
+        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=Mock(), protocol=P, conn=Mock())
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
         
-        # Test
+        # When
         season, episode = provider.getSeasonAndEpisode(program)
         
-        # Verify
+        # Then
         self.assertIsNone(season)
         self.assertIsNone(episode)
         
@@ -643,7 +646,7 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
         try:
             OneStrikeAndYoureOutFanartProvider(self.platform, delegate=None, nextProvider=self.nextProvider)
             self.fail('Expected exception to be thrown when delegate is null')
-        except Exception, e:
+        except Exception:
             log.debug('SUCCESS: got exception on null delegate')
 
     def test_getSeasonAndEpisode_When_not_struck_out_and_delegate_returns_empty_tuple_Then_strike_out_and_return_nextProviders_result(self):
@@ -728,7 +731,7 @@ class SuperFastFanartProviderTest(unittest.TestCase):
 
     @staticmethod
     def programs(cnt):
-        for i in xrange(cnt):
+        for i in xrange(cnt): #@UnusedVariable
             yield TVProgram({
                 'starttime': '20081121140000',
                 'endtime'  : '20081121140000',
@@ -805,8 +808,6 @@ class SuperFastFanartProviderTest(unittest.TestCase):
         key = self.provider.createKey('getPosters', program)
         self.assertGreater(len(key), 0)
 
-
-P = protocol.Protocol56()
 
 class TvRageProviderTest(unittest.TestCase):
     
