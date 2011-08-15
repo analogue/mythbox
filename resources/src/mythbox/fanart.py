@@ -866,7 +866,14 @@ class TvRageProvider(NoOpFanartProvider):
     
     def searchForEpisode(self, program, show):        
         oad = program.originalAirDate()
-        d = datetime.date(int(oad[0:4]), int(oad[5:7]), int(oad[8:10]))
+        #log.debug('original air date1: %s %s' % (oad, type(oad)))
+        # TODO: change original air date in RecordedProgram to type datetime.date
+        if type(oad) == datetime.date: 
+            d = oad
+        else:
+            d = datetime.date(int(oad[0:4]), int(oad[5:7]), int(oad[8:10]))
+        #log.debug('original air date2: %s' % d)
+
         try:
             if d in show.seasonsAndEpisodes:
                 return show.seasonsAndEpisodes[d]

@@ -316,6 +316,13 @@ class TvGuideWindow(ui.BaseWindow):
             self.setWindowProperty('airtime', program.formattedAirTime())
             self.setWindowProperty('duration', program.formattedDuration())
             self.setWindowProperty('originalAirDate', program.formattedOriginalAirDate())
+            
+            season, episode = self.fanArt.getSeasonAndEpisode(program)
+            if not season is None and not episode is None:
+                self.setWindowProperty('seasonAndEpisode', '%sx%s' % (season, episode))
+            else:
+                self.setWindowProperty('seasonAndEpisode', '-')
+                
             self.setWindowProperty('banner', u'')
             if self.fanArt.hasBanners(program):
                 bannerPath = self.fanArt.pickBanner(program)
@@ -332,6 +339,7 @@ class TvGuideWindow(ui.BaseWindow):
             self.setWindowProperty('duration', u'')
             self.setWindowProperty('originalAirDate', u'')
             self.setWindowProperty('banner', u'')
+            self.setWindowProperty('seasonAndEpisode', u'')
 
     @run_async
     def workerBee(self):

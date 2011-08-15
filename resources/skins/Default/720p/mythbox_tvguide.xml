@@ -114,6 +114,10 @@
                 <posy>60</posy>
                 <info>Window.Property(originalAirDate)</info>
             </control>
+            <control type="label">
+                <posy>90</posy>
+                <info>Window.Property(seasonAndEpisode)</info>
+            </control>
         </control>
                 
     </control>
