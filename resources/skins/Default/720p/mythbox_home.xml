@@ -438,7 +438,6 @@
                     <width>900</width>
                     <height>250</height>
                     <onup>2000</onup>
-<!--                    <ondown>61</ondown>-->
                     <ondown>300</ondown>
                     <usecontrolcoords>true</usecontrolcoords>
                     <control type="wraplist" id="500">
@@ -449,9 +448,7 @@
                         <onleft>500</onleft>
                         <onright>500</onright>
                         <onup>2000</onup>
-                        <ondown>61</ondown>
                         <viewtype label="31028">list</viewtype>
-                        <pagecontrol>61</pagecontrol>
                         <scrolltime>200</scrolltime>
                         <focusposition>2</focusposition>
                         <orientation>horizontal</orientation>
