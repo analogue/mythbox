@@ -1278,6 +1278,31 @@ class EventConnection(Connection):
             raise ServerException, 'Backend announce with events refused: %s' % reply
 
 
+class OfflineConnection(Connection):
+    """For offline testing"""
+                        
+    def __init__(self, settings, translator, platform, bus, db=None):
+        pass
+
+    def connect(self, announce='Playback', slaveBackend=None):
+        pass
+
+    def getServerVersion(self):
+        return 65
+
+    def close(self):
+        pass
+    
+    def isTunerRecording(self, tuner):
+        return False
+    
+    def getAllRecordings(self):
+        return []
+
+    def getUpcomingRecordings(self, filter=Upcoming.SCHEDULED):
+        return []
+    
+
 class ConnectionFactory(pool.PoolableFactory):
     
     def __init__(self, *args, **kwargs):
@@ -1287,9 +1312,14 @@ class ConnectionFactory(pool.PoolableFactory):
         self.bus = kwargs['bus']
     
     def create(self):
-        conn = Connection(self.settings, self.translator, self.platform, self.bus)
+        from mythbox import config
+        if config.offline:
+            conn = OfflineConnection(self.settings, self.translator, self.platform, self.bus)
+        else:
+            conn = Connection(self.settings, self.translator, self.platform, self.bus)
         return conn
     
     def destroy(self, conn):
         conn.close()
         del conn
+

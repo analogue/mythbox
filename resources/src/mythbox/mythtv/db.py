@@ -59,7 +59,11 @@ class MythDatabaseFactory(PoolableFactory):
         self.domainCache = kwargs['domainCache']
     
     def create(self):
-        db = MythDatabase(self.settings, self.translator, self.domainCache)
+        from mythbox import config
+        if config.offline:
+            db = OfflineDatabase()
+        else:
+            db = MythDatabase(self.settings, self.translator, self.domainCache)
         return db
     
     def destroy(self, db):
@@ -1004,3 +1008,43 @@ class MythDatabase(object):
         # `last_delete`,    '2008-10-06 23:29:08',  
         # `storagegroup`,   'Default', 
         # `avg_delay`)      76)
+
+
+class OfflineDatabase(MythDatabase):
+    """For offline testing"""
+    
+    def __init__(self, *args, **kwargs):
+        pass
+ 
+    def getMasterBackend(self):
+        from mythbox.mythtv.domain import Backend
+        return Backend('localhost', '127.0.0.1', 6543, True)
+    
+    def getSlaveBackends(self):
+        return []
+    
+    def initWithSettings(self, settings, translator, domainCache):
+        pass
+    
+    def close(self):
+        pass
+
+    def toBackend(self, hostnameOrIpAddress):
+        return self.getMasterBackend()
+    
+    def getTuners(self):
+        return [] # Tuner[]
+
+    def getJobs(self, program=None, jobType=None, jobStatus=None):
+        jobs = []
+        return jobs
+
+    def getChannels(self):
+        return []
+    
+    def getTVGuideDataFlattened(self, startTime, endTime, channels):
+        return []
+    
+    def getRecordingSchedules(self, chanId='', scheduleId=-1):
+        #from mythbox.mythtv.domain import RecordingSchedule
+        return []
