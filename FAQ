@@ -94,9 +94,9 @@ A8. TODO: Placeholder
 -------------------------------------------------------------------------------
 Q9. Where is the source code?  
     
-A9. To checkout the source (assuming you have Mercurial installed): 
+A9. To checkout the source (assuming you have Git installed): 
   
-        hg clone http://mythbox.googlecode.com/hg MythBox
+    git clone git://github.com/analogue/MythBox.git
   
     Description of source tree:
     
