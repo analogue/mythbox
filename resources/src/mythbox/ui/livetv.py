@@ -316,7 +316,7 @@ class LiveTvWindow(BaseWindow):
     def onAction(self, action):
         id = action.getId()
         
-        if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR,):
+        if id in Action.GO_BACK:
             self.closed = True
             self.settings.put('livetv_last_selected', str(self.channelsListBox.getSelectedPosition()))
             self.close()

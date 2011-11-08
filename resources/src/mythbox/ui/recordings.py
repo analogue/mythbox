@@ -161,7 +161,7 @@ class RecordingsWindow(BaseWindow):
     def onAction(self, action):
         id = action.getId()
         
-        if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
+        if id in Action.GO_BACK:
             self.closed = True
             self.saveSettings()
             self.close()

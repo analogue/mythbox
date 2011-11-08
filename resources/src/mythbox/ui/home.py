@@ -109,7 +109,7 @@ class HomeWindow(BaseWindow):
         
         id = action.getId()
         
-        if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR,):
+        if id in Action.GO_BACK:
             if self.isCoverFlowPopupActive():
                 self.setFocus(self.coverFlow)
             else:

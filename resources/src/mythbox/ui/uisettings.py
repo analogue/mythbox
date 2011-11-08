@@ -243,7 +243,7 @@ class SettingsWindow(BaseWindow):
             
     @catchall
     def onAction(self, action):
-        if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
+        if action.getId() in Action.GO_BACK:
             self.close()
 
     def renderStreaming(self):

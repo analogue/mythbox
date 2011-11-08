@@ -121,7 +121,7 @@ class UpcomingRecordingsWindow(BaseWindow):
     def onAction(self, action):
         id = action.getId()
         
-        if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR,):
+        if id in Action.GO_BACK:
             self.closed = True
             self.settings.put('upcoming_sort_by', self.sortBy)
             self.settings.put('upcoming_sort_ascending', '%s' % self.sortAscending)

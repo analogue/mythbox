@@ -58,7 +58,9 @@ class Action(object):
     CONTEXT_MENU            = 117  # TV Guide on MCE remote
     HOME                    = 159  # kbd only
     END                     = 160  # kbd only
-
+    
+    GO_BACK = (PARENT_DIR, PREVIOUS_MENU, NAV_BACK,)
+    
 
 class Align(object):
     # from xbmc/guilib/common/xbfont.h

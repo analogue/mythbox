@@ -86,7 +86,7 @@ class SchedulesWindow(BaseWindow):
     def onAction(self, action):
         id = action.getId()
         
-        if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
+        if id in Action.GO_BACK:
             self.closed = True
             self.settings.put('schedules_last_selected', '%d'%self.schedulesListBox.getSelectedPosition())
             self.settings.put('schedules_sort_by', self.sortBy)
@@ -245,7 +245,7 @@ class ScheduleDialog(BaseDialog):
         
     @catchall_ui 
     def onAction(self, action):
-        if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
+        if action.getId() in Action.GO_BACK:
             self.close() 
 
     @catchall_ui

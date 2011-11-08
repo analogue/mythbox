@@ -235,7 +235,7 @@ class TvGuideWindow(ui.BaseWindow):
         
         actionConsumed = False
         
-        if action.getId() in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
+        if action.getId() in Action.GO_BACK:
             self.closed = True
             self.settings.put('tv_guide_last_selected', '%s' % self.startChan)
             self.bus.deregister(self)

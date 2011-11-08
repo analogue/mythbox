@@ -242,7 +242,7 @@ class RecordingDetailsWindow(BaseWindow):
     @catchall_ui
     def onAction(self, action):
         id = action.getId()
-        if id in (Action.PREVIOUS_MENU, Action.PARENT_DIR):
+        if id in Action.GO_BACK:
             if self.isAdvancedBladeActive():
                 self.setFocus(self.advancedButton)
             else:
