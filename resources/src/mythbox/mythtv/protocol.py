@@ -36,36 +36,15 @@ class ProtocolException(Exception):
 
 class BaseProtocol(object):
     
-    def version(self):
-        raise Exception, 'Abstract method'
-    
     def recordSize(self):
         return len(self.recordFields())
     
-    def tvState(self):
-        raise Exception, 'Abstract method'
-    
-    def buildAnnounceFileTransferCommand(self, hostname, filePath):
-        raise Exception, 'Abstract method'
-    
-    def getLiveTvBrain(self, settings, translator):
-        raise Exception, 'Abstract method'
-
-    def recordFields(self):
-        return Exception, 'Abstract method'
-
     def emptyRecordFields(self):
-        return []
+        return ['episode','inetref','season']
     
     def protocolToken(self):
         return ""
-
-    def mythVersion(self):
-        raise Exception, 'Abstract method'
-
-    def supportsStreaming(self, platform):
-        raise Exception, 'Abstract method'
-
+    
 
 class Protocol40(BaseProtocol):
     
@@ -119,6 +98,21 @@ class Protocol40(BaseProtocol):
 
     def supportsStreaming(self, platform):
         return True
+
+    def readLong(self, reply, remove=False):
+        from mythbox.mythtv.conn import decodeLongLong
+        d = decodeLongLong(int(reply[1]), int(reply[0]))
+        if remove:
+            reply.pop(0)
+            reply.pop(0)
+        return d
+
+    def writeLong(self, d, request):
+        from mythbox.mythtv.conn import encodeLongLong
+        low, high = encodeLongLong(d)
+        request.append('%d' % high)
+        request.append('%d' % low)
+
 
 class Protocol41(Protocol40):
     
@@ -236,7 +230,7 @@ class Protocol57(Protocol56):
     def mythVersion(self):
         return '0.24'
 
-    def recordFields(self):
+    def recordFields(self):#
         return ['title','subtitle','description',
                 'category','chanid','channum',
                 'callsign','channame','filename',
@@ -339,9 +333,55 @@ class Protocol65(Protocol64):
         return ['QUERY_RECORDINGS Unsorted']
 
 
+class Protocol66(Protocol65):
+    
+    def version(self):
+        return 66
+    
+    def protocolToken(self):
+        return "0C0FFEE0"
+
+    def readLong(self, reply, remove=False):
+        d = long(reply[0])
+        if remove:
+            reply.pop(0)
+        return d
+    
+    def writeLong(self, d, request):
+        request.append('%d' % long(d))
+
+
+class Protocol67(Protocol66):
+    
+    def version(self):
+        return 67
+    
+    def protocolToken(self):
+        return "0G0G0G0"
+
+    def recordFields(self):
+        # Copied from mythtv/mythtv/bindings/python/MythTV/mythproto.py
+        return  ['title',        'subtitle',     'description',
+                 'season',       'episode',      'category',
+                 'chanid',       'channum',      'callsign',
+                 'channame',     'filename',     'filesize',
+                 'starttime',    'endtime',      'findid',
+                 'hostname',     'sourceid',     'cardid',
+                 'inputid',      'recpriority',  'recstatus',
+                 'recordid',     'rectype',      'dupin',
+                 'dupmethod',    'recstartts',   'recendts',
+                 'programflags', 'recgroup',     'outputfilters',
+                 'seriesid',     'programid',    'inetref',
+                 'lastmodified', 'stars',        'airdate',
+                 'playgroup',    'recpriority2', 'parentid',
+                 'storagegroup', 'audio_props',  'video_props',
+                 'subtitle_type','year']
+
+
+
 # Current rev in mythversion.h
 protocols = {
-    40: Protocol40(),
+    40: Protocol40(), # 0.21
     41: Protocol41(),
     42: Protocol42(),
     43: Protocol43(),
@@ -362,5 +402,7 @@ protocols = {
     62: Protocol62(),  # 0.24
     63: Protocol63(),  # 0.24
     64: Protocol64(),  # 0.24
-    65: Protocol65()   # 0.24
+    65: Protocol65(),  # 0.24
+    66: Protocol66(),  # 0.24
+    67: Protocol67()   # 0.24
 }    

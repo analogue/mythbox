@@ -386,7 +386,7 @@ class Connection(object):
         For a tuner that is recording, return the number of frames written as an int
         """
         reply = self._sendRequest(self.cmdSock, ['QUERY_RECORDER %d' % tuner.tunerId, 'GET_FRAMES_WRITTEN'])
-        return decodeLongLong(int(reply[1]), int(reply[0]))
+        return self.protocol.readLong(reply)
 
     @timed
     def getTunerFilePosition(self, tuner):
@@ -394,7 +394,7 @@ class Connection(object):
         For a tuner that is recording, return the current position in the file as an int
         """
         reply = self._sendRequest(self.cmdSock, ['QUERY_RECORDER %d' % tuner.tunerId, 'GET_FILE_POSITION'])
-        return decodeLongLong(int(reply[1]), int(reply[0]))
+        return self.protocol.readLong(reply)
 
     @timed
     def getTunerFrameRate(self, tuner):
@@ -600,12 +600,11 @@ class Connection(object):
             msg.insert(0, token)
             
         # extra data
-        #if width and height:
         msg.append('s')
-        timeLow, timeHigh = encodeLongLong(180)
-        msg.append('%d' % timeHigh)
-        msg.append('%d' % timeLow)
         
+        # thumbnail is a snapshot @ 3mins
+        self.protocol.writeLong(180, msg)
+
         # WORKAROUND:
         #    Specifying output file as non <EMPTY> in 0.24 seems to break preview generation.
         #    mythpreviewgen seems to think the local dir is '/' and can't write to it in the call
@@ -858,8 +857,7 @@ class Connection(object):
         """
         command = 'QUERY_BOOKMARK %s %s' %(program.getChannelId(), program.recstarttimets())
         reply = self._sendRequest(self.cmdSock, [command])
-        bookmarkFrame = decodeLongLong(int(reply[1]), int(reply[0])) 
-        log.debug('bookmarkFrame = int %s int %s => long %s' %(reply[0], reply[1], bookmarkFrame))
+        bookmarkFrame = self.protocol.readLong(reply)
         return bookmarkFrame
     
     @timed
@@ -868,9 +866,14 @@ class Connection(object):
         Sets the bookmark for the given program to frameNumber. 
         Raises ServerException on failure.
         """
-        lowWord, highWord = encodeLongLong(frameNumber)
-        command = 'SET_BOOKMARK %s %s %s %s' %(program.getChannelId(), program.recstarttimets(), highWord, lowWord)
-        reply = self._sendRequest(self.cmdSock, [command])
+        tokens = ['SET_BOOKMARK', '%s' % program.getChannelId(), '%s' % program.recstarttimets()]
+        self.protocol.writeLong(frameNumber, tokens)
+        
+        # pad with 'dont_care' if frameNumber not split into high/low bytes
+        if len(tokens) == 4:
+            tokens.append('dont_care')
+        
+        reply = self._sendRequest(self.cmdSock, [' '.join(tokens)])
         
         if reply[0] == 'OK':
             log.debug("Bookmark frameNumber set to %s" % frameNumber)
@@ -891,13 +894,13 @@ class Connection(object):
         COMM_START = 4
         COMM_END   = 5
         commBreaks = []
-        command = 'QUERY_COMMBREAK %s %s' %(program.getChannelId(), program.starttimets())
+        command = 'QUERY_COMMBREAK %s %s' % (program.getChannelId(), program.starttimets())
         reply = self._sendRequest(self.cmdSock, [command])
 
         if len(reply) == 0:
             return commBreaks
         
-        numRecs = int(reply[0])
+        numRecs = int(reply.pop(0))
         
         if numRecs in (-1,0,):
             return commBreaks        
@@ -906,21 +909,19 @@ class Connection(object):
             raise ClientException, 'Expected an even number of comm break records but got %s instead' % numRecs
         
         fps = program.getFPS()
-        recSize = 3                      # marker, highByte, lowByte
+        
         for i in xrange(0, numRecs, 2):  # skip by 2's - start/end come in pairs
-            baseIndex = i * recSize
 
-            commFlagStart = int(reply[baseIndex + 1])
+            commFlagStart = int(reply.pop(0))
             if commFlagStart != COMM_START:
                 raise ProtocolException, 'Expected COMM_START for record %s but got %s instead' % ((i+1), commFlagStart)
-            
-            frameStart = decodeLongLong(reply[baseIndex + 3], reply[baseIndex + 2])
+            frameStart = self.protocol.readLong(reply, remove=True)
 
-            commFlagEnd = int(reply[baseIndex + 4])
+            commFlagEnd = int(reply.pop(0))
             if commFlagEnd != COMM_END:
-                raise ProtocolException, 'Expected COMM_END for record %s but got %s instead' %((i+2), commFlagEnd)
-            
-            frameEnd = decodeLongLong(reply[baseIndex + 6], reply[baseIndex + 5])
+                raise ProtocolException, 'Expected COMM_END for record %s but got %s instead' %((i+2), commFlagEnd)            
+            frameEnd = self.protocol.readLong(reply, remove=True)
+
             from mythbox.mythtv.domain import frames2seconds, CommercialBreak
             commBreaks.append(CommercialBreak(frames2seconds(frameStart, fps), frames2seconds(frameEnd, fps)))
                         
@@ -934,26 +935,20 @@ class Connection(object):
         @todo: Update so support multiple storage groups. For now, just return the stats on the first storage group
         """
         reply = self._sendRequest(self.cmdSock, ['QUERY_FREE_SPACE'])
+        ok = reply.pop(0)
+        hostname = reply.pop(0)
+        directory = reply.pop(0)
+        _ = reply.pop(0)
+        _ = reply.pop(0)
+        totalSpace = self.protocol.readLong(reply, remove=True)
+        usedSpace = self.protocol.readLong(reply, remove=True)
 
-        # Reply indices:
-        # 0 hostname,
-        # 1 directory,
-        # 2 1,
-        # 3 -1,
-        # 4 total size high
-        # 5 total size low
-        # 6 used size high
-        # 7 used size low
-
-        totalSpace = decodeLongLong(int(reply[6]), int(reply[5]))
-        usedSpace = decodeLongLong(int(reply[8]), int(reply[7]))
-        freeSpace = totalSpace - usedSpace
         return {
-            'hostname' : reply[1],
-            'dir'      : reply[2],
+            'hostname' : hostname,
+            'dir'      : directory,
             'total'    : totalSpace,
             'used'     : usedSpace,     
-            'free'     : freeSpace,    
+            'free'     : totalSpace - usedSpace,    
         }
     
     def getLoad(self):
@@ -1101,8 +1096,10 @@ class Connection(object):
             closeCommandSocket = True 
          
         reply,dataSocket = self.annFileTransfer(backend.hostname, backendPath)
-        filesize = decodeLongLong(reply[2], reply[1])
-        log.debug('file = %s reply[0] = %s filesize = %s' % (backendPath, reply[0], filesize))
+        filename = reply.pop(0)
+        filesize = self.protocol.readLong(reply, remove=True)
+        
+        log.debug('path = %s\tfile = %s\tsize = %s' % (backendPath, filename, filesize))
         
         if filesize == 0:
             rc = False
@@ -1117,7 +1114,7 @@ class Connection(object):
             
             while remainingBytes > 0:
                 blockSize = min(remainingBytes, maxBlockSize)
-                requestBlockMsg = ['QUERY_FILETRANSFER ' + reply[0], 'REQUEST_BLOCK', '%s' % blockSize]
+                requestBlockMsg = ['QUERY_FILETRANSFER ' + filename, 'REQUEST_BLOCK', '%s' % blockSize]
                 self._sendMsg(commandSocket, requestBlockMsg)
                 
                 blockTransferred = 0
@@ -1215,7 +1212,7 @@ class Connection(object):
         try:
             s.send(msg)
         except Exception, e:
-            if str(e) == "(10053, 'Software caused connection abort')":
+            if str(e) == "(10053, 'Software caused connection abort')" or str(e) == "[Errno 10053] An established connection was aborted by the software in your host machine":
                 log.warn('Lost connection resetting')
                 try:
                     self.close()
