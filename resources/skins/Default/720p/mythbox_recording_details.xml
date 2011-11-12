@@ -268,6 +268,7 @@
             <enabled>true</enabled>
             <pulseonselect>true</pulseonselect>
             <onup>255</onup>
+            <ondown>251</ondown>
         </control>
         
         <control type="button" id="251">
@@ -282,6 +283,8 @@
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
+            <onup>250</onup>
+            <ondown>252</ondown>
         </control>
         
         <control type="button" id="252">
@@ -296,6 +299,8 @@
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
+            <onup>251</onup>
+            <ondown>253</ondown>
         </control>
 
         <control type="button" id="253">
@@ -310,6 +315,7 @@
             <texturefocus>button_focus.png</texturefocus>
             <texturenofocus>button_nofocus.png</texturenofocus>
             <pulseonselect>true</pulseonselect>
+            <onup>252</onup>
             <ondown>256</ondown>
         </control>
 

@@ -252,7 +252,7 @@ class RecordingDetailsWindow(BaseWindow):
         elif id == Action.PAGE_DOWN:
             self.nextRecording()
         else: 
-            log.debug('unhandled action = %s  id = %s' % (action, action.getId()))
+            log.debug('unhandled action = %s  id = %s' % (action, id))
 
     def onFocus(self, controlId):
         pass
