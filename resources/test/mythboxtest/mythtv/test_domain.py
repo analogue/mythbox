@@ -65,15 +65,9 @@ def socketDateTime(year, month, day, h, m, s):
 
 class ModuleFunctionsTest(unittest.TestCase):
     
-    def test_ctime2MythTime_MinDateStringReturnsMinDate(self):
-        t = ctime2MythTime('0')
-        log.debug('MythTime = %s' % t)
-        self.assertEqual('19691231180000', t)
-
-    def test_ctime2MythTime_MinDateIntReturnsMinDate(self):
-        t = ctime2MythTime(0)
-        log.debug('MythTime = %s' % t)
-        self.assertEqual('19691231180000', t)
+    def test_ctime2MythTime_Zero_Returns_MinDate(self):
+        self.assertEqual('19691231160000', ctime2MythTime(0))
+        self.assertEqual('19691231160000', ctime2MythTime('0'))
 
     def test_ctime2MythTime_BadInputRaisesValueError(self):
         # PLATFORM ISSUE: Throws exception on windows but returns 19691231175959 on linux
