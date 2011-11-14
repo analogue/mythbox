@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     import os, sys, xbmcaddon
     scriptDir = xbmcaddon.Addon('script.mythbox').getAddonInfo('path')
-    sys.path.append(os.path.join(scriptDir, 'resources', 'src'))
+    sys.path.insert(0, os.path.join(scriptDir, 'resources', 'src'))
 
     import xbmcgui
     import xbmc
