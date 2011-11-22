@@ -882,7 +882,7 @@ class RecordedProgram(Program):
         return self.getField('programid')
 
     def hasOriginalAirDate(self):
-        return int(self._data[38]) == 1
+        return self.protocol.hasOriginalAirDate(self)
     
     def originalAirDate(self):
         '''

@@ -72,6 +72,9 @@ class Protocol40(BaseProtocol):
                  'playgroup',    'recpriority2', 'parentid',
                  'storagegroup', 'audio_props',  'video_props',
                  'subtitle_type']
+
+    def hasOriginalAirDate(self, program):
+        return int(program.getField('hasairdate')) == 1
     
     def tvState(self):
         return TVState
@@ -245,6 +248,10 @@ class Protocol57(Protocol56):
                 'playgroup','recpriority2','parentid',
                 'storagegroup','audio_props','video_props',
                 'subtitle_type','year']
+    
+    def hasOriginalAirDate(self, program):
+        d = program.originalAirDate()
+        return d and '-' in d
     
     def buildAnnounceFileTransferCommand(self, hostname, filePath):
         return ["ANN FileTransfer %s 0" % hostname, filePath, 'Default']

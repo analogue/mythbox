@@ -38,8 +38,10 @@ from mythbox.platform import Platform
 
 log = mythboxtest.getLogger('mythbox.unittest')
 
+TEST_PROTOCOL_VERSION = 63
+TEST_PROTOCOL = protocol.Protocol63()
  
-def pdata(pdict={}, protocolVersion=56):
+def pdata(pdict={}, protocolVersion=TEST_PROTOCOL_VERSION):
     '''
     make creating fake program data easy with a sparse dict
     
@@ -173,7 +175,7 @@ class TVProgramTest(unittest.TestCase):
         }
         self.translator = Mock() 
         self.platform = Platform()
-        self.protocol = protocol.Protocol23056()
+        self.protocol = TEST_PROTOCOL
         self.settings = MythSettings(self.platform, self.translator)
 
     def test_constructor(self):
@@ -212,7 +214,7 @@ class RecordedProgramTest(unittest.TestCase):
         self.settings = Mock()
         self.translator = Mock()
         self.platform = Mock()
-        self.protocol = protocol.Protocol23056()
+        self.protocol = TEST_PROTOCOL
         self.pkwargs = {'settings':self.settings, 'translator': self.translator, 'platform':self.platform, 'protocol':self.protocol, 'conn':self.conn}
         
     def test_hashable(self):
@@ -288,6 +290,7 @@ class RecordedProgramTest(unittest.TestCase):
     def test_formattedAirTime(self):
         #                                      9:00pm                               9:30pm
         p = RecordedProgram(pdata({'starttime':socketTime(21, 0, 0), 'endtime':socketTime(21, 30, 0)}), **self.pkwargs)
+        print p
         self.assertEqual('9:00 - 9:30PM', p.formattedAirTime(short=False))
         self.assertEqual('9 - 9:30PM', p.formattedAirTime(short=True))
         self.assertEqual('9 - 9:30PM', p.formattedAirTime())
@@ -330,7 +333,7 @@ class RecordedProgramTest(unittest.TestCase):
         self.assertEqual('', rp.originalAirDate())
         
     def test_originalAirDate_When_available_Returns_date_as_string(self):
-        rp = RecordedProgram(pdata({'airdate': '2008-10-10', 'hasairdate':1}), **self.pkwargs)
+        rp = RecordedProgram(pdata({'airdate': '2008-10-10'}), **self.pkwargs)
         self.assertEqual('2008-10-10', rp.originalAirDate())
         self.assertTrue(rp.hasOriginalAirDate())
 
@@ -494,7 +497,7 @@ class JobTest(unittest.TestCase):
 
     def setUp(self):
         self.translator = Mock()
-        self.protocol = protocol.Protocol56()
+        self.deps = {'settings':Mock(), 'translator':self.translator, 'platform':Mock(), 'protocol':TEST_PROTOCOL, 'conn':Mock()}
 
     def test_moveToFrontOfQueue_Raises_Exeption_When_Job_Not_Queued(self):
         job = self.createJob(jobStatus=JobStatus.FINISHED)
@@ -683,12 +686,8 @@ class JobTest(unittest.TestCase):
         job = self.createJob()
         job.startTime = datetime.datetime(2009, 12, 5, 10, 20, 00)
         job.channelId = 1999
-        
-        data = [''] * self.protocol.recordSize()
-        data[4]  = 1999
-        data[11] = time.mktime(datetime.datetime(2009, 12, 5, 10, 20, 00).timetuple()) 
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=self.protocol, conn=Mock())
-        
+        program = RecordedProgram(pdata({'chanid':1999, 'starttime' : time.mktime(datetime.datetime(2009, 12, 5, 10, 20, 00).timetuple())}), **self.deps)
+                                  
         # Test & verify
         self.assertTrue(job.isJobFor(program))
         
@@ -697,11 +696,7 @@ class JobTest(unittest.TestCase):
         job = self.createJob()
         job.startTime = datetime.datetime(2008, 11, 4, 23, 45, 00)
         job.channelId = 1999
-        
-        data = [''] * self.protocol.recordSize()
-        data[4]  = 1999
-        data[11] = time.mktime(datetime.datetime(2009, 12, 5, 10, 20, 00).timetuple()) 
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=self.protocol, conn=Mock())
+        program = RecordedProgram(pdata({'chanid':1999, 'starttime': time.mktime(datetime.datetime(2009, 12, 5, 10, 20, 00).timetuple())}), **self.deps)
         
         # Test & verify
         self.assertFalse(job.isJobFor(program))
@@ -711,11 +706,7 @@ class JobTest(unittest.TestCase):
         job = self.createJob()
         job.startTime = datetime.datetime(2008, 11, 4, 23, 45, 00)
         job.channelId = 200
-        
-        data = [''] * self.protocol.recordSize()
-        data[4]  = 1999
-        data[11] = time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple()) 
-        program = RecordedProgram(data=data, settings=Mock(), translator=Mock(), platform=Mock(), protocol=self.protocol, conn=Mock())
+        program = RecordedProgram(pdata({'chanid':1999, 'starttime':time.mktime(datetime.datetime(2008, 11, 4, 23, 45, 00).timetuple())}), **self.deps)
         
         # Test & verify
         self.assertFalse(job.isJobFor(program))
