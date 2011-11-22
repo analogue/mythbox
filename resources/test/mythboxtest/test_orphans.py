@@ -58,13 +58,13 @@ class DeleteOrphansTest(unittest.TestCase):
     def tearDown(self):
         self.conn.close()
 
-    def test_getAllRecordings(self):
+    def test_delete_orphaned_recordings(self):
         recordings = self.conn.getAllRecordings()
         log.debug('Num Recordings = %s' % len(recordings))
         for i,r in enumerate(recordings):
             print i,r.getBareFilename()
  
-        dirs = ['/usr2/mythtv','/usr2/mythtv2', '/usr2/mythtv3']
+        dirs = ['/usr2/mythtv']
         
         mpgs = []
         
@@ -109,10 +109,60 @@ class DeleteOrphansTest(unittest.TestCase):
         
         import shutil
         
-        for src in bucket[:25]:
+        for src in bucket:
             dest = '/usr2/mythtv/backup/' + os.path.basename(src)
             print src,' -> ', dest
             #shutil.move(src, dest) 
+
+    def test_recreate_lost_recordings(self):
+        recordings = self.conn.getAllRecordings()
+        log.debug('Num Recordings = %s' % len(recordings))
+        for i,r in enumerate(recordings):
+            print i,r.getBareFilename()
+ 
+        dirs = ['/usr2/mythtv']
+        
+        mpgs = []
+        
+        for d in dirs:
+            files = os.listdir(d)
+            for f in files:
+                if f.endswith('.mpg'):
+                    mpgs.append(f)
+                    print f
+                    
+        print 'Recs  total   = ', len(recordings)
+        print 'Files total   = ', len(mpgs)
+        print 'Missing total = ', len(recordings) - len(mpgs)    
+        
+        rec_names = [r.getBareFilename() for r in recordings]
+        tocreate = rec_names[:]
+        for m in mpgs:
+            if m in rec_names:
+                tocreate.remove(m)
+                
+        print 'Tocreate    = ', len(tocreate)
+
+        bucket = []
+        
+        import datetime
+        
+        for f in tocreate:
+            for d in dirs:
+                path = os.path.join(d,f)
+                if not os.path.exists(path):
+                    bucket.append(path)
+                    print path
+                        
+        print 'Bucket     = ', len(bucket)
+        sorted(bucket)
+                
+        import shutil
+        
+        src = '/usr/copy/me.mpg'
+        for dest in bucket:
+            print src,' -> ', dest
+            #shutil.copy(src, dest) 
 
             
 if __name__ == '__main__':
