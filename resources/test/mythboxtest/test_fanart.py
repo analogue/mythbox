@@ -817,17 +817,23 @@ class TvRageProviderTest(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.sandbox, ignore_errors=True)
         self.platform = Mock()
         when(self.platform).getCacheDir().thenReturn(self.sandbox)
-    
+        self.deps = { 
+            'settings': Mock(), 
+            'translator': Mock(), 
+            'platform' : self.platform, 
+            'protocol' : P, 
+            'conn' : Mock()
+        }
+        
     def test_getSeasonAndEpisode_Success(self):
         # Given
         fields = {
             'title'     : u'The Real World',
             'starttime' : socketDateTime(2008, 11, 4, 23, 45, 00), 
             'endtime'   : socketDateTime(2008, 11, 4, 23, 45, 00),
-            'hasairdate': 1,
             'airdate'   : u'2010-07-14'
         }
-        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=self.platform, protocol=P, conn=Mock())
+        program = RecordedProgram(data=pdata(fields), **self.deps)
         provider = TvRageProvider(self.platform)
         
         # When
@@ -843,10 +849,9 @@ class TvRageProviderTest(unittest.TestCase):
             'title'     : u'House Hunters',
             'starttime' : socketDateTime(2010, 12, 2, 22, 45, 00), 
             'endtime'   : socketDateTime(2010, 12, 2, 23, 50, 00),
-            'hasairdate': 1,
             'airdate'   : u'2008-11-02'
         }
-        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=self.platform, protocol=P, conn=Mock())
+        program = RecordedProgram(data=pdata(fields), **self.deps)
         provider = TvRageProvider(self.platform)
         
         # When
@@ -862,10 +867,9 @@ class TvRageProviderTest(unittest.TestCase):
             'title'     : u'The Daily Show With Jon Stewart',
             'starttime' : socketDateTime(2010, 12, 2, 22, 45, 00), 
             'endtime'   : socketDateTime(2010, 12, 2, 23, 50, 00),
-            'hasairdate': 1,
             'airdate'   : u'2005-01-04'
         }
-        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=self.platform, protocol=P, conn=Mock())
+        program = RecordedProgram(data=pdata(fields), **self.deps)
         provider = TvRageProvider(self.platform)
         
         # When -- Season 3 for The Daily Show with Jon Stewart is missing
@@ -881,10 +885,9 @@ class TvRageProviderTest(unittest.TestCase):
             'title'     : u'Crap Crappity Crapola',
             'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
             'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
-            'hasairdate': 1,
             'airdate'   : u'2010-08-03'
         }
-        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=self.platform, protocol=P, conn=Mock())
+        program = RecordedProgram(data=pdata(fields), **self.deps)
         provider = TvRageProvider(self.platform)
         
         # When
@@ -900,10 +903,9 @@ class TvRageProviderTest(unittest.TestCase):
             'title'     : u'Seinfeld',
             'starttime' : socketDateTime(2008, 11, 4, 23, 45, 00), 
             'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
-            'hasairdate': 1,
             'airdate'   : u'1989-07-05'
         }
-        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=self.platform, protocol=P, conn=Mock())
+        program = RecordedProgram(data=pdata(fields), **self.deps)
         provider = TvRageProvider(self.platform)
         
         # When
@@ -922,10 +924,9 @@ class TvRageProviderTest(unittest.TestCase):
             'subtitle'  : u'In The Crosshairs',
             'starttime' : socketDateTime(2010, 12, 2, 22, 45, 00), 
             'endtime'   : socketDateTime(2010, 12, 2, 23, 50, 00),
-            'hasairdate': 1,
             'airdate'   : u'2010-09-20',   # TVRage shows date as 2010-09-16
         }
-        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=self.platform, protocol=P, conn=Mock())
+        program = RecordedProgram(data=pdata(fields), **self.deps)
         provider = TvRageProvider(self.platform)
         
         # When
@@ -942,11 +943,29 @@ class TvRageProviderTest(unittest.TestCase):
             'subtitle'    :u'blah',
             'starttime'   :socketDateTime(2008, 11, 4, 23, 45, 00),
             'endtime'     :socketDateTime(2008, 11, 4, 23, 50, 00),
-            'hasairdate'  :1,
             'airdate'     :u'2010-07-14'
         }
         
-        program = RecordedProgram(pdata(fields, P.version()), settings=Mock(), translator=Mock(), platform=self.platform, protocol=P, conn=Mock())
+        program = RecordedProgram(pdata(fields), **self.deps)
+        provider = TvRageProvider(self.platform)
+        
+        # When
+        season, episode = provider.getSeasonAndEpisode(program)
+        
+        # Then
+        self.assertIsNone(season)
+        self.assertIsNone(episode)
+
+    def test_getSeasonAndEpisode_When_original_airdate_and_subtitle_not_available_Then_return_Nones(self):
+        # Given
+        fields = {
+            'title'     : u'WCG Ultimate Gamer',
+            'subtitle'  : u'',
+            'airdate'   : u'',
+            'starttime' : socketDateTime(2010, 12, 2, 22, 45, 00), 
+            'endtime'   : socketDateTime(2010, 12, 2, 23, 50, 00),
+        }
+        program = RecordedProgram(data=pdata(fields), **self.deps)
         provider = TvRageProvider(self.platform)
         
         # When

@@ -865,14 +865,15 @@ class TvRageProvider(NoOpFanartProvider):
         return show
     
     def searchForEpisode(self, program, show):        
+        if not program.hasOriginalAirDate():
+            return self.searchBySubtitle(program, show)            
+            
         oad = program.originalAirDate()
-        #log.debug('original air date1: %s %s' % (oad, type(oad)))
         # TODO: change original air date in RecordedProgram to type datetime.date
         if type(oad) == datetime.date: 
             d = oad
         else:
             d = datetime.date(int(oad[0:4]), int(oad[5:7]), int(oad[8:10]))
-        #log.debug('original air date2: %s' % d)
 
         try:
             if d in show.seasonsAndEpisodes:
@@ -883,7 +884,7 @@ class TvRageProvider(NoOpFanartProvider):
         except:
             # backwards compatibility for pickled shows w/o index. return None,None to force re-query
             return None, None
-        
+    
     def searchBySubtitle(self, program, show):
         subtitle = program.subtitle()
         if subtitle is None or len(subtitle) == 0:
