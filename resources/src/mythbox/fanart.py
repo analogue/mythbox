@@ -653,6 +653,9 @@ class TvdbFanartProvider(BaseFanartProvider):
         if program.isMovie(): 
             return None, None
         
+        if not program.hasOriginalAirDate():
+            return None, None
+        
         t = self.transform(program.title())
         
         try:

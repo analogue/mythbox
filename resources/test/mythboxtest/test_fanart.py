@@ -26,8 +26,6 @@ from mythbox.filecache import FileCache, HttpResolver
 from mythbox.mythtv.domain import TVProgram, Program, RecordedProgram
 from mythbox.util import run_async, safe_str
 from mythboxtest.mythtv.test_domain import pdata, socketDateTime
-import mythbox.mythtv.protocol as protocol
-
 
 import datetime
 import mythboxtest
@@ -45,8 +43,6 @@ from mythboxtest import TEST_PROTOCOL
 log = mythboxtest.getLogger('mythbox.unittest')
 
 ustr = u'Königreich der Himmel'
-P = TEST_PROTOCOL
-
 
 class ChainDecoratorTest(unittest.TestCase):
 
@@ -278,7 +274,14 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.sandbox = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.sandbox, ignore_errors=True)
         when(self.platform).getCacheDir().thenReturn(self.sandbox)
-            
+        self.deps = {
+            'settings' : Mock(), 
+            'translator' : Mock(), 
+            'platform' : self.platform, 
+            'protocol' : TEST_PROTOCOL, 
+            'conn' : Mock()
+        }
+        
     def getPrograms(self):
         return self.getTvShows()
     
@@ -349,16 +352,15 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.assertFalse(self.fail)
         
     @skipIfTvdbDown
-    def test_getSeasonAndEpisode_Success(self):
+    def test_getSeasonAndEpisode_When_matches_original_airdate_Then_return_season_and_episode(self):
         # Given
         fields = {
             'title'     : u'The Real World',
             'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
             'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
-            'hasairdate': 1,
             'airdate'   : u'2010-07-14'
         }
-        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=Mock(), protocol=P, conn=Mock())
+        program = RecordedProgram(data=pdata(fields), **self.deps)
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
         
         # When
@@ -369,16 +371,34 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.assertEqual('3', episode)
         
     @skipIfTvdbDown
-    def test_getSeasonAndEpisode_When_episode_not_found_Then_returns_none(self):
+    def test_getSeasonAndEpisode_When_no_matching_original_airdate_Then_return_nones(self):
         # Given
         fields = {
             'title'     : u'MasterChef',
             'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
             'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
-            'hasairdate': 1,
-            'airdate'   : u'2010-08-03'
+            'airdate'   : u'2010-08-03'  # no match
         }
-        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=Mock(), protocol=P, conn=Mock())
+        program = RecordedProgram(data=pdata(fields), **self.deps)
+        provider = TvdbFanartProvider(self.platform, nextProvider=None)
+        
+        # When
+        season, episode = provider.getSeasonAndEpisode(program)
+        
+        # Then
+        self.assertIsNone(season)
+        self.assertIsNone(episode)
+
+    @skipIfTvdbDown
+    def test_getSeasonAndEpisode_When_original_airdate_not_available_Then_return_nones(self):
+        # Given
+        fields = {
+            'title'     : u'The Real World',
+            'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
+            'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
+            'airdate'   : u''
+        }
+        program = RecordedProgram(data=pdata(fields), **self.deps)
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
         
         # When
@@ -390,15 +410,14 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
 
     @skipIfTvdbDown
     def test_getSeasonAndEpisode_When_show_not_found_Then_returns_none(self):
-        # Setup
+        # Given
         fields = {
             'title'     : u'This Show Does Not Exist',
             'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
             'endtime'   : socketDateTime(2008, 11, 4, 23, 45, 00),
-            'hasairdate': 1,
             'airdate'   : u'2010-08-03'
         }
-        program = RecordedProgram(data=pdata(fields,P.version()), settings=Mock(), translator=Mock(), platform=Mock(), protocol=P, conn=Mock())
+        program = RecordedProgram(data=pdata(fields), **self.deps)
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
         
         # When
@@ -821,7 +840,7 @@ class TvRageProviderTest(unittest.TestCase):
             'settings': Mock(), 
             'translator': Mock(), 
             'platform' : self.platform, 
-            'protocol' : P, 
+            'protocol' : TEST_PROTOCOL, 
             'conn' : Mock()
         }
         
