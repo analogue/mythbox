@@ -45,7 +45,8 @@ class BootStrapper(object):
                 self.bootstrapSettings()
                 self.bootstrapUpdater()
                 self.bootstrapFeeds()
-                self.bootstrapDebugShell()
+                # TODO: Re-enable when twisted not loaded from dist-packages
+                #self.bootstrapDebugShell()
                 self.bootstrapHomeScreen()
             except Exception, ex:
                 if not self.failSilent:
