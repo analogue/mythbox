@@ -356,6 +356,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         # Given
         fields = {
             'title'     : u'The Real World',
+            'subtitle'  : u'',
             'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
             'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
             'airdate'   : u'2010-07-14'
@@ -371,13 +372,14 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.assertEqual('3', episode)
         
     @skipIfTvdbDown
-    def test_getSeasonAndEpisode_When_no_matching_original_airdate_Then_return_nones(self):
+    def test_getSeasonAndEpisode_When_no_matching_original_airdate_or_subtitle_Then_return_nones(self):
         # Given
         fields = {
             'title'     : u'MasterChef',
+            'subtitle'  : u'',
             'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
             'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
-            'airdate'   : u'2010-08-03'  # no match
+            'airdate'   : u''
         }
         program = RecordedProgram(data=pdata(fields), **self.deps)
         provider = TvdbFanartProvider(self.platform, nextProvider=None)
@@ -390,10 +392,31 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.assertIsNone(episode)
 
     @skipIfTvdbDown
+    def test_getSeasonAndEpisode_When_original_airdate_not_available_and_subtitle_matches_Then_return_season_and_episode(self):
+        # Given
+        fields = {
+            'title'     : u'The Real World',
+            'subtitle'  : u"Jemmye's White Knight",
+            'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
+            'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
+            'airdate'   : u''
+        }
+        program = RecordedProgram(data=pdata(fields), **self.deps)
+        provider = TvdbFanartProvider(self.platform, nextProvider=None)
+        
+        # When
+        season, episode = provider.getSeasonAndEpisode(program)
+        
+        # Then
+        self.assertEqual('24', season)
+        self.assertEqual('3', episode)
+
+    @skipIfTvdbDown
     def test_getSeasonAndEpisode_When_original_airdate_not_available_Then_return_nones(self):
         # Given
         fields = {
             'title'     : u'The Real World',
+            'subtitle'  : u'',
             'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
             'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
             'airdate'   : u''
