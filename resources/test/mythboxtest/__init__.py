@@ -2,6 +2,10 @@
 from os.path import join, exists, abspath
 from os import getcwd
 
+from mythbox.mythtv.protocol import Protocol63
+
+TEST_PROTOCOL = Protocol63()
+
 def getParent(d):
     if not exists(d):
         return None

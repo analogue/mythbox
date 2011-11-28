@@ -40,11 +40,12 @@ import unittest2 as unittest
 from tvdb_exceptions import tvdb_error
 from unittest2.case import SkipTest
 from decorator import decorator
+from mythboxtest import TEST_PROTOCOL
 
 log = mythboxtest.getLogger('mythbox.unittest')
 
 ustr = u'Königreich der Himmel'
-P = protocol.Protocol57()
+P = TEST_PROTOCOL
 
 
 class ChainDecoratorTest(unittest.TestCase):

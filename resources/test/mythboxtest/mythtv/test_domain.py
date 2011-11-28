@@ -35,13 +35,11 @@ from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, FlagMask, 
      EpisodeFilter, JobStatus, JobType
 
 from mythbox.platform import Platform
+from mythboxtest import TEST_PROTOCOL
 
 log = mythboxtest.getLogger('mythbox.unittest')
-
-TEST_PROTOCOL_VERSION = 63
-TEST_PROTOCOL = protocol.Protocol63()
  
-def pdata(pdict={}, protocolVersion=TEST_PROTOCOL_VERSION):
+def pdata(pdict={}, protocolVersion=TEST_PROTOCOL.version()):
     '''
     make creating fake program data easy with a sparse dict
     
