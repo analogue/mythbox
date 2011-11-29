@@ -394,9 +394,16 @@ class SuperFastFanartProvider(PersistentFanartProvider):
         key = '%s-%s' % (methodName, safe_str(program.title()))
         return key
 
+    def createEpisodeKey(self, methodName, program):
+        return '-'.join(str(k) for k in [
+            methodName, 
+            safe_str(program.title()), 
+            safe_str(program.subtitle()), 
+            program.originalAirDate()])
+
     def getSeasonAndEpisode(self, program):
         season, episode = None, None
-        key = self.createKey('getSeasonAndEpisode', program)
+        key = self.createEpisodeKey('getSeasonAndEpisode', program)
         
         # looks like we're caching more than just paths now
         if key in self.imagePathsByKey:
@@ -410,7 +417,7 @@ class SuperFastFanartProvider(PersistentFanartProvider):
         super(SuperFastFanartProvider, self).clear(program)
   
         if program:
-            for key in [self.createKey(m, program) for m in ['getPosters', 'getBanners', 'getBackgrounds', 'getSeasonAndEpisode']]:
+            for key in [self.createKey(m, program) for m in ['getPosters', 'getBanners', 'getBackgrounds']]:
                 if key in self.imagePathsByKey:
                     del self.imagePathsByKey[key]
         else:
