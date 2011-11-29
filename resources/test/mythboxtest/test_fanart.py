@@ -851,6 +851,33 @@ class SuperFastFanartProviderTest(unittest.TestCase):
         key = self.provider.createKey('getPosters', program)
         self.assertGreater(len(key), 0)
 
+    def test_getSeasonAndEpisode_When_not_in_cache_Then_ask_next_provider(self):
+        # Given
+        when(self.nextProvider).getSeasonAndEpisode(any(Program)).thenReturn(('5','12'))
+        key = self.provider.createKey('getSeasonAndEpisode', self.program)
+        self.assertNotIn(key, self.provider.imagePathsByKey)
+                        
+        # When
+        season, episode = self.provider.getSeasonAndEpisode(self.program)
+        
+        # Then
+        self.assertEqual('5', season)
+        self.assertEqual('12', episode)
+        self.assertEqual(('5','12'), self.provider.imagePathsByKey.get(key))
+    
+    def test_getSeasonAndEpisode_When_found_in_cache_Then_return_cached_copy(self):
+        # Given
+        key = self.provider.createKey('getSeasonAndEpisode', self.program)
+        self.provider.imagePathsByKey[key] = ('5','12')
+                        
+        # When
+        season, episode = self.provider.getSeasonAndEpisode(self.program)
+        
+        # Then
+        self.assertEqual('5', season)
+        self.assertEqual('12', episode)
+        verifyZeroInteractions(self.nextProvider)
+
 
 class TvRageProviderTest(unittest.TestCase):
     

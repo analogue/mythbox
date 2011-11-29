@@ -395,7 +395,16 @@ class SuperFastFanartProvider(PersistentFanartProvider):
         return key
 
     def getSeasonAndEpisode(self, program):
-        return self.nextProvider.getSeasonAndEpisode(program)
+        season, episode = None, None
+        key = self.createKey('getSeasonAndEpisode', program)
+        
+        # looks like we're caching more than just paths now
+        if key in self.imagePathsByKey:
+            season, episode = self.imagePathsByKey[key]
+        elif self.nextProvider:
+            season, episode = self.nextProvider.getSeasonAndEpisode(program)
+            self.imagePathsByKey[key] = (season, episode)
+        return season, episode
         
     def clear(self, program=None):
         super(SuperFastFanartProvider, self).clear(program)
