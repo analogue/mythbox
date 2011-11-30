@@ -769,7 +769,13 @@ class SuperFastFanartProviderTest(unittest.TestCase):
         self.nextProvider = Mock()
         self.platform = Mock()
         when(self.platform).getCacheDir().thenReturn(self.sandbox)
-        self.program = TVProgram({'title': 'Two Fat Ladies', 'category_type':'series'}, translator=Mock())
+        self.program = TVProgram({
+            'title' : u'Two Fat Ladies', 
+            'category_type': u'series', 
+            'subtitle' : u'Finger lickin good',
+            'originalairdate' : u'20081121'
+            }, 
+            translator=Mock())
         self.provider = SuperFastFanartProvider(self.platform, self.nextProvider)
 
     @staticmethod
@@ -854,7 +860,7 @@ class SuperFastFanartProviderTest(unittest.TestCase):
     def test_getSeasonAndEpisode_When_not_in_cache_Then_ask_next_provider(self):
         # Given
         when(self.nextProvider).getSeasonAndEpisode(any(Program)).thenReturn(('5','12'))
-        key = self.provider.createKey('getSeasonAndEpisode', self.program)
+        key = self.provider.createEpisodeKey('getSeasonAndEpisode', self.program)
         self.assertNotIn(key, self.provider.imagePathsByKey)
                         
         # When
@@ -867,7 +873,7 @@ class SuperFastFanartProviderTest(unittest.TestCase):
     
     def test_getSeasonAndEpisode_When_found_in_cache_Then_return_cached_copy(self):
         # Given
-        key = self.provider.createKey('getSeasonAndEpisode', self.program)
+        key = self.provider.createEpisodeKey('getSeasonAndEpisode', self.program)
         self.provider.imagePathsByKey[key] = ('5','12')
                         
         # When
