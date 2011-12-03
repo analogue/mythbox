@@ -684,7 +684,6 @@ class TvdbFanartProvider(BaseFanartProvider):
         try:
             # find show        
             try:
-                #tvdb_show = self.tvdb[title]
                 with self.lock:
                     tvdb_show = self._queryTvDb(title)
             except tvdb_api.tvdb_shownotfound:
@@ -704,14 +703,16 @@ class TvdbFanartProvider(BaseFanartProvider):
 
     def findEpisodeByOriginalAirDate(self, program, tvdb_show):
         if not program.hasOriginalAirDate():
-            return None
+            date = program.starttimeAsTime().strftime('%Y-%m-%d')
+        else:
+            date = program.originalAirDate()
         
         try:
             with self.lock:
-                episodes = tvdb_show.airedOn(program.originalAirDate())
+                episodes = tvdb_show.airedOn(date)
             return episodes[0]
         except tvdb_api.tvdb_episodenotfound:
-            log.debug('TVDB: Show %s airing on %s not found' % (safe_str(program.title()), program.originalAirDate()))
+            log.debug('TVDB: Show %s airing on %s not found' % (safe_str(program.title()), date))
             return None
     
     def findEpisodeBySubtitle(self, program, tvdb_show):
