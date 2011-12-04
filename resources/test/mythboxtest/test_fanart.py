@@ -449,6 +449,27 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         # Then
         self.assertIsNone(season)
         self.assertIsNone(episode)
+
+    @skipIfTvdbDown
+    def test_getSeasonAndEpisode_When_search_by_original_airdate_and_subtitle_fails_Then_search_on_record_date(self):
+        # Given
+        fields = {
+            'title'     : u'Late Night With Jimmy Fallon',
+            'subtitle'  : u'xxx',
+            'starttime' : socketDateTime(2011, 12, 2, 2, 00, 00),
+            'endtime'   : socketDateTime(2011, 12, 2, 3, 00, 00),
+            'airdate'   : u'2006-10-10'
+        }
+        program = RecordedProgram(data=pdata(fields), **self.deps)
+        provider = TvdbFanartProvider(self.platform, nextProvider=None)
+        
+        # When
+        season, episode = provider.getSeasonAndEpisode(program)
+        
+        # Then
+        log.debug('%s %s' % (season, episode))
+        self.assertEqual('2011', season)
+        self.assertTrue('114', episode)
         
     @skipIfTvdbDown
     def test_getBanners_When_program_is_not_movie_Then_returns_banners(self):

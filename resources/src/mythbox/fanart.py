@@ -672,7 +672,7 @@ class TvdbFanartProvider(BaseFanartProvider):
                 return self.tvdb[title]['_banners'][qtype]
             else:
                 return self.tvdb[title]
-        
+
     @chain
     def getSeasonAndEpisode(self, program):
         if program.isMovie(): 
@@ -682,49 +682,39 @@ class TvdbFanartProvider(BaseFanartProvider):
         tvdb_show = None
         
         try:
-            # find show        
             try:
                 with self.lock:
                     tvdb_show = self._queryTvDb(title)
             except tvdb_api.tvdb_shownotfound:
                 log.debug('TVDB: Show not found - %s' % safe_str(title))
                 return None, None
-    
-            # try a couple of different angles
-            episode = self.findEpisodeByOriginalAirDate(program, tvdb_show)
-            if episode is None:
-                episode = self.findEpisodeBySubtitle(program, tvdb_show)
-                if episode is None:
-                    return None, None
-            return episode['seasonnumber'], episode['episodenumber']
+ 
+            episode = self._findEpisode(program, tvdb_show)
+            return (episode['seasonnumber'], episode['episodenumber']) if episode else (None, None) 
+            
         except tvdb_api.tvdb_error:
             log.exception(safe_str(title))
             return None, None
 
-    def findEpisodeByOriginalAirDate(self, program, tvdb_show):
-        if not program.hasOriginalAirDate():
-            date = program.starttimeAsTime().strftime('%Y-%m-%d')
-        else:
-            date = program.originalAirDate()
-        
-        try:
-            with self.lock:
-                episodes = tvdb_show.airedOn(date)
-            return episodes[0]
-        except tvdb_api.tvdb_episodenotfound:
-            log.debug('TVDB: Show %s airing on %s not found' % (safe_str(program.title()), date))
-            return None
+    def _findEpisode(self, program, tvdb_show):
+        finders = [
+            ('original air date', program.hasOriginalAirDate, program.originalAirDate, None, 'firstaired'),
+            ('subtitle', program.subtitle, program.subtitle, None, 'episodename'),
+            ('recording date', program.starttimeAsTime, lambda p: p.starttimeAsTime().strftime('%Y-%m-%d'), program, 'firstaired')
+            ('recording date - 1', program.starttimeAsTime, lambda p: p.starttimeAsTime().strftime('%Y-%m-%d'), program, 'firstaired')
+
+        ]
     
-    def findEpisodeBySubtitle(self, program, tvdb_show):
-        subtitle = program.subtitle()
-        if subtitle is None or len(subtitle) == 0:
-            return None
-        
-        with self.lock:    
-            episodes = tvdb_show.search(term=subtitle, key='episodename')
-        if not episodes:
-            log.debug("TVDB: Show %s with subtitle '%s' not found" % (safe_str(program.title()), safe_str(subtitle)))
-        return episodes[0] if episodes else None
+        for searchStrategy, shouldSearch, searchFor, searchForArg, searchKey in finders:
+            if shouldSearch():
+                term = searchFor(searchForArg) if searchForArg else searchFor()
+                with self.lock:
+                    episodes = tvdb_show.search(term=term, key=searchKey)
+                if episodes:
+                    return episodes[0]
+                else:
+                    log.debug('TVDB: Episode not found - %s - %s as %s' % (safe_str(program.title()), searchStrategy, term))
+        return None
 
 
 class TheMovieDbFanartProvider(BaseFanartProvider):
