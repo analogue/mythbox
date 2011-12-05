@@ -366,7 +366,8 @@ class SuperFastFanartProvider(PersistentFanartProvider):
             banners = self.imagePathsByKey[key]
         elif self.nextProvider:
             banners = self.nextProvider.getBanners(program)
-            self.imagePathsByKey[key] = banners
+            if banners:
+                self.imagePathsByKey[key] = banners
         return banners
 
     def getBackgrounds(self, program):
@@ -378,7 +379,8 @@ class SuperFastFanartProvider(PersistentFanartProvider):
             backgrounds = self.imagePathsByKey[key]
         elif self.nextProvider:
             backgrounds = self.nextProvider.getBackgrounds(program)
-            self.imagePathsByKey[key] = backgrounds
+            if backgrounds:
+                self.imagePathsByKey[key] = backgrounds
         return backgrounds
 
     def hasPosters(self, program):
@@ -410,7 +412,8 @@ class SuperFastFanartProvider(PersistentFanartProvider):
             season, episode = self.imagePathsByKey[key]
         elif self.nextProvider:
             season, episode = self.nextProvider.getSeasonAndEpisode(program)
-            self.imagePathsByKey[key] = (season, episode)
+            if season and episode:
+                self.imagePathsByKey[key] = (season, episode)
         return season, episode
         
     def clear(self, program=None):
@@ -420,6 +423,10 @@ class SuperFastFanartProvider(PersistentFanartProvider):
             for key in [self.createKey(m, program) for m in ['getPosters', 'getBanners', 'getBackgrounds']]:
                 if key in self.imagePathsByKey:
                     del self.imagePathsByKey[key]
+            
+            episodeKey = self.createEpisodeKey('getSeasonAndEpisode', program)
+            if episodeKey:
+                del self.imagePathsByKey[episodeKey]
         else:
             self.imagePathsByKey.clear()
         
@@ -521,6 +528,7 @@ class HttpCachingFanartProvider(BaseFanartProvider):
         self.workThread.join()
         
     def getSeasonAndEpisode(self, program):
+        # pass through
         return self.nextProvider.getSeasonAndEpisode(program)
 
 
