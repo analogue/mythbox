@@ -700,9 +700,8 @@ class TvdbFanartProvider(BaseFanartProvider):
         finders = [
             ('original air date', program.hasOriginalAirDate, program.originalAirDate, None, 'firstaired'),
             ('subtitle', program.subtitle, program.subtitle, None, 'episodename'),
-            ('recording date', program.starttimeAsTime, lambda p: p.starttimeAsTime().strftime('%Y-%m-%d'), program, 'firstaired')
-            ('recording date - 1', program.starttimeAsTime, lambda p: p.starttimeAsTime().strftime('%Y-%m-%d'), program, 'firstaired')
-
+            ('recording date', program.starttimeAsTime, lambda p: p.starttimeAsTime().strftime('%Y-%m-%d'), program, 'firstaired'),
+            ('recording date - 1', program.starttimeAsTime, lambda p: (p.starttimeAsTime() - datetime.timedelta(days=1)).strftime('%Y-%m-%d'), program, 'firstaired')
         ]
     
         for searchStrategy, shouldSearch, searchFor, searchForArg, searchKey in finders:
@@ -713,7 +712,7 @@ class TvdbFanartProvider(BaseFanartProvider):
                 if episodes:
                     return episodes[0]
                 else:
-                    log.debug('TVDB: Episode not found - %s - %s as %s' % (safe_str(program.title()), searchStrategy, term))
+                    log.debug("TVDB: '%s' episode not found by '%s' as '%s'" % (safe_str(program.title()), searchStrategy, term))
         return None
 
 

@@ -350,6 +350,12 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
             t.join()
 
         self.assertFalse(self.fail)
+
+    def assertSeasonAndEpisode(self, program, expectedSeason, expectedEpisode):
+        provider = TvdbFanartProvider(self.platform, nextProvider=None)
+        season, episode = provider.getSeasonAndEpisode(program)
+        self.assertEqual(expectedSeason, season)
+        self.assertEqual(expectedEpisode, episode)
         
     @skipIfTvdbDown
     def test_getSeasonAndEpisode_When_matches_original_airdate_Then_return_season_and_episode(self):
@@ -361,15 +367,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
             'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
             'airdate'   : u'2010-07-14'
         }
-        program = RecordedProgram(data=pdata(fields), **self.deps)
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
-        
-        # When
-        season, episode = provider.getSeasonAndEpisode(program)
-        
-        # Then
-        self.assertEqual('24', season)
-        self.assertEqual('3', episode)
+        self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), u'24', u'3')
         
     @skipIfTvdbDown
     def test_getSeasonAndEpisode_When_no_matching_original_airdate_or_subtitle_Then_return_nones(self):
@@ -381,15 +379,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
             'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
             'airdate'   : u''
         }
-        program = RecordedProgram(data=pdata(fields), **self.deps)
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
-        
-        # When
-        season, episode = provider.getSeasonAndEpisode(program)
-        
-        # Then
-        self.assertIsNone(season)
-        self.assertIsNone(episode)
+        self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), None, None)
 
     @skipIfTvdbDown
     def test_getSeasonAndEpisode_When_original_airdate_not_available_and_subtitle_matches_Then_return_season_and_episode(self):
@@ -401,19 +391,10 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
             'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
             'airdate'   : u''
         }
-        program = RecordedProgram(data=pdata(fields), **self.deps)
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
-        
-        # When
-        season, episode = provider.getSeasonAndEpisode(program)
-        
-        # Then
-        self.assertEqual('24', season)
-        self.assertEqual('3', episode)
+        self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), u'24', u'3')
 
     @skipIfTvdbDown
     def test_getSeasonAndEpisode_When_original_airdate_not_available_Then_return_nones(self):
-        # Given
         fields = {
             'title'     : u'The Real World',
             'subtitle'  : u'',
@@ -421,38 +402,20 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
             'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
             'airdate'   : u''
         }
-        program = RecordedProgram(data=pdata(fields), **self.deps)
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
-        
-        # When
-        season, episode = provider.getSeasonAndEpisode(program)
-        
-        # Then
-        self.assertIsNone(season)
-        self.assertIsNone(episode)
+        self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), None, None)
 
     @skipIfTvdbDown
     def test_getSeasonAndEpisode_When_show_not_found_Then_returns_none(self):
-        # Given
         fields = {
             'title'     : u'This Show Does Not Exist',
             'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
             'endtime'   : socketDateTime(2008, 11, 4, 23, 45, 00),
             'airdate'   : u'2010-08-03'
         }
-        program = RecordedProgram(data=pdata(fields), **self.deps)
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
-        
-        # When
-        season, episode = provider.getSeasonAndEpisode(program)
-        
-        # Then
-        self.assertIsNone(season)
-        self.assertIsNone(episode)
+        self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), None, None)
 
     @skipIfTvdbDown
     def test_getSeasonAndEpisode_When_search_by_original_airdate_and_subtitle_fails_Then_search_on_record_date(self):
-        # Given
         fields = {
             'title'     : u'Late Night With Jimmy Fallon',
             'subtitle'  : u'xxx',
@@ -460,16 +423,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
             'endtime'   : socketDateTime(2011, 12, 2, 3, 00, 00),
             'airdate'   : u'2006-10-10'
         }
-        program = RecordedProgram(data=pdata(fields), **self.deps)
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
-        
-        # When
-        season, episode = provider.getSeasonAndEpisode(program)
-        
-        # Then
-        log.debug('%s %s' % (season, episode))
-        self.assertEqual('2011', season)
-        self.assertTrue('114', episode)
+        self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), u'2011', u'184')
         
     @skipIfTvdbDown
     def test_getBanners_When_program_is_not_movie_Then_returns_banners(self):
