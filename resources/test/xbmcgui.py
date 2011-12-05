@@ -876,14 +876,14 @@ class ControlProgress(Control):
 
 class ListItem(object):
  
-    def __init__(self, label = "", label2 = "", iconImage = None, thumbnailImage = None):
+    def __init__(self, label = "", label2 = "", iconImage = None, thumbnailImage = None, path = None):
         """
         Creates a new ListItem.
         label          : [opt] string or unicode - label1 text.
         label2         : [opt] string or unicode - label2 text.
         iconImage      : [opt] string - icon filename.
         thumbnailImage : [opt] string - thumbnail filename.
- 
+        path           : [opt] string - path to activate
         example:
         - listitem = xbmcgui.ListItem('Casino Royale', '[PG-13]', 'blank-poster.tbn', 'poster.tbn')
         """

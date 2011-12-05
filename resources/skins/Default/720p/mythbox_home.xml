@@ -448,7 +448,6 @@
                         <onleft>500</onleft>
                         <onright>500</onright>
                         <onup>2000</onup>
-                        <viewtype label="31028">list</viewtype>
                         <scrolltime>200</scrolltime>
                         <focusposition>2</focusposition>
                         <orientation>horizontal</orientation>

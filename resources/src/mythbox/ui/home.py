@@ -91,12 +91,12 @@ class HomeWindow(BaseWindow):
             self.refresh()
    
     def initCoverFlow(self):
-        self.coverItems = []
-        for i in range(MAX_COVERFLOW):
-            coverItem = xbmcgui.ListItem()
-            self.setListItemProperty(coverItem, 'thumb', 'loading.gif')
-            self.coverItems.append(coverItem)
-        self.coverFlow.addItems(self.coverItems)
+        coverItems = []
+        for _ in range(MAX_COVERFLOW):
+            coverItem = xbmcgui.ListItem(iconImage='loading.gif', thumbnailImage='loading.gif')
+            self.updateListItemProperty(coverItem, 'thumb', 'loading.gif')
+            coverItems.append(coverItem)
+        self.coverFlow.addItems(coverItems)
    
     def isCoverFlowPopupActive(self):
         buttonIds = [ID_COVERFLOW_POPUP,301,302]
@@ -319,7 +319,7 @@ class HomeWindow(BaseWindow):
     @window_busy
     def refreshOnInit(self):
         if self.settingsOK:
-            self.initCoverFlow()
+            #self.initCoverFlow()
             self.renderTuners()
             self.renderJobs()
             self.renderStats()
@@ -339,10 +339,15 @@ class HomeWindow(BaseWindow):
                 self.recordings.remove(exclude)
             except:
                 pass
+        
+        # NOTE: apparently, updating listitem properties broke in eden creating dupes.
+        #       reset as a workaround for the time being.
+        self.coverFlow.reset()
+        self.coverItems = []
             
         for i, r in enumerate(self.recordings[:MAX_COVERFLOW]):
             log.debug('Coverflow %d/%d: %s' % (i+1, MAX_COVERFLOW, safe_str(r.title())))
-            listItem = self.coverItems[i] 
+            listItem = xbmcgui.ListItem() 
             self.setListItemProperty(listItem, 'title', r.title())
             self.setListItemProperty(listItem, 'description', r.description())
             
@@ -352,7 +357,9 @@ class HomeWindow(BaseWindow):
                 if not cover:
                     cover = 'mythbox-logo.png'
             self.updateListItemProperty(listItem, 'thumb', cover)
-            
+            self.coverItems.append(listItem)
+            #self.coverFlow.addItem(listItem)
+        self.coverFlow.addItems(self.coverItems)
         log.debug('<<< renderCoverFlow end')
         
     @run_async
