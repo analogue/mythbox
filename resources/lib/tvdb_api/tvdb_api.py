@@ -28,14 +28,18 @@ import warnings
 import logging
 import datetime
 
-try:
-    import xml.etree.cElementTree as ElementTree
-except ImportError:
-    try:
-        import xml.etree.ElementTree as ElementTree
-    except ImportError:
-        import elementtree.ElementTree as ElementTree
+# TODO: Fails under python 2.7 on ubuntu 10.10 with 'NoneType is not callable exception
+#       somewhere in the native code.
+#try:
+#    import xml.etree.cElementTree as ElementTree
+#except ImportError:
+#
 
+try:
+    import xml.etree.ElementTree as ElementTree
+except ImportError:
+    import elementtree.ElementTree as ElementTree
+            
 try:
     import gzip
 except ImportError:
