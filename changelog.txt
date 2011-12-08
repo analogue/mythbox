@@ -1,6 +1,7 @@
 x/xx/2011 - MythBox 1.0.5
 -----------------------------
   New
+    - Support for XBMC 11.0 (Eden)
     - A thumbnail for which there is no associated recording is
       automatically deleted
     - Added 'Refresh Fan Art' button to the Recording Details > Advanced menu

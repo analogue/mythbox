@@ -21,7 +21,7 @@ from mockito import Mock, when, verify, any, verifyZeroInteractions
 from mythbox.fanart import chain, ImdbFanartProvider, TvdbFanartProvider, \
     TheMovieDbFanartProvider, GoogleImageSearchProvider, SuperFastFanartProvider, \
     OneStrikeAndYoureOutFanartProvider, SpamSkippingFanartProvider, \
-    HttpCachingFanartProvider, TvRageProvider
+    HttpCachingFanartProvider, TvRageProvider, NoOpFanartProvider
 from mythbox.filecache import FileCache, HttpResolver
 from mythbox.mythtv.domain import TVProgram, Program, RecordedProgram
 from mythbox.util import run_async, safe_str
@@ -359,7 +359,6 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         
     @skipIfTvdbDown
     def test_getSeasonAndEpisode_When_matches_original_airdate_Then_return_season_and_episode(self):
-        # Given
         fields = {
             'title'     : u'The Real World',
             'subtitle'  : u'',
@@ -874,45 +873,32 @@ class TvRageProviderTest(unittest.TestCase):
             'protocol' : TEST_PROTOCOL, 
             'conn' : Mock()
         }
+
+    def assertSeasonAndEpisode(self, program, expectedSeason, expectedEpisode):
+        provider = TvRageProvider(self.platform)
+        season, episode = provider.getSeasonAndEpisode(program)
+        self.assertEqual(expectedSeason, season)
+        self.assertEqual(expectedEpisode, episode)
         
     def test_getSeasonAndEpisode_Success(self):
-        # Given
         fields = {
             'title'     : u'The Real World',
             'starttime' : socketDateTime(2008, 11, 4, 23, 45, 00), 
             'endtime'   : socketDateTime(2008, 11, 4, 23, 45, 00),
             'airdate'   : u'2010-07-14'
         }
-        program = RecordedProgram(data=pdata(fields), **self.deps)
-        provider = TvRageProvider(self.platform)
-        
-        # When
-        season, episode = provider.getSeasonAndEpisode(program)
-        
-        # Then
-        self.assertEqual('24', season)
-        self.assertEqual('3', episode)
+        self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), u'24', u'3')
 
     def test_getSeasonAndEpisode_Success_HouseHunters(self):
-        # Given
         fields = {
             'title'     : u'House Hunters',
             'starttime' : socketDateTime(2010, 12, 2, 22, 45, 00), 
             'endtime'   : socketDateTime(2010, 12, 2, 23, 50, 00),
             'airdate'   : u'2008-11-02'
         }
-        program = RecordedProgram(data=pdata(fields), **self.deps)
-        provider = TvRageProvider(self.platform)
-        
-        # When
-        season, episode = provider.getSeasonAndEpisode(program)
-        
-        # Then
-        self.assertEqual('30', season)
-        self.assertEqual('2', episode)
+        self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), u'30', u'2')
 
     def test_getSeasonAndEpisode_dont_blowup_when_a_season_is_missing(self):
-        # Given
         fields = {
             'title'     : u'The Daily Show With Jon Stewart',
             'starttime' : socketDateTime(2010, 12, 2, 22, 45, 00), 
@@ -930,22 +916,13 @@ class TvRageProviderTest(unittest.TestCase):
         self.assertIsNotNone(episode)
 
     def test_getSeasonAndEpisode_When_show_not_found_Then_returns_none(self):
-        # Given
         fields = {
             'title'     : u'Crap Crappity Crapola',
             'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
             'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
             'airdate'   : u'2010-08-03'
         }
-        program = RecordedProgram(data=pdata(fields), **self.deps)
-        provider = TvRageProvider(self.platform)
-        
-        # When
-        season, episode = provider.getSeasonAndEpisode(program)
-        
-        # Then
-        self.assertIsNone(season)
-        self.assertIsNone(episode)
+        self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), None, None)
 
     def test_getSeasonAndEpisode_try_to_cache_output(self):
         # Given
@@ -968,7 +945,6 @@ class TvRageProviderTest(unittest.TestCase):
             self.assertEqual('1', episode)
 
     def test_getSeasonAndEpisode_When_match_not_found_using_original_airdate_Then_match_by_subtitle(self):
-        # Given
         fields = {
             'title'     : u'WCG Ultimate Gamer',
             'subtitle'  : u'In The Crosshairs',
@@ -976,18 +952,9 @@ class TvRageProviderTest(unittest.TestCase):
             'endtime'   : socketDateTime(2010, 12, 2, 23, 50, 00),
             'airdate'   : u'2010-09-20',   # TVRage shows date as 2010-09-16
         }
-        program = RecordedProgram(data=pdata(fields), **self.deps)
-        provider = TvRageProvider(self.platform)
-        
-        # When
-        season, episode = provider.getSeasonAndEpisode(program)
-        
-        # Then
-        self.assertEqual('2', season)
-        self.assertEqual('5', episode)
+        self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), u'2', u'5')
 
     def test_getSeasonAndEpisode_NBCNightlyNews_returns_None_cuz_TVRage_throws_KeyError(self):
-        # Given
         fields = {
             'title'       :u'NBC Nightly News',
             'subtitle'    :u'blah',
@@ -995,19 +962,9 @@ class TvRageProviderTest(unittest.TestCase):
             'endtime'     :socketDateTime(2008, 11, 4, 23, 50, 00),
             'airdate'     :u'2010-07-14'
         }
+        self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), None, None)
         
-        program = RecordedProgram(pdata(fields), **self.deps)
-        provider = TvRageProvider(self.platform)
-        
-        # When
-        season, episode = provider.getSeasonAndEpisode(program)
-        
-        # Then
-        self.assertIsNone(season)
-        self.assertIsNone(episode)
-
     def test_getSeasonAndEpisode_When_original_airdate_and_subtitle_not_available_Then_return_Nones(self):
-        # Given
         fields = {
             'title'     : u'WCG Ultimate Gamer',
             'subtitle'  : u'',
@@ -1015,12 +972,57 @@ class TvRageProviderTest(unittest.TestCase):
             'starttime' : socketDateTime(2010, 12, 2, 22, 45, 00), 
             'endtime'   : socketDateTime(2010, 12, 2, 23, 50, 00),
         }
+        self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), None, None)
+
+
+class IntegrationTest(unittest.TestCase):
+
+    def setUp(self):
+        self.sandbox = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.sandbox, ignore_errors=True)
+        self.platform = Mock()
+        when(self.platform).getCacheDir().thenReturn(self.sandbox)
+        self.deps = { 
+            'settings': Mock(), 
+            'translator': Mock(), 
+            'platform' : self.platform, 
+            'protocol' : TEST_PROTOCOL, 
+            'conn' : Mock()
+        }
+    
+    def test_end_to_end_tvdb_flow(self):
+        no_op = NoOpFanartProvider()
+        tvdb = TvdbFanartProvider(self.platform)
+        fileCache = FileCache(os.path.join(self.sandbox, 'http'), HttpResolver())
+        http = HttpCachingFanartProvider(fileCache, tvdb)
+        superfast = SuperFastFanartProvider(self.platform, http, filename='tvdb')
+        strike = OneStrikeAndYoureOutFanartProvider(self.platform, superfast, no_op, filename='tvdb')
+
+        fields = {
+            'title'     : u'The Real World',
+            'subtitle'  : u'',
+            'starttime' : socketDateTime(2008, 11, 4, 22, 45, 00),
+            'endtime'   : socketDateTime(2008, 11, 4, 23, 50, 00),
+            'airdate'   : u'2010-07-14'
+        }
+        #self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), u'24', u'3')
+        
         program = RecordedProgram(data=pdata(fields), **self.deps)
-        provider = TvRageProvider(self.platform)
+        season, episode = strike.getSeasonAndEpisode(program)
         
-        # When
-        season, episode = provider.getSeasonAndEpisode(program)
+        log.info(season)
+        log.info(episode)
+
+        self.assertEqual(('24','3'), (season, episode))
         
-        # Then
-        self.assertIsNone(season)
-        self.assertIsNone(episode)
+        method = 'getSeasonAndEpisode'
+        
+        # verify strikeout provider
+        strikeKey = strike.createKey(method, program)
+        self.assertFalse(strike.hasStruckOut(strikeKey))
+        
+        # verify superfast provider
+        superfastKey = superfast.createEpisodeKey(method, program)
+        self.assertEqual(superfast.pcache[superfastKey], ('24','3'))
+        
+        strike.close()
