@@ -1024,6 +1024,21 @@ class TvRageProviderTest(unittest.TestCase):
         while t:
             t.pop().join()
 
+    def test_works_with_TVProgram_not_just_RecordedProgram(self):
+        data = { 
+            'title'          : u'Love and HipHop',
+            'subtitle'       : u'', 
+            'category_type'  : 'series',
+            'originalairdate': u'2011-11-21',
+            'starttime'      : datetime.datetime(2011, 12, 8, 22),
+            'endtime'        : datetime.datetime(2011, 12, 8, 23),
+        }
+        tvProgram = TVProgram(data, translator=Mock())
+        tvRage = TvRageProvider(self.platform)
+        season, episode = tvRage.getSeasonAndEpisode(tvProgram)
+        self.assertEqual('2', season)
+        self.assertEqual('2', episode)
+
         
 class IntegrationTest(unittest.TestCase):
 

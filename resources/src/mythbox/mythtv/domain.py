@@ -530,7 +530,11 @@ class TVProgram(Program):
     def getChannelNumber(self):
         return self._data['channum']
     
+    def hasOriginalAirDate(self):
+        return self.originalAirDate() is not None
+    
     def originalAirDate(self): 
+        """Returns datetime.datetime"""
         return self._data['originalairdate']
                 
     def getCallSign(self):
