@@ -912,25 +912,43 @@ class TvRageProvider(NoOpFanartProvider):
                 pass # For cases where an entire season is missing, keep going...
         return show
     
-    def searchForEpisode(self, program, show):        
+    def searchForEpisode(self, program, show):
+        """Search for a match in this order until we get a hit
+        - original air date
+        - subtitle
+        - original air date - 1 day
+        - original air date + 1 day
+        """        
         if not program.hasOriginalAirDate():
-            return self.searchBySubtitle(program, show)            
+            # set unrealistic date to force lookup failure 
+            oad = datetime.date(2099, 1, 1)             
+        else:
+            oad = program.originalAirDate()
             
-        oad = program.originalAirDate()
         # TODO: change original air date in RecordedProgram to type datetime.date
         if type(oad) == datetime.date: 
             d = oad
         else:
             d = datetime.date(int(oad[0:4]), int(oad[5:7]), int(oad[8:10]))
 
-        try:
-            if d in show.seasonsAndEpisodes:
-                return show.seasonsAndEpisodes[d]
-            else:
-                log.debug('TVRage: No episode found matching airdate %s in %s episodes of %s' % (oad, len(show.seasonsAndEpisodes), safe_str(program.title())))
-                return self.searchBySubtitle(program, show)
-        except:
-            # backwards compatibility for pickled shows w/o index. return None,None to force re-query
+        if d in show.seasonsAndEpisodes:
+            return show.seasonsAndEpisodes[d]
+        else:
+            log.debug('TVRage: No episode found matching airdate %s in %s episodes of %s' % 
+                (oad, len(show.seasonsAndEpisodes), safe_str(program.title())))
+            
+            season, episode = self.searchBySubtitle(program, show)
+            if season and episode:
+                return season, episode
+            
+            dayBefore = d - datetime.timedelta(days=1)
+            if dayBefore in show.seasonsAndEpisodes:
+                return show.seasonsAndEpisodes[dayBefore]
+
+            dayAfter  = d + datetime.timedelta(days=1)
+            if dayAfter in show.seasonsAndEpisodes:
+                return show.seasonsAndEpisodes[dayAfter]
+            
             return None, None
     
     def searchBySubtitle(self, program, show):

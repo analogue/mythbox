@@ -981,6 +981,26 @@ class TvRageProviderTest(unittest.TestCase):
         }
         self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), u'2', u'2')
 
+    def test_getSeasonAndEpisode_succeeds_when_original_airdate_incorrect_and_one_day_ahead(self):
+        fields = {
+            'title'     : u'Love and HipHop',
+            'subtitle'  : u'',
+            'airdate'   : u'2011-11-22',
+            'starttime' : socketDateTime(2011, 12, 8, 22, 00, 00),
+            'endtime'   : socketDateTime(2011, 12, 8, 23, 00, 00),
+        }
+        self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), u'2', u'2')
+
+    def test_getSeasonAndEpisode_succeeds_when_original_airdate_incorrect_and_one_day_behind(self):
+        fields = {
+            'title'     : u'Love and HipHop',
+            'subtitle'  : u'',
+            'airdate'   : u'2011-11-20',
+            'starttime' : socketDateTime(2011, 12, 8, 22, 00, 00),
+            'endtime'   : socketDateTime(2011, 12, 8, 23, 00, 00),
+        }
+        self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), u'2', u'2')
+
     def test_pound_with_threads(self):
         max = 20
         t = []
