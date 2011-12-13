@@ -38,12 +38,6 @@ __date__ = '14 July 2006'
 __platform__ = 'XBOX'
 __version__ = '1.2'
 
-def lock():
-    log.debug('xbmcgui.lock() called')
-
-def unlock():
-    log.debug('xbmcgui.unlock() called')
-
 def getCurrentWindowId():
     log.debug('xbmcgui.getCurrentWindowId() called')
 

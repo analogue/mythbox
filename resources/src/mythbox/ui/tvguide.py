@@ -37,7 +37,7 @@ from mythbox.mythtv.domain import RecordingSchedule, Channel
 from mythbox.mythtv.enums import Upcoming
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import Action, Align, AspectRatio, window_busy
-from mythbox.util import catchall_ui, timed, catchall, ui_locked2, safe_str, run_async
+from mythbox.util import catchall_ui, timed, catchall, safe_str, run_async
 from mythbox.bus import Event
 
 log = logging.getLogger('mythbox.ui')
@@ -305,7 +305,6 @@ class TvGuideWindow(ui.BaseWindow):
             else:
                 raise
 
-    @ui_locked2
     def renderProgramInfo(self, program):
         if program:
             log.debug('Show info for ' + safe_str(program.title()))
@@ -721,7 +720,6 @@ class TvGuideWindow(ui.BaseWindow):
         log.debug("left count   = %d" % len(self.leftCtls))
         log.debug("right count  = %d" % len(self.rightCtls))
 
-    @ui_locked2
     def _render(self):
         """
         Method to draw all the dynamic controls that represent the program

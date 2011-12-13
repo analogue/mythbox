@@ -28,7 +28,7 @@ import mythbox.msg as m
 
 from mythbox.ui.recordingdetails import RecordingDetailsWindow
 from mythbox.ui.toolkit import window_busy, BaseWindow, Action
-from mythbox.util import catchall_ui, run_async, timed, catchall, ui_locked2, coalesce, safe_str
+from mythbox.util import catchall_ui, run_async, timed, catchall, coalesce, safe_str
 from mythbox.util import CyclingBidiIterator, formatSize, to_kwargs
 from mythbox.ui import toolkit
 from mythbox.bus import Event
@@ -240,7 +240,6 @@ class RecordingsWindow(BaseWindow):
         self.programs.sort(key=TITLE_SORT_BY[self.titleSortBy]['sorter'], reverse=False)
         self.refresh()
         
-    @ui_locked2
     def render(self):
         log.debug('Rendering....')
         self.renderNav()
@@ -278,15 +277,7 @@ class RecordingsWindow(BaseWindow):
 
         self.groupsListbox.reset()
         self.groupsListbox.addItems(self.groupsListItems)
-
-        #
-        # HACK ALERT: Selection won't register unless gui unlocked
-        #        
-        xbmcgui.unlock()
-        try:
-            self.selectListItemAtIndex(self.groupsListbox, lastSelectedIndex)
-        finally:
-            xbmcgui.lock()
+        self.selectListItemAtIndex(self.groupsListbox, lastSelectedIndex)
         
         log.debug('index check = %s' % self.groupsListbox.getSelectedPosition())
         self.onGroupSelect()
@@ -314,7 +305,6 @@ class RecordingsWindow(BaseWindow):
         if not self.activeGroup.backgroundsDone:
             self.renderBackgrounds(self.activeRenderToken, self.activeGroup)
         
-    @ui_locked2
     def renderPrograms(self):        
         @timed 
         def constructorTime():
@@ -368,7 +358,6 @@ class RecordingsWindow(BaseWindow):
             except:
                 pass
 
-    #@ui_locked2
     @timed
     def renderProgramDeleted2(self, deletedProgram, selectionIndex):
         savedLastSelectedGroupIndex = self.groupsByTitle[self.lastSelectedGroup].index

@@ -30,7 +30,7 @@ from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.domain import Channel
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import BaseWindow, window_busy, Action
-from mythbox.util import catchall_ui, run_async, catchall, ui_locked, ui_locked2
+from mythbox.util import catchall_ui, run_async, catchall
 
 log = logging.getLogger('mythbox.ui')
 
@@ -149,7 +149,6 @@ class UpcomingRecordingsWindow(BaseWindow):
         self.applySort()
         
     @inject_conn
-    @ui_locked
     def render(self):
         self.listItemsByProgram.clear()
         self.programsByListItem.clear()
@@ -157,7 +156,6 @@ class UpcomingRecordingsWindow(BaseWindow):
         
         log.debug('Rendering %d upcoming recordings...' % len(self.programs))
         
-        @ui_locked2
         def buildListItems():
             previous = None
             for i, p in enumerate(self.programs):

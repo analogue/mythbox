@@ -28,7 +28,7 @@ from mythbox.mythtv.conn import inject_conn
 from mythbox.mythtv.db import inject_db 
 from mythbox.mythtv.enums import CheckForDupesIn, CheckForDupesUsing, EpisodeFilter, ScheduleType
 from mythbox.ui.toolkit import BaseDialog, BaseWindow, window_busy, Action 
-from mythbox.util import catchall_ui, catchall, run_async, ui_locked, ui_locked2, safe_str
+from mythbox.util import catchall_ui, catchall, run_async, safe_str
 
 log = logging.getLogger('mythbox.ui')
 
@@ -130,13 +130,11 @@ class SchedulesWindow(BaseWindow):
         self.applySort()
         self.render()
         
-    @ui_locked
     def render(self):
         log.debug('Rendering....')
         self.listItemsBySchedule.clear()
         listItems = []
         
-        @ui_locked2
         def buildListItems():
             for i, s in enumerate(self.schedules):
                 li = xbmcgui.ListItem()

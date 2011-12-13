@@ -32,7 +32,7 @@ from mythbox.mythtv.domain import Channel
 from mythbox.mythtv.conn import ServerException
 from mythbox.ui.player import MountedPlayer, NoOpCommercialSkipper
 from mythbox.ui.toolkit import Action, BaseWindow, window_busy
-from mythbox.util import safe_str,catchall, catchall_ui, run_async, ui_locked, ui_locked2, formatSize
+from mythbox.util import safe_str,catchall, catchall_ui, run_async, formatSize
 from odict import odict
 
 log = logging.getLogger('mythbox.ui')    
@@ -385,13 +385,11 @@ class LiveTvWindow(BaseWindow):
             else:
                 channel.currentProgram = None
 
-    @ui_locked
     def render(self):
         log.debug('Rendering....')
         self.listItemsByChannel.clear()
         listItems = []
 
-        @ui_locked2
         def buildListItems():
             for i, channel in enumerate(self.channels):
                 #log.debug('Working channel: %d' %i)
