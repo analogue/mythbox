@@ -20,7 +20,6 @@ import datetime
 import logging
 import os
 import re
-import sre
 import time
 
 import mythbox.msg as m
@@ -45,7 +44,7 @@ def dbTime2MythTime(dt):
         raise Exception, 'datetime paramater is None'
     elif type(dt) is str:
         # TODO: Remove me - pure python mysql support
-        s = sre.sub( "[T:|\\-| ]", "", dt) 
+        s = re.sub( "[T:|\\-| ]", "", dt) 
     elif type(dt) is datetime.datetime:
         # Native MySQLdb
         s = dt.strftime("%Y%m%d%H%M%S")
@@ -428,7 +427,7 @@ class Program(object):
         fullTitle = ""
         if self.title():
             fullTitle += self.title()
-        if self.subtitle() and not sre.match('^\s+$', self.subtitle()):
+        if self.subtitle() and not re.match('^\s+$', self.subtitle()):
             fullTitle += " - " + self.subtitle()
         return fullTitle
         
@@ -1566,7 +1565,7 @@ class RecordingSchedule(object):
         fullTitle = u''
         if self.title():
             fullTitle += self.title()
-        if self.subtitle() and not sre.match('^\s+$', self.subtitle()):
+        if self.subtitle() and not re.match('^\s+$', self.subtitle()):
             fullTitle += u' - ' + self.subtitle()
         return fullTitle
 

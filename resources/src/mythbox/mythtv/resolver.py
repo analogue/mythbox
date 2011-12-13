@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
+#  Copyright (C) 2011 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -16,10 +16,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-
 import logging
-import md5
 
+from hashlib import md5
 from mythbox.filecache import FileResolver
 from mythbox.mythtv.conn import inject_conn
 from mythbox.mythtv.db import inject_db
@@ -65,7 +64,7 @@ class MythThumbnailResolver(FileResolver):
                 pass
             
     def hash(self, program):
-        return md5.new(safe_str(self.getKey(program))).hexdigest()
+        return md5(safe_str(self.getKey(program))).hexdigest()
     
     @inject_conn    
     def getKey(self, program):
@@ -101,6 +100,6 @@ class MythChannelIconResolver(FileResolver):
             
     def hash(self, channel):
         if channel.getIconPath():
-            return md5.new(safe_str(channel.getIconPath())).hexdigest()
+            return md5(safe_str(channel.getIconPath())).hexdigest()
         else:
             return u''

@@ -19,7 +19,6 @@
 #
 import datetime
 import logging
-import md5
 import os
 import random
 import imdb         #@UnusedImport
@@ -35,8 +34,9 @@ import urllib2
 import urllib
 import Queue
 
+from hashlib import md5
 from decorator import decorator
-from mythbox.util import synchronized, safe_str, run_async, max_threads, timed, requireDir, formatSize
+from mythbox.util import sync_instance, synchronized, safe_str, run_async, max_threads, timed, requireDir, formatSize
 from mythbox.bus import Event
 
 log = logging.getLogger('mythbox.fanart')
@@ -127,11 +127,8 @@ class PersistentFanartProvider(BaseFanartProvider):
         cache = {}
         try:
             if os.path.exists(self.pfilename):
-                f = open(self.pfilename, 'rb')
-                try:
+                with open(self.pfilename, 'rb') as f:
                     cache = pickle.load(f)
-                finally:
-                    f.close()
         except EOFError:
             log.error('EOF error loading persistent cache from %s. Starting fresh' % self.pfilename)
         except:
@@ -140,9 +137,8 @@ class PersistentFanartProvider(BaseFanartProvider):
 
     def saveCache(self):
         try:
-            f = open(self.pfilename, 'wb')
-            pickle.dump(self.pcache, f)
-            f.close()
+            with open(self.pfilename, 'wb') as f:
+                pickle.dump(self.pcache, f)
         except:
             log.exception('Error saving persistent cache to %s' % self.pfilename)
 
@@ -181,7 +177,7 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
         self.struckOut = self.pcache
 
     def createKey(self, method, program):
-        return '%s-%s' % (method, md5.new(safe_str(program.title())).hexdigest())
+        return '%s-%s' % (method, md5(safe_str(program.title())).hexdigest())
         
     @synchronized
     def hasStruckOut(self, key):
@@ -829,6 +825,7 @@ class TvRageProvider(NoOpFanartProvider):
         self.nextProvider = nextProvider
         self.memcache = {}
 
+    @sync_instance
     def clear(self, program=None):
         if program is None:
             self.memcache.clear()
@@ -852,31 +849,27 @@ class TvRageProvider(NoOpFanartProvider):
         fname = os.path.join(self.cacheDir, safe_str(program.title().replace('/','_')))
         if not os.path.exists(fname):
             return None
-        f = open(fname, 'rb')
-        try:
+
+        with open(fname, 'rb') as f:
             try:
                 show = pickle.load(f)
                 self.memcache[program.title()] = show
                 return show
             except EOFError: 
                 return None  # file corrupt
-        finally: 
-            f.close()
     
     def save(self, program, show):
         '''Save tvrage.api.Show to memory/disk cache'''
-        f = open(os.path.join(self.cacheDir, safe_str(program.title().replace('/','_'))), 'wb')
-        try:
+        with open(os.path.join(self.cacheDir, safe_str(program.title().replace('/','_'))), 'wb') as f:
             self.memcache[program.title()] = show
             pickle.dump(show, f)
-        finally:
-            f.close()
         
     @chain
+    @sync_instance
     def getSeasonAndEpisode(self, program):
         if program.isMovie(): 
             return None, None
-
+        
         show = self.load(program)
 
         if show is None:

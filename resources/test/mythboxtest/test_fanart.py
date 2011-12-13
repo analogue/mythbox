@@ -206,7 +206,7 @@ class BaseFanartProviderTestCase(unittest.TestCase):
     def base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
         programs = self.getPrograms()
         provider = self.getProvider()
-        
+
         @run_async
         def work(p):
             posters = provider.getPosters(p)
@@ -370,7 +370,6 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         
     @skipIfTvdbDown
     def test_getSeasonAndEpisode_When_no_matching_original_airdate_or_subtitle_Then_return_nones(self):
-        # Given
         fields = {
             'title'     : u'MasterChef',
             'subtitle'  : u'',
@@ -382,7 +381,6 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
 
     @skipIfTvdbDown
     def test_getSeasonAndEpisode_When_original_airdate_not_available_and_subtitle_matches_Then_return_season_and_episode(self):
-        # Given
         fields = {
             'title'     : u'The Real World',
             'subtitle'  : u"Jemmye's White Knight",
@@ -925,7 +923,6 @@ class TvRageProviderTest(unittest.TestCase):
         self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), None, None)
 
     def test_getSeasonAndEpisode_try_to_cache_output(self):
-        # Given
         fields = {
             'title'     : u'Seinfeld',
             'starttime' : socketDateTime(2008, 11, 4, 23, 45, 00), 
@@ -974,7 +971,40 @@ class TvRageProviderTest(unittest.TestCase):
         }
         self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), None, None)
 
+    def test_love_and_hiphop_failure(self):
+        fields = {
+            'title'     : u'Love and HipHop',
+            'subtitle'  : u'',
+            'airdate'   : u'2011-11-21',
+            'starttime' : socketDateTime(2011, 12, 8, 22, 00, 00),
+            'endtime'   : socketDateTime(2011, 12, 8, 23, 00, 00),
+        }
+        self.assertSeasonAndEpisode(RecordedProgram(data=pdata(fields), **self.deps), u'2', u'2')
 
+    def test_pound_with_threads(self):
+        max = 20
+        t = []
+        provider = TvRageProvider(self.platform)
+        fields = {
+            'title'     : u'Love and HipHop',
+            'subtitle'  : u'', 
+            'airdate'   : u'2011-11-21',
+            'starttime' : socketDateTime(2011, 12, 8, 22, 00, 00), 
+            'endtime'   : socketDateTime(2011, 12, 8, 23, 00, 00), 
+        }    
+        program = RecordedProgram(data=pdata(fields), **self.deps)        
+
+        @run_async
+        def doWork(provider):
+            provider.getSeasonAndEpisode(program)
+
+        for i in xrange(max):
+            t.append(doWork(provider))
+
+        while t:
+            t.pop().join()
+
+        
 class IntegrationTest(unittest.TestCase):
 
     def setUp(self):

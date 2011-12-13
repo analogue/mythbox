@@ -18,8 +18,8 @@
 
 import datetime
 import logging
+import re
 import socket
-import sre
 import thread
 import threading
 import time
@@ -553,7 +553,7 @@ class Connection(object):
         msg.insert(0, 'DELETE_RECORDING')
         msg.append('0')
         reply = self._sendRequest(self.cmdSock, msg)
-        if sre.match('^-?\d+$', reply[0]):
+        if re.match('^-?\d+$', reply[0]):
             rc = int(reply[0])
             self.bus.publish({'id':Event.RECORDING_DELETED, 'source': self, 'program':program})
         else:
@@ -575,7 +575,7 @@ class Connection(object):
         msg.insert(0, 'FORGET_RECORDING')
         msg.append('0')
         reply = self._sendRequest(self.cmdSock, msg)
-        if sre.match('^-?\d+$', reply[0]):
+        if re.match('^-?\d+$', reply[0]):
             rc2 = int(reply[0])
         else:
             raise ServerException, reply[0]

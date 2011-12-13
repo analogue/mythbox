@@ -17,12 +17,12 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 import logging
-import md5
 import os
 import shutil
 import urllib
 import threading
 
+from hashlib import md5
 from mythbox.bus import Event
 from mythbox.util import sync_instance, safe_str, SynchronizedDict, requireDir,\
     run_async, catchall
@@ -36,7 +36,7 @@ class FileResolver(object):
         raise Exception, 'AbstractMethod'
     
     def hash(self, fileUrl):
-        return md5.new(safe_str(fileUrl)).hexdigest()
+        return md5(safe_str(fileUrl)).hexdigest()
     
 
 class FileSystemResolver(FileResolver):
