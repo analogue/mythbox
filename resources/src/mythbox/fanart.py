@@ -532,7 +532,7 @@ class ImdbFanartProvider(BaseFanartProvider):
 
     def __init__(self, nextProvider=None):
         BaseFanartProvider.__init__(self, nextProvider)
-        self.imdb = imdb.IMDb(accessSystem=None, loggingLevel='debug')
+        self.imdb = imdb.IMDb(accessSystem=None) # loggingConfig='~/git/mythbox/mythbox_log.ini')
 
     @chain
     @max_threads(1)
