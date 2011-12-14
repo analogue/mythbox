@@ -206,24 +206,14 @@ class BaseFanartProviderTestCase(unittest.TestCase):
     def base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
         programs = self.getPrograms()
         provider = self.getProvider()
-
+        max, self.cnt = 5, 0
+        
         @run_async
         def work(p):
-            posters = provider.getPosters(p)
-            if len(posters) == 0:
-                log.exception('Failed on %s' % safe_str(p.title()))
-                self.fail = True
-            for poster in posters:
-                log.debug('%s - %s' % (safe_str(p.title()), poster))
+            self.cnt += 1 if provider.getPosters(p) else 0
 
-        self.fail = False
-        threads = [] 
-        for p in programs[:5]:
-            threads.append(work(p))
-        for t in threads:
-            t.join()
-            
-        self.assertFalse(self.fail)
+        [t.join() for t in [work(p) for p in programs[:max]]]
+        self.assertEqual(max, self.cnt, 'Only got %d correct responses out of %d' % (self.cnt, max))
         
 
 class ImdbFanartProviderTest(BaseFanartProviderTestCase):

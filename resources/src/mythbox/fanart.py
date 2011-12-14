@@ -532,25 +532,27 @@ class ImdbFanartProvider(BaseFanartProvider):
 
     def __init__(self, nextProvider=None):
         BaseFanartProvider.__init__(self, nextProvider)
-        self.imdb = imdb.IMDb(accessSystem=None)
+        self.imdb = imdb.IMDb(accessSystem=None, loggingLevel='debug')
 
     @chain
     @max_threads(1)
     @timed
     def getPosters(self, program):
+        if not program.isMovie():
+            return []
+        
         posters = []
-        if program.isMovie():
-            try:
-                movies = self.imdb.search_movie(title=u'' + program.title(), results=1)
-                for movie in movies:
-                    m = self.imdb.get_movie(movie.getID())
-                    #for key,value in m.items():
-                    #    log.warn('movie[%d] id[%s] key[%s] -> %s' % (1, m.getID(), key, safe_str(value)))
-                    posters.append(m['full-size cover url'])  
-            except imdb.IMDbError, e:
-                log.error('IMDB: Error looking up movie: %s %s' % (safe_str(program.title()), safe_str(str(e))))
-            except Exception, e:
-                log.error('IMDB: Error looking up %s: %s' % (safe_str(program.title()), safe_str(str(e))))
+        try:
+            movies = self.imdb.search_movie(title=u'' + program.title(), results=1)
+            for movie in movies:
+                m = self.imdb.get_movie(movie.getID())
+                #for key,value in m.items():
+                #    log.warn('movie[%d] id[%s] key[%s] -> %s' % (1, m.getID(), key, safe_str(value)))
+                posters.append(m['full-size cover url'])  
+        except imdb.IMDbError, e:
+            log.error('IMDB: Error looking up movie: %s %s' % (safe_str(program.title()), safe_str(str(e))))
+        except Exception, e:
+            log.error('IMDB: Error looking up %s: %s' % (safe_str(program.title()), safe_str(str(e))))
         return posters
     
     @chain
