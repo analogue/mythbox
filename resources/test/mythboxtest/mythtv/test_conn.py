@@ -24,7 +24,7 @@ import unittest2 as unittest
 from mockito import Mock
 from mythbox.bus import EventBus
 from mythbox.mythtv.enums import Upcoming
-from mythbox.mythtv.conn import Connection, EventConnection, createChainId, ServerException, encodeLongLong, decodeLongLong
+from mythbox.mythtv.conn import Connection, EventConnection, createChainId, ServerException
 from mythbox.mythtv.db import MythDatabase
 from mythbox.mythtv.protocol import ProtocolException
 from mythbox.platform import getPlatform
@@ -39,35 +39,6 @@ class FunctionsTest(unittest.TestCase):
         chainId = createChainId()
         log.debug('Chain Id = %s' % chainId)
         self.assertTrue(chainId is not None) 
-
-    def test_decodeLongLong(self):
-        self.assertEquals(0, decodeLongLong(0, 0))
-        self.assertEquals(1, decodeLongLong(1, 0))
-        self.assertEquals(0xffffffff00000001, decodeLongLong(1, 0xffffffff))
-        self.assertEquals(0x00000000ffffffff, decodeLongLong(0xffffffff, 0x0))
-        self.assertEquals(0xffffffff00000000, decodeLongLong(0x0, 0xffffffff))
-        self.assertEquals(0xffffffffffffffff, decodeLongLong(0xffffffff, 0xffffffff))
-    
-    def test_encodeLongLong(self):
-        lowWord, highWord = encodeLongLong(0L)
-        self.assertEquals(0, lowWord)
-        self.assertEquals(0, highWord)
-
-        lowWord, highWord = encodeLongLong(1L)
-        self.assertEquals(1, lowWord)
-        self.assertEquals(0, highWord)
-        
-        lowWord, highWord = encodeLongLong(0xffffffff00000001)
-        self.assertEquals(1, lowWord)
-        self.assertEquals(0xffffffff, highWord)
-
-        lowWord, highWord = encodeLongLong(0x00000000ffffffff)
-        self.assertEquals(0xffffffff, lowWord)
-        self.assertEquals(0x0, highWord)
-
-        lowWord, highWord = encodeLongLong(0xffffffffffffffff)
-        self.assertEquals(0xffffffff, lowWord)
-        self.assertEquals(0xffffffff, highWord)
 
 
 class ConnectionTest(unittest.TestCase):

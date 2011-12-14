@@ -24,7 +24,7 @@ import unittest2 as unittest
 from mockito import Mock
 from mythbox.bus import EventBus
 from mythbox.mythtv.enums import Upcoming
-from mythbox.mythtv.conn import Connection, EventConnection, createChainId, ServerException, encodeLongLong, decodeLongLong
+from mythbox.mythtv.conn import Connection, EventConnection, createChainId, ServerException
 from mythbox.mythtv.db import MythDatabase 
 from mythbox.mythtv.protocol import ProtocolException
 from mythbox.platform import getPlatform

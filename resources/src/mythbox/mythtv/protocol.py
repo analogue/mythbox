@@ -103,18 +103,36 @@ class Protocol40(BaseProtocol):
         return True
 
     def readLong(self, reply, remove=False):
-        from mythbox.mythtv.conn import decodeLongLong
-        d = decodeLongLong(int(reply[1]), int(reply[0]))
+        d = self.decodeLongLong(int(reply[1]), int(reply[0]))
         if remove:
             reply.pop(0)
             reply.pop(0)
         return d
 
     def writeLong(self, d, request):
-        from mythbox.mythtv.conn import encodeLongLong
-        low, high = encodeLongLong(d)
+        low, high = self.encodeLongLong(d)
         request.append('%d' % high)
         request.append('%d' % low)
+
+    def decodeLongLong(self, low32Bits, high32Bits):
+        """
+        @type low32Bits: int or str
+        @type high32Bits: int or str
+        @return: Decodes two 32bit ints to a 64bit long
+        @rtype: long
+        """
+        if isinstance(low32Bits, basestring): 
+            low32Bits = long(low32Bits)
+        if isinstance(high32Bits, basestring): 
+            high32Bits = long(high32Bits)
+        return low32Bits & 0xffffffffL | (high32Bits << 32)
+    
+    def encodeLongLong(self, long64Bits):
+        """
+        @rtype: (low32Bits, high32Bits)
+        @return: Encodes 64bit long into pair of 32 bit ints
+        """
+        return long64Bits & 0xffffffffL, long64Bits >> 32
 
 
 class Protocol41(Protocol40):

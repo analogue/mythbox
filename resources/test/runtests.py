@@ -25,6 +25,7 @@ import mythboxtest.mythtv.test_db
 import mythboxtest.mythtv.test_conn
 import mythboxtest.mythtv.test_inject_conn
 import mythboxtest.mythtv.test_domain
+import mythboxtest.mythtv.test_protocol
 import mythboxtest.mythtv.test_publish
 import mythboxtest.ui.test_player
 import mythboxtest.test_pool
@@ -50,6 +51,7 @@ def suite():
     mysuite.addTest(unittest.findTestCases(mythboxtest.mythtv.test_db))
     mysuite.addTest(unittest.findTestCases(mythboxtest.mythtv.test_conn))
     mysuite.addTest(unittest.findTestCases(mythboxtest.mythtv.test_inject_conn))
+    mysuite.addTest(unittest.findTestCases(mythboxtest.mythtv.test_protocol))
     mysuite.addTest(unittest.findTestCases(mythboxtest.mythtv.test_publish))
     #import test_domain
     mysuite.addTest(unittest.findTestCases(mythboxtest.mythtv.test_domain))
