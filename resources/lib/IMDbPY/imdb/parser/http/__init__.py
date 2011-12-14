@@ -7,7 +7,7 @@ the imdb.IMDb function will return an instance of this class when
 called with the 'accessSystem' argument set to "http" or "web"
 or "html" (this is the default).
 
-Copyright 2004-2010 Davide Alberani <da@erlug.linux.it>
+Copyright 2004-2011 Davide Alberani <da@erlug.linux.it>
                2008 H. Turgut Uyar <uyar@tekir.org>
 
 This program is free software; you can redistribute it and/or modify
@@ -165,6 +165,14 @@ class IMDbURLopener(FancyURLopener):
             self.del_header(header)
         self.addheaders.append((header, value))
 
+    def get_header(self, header):
+        """Return the first value of a header, or None
+        if not present."""
+        for index in xrange(len(self.addheaders)):
+            if self.addheaders[index][0] == header:
+                return self.addheaders[index][1]
+        return None
+
     def del_header(self, header):
         """Remove a default header."""
         for index in xrange(len(self.addheaders)):
@@ -210,12 +218,12 @@ class IMDbURLopener(FancyURLopener):
             if size != -1:
                 # Ensure that the Range header is removed.
                 self.del_header('Range')
-            raise IMDbDataAccessError, {'errcode': e.errno,
+            raise IMDbDataAccessError({'errcode': e.errno,
                                         'errmsg': str(e.strerror),
                                         'url': url,
                                         'proxy': self.get_proxy(),
                                         'exception type': 'IOError',
-                                        'original exception': e}
+                                        'original exception': e})
         if encode is None:
             encode = 'latin_1'
             # The detection of the encoding is error prone...
@@ -229,24 +237,24 @@ class IMDbURLopener(FancyURLopener):
             self._logger.warn('404 code returned for %s: %s (headers: %s)',
                                 url, errmsg, headers)
             return _FakeURLOpener(url, headers)
-        raise IMDbDataAccessError, {'url': 'http:%s' % url,
+        raise IMDbDataAccessError({'url': 'http:%s' % url,
                                     'errcode': errcode,
                                     'errmsg': errmsg,
                                     'headers': headers,
                                     'error type': 'http_error_default',
-                                    'proxy': self.get_proxy()}
+                                    'proxy': self.get_proxy()})
 
     def open_unknown(self, fullurl, data=None):
-        raise IMDbDataAccessError, {'fullurl': fullurl,
+        raise IMDbDataAccessError({'fullurl': fullurl,
                                     'data': str(data),
                                     'error type': 'open_unknown',
-                                    'proxy': self.get_proxy()}
+                                    'proxy': self.get_proxy()})
 
     def open_unknown_proxy(self, proxy, fullurl, data=None):
-        raise IMDbDataAccessError, {'proxy': str(proxy),
+        raise IMDbDataAccessError({'proxy': str(proxy),
                                     'fullurl': fullurl,
                                     'error type': 'open_unknown_proxy',
-                                    'data': str(data)}
+                                    'data': str(data)})
 
 
 class IMDbHTTPAccessSystem(IMDbBase):
@@ -264,17 +272,17 @@ class IMDbHTTPAccessSystem(IMDbBase):
         # When isThin is set, we're parsing the "maindetails" page
         # of a movie (instead of the "combined" page) and movie/person
         # references are not collected if no defaultModFunct is provided.
+        #
+        # NOTE: httpThin was removed since IMDbPY 4.8.
         self.isThin = isThin
         self._getRefs = True
         self._mdparse = False
         if isThin:
-            if self.accessSystem == 'http':
-                self.accessSystem = 'httpThin'
-            self._mdparse = True
-            if self._defModFunct is None:
-                self._getRefs = False
-                from imdb.utils import modNull
-                self._defModFunct = modNull
+            self._http_logger.warn('"httpThin" access system no longer ' +
+                    'supported; "http" used automatically', exc_info=False)
+            self.isThin = 0
+            if self.accessSystem in ('httpThin', 'webThin', 'htmlThin'):
+                self.accessSystem = 'http'
         self.do_adult_search(adultSearch)
         if cookie_id != -1:
             if cookie_id is None:
@@ -324,30 +332,30 @@ class IMDbHTTPAccessSystem(IMDbBase):
         try:
             return '%07d' % int(movieID)
         except ValueError, e:
-            raise IMDbParserError, 'invalid movieID "%s": %s' % (movieID, e)
+            raise IMDbParserError('invalid movieID "%s": %s' % (movieID, e))
 
     def _normalize_personID(self, personID):
         """Normalize the given personID."""
         try:
             return '%07d' % int(personID)
         except ValueError, e:
-            raise IMDbParserError, 'invalid personID "%s": %s' % (personID, e)
+            raise IMDbParserError('invalid personID "%s": %s' % (personID, e))
 
     def _normalize_characterID(self, characterID):
         """Normalize the given characterID."""
         try:
             return '%07d' % int(characterID)
         except ValueError, e:
-            raise IMDbParserError, 'invalid characterID "%s": %s' % \
-                    (characterID, e)
+            raise IMDbParserError('invalid characterID "%s": %s' % \
+                    (characterID, e))
 
     def _normalize_companyID(self, companyID):
         """Normalize the given companyID."""
         try:
             return '%07d' % int(companyID)
         except ValueError, e:
-            raise IMDbParserError, 'invalid companyID "%s": %s' % \
-                    (companyID, e)
+            raise IMDbParserError('invalid companyID "%s": %s' % \
+                    (companyID, e))
 
     def get_imdbMovieID(self, movieID):
         """Translate a movieID in an imdbID; in this implementation
@@ -409,11 +417,23 @@ class IMDbHTTPAccessSystem(IMDbBase):
         else:
             self.urlOpener.del_header('Cookie')
 
-    def _retrieve(self, url, size=-1):
+    def _retrieve(self, url, size=-1, _noCookies=False):
         """Retrieve the given URL."""
         ##print url
+        _cookies = None
+        # XXX: quite obscene, but in some very limited
+        #      cases (/ttXXXXXXX/epdate) if the cookies
+        #      are set, a 500 error is returned.
+        if _noCookies:
+            _cookies = self.urlOpener.get_header('Cookie')
+            self.del_cookies()
         self._http_logger.debug('fetching url %s (size: %d)', url, size)
-        return self.urlOpener.retrieve_unicode(url, size=size)
+        try:
+            ret = self.urlOpener.retrieve_unicode(url, size=size)
+        finally:
+            if _noCookies and _cookies:
+                self.urlOpener.set_header('Cookie', _cookies)
+        return ret
 
     def _get_search_content(self, kind, ton, results):
         """Retrieve the web page for a given search.
@@ -435,7 +455,7 @@ class IMDbHTTPAccessSystem(IMDbBase):
         # The retrieved page contains no results, because too many
         # titles or names contain the string we're looking for.
         params = 's=%s;q=%s;lm=0' % (kind, quote_plus(ton))
-        size = 22528 + results * 512
+        size = 131072 + results * 512
         return self._retrieve(imdbURL_find % params, size=size)
 
     def _search_movie(self, title, results):
@@ -456,10 +476,7 @@ class IMDbHTTPAccessSystem(IMDbBase):
         return self.smProxy.search_movie_parser.parse(cont, results=results)['data']
 
     def get_movie_main(self, movieID):
-        if not self.isThin:
-            cont = self._retrieve(imdbURL_movie_main % movieID + 'combined')
-        else:
-            cont = self._retrieve(imdbURL_movie_main % movieID + 'maindetails')
+        cont = self._retrieve(imdbURL_movie_main % movieID + 'combined')
         return self.mProxy.movie_parser.parse(cont, mdparse=self._mdparse)
 
     def get_movie_full_credits(self, movieID):
@@ -544,8 +561,8 @@ class IMDbHTTPAccessSystem(IMDbBase):
         return self.mProxy.soundtrack_parser.parse(cont)
 
     def get_movie_dvd(self, movieID):
-        cont = self._retrieve(imdbURL_movie_main % movieID + 'dvd')
-        return self.mProxy.dvd_parser.parse(cont, getRefs=self._getRefs)
+        self._http_logger.warn('dvd information no longer available', exc_info=False)
+        return {}
 
     def get_movie_recommendations(self, movieID):
         cont = self._retrieve(imdbURL_movie_main % movieID + 'recommendations')
@@ -580,8 +597,8 @@ class IMDbHTTPAccessSystem(IMDbBase):
         return self.mProxy.news_parser.parse(cont, getRefs=self._getRefs)
 
     def get_movie_amazon_reviews(self, movieID):
-        cont = self._retrieve(imdbURL_movie_main % movieID + 'amazon')
-        return self.mProxy.amazonrev_parser.parse(cont)
+        self._http_logger.warn('amazon review no longer available', exc_info=False)
+        return {}
 
     def get_movie_guests(self, movieID):
         cont = self._retrieve(imdbURL_movie_main % movieID + 'epcast')
@@ -589,8 +606,9 @@ class IMDbHTTPAccessSystem(IMDbBase):
     get_movie_episodes_cast = get_movie_guests
 
     def get_movie_merchandising_links(self, movieID):
-        cont = self._retrieve(imdbURL_movie_main % movieID + 'sales')
-        return self.mProxy.sales_parser.parse(cont)
+        self._http_logger.warn('merchandising links no longer available',
+                exc_info=False)
+        return {}
 
     def get_movie_episodes(self, movieID):
         cont = self._retrieve(imdbURL_movie_main % movieID + 'episodes')
@@ -608,7 +626,7 @@ class IMDbHTTPAccessSystem(IMDbBase):
         return data_d
 
     def get_movie_episodes_rating(self, movieID):
-        cont = self._retrieve(imdbURL_movie_main % movieID + 'epdate')
+        cont = self._retrieve(imdbURL_movie_main % movieID + 'epdate', _noCookies=True)
         data_d = self.mProxy.eprating_parser.parse(cont)
         # set movie['episode of'].movieID for every episode.
         if data_d.get('data', {}).has_key('episodes rating'):

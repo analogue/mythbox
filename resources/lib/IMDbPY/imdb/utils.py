@@ -3,7 +3,7 @@ utils module (imdb package).
 
 This module provides basic utilities for the imdb package.
 
-Copyright 2004-2010 Davide Alberani <da@erlug.linux.it>
+Copyright 2004-2011 Davide Alberani <da@erlug.linux.it>
                2009 H. Turgut Uyar <uyar@tekir.org>
 
 This program is free software; you can redistribute it and/or modify
@@ -42,9 +42,14 @@ _utils_logger = logging.getLogger('imdbpy.utils')
 # and year of release.
 # XXX: probably L, C, D and M are far too much! ;-)
 re_year_index = re.compile(r'\(([0-9\?]{4}(/[IVXLCDM]+)?)\)')
+re_extended_year_index = re.compile(r'\((TV episode|TV Series|TV mini-series|TV|Video|Video Game)? ?((?:[0-9\?]{4})(?:-[0-9\?]{4})?)(?:/([IVXLCDM]+)?)?\)')
+re_remove_kind = re.compile(r'\((TV episode|TV Series|TV mini-series|TV|Video|Video Game)? ?')
 
 # Match only the imdbIndex (for name strings).
 re_index = re.compile(r'^\(([IVXLCDM]+)\)$')
+
+# Match things inside parentheses.
+re_parentheses = re.compile(r'(\(.*\))')
 
 # Match the number of episodes.
 re_episodes = re.compile('\s?\((\d+) episodes\)', re.I)
@@ -136,16 +141,17 @@ def analyze_name(name, canonical=None):
     res = {}
     imdbIndex = ''
     opi = name.rfind('(')
-    if opi != -1:
-        cpi = name.rfind(')')
-        if cpi > opi and re_index.match(name[opi:cpi+1]):
+    cpi = name.rfind(')')
+    # Strip  notes (but not if the name starts with a parenthesis).
+    if opi not in (-1, 0) and cpi > opi:
+        if re_index.match(name[opi:cpi+1]):
             imdbIndex = name[opi+1:cpi]
             name = name[:opi].rstrip()
         else:
             # XXX: for the birth and death dates case like " (1926-2004)"
-            name = name[:opi-1]
+            name = re_parentheses.sub('', name).strip()
     if not name:
-        raise IMDbParserError, 'invalid name: "%s"' % original_n
+        raise IMDbParserError('invalid name: "%s"' % original_n)
     if canonical is not None:
         if canonical:
             name = canonicalName(name)
@@ -391,6 +397,24 @@ def analyze_title(title, canonical=None, canonicalSeries=None,
         title = title[:-4].rstrip()
     # Search for the year and the optional imdbIndex (a roman number).
     yi = re_year_index.findall(title)
+    if not yi:
+        yi = re_extended_year_index.findall(title)
+        if yi:
+            yk, yiy, yii = yi[-1]
+            yi = [(yiy, yii)]
+            if yk == 'TV episode':
+                kind = u'episode'
+            elif yk == 'TV':
+                kind = u'tv movie'
+            elif yk == 'TV Series':
+                kind = u'tv series'
+            elif yk == 'Video':
+                kind = u'video movie'
+            elif yk == 'TV mini-series':
+                kind = u'tv mini series'
+            elif yk == 'Video Game':
+                kind = u'video game'
+            title = re_remove_kind.sub('(', title)
     if yi:
         last_yi = yi[-1]
         year = last_yi[0]
@@ -410,7 +434,7 @@ def analyze_title(title, canonical=None, canonicalSeries=None,
         kind = u'tv series'
         title = title[:-11].rstrip()
     if not title:
-        raise IMDbParserError, 'invalid title: "%s"' % original_t
+        raise IMDbParserError('invalid title: "%s"' % original_t)
     if canonical is not None:
         if canonical:
             title = canonicalTitle(title)
@@ -421,6 +445,9 @@ def analyze_title(title, canonical=None, canonicalSeries=None,
     result['title'] = title
     result['kind'] = kind or u'movie'
     if year and year != '????':
+        if '-' in year:
+            result['series years'] = year
+            year = year[:4]
         try:
             result['year'] = int(year)
         except (TypeError, ValueError):
@@ -582,7 +609,7 @@ def analyze_company_name(name, stripNotes=False):
             country = name[idx:]
             name = name[:idx].rstrip()
     if not name:
-        raise IMDbParserError, 'invalid name: "%s"' % o_name
+        raise IMDbParserError('invalid name: "%s"' % o_name)
     result = {'name': name}
     if country:
         result['country'] = country
@@ -1307,7 +1334,7 @@ class _Container(object):
 
     def getID(self):
         """Return movieID, personID, characterID or companyID."""
-        raise NotImplementedError, 'override this method'
+        raise NotImplementedError('override this method')
 
     def __cmp__(self, other):
         """Compare two Movie, Person, Character or Company objects."""
@@ -1482,14 +1509,14 @@ class _Container(object):
 
     def __repr__(self):
         """String representation of an object."""
-        raise NotImplementedError, 'override this method'
+        raise NotImplementedError('override this method')
 
     def __str__(self):
         """Movie title or person name."""
-        raise NotImplementedError, 'override this method'
+        raise NotImplementedError('override this method')
 
     def __contains__(self, key):
-        raise NotImplementedError, 'override this method'
+        raise NotImplementedError('override this method')
 
     def append_item(self, key, item):
         """The item is appended to the list identified by the given key."""
@@ -1505,7 +1532,7 @@ class _Container(object):
         return 0
 
     def __deepcopy__(self, memo):
-        raise NotImplementedError, 'override this method'
+        raise NotImplementedError('override this method')
 
     def copy(self):
         """Return a deep copy of the object itself."""

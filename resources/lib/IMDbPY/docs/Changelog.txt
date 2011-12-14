@@ -1,6 +1,50 @@
   Changelog for IMDbPY
   ====================
 
+* What's the new in release 4.8.2 "The Big Bang Theory" (02 Nov 2011)
+  [general]
+  - fixed install path of locales.
+  
+  [http]
+  - removed debug code.
+
+
+* What's the new in release 4.8 "Super" (01 Nov 2011)
+  [general]
+  - fix for a problem managing exceptions with Python 2.4.
+  - converted old-style exceptions to instances.
+  - enanchements for the reduce.sh script.
+  - added notes about problems connecting to IMDb's web servers.
+  - improvements in the parsers of movie titles.
+  - improvements in the parser of person names.
+
+  [http]
+  - potential fix for GAE environment.
+  - handled the new style of "in production" information.
+  - fix for 'episodes' list.
+  - fix for 'episodes rating'.
+  - fix for queries that returned too many results.
+  - fix for wrong/missing references.
+  - removed no more available information set "amazon
+    reviews" and "dvd".
+  - fix for cast of tv series.
+  - fix for title of tv series.
+  - now the beautiful parses work again.
+
+  [httpThin]
+  - removed "httpThin", falling back to "http".
+
+  [mobile]
+  - fix for missing headshots.
+  - fix for rating and number of votes.
+  - fix for missing genres.
+  - many other fixes to keep up-to-date with the IMDb site.
+
+  [sql]
+  - fix for a nasty bug parsing notes about character names.
+  - fixes for SQLite with SQLOjbect.
+
+
 * What's the new in release 4.7 "Saw VI" (23 Jan 2011)
  [http]
  - first fixes for the new set of parsers.

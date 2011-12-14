@@ -6,7 +6,7 @@ IMDb's data for mobile systems.
 the imdb.IMDb function will return an instance of this class when
 called with the 'accessSystem' argument set to "mobile".
 
-Copyright 2005-2010 Davide Alberani <da@erlug.linux.it>
+Copyright 2005-2011 Davide Alberani <da@erlug.linux.it>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -127,7 +127,7 @@ class IMDbMobileAccessSystem(IMDbHTTPAccessSystem):
     accessSystem = 'mobile'
     _mobile_logger = logging.getLogger('imdbpy.parser.mobile')
 
-    def __init__(self, isThin=1, *arguments, **keywords):
+    def __init__(self, isThin=0, *arguments, **keywords):
         self.accessSystem = 'mobile'
         IMDbHTTPAccessSystem.__init__(self, isThin, *arguments, **keywords)
 
@@ -243,8 +243,10 @@ class IMDbMobileAccessSystem(IMDbHTTPAccessSystem):
         cont = self._mretrieve(imdbURL_movie_main % movieID + 'maindetails')
         title = _findBetween(cont, '<title>', '</title>', maxRes=1)
         if not title:
-            raise IMDbDataAccessError, 'unable to get movieID "%s"' % movieID
+            raise IMDbDataAccessError('unable to get movieID "%s"' % movieID)
         title = _unHtml(title[0])
+        if title.endswith(' - IMDb'):
+            title = title[:-7]
         if cont.find('<span class="tv-extra">TV mini-series</span>') != -1:
             title += ' (mini)'
         d = analyze_title(title)
@@ -335,29 +337,26 @@ class IMDbMobileAccessSystem(IMDbHTTPAccessSystem):
         if cvurl:
             cvurl = _findBetween(cvurl[0], 'src="', '"', maxRes=1)
             if cvurl: d['cover url'] = cvurl[0]
-        genres = _findBetween(cont, 'href="/Sections/Genres/', '/')
+        genres = _findBetween(cont, 'href="/genre/', '"')
         if genres:
             d['genres'] = list(set(genres))
-        ur = _findBetween(cont, '<div class="starbar-meta">', '</div>',
+        ur = _findBetween(cont, 'id="star-bar-user-rate">', '</div>',
                             maxRes=1)
         if ur:
             rat = _findBetween(ur[0], '<b>', '</b>', maxRes=1)
             if rat:
-                teni = rat[0].find('/10')
-                if teni != -1:
-                    rat = rat[0][:teni]
-                    try:
-                        rat = float(rat.strip())
-                        d['rating'] = rat
-                    except ValueError:
-                        self._mobile_logger.warn('wrong rating: %s', rat)
-            vi = ur[0].rfind('tn15more">')
+                if rat:
+                    d['rating'] = rat[0].strip()
+                else:
+                    self._mobile_logger.warn('wrong rating: %s', rat)
+            vi = ur[0].rfind('href="ratings"')
             if vi != -1 and ur[0][vi+10:].find('await') == -1:
                 try:
-                    votes = _unHtml(ur[0][vi+10:]).replace('votes', '').strip()
-                    votes = int(votes.replace(',', ''))
+                    votes = _findBetween(ur[0][vi:], "title='",
+                                        " IMDb", maxRes=1)
+                    votes = int(votes[0].replace(',', ''))
                     d['votes'] = votes
-                except ValueError:
+                except (ValueError, IndexError):
                     self._mobile_logger.warn('wrong votes: %s', ur)
         top250 = _findBetween(cont, 'href="/chart/top?', '</a>', maxRes=1)
         if top250:
@@ -540,7 +539,7 @@ class IMDbMobileAccessSystem(IMDbHTTPAccessSystem):
         if not name:
             if _parseChr: w = 'characterID'
             else: w = 'personID'
-            raise IMDbDataAccessError, 'unable to get %s "%s"' % (w, personID)
+            raise IMDbDataAccessError('unable to get %s "%s"' % (w, personID))
         name = _unHtml(name[0].replace(' - IMDb', ''))
         if _parseChr:
             name = name.replace('(Character)', '').strip()
@@ -568,19 +567,28 @@ class IMDbMobileAccessSystem(IMDbHTTPAccessSystem):
                         r['%s date' % dtitle] = date
                     if notes:
                         r['%s notes' % dtitle] = notes
-        akas = _findBetween(s, 'Alternate Names:</h5>', ('</div>',
+        akas = _findBetween(s, 'Alternate Names:</h4>', ('</div>',
                             '<br/><br/>'), maxRes=1)
         if akas:
             akas = akas[0]
+            if akas:
+                akas = _unHtml(akas)
             if akas.find(' | ') != -1:
-                akas = _unHtml(akas).split(' | ')
+                akas = akas.split(' | ')
             else:
-                akas = _unHtml(akas).split(' / ')
-            if akas: r['akas'] = akas
-        hs = _findBetween(s, 'name="headshot"', '</a>', maxRes=1)
+                akas = akas.split(' / ')
+            if akas: r['akas'] = filter(None, [x.strip() for x in akas])
+        hs = _findBetween(s, "rel='image_src'", '>', maxRes=1)
+        if not hs:
+            hs = _findBetween(s, 'rel="image_src"', '>', maxRes=1)
+        if not hs:
+            hs = _findBetween(s, '<a name="headshot"', '</a>', maxRes=1)
         if hs:
-            hs[:] = _findBetween(hs[0], 'src="', '"', maxRes=1)
-            if hs: r['headshot'] = hs[0]
+            hsl = _findBetween(hs[0], "href='", "'", maxRes=1)
+            if not hsl:
+                hsl = _findBetween(hs[0], 'href="', '"', maxRes=1)
+            if hsl and 'imdb-share-logo' not in hsl[0]:
+                r['headshot'] = hsl[0]
         # Build a list of tuples such [('hrefLink', 'section name')]
         workkind = _findBetween(s, 'id="jumpto_', '</a>')
         ws = []
@@ -601,6 +609,8 @@ class IMDbMobileAccessSystem(IMDbHTTPAccessSystem):
         #    ws.append(('filmography', 'filmography'))
         for sect, sectName in ws:
             raws = u''
+            if sectName == 'self':
+                sect = 'Self'
             # Everything between the current section link and the end
             # of the <ol> tag.
             if _parseChr and sect == 'filmography':
@@ -609,8 +619,10 @@ class IMDbMobileAccessSystem(IMDbHTTPAccessSystem):
                 inisect = s.find('<a name="%s' % sect)
             if inisect != -1:
                 endsect = s[inisect:].find('<div id="filmo-head-')
+                if endsect == -1:
+                    endsect = s[inisect:].find('<div class="article"')
                 if endsect != -1: raws = s[inisect:inisect+endsect]
-            if not raws: continue
+            #if not raws: continue
             mlist = _findBetween(raws, '<div class="filmo-row',
                     ('<div class="clear"/>',))
             for m in mlist:
@@ -813,10 +825,10 @@ class IMDbMobileAccessSystem(IMDbHTTPAccessSystem):
             intro = _unHtml(intro[0]).strip()
             if intro:
                 d['introduction'] = intro
-        bios = _findBetween(cont, '<div class="display">',
-                            '<div class="history">')
-        if bios:
-            bios = _findBetween(bios[0], '<h4>', ('<h4>', '</div>'))
+        tocidx = cont.find('<table id="toc..')
+        if tocidx != -1:
+            cont = cont[tocidx:]
+        bios = _findBetween(cont, '<h4>', ('<h4>', '</div>'))
         if bios:
             for bio in bios:
                 bio = bio.replace('</h4>', '::')

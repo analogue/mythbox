@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import distutils.sysconfig
 import os
 import sys
 import ez_setup
@@ -9,7 +10,7 @@ import setuptools
 
 # version of the software; in the code repository this represents
 # the _next_ release.  setuptools will automatically add 'dev-rREVISION'.
-version = '4.7'
+version = '4.8.2'
 
 home_page = 'http://imdbpy.sf.net/'
 
@@ -86,7 +87,7 @@ featLxml = setuptools.dist.Feature('add lxml dependency', standard=True,
 # XXX: it seems there's no way to specify that we need EITHER
 #      SQLObject OR SQLAlchemy.
 featSQLObject = setuptools.dist.Feature('add SQLObject dependency',
-        standard=True, install_requires=['SQLObject'],
+        standard=True, install_requires=['SQLObject', 'FormEncode'],
         require_features='sql')
 
 featSQLAlchemy = setuptools.dist.Feature('add SQLAlchemy dependency',
@@ -223,16 +224,16 @@ try:
     else:
         languages = []
     if languages:
-        data_files.append(('imdb/locale', ['imdb/locale/imdbpy.pot']))
+        data_files.append((os.path.join(distutils.sysconfig.get_python_lib(), 'imdb/locale'), ['imdb/locale/imdbpy.pot']))
     for lang in languages:
         files_found = setuptools.findall('imdb/locale/%s' % lang)
         if not files_found:
             continue
         base_dir = os.path.dirname(files_found[0])
-        data_files.append(('imdb/locale', ['imdb/locale/imdbpy-%s.po' % lang]))
+        data_files.append((os.path.join(distutils.sysconfig.get_python_lib(), 'imdb/locale'), ['imdb/locale/imdbpy-%s.po' % lang]))
         if not base_dir:
             continue
-        data_files.append((base_dir, files_found))
+        data_files.append((os.path.join(distutils.sysconfig.get_python_lib(), base_dir), files_found))
     setuptools.setup(**params)
 except SystemExit:
     print ERR_MSG
