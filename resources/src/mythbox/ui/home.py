@@ -340,9 +340,6 @@ class HomeWindow(BaseWindow):
             except:
                 pass
         
-        # NOTE: apparently, updating listitem properties broke in eden creating dupes.
-        #       reset as a workaround for the time being.
-        self.coverFlow.reset()
         self.coverItems = []
             
         for i, r in enumerate(self.recordings[:MAX_COVERFLOW]):
@@ -358,7 +355,10 @@ class HomeWindow(BaseWindow):
                     cover = 'mythbox-logo.png'
             self.updateListItemProperty(listItem, 'thumb', cover)
             self.coverItems.append(listItem)
-            #self.coverFlow.addItem(listItem)
+
+        # NOTE: apparently, updating listitem properties broke in eden creating dupes.
+        #       reset as a workaround for the time being.
+        self.coverFlow.reset()
         self.coverFlow.addItems(self.coverItems)
         log.debug('<<< renderCoverFlow end')
         
