@@ -210,7 +210,8 @@ class BaseFanartProviderTestCase(unittest.TestCase):
         
         @run_async
         def work(p):
-            self.cnt += 1 if provider.getPosters(p) else 0
+            if provider.getPosters(p):
+                self.cnt += 1
 
         [t.join() for t in [work(p) for p in programs[:max]]]
         self.assertEqual(max, self.cnt, 'Only got %d correct responses out of %d' % (self.cnt, max))
