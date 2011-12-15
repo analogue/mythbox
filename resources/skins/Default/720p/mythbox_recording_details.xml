@@ -172,12 +172,13 @@
             <info>Window.Property(thumbnail)</info>
             <aspectratio>scale</aspectratio>
             <fadetime>400</fadetime>
+            <visible>!Player.HasVideo</visible>
         </control>
         
         <control type="videowindow" id="4011">
-            <posx>305</posx>
+            <posx>320</posx>
             <posy>320</posy>
-            <width>600</width>
+            <width>568</width>
             <height>320</height>
             <visible>Player.HasVideo</visible>
         </control>
