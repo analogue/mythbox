@@ -198,16 +198,7 @@ class StreamingPlayer(BasePlayer):
         mlog.debug('> playRecording %s' % safe_str(self.program.title()))
         assert not self.isPlaying(), 'Player is already playing a video'
         self.commSkipper = commSkipper
-        
-        # extract recording's framerate from xbmc.log and inject into bookmarker
-        #from mythbox.log import LogScraper
-        #logtail = LogScraper(self.platform.getXbmcLog())
-        #worker = logtail.matchLineAsync("fps:", timeout=30, callback=self.bookmarker.onFPS)
         self.play(self.buildPlaybackUrl(), self.buildPlayList())
-        #worker.join()
-        
-        #self._waitForPlaybackCompleted()
-        #self.active = False
         mlog.debug('< playRecording')
 
     def buildPlayList(self):
@@ -267,22 +258,6 @@ class MythBookmarker(Bookmarker):
     def onPlayBackEnded(self):
         self._clearBookmark()
 
-#    @catchall
-#    def onFPS(self, line):
-#        log.debug('onFPS: %s' % line)
-#        if line is not None:
-#            log.debug('onFPS: line not none')
-#            words = line.split()
-#            tagIndex = words.index('fps:')
-#            self.fps = float(words[tagIndex+1].strip(','))
-#            self.program.setFPS(self.fps)
-#            log.debug('fps = %s' % self.fps)
-#        else:
-#            log.debug('onFPS: line is none')
-#            self.fps = 0.0
-#        #if log.isEnabledFor(logging.DEBUG):
-#        #    showPopup('FPS', 'FPS %s' % self.fps)           
-            
     def _clearBookmark(self):
         if self.program.isBookmarked():
             self.program.setBookmark(0.0) 
@@ -290,17 +265,6 @@ class MythBookmarker(Bookmarker):
     def _resumeFromBookmark(self):
         log.debug('bookmarker : before wait for gotFPS')
         
-#        # wait for fps to be set by log scaper for a max of 10 seconds
-#        cnt = 0
-#        while self.fps is None and cnt < 100:
-#            time.sleep(0.1)
-#            cnt += 1
-#        
-#        if self.fps is None:
-#            log.warn('Timed out waiting for fps to be set on bookmarker')
-#        else:
-#            log.debug('bookmarker : after wait for gotFPS')
-                
         bookmarkSecs = self.program.getBookmark()
         if bookmarkSecs > 0 and bookmarkSecs < (self.program.getDuration() * 60):
             fb = formatSeconds(bookmarkSecs)

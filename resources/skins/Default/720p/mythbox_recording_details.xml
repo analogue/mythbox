@@ -154,12 +154,13 @@
         <!-- ============================================= -->
         <control type="image" id="4010">
             <description>Preview shadow</description>
-            <posx>290</posx>
+            <posx>295</posx>
             <posy>287</posy>
-            <width>630</width>
+            <width>625</width>
             <height>380</height>
             <texture background="false" border="40">-</texture>
             <info>Window.Property(thumbnailShadow)</info>
+            <visible>!Player.HasVideo</visible>
         </control>
                       
         <control type="image" id="4009">
@@ -507,7 +508,7 @@
         <imagepath>busy</imagepath>
         <timeperimage>50</timeperimage>
         <fadetime>0</fadetime>
-        <visible>substring(Window.Property(busy),true)</visible>
+        <visible>substring(Window.Property(busy),true) + !Player.HasVideo</visible>
         <animation effect="fade" time="250">VisibleChange</animation>    
     </control>
 

@@ -247,7 +247,7 @@
         <imagepath>busy</imagepath>
         <timeperimage>50</timeperimage>
         <fadetime>0</fadetime>
-        <visible>substring(Window.Property(busy),true)</visible>
+        <visible>substring(Window.Property(busy),true) + !Player.HasVideo</visible>
         <animation effect="fade" time="250">VisibleChange</animation>    
     </control>
     
