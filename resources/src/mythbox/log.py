@@ -17,8 +17,35 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 import time
+import xbmc
 from threading import Thread
+from logging import Handler
 
+
+class XbmcLogHandler(Handler):
+    """Log handler for python's built in logging framework that sends log output to xbmc.log(...)"""
+
+    to_xbmc_level = {
+        'DEBUG'   : xbmc.LOGDEBUG,
+        'WARNING' : xbmc.LOGWARNING,
+        'INFO'    : xbmc.LOGINFO,
+        'ERROR'   : xbmc.LOGERROR,
+        'CRITICAL': xbmc.LOGFATAL
+    }
+    
+    def __init__(self):
+        Handler.__init__(self)
+
+    def emit(self, record):
+        """Emit a record."""
+        try:
+            msg = self.format(record)
+            fs = "%s" % msg
+            xbmc.log(fs, level=self.to_xbmc_level.get(record.levelname, xbmc.LOGINFO))
+        except:
+            self.handleError(record)
+
+    
 class LogScraper(object):
 
     def __init__(self, fname):

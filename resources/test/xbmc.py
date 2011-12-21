@@ -1,20 +1,5 @@
 #
-#  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2010 analogue@yahoo.com
-#
-#  This program is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation; either version 2
-#  of the License, or (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# Stubbed out xbmc module
 #
 
 import os
@@ -23,6 +8,17 @@ import time
 import tempfile 
 
 abortRequested = False
+
+# log levels
+LOGDEBUG = 0
+LOGINFO = 1
+LOGNOTICE = 2
+LOGWARNING = 3
+LOGERROR = 4
+LOGSEVERE = 5
+LOGFATAL = 6
+LOGNONE = 7
+
 
 def getIPAddress():
     return socket.gethostbyname(socket.gethostname())
@@ -250,7 +246,10 @@ def log(msg, level):
            Once you use a keyword, all following arguments require the keyword.
      
            Text is written to the log for the following conditions.
-             XBMC loglevel == -1 (NONE, nothing at all is logged)         XBMC loglevel == 0 (NORMAL, shows LOGNOTICE, LOGERROR, LOGSEVERE and LOGFATAL)         XBMC loglevel == 1 (DEBUG, shows all)       See pydocs for valid values for level.
+             XBMC loglevel == -1 (NONE, nothing at all is logged)         
+             XBMC loglevel == 0 (NORMAL, shows LOGNOTICE, LOGERROR, LOGSEVERE and LOGFATAL)         
+             XBMC loglevel == 1 (DEBUG, shows all)       
+             See pydocs for valid values for level.
      
     example:
       - xbmc.log(msg='This is a test string.', level=xbmc.LOGDEBUG)

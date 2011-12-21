@@ -22,7 +22,7 @@
 __scriptname__   = "MythBox for XBMC"
 __author__       = "analogue@yahoo.com"
 __url__          = "http://mythbox.googlecode.com"
-__hg_url__       = "https://mythbox.googlecode.com/hg/"
+__git_url__      = "http://github.com/analogue/mythbox"
 __credits__      = "bunch of ppl"
 
 if __name__ == '__main__':
