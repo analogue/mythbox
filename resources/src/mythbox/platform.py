@@ -65,19 +65,27 @@ class Platform(object):
         requireDir(self.getCacheDir())
 
     def xbmcVersion(self):
-        version = 0.0
-        vs = xbmc.getInfoLabel('System.BuildVersion')
-        try: 
-            # sample input: '10.1 Git:Unknown'
-            version = float(vs.split()[0])
-        except ValueError:
+        build = xbmc.getInfoLabel('System.BuildVersion')
+     
+        # TODO: regex'ify
+        # methods to extract version as number given build string   
+        methods = [
+            lambda b: float(b.split()[0]),               # sample input: 10.1 Git:Unknown  
+            lambda b: float(b.split()[0].split('-')[1]), # sample input: PRE-11.0 Git:Unknown
+            lambda b: float(b.split()[0].split('-')[0]), # sample input: 11.0-BETA1 Git:20111222-22ad8e4
+            lambda b: 0.0
+        ]
+        
+        for m in methods:
             try:
-                # sample input: 'PRE-11.0 Git:Unknown'
-                version = float(vs.split()[0].split('-')[1])
+                version = m(build)
+                break
             except ValueError:
-                log.error('Cannot determine version of XBMC from build version: %s. Returning %s' % (vs, version))
+                # parsing failed, try next method
+                pass
+            
         return version
-    
+            
     def addLibsToSysPath(self):
         '''Add 3rd party libs in ${scriptdir}/resources/lib to the PYTHONPATH'''
         libs = [
