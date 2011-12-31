@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon 
-    id="script.mythbox" 
-    name="MythBox" 
-    version="version_tag" 
-    provider-name="analogue@yahoo.com">
+<addon
+    id="script.mythbox"
+    name="MythBox"
+    version="version_tag"
+    provider-name="analogue@yahoo.com (Semir Patel)">
     <requires>
         <import addon="xbmc.python" version="2.0" />
         <import addon="script.module.beautifulsoup" version="3.2.0" />
         <import addon="script.module.elementtree" version="1.2.7"/>
-        <import addon="script.module.simplejson"/>
+        <import addon="script.module.simplejson" version="2.0.10"/>
     </requires>
     <extension point="xbmc.python.script" library="default.py">
         <provides>video</provides>
@@ -22,7 +22,7 @@
         - Watch recordings with commercial skipping
         - Watch live tv
         - Create and edit recording schedules
-        - Fan art from tvdb, tvrage, tmdb, imdb, and google image search
+        - Fan art from tvdb, tmdb, tvrage, imdb, and google
         - Enhanced program guide
         - Show upcoming recordings
         - Tuner and job status
@@ -33,7 +33,7 @@
         - Regarder les enregistrements avec saut de la publicité
         - Regarder la tv en direct
         - Créer et éditer des planifications d'enregistrements
-        - Fanart à partir de tvdb, tvrage, tmdb, imdb, et de la recherche d'image google
+        - Fanart à partir de tvdb, tvrage, tmdb, imdb, et google
         - Guide de programme amélioré
         - Afficher les enregistrements à venir
         - Statut du syntoniseur et des travaux
