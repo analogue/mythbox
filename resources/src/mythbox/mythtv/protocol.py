@@ -403,6 +403,31 @@ class Protocol67(Protocol66):
                  'subtitle_type','year']
 
 
+class Protocol68(Protocol67):
+    
+    def version(self):
+        return 68
+    
+    def protocolToken(self):
+        return "90094EAD"
+
+
+class Protocol69(Protocol68):
+    
+    def version(self):
+        return 69
+    
+    def protocolToken(self):
+        return "63835135"
+
+
+class Protocol70(Protocol69):
+    
+    def version(self):
+        return 70
+    
+    def protocolToken(self):
+        return "53153836"
 
 # Current rev in mythversion.h
 protocols = {
@@ -426,8 +451,11 @@ protocols = {
     61: Protocol61(),  # 0.24
     62: Protocol62(),  # 0.24
     63: Protocol63(),  # 0.24
-    64: Protocol64(),  # 0.24
-    65: Protocol65(),  # 0.24
-    66: Protocol66(),  # 0.24
-    67: Protocol67()   # 0.24
+    64: Protocol64(),  # 0.25
+    65: Protocol65(),  # 0.25
+    66: Protocol66(),  # 0.25
+    67: Protocol67(),  # 0.25
+    68: Protocol68(),  # 0.25 - VIDEO_LIST_UPDATE
+    69: Protocol69(),  # 0.25 - QUERY_FILE_HASH 
+    70: Protocol70()   # 0.25 - REOPEN
 }    
