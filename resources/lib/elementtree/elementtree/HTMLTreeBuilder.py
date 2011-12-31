@@ -1,6 +1,6 @@
 #
 # ElementTree
-# $Id: HTMLTreeBuilder.py 2325 2005-03-16 15:50:43Z fredrik $
+# $Id: HTMLTreeBuilder.py 3225 2007-08-27 21:32:08Z fredrik $
 #
 # a simple tree builder, for HTML input
 #
@@ -20,7 +20,7 @@
 # --------------------------------------------------------------------
 # The ElementTree toolkit is
 #
-# Copyright (c) 1999-2004 by Fredrik Lundh
+# Copyright (c) 1999-2007 by Fredrik Lundh
 #
 # By obtaining, using, and/or copying this software and/or its
 # associated documentation, you agree that you have read, understood,

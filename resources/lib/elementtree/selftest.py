@@ -1,4 +1,4 @@
-# $Id: selftest.py 2326 2005-03-17 07:45:21Z fredrik $
+# $Id: selftest.py 3224 2007-08-27 21:23:39Z fredrik $
 # -*- coding: iso-8859-1 -*-
 # elementtree selftest program
 
@@ -9,7 +9,7 @@
 # TODO: add xml/html parsing tests
 # TODO: etc
 
-import sys, string, StringIO
+import sys, cStringIO
 
 from elementtree import ElementTree
 from elementtree import ElementPath
@@ -18,8 +18,8 @@ from elementtree import HTMLTreeBuilder
 from elementtree import SimpleXMLWriter
 
 def serialize(elem, encoding=None):
-    import StringIO
-    file = StringIO.StringIO()
+    import cStringIO
+    file = cStringIO.StringIO()
     tree = ElementTree.ElementTree(elem)
     if encoding:
         tree.write(file, encoding)
@@ -35,8 +35,8 @@ def summarize_list(seq):
 
 def normalize_crlf(tree):
     for elem in tree.getiterator():
-        if elem.text: elem.text = string.replace(elem.text, "\r\n", "\n")
-        if elem.tail: elem.tail = string.replace(elem.tail, "\r\n", "\n")
+        if elem.text: elem.text = elem.text.replace("\r\n", "\n")
+        if elem.tail: elem.tail = elem.tail.replace("\r\n", "\n")
 
 SAMPLE_XML = ElementTree.XML("""
 <body>
@@ -112,7 +112,7 @@ def sanity():
 def version():
     """
     >>> ElementTree.VERSION
-    '1.2.6'
+    '1.2.7'
     """
 
 def interface():
@@ -458,13 +458,13 @@ def encoding():
     >>> elem.attrib["key"] = "<&\"\'>"
     >>> elem.text = None
     >>> serialize(elem)
-    '<tag key="&lt;&amp;&quot;&apos;&gt;" />'
+    '<tag key="&lt;&amp;&quot;\'&gt;" />'
     >>> serialize(elem, "utf-8")
-    '<tag key="&lt;&amp;&quot;&apos;&gt;" />'
+    '<tag key="&lt;&amp;&quot;\'&gt;" />'
     >>> serialize(elem, "us-ascii")
-    '<tag key="&lt;&amp;&quot;&apos;&gt;" />'
+    '<tag key="&lt;&amp;&quot;\'&gt;" />'
     >>> serialize(elem, "iso-8859-1")
-    '<?xml version=\'1.0\' encoding=\'iso-8859-1\'?>\n<tag key="&lt;&amp;&quot;&apos;&gt;" />'
+    '<?xml version=\'1.0\' encoding=\'iso-8859-1\'?>\n<tag key="&lt;&amp;&quot;\'&gt;" />'
 
     >>> elem.text = u'\xe5\xf6\xf6<>'
     >>> elem.attrib.clear()
@@ -488,6 +488,9 @@ def encoding():
     >>> serialize(elem, "iso-8859-1")
     '<?xml version=\'1.0\' encoding=\'iso-8859-1\'?>\n<tag key="\xe5\xf6\xf6&lt;&gt;" />'
 
+    >>> elem.attrib["key"] = u'foo\nbar'
+    >>> serialize(elem)
+    '<tag key="foo&#10;bar" />'
     """
 
 ENTITY_XML = """\
@@ -796,7 +799,7 @@ def xinclude_default():
 
 def xmlwriter():
     r"""
-    >>> file = StringIO.StringIO()
+    >>> file = cStringIO.StringIO()
     >>> w = SimpleXMLWriter.XMLWriter(file)
     >>> html = w.start("html")
     >>> x = w.start("head")

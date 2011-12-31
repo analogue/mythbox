@@ -127,7 +127,7 @@ element instance.</dd>
 A true value if this is an element object.</dd>
 </dl><br />
 </dd>
-<dt><b>iterparse(source, events=None)</b> (class) [<a href='#elementtree.ElementTree.iterparse-class'>#</a>]</dt>
+<dt><a id='elementtree.ElementTree.iterparse-function' name='elementtree.ElementTree.iterparse-function'><b>iterparse(source, events=None)</b></a> [<a href='#elementtree.ElementTree.iterparse-function'>#</a>]</dt>
 <dd>
 <p>Parses an XML document into an element tree incrementally, and reports
 what's going on to the user.</p>
@@ -143,7 +143,6 @@ A list of events to report back.  If omitted, only &quot;end&quot;
 <dd>
 A (event, elem) iterator.</dd>
 </dl><br />
-<p>For more information about this class, see <a href='#elementtree.ElementTree.iterparse-class'><i>The iterparse Class</i></a>.</p>
 </dd>
 <dt><a id='elementtree.ElementTree.parse-function' name='elementtree.ElementTree.parse-function'><b>parse(source, parser=None)</b></a> [<a href='#elementtree.ElementTree.parse-function'>#</a>]</dt>
 <dd>
@@ -721,26 +720,6 @@ A file name, or a file object opened for writing.</dd>
 <dt><i>encoding</i></dt>
 <dd>
 Optional output encoding (default is US-ASCII).</dd>
-</dl><br />
-</dd>
-</dl>
-<h2><a id='elementtree.ElementTree.iterparse-class' name='elementtree.ElementTree.iterparse-class'>The iterparse Class</a></h2>
-<dl>
-<dt><b>iterparse(source, events=None)</b> (class) [<a href='#elementtree.ElementTree.iterparse-class'>#</a>]</dt>
-<dd>
-<p>Parses an XML document into an element tree incrementally, and reports
-what's going on to the user.</p>
-<dl>
-<dt><i>source</i></dt>
-<dd>
-A filename or file object containing XML data.</dd>
-<dt><i>events</i></dt>
-<dd>
-A list of events to report back.  If omitted, only &quot;end&quot;
-    events are reported.</dd>
-<dt>Returns:</dt>
-<dd>
-A (event, elem) iterator.</dd>
 </dl><br />
 </dd>
 </dl>

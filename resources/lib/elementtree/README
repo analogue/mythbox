@@ -1,4 +1,4 @@
-$Id: README 2326 2005-03-17 07:45:21Z fredrik $
+$Id: README 2923 2006-11-19 08:05:45Z fredrik $
 
 =======================
 The elementtree library
@@ -12,9 +12,11 @@ For more information on this library, see:
     docs/index.html
     http://effbot.org/zone/element.htm
 
-The modules are designed to work with Python 2.1 and newer.  The core
-ElementTree module and the SimpleXMLTreeBuilder class also works under
-1.5.2 and 2.0.
+The modules are designed to work with CPython 2.1 and newer, as well
+as IronPython 1.0 and newer.
+
+The core ElementTree module and the SimpleXMLTreeBuilder class also
+work under CPython 1.5.2 and 2.0.
 
 Enjoy /F
 
@@ -24,8 +26,8 @@ http://www.pythonware.com
 --------------------------------------------------------------------
 The ElementTree Library is
 
-Copyright (c) 1999-2005 by Secret Labs AB
-Copyright (c) 1999-2005 by Fredrik Lundh
+Copyright (c) 1999-2007 by Secret Labs AB
+Copyright (c) 1999-2007 by Fredrik Lundh
 
 By obtaining, using, and/or copying this software and/or its
 associated documentation, you agree that you have read, understood,
@@ -52,7 +54,9 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 release info
 ------------
 
-This is release 1.2.6 of the ElementTree library.
+This is release 1.2.7 of the ElementTree library.  This release adds
+built-in parser support for IronPython 1.0, but is otherwise identical
+to release 1.2.6.
 
 For a list of changes in this release, see the CHANGES document.
 
@@ -84,6 +88,8 @@ elementtree/
 
   ElementInclude.py           Element include support module.  Adds limited
                               XInclude support.
+
+  ElementIron.py              Element parser for IronPython 1.0.
 
   HTMLTreeBuilder.py          Element tree builder for HTML.  This only
                               works for mostly well-formed HTML; if you

@@ -18,7 +18,7 @@
 # --------------------------------------------------------------------
 # The ElementTree toolkit is
 #
-# Copyright (c) 1999-2004 by Fredrik Lundh
+# Copyright (c) 1999-2007 by Fredrik Lundh
 #
 # By obtaining, using, and/or copying this software and/or its
 # associated documentation, you agree that you have read, understood,

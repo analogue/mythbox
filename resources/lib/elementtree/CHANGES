@@ -1,9 +1,18 @@
 The ElementTree Library
-$Id: CHANGES 2326 2005-03-17 07:45:21Z fredrik $
+$Id: CHANGES 3224 2007-08-27 21:23:39Z fredrik $
 
 *** Changes from release 1.1 to 1.2 ***
 
-(1.2.6 released)
+(1.2.7 released)
+
+- Added parser support for IronPython (through the ElementIron
+  module).
+
+- Changed serialization of attribute values; newlines are now
+  preserved; apostrophes are no longer escaped.  The serializer
+  was also made a bit faster (~20% on my test cases).
+
+(1.2.6 released; Python 2.5 released)
 
 - Fixed handling of entities defined in internal DTD's (reported
   by Greg Wilson).

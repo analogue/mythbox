@@ -1,6 +1,6 @@
 #
 # ElementTree
-# $Id: XMLTreeBuilder.py 2305 2005-03-01 17:43:09Z fredrik $
+# $Id: XMLTreeBuilder.py 3225 2007-08-27 21:32:08Z fredrik $
 #
 # an XML tree builder
 #
@@ -19,7 +19,7 @@
 # --------------------------------------------------------------------
 # The ElementTree toolkit is
 #
-# Copyright (c) 1999-2004 by Fredrik Lundh
+# Copyright (c) 1999-2007 by Fredrik Lundh
 #
 # By obtaining, using, and/or copying this software and/or its
 # associated documentation, you agree that you have read, understood,

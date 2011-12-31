@@ -1,9 +1,26 @@
-# $Id: benchmark.py 1757 2004-03-28 17:21:25Z fredrik $
+# $Id: benchmark.py 2923 2006-11-19 08:05:45Z fredrik $
 # simple elementtree benchmark program
 
-from elementtree import XMLTreeBuilder, SimpleXMLTreeBuilder
-from elementtree import SgmlopXMLTreeBuilder
-from xml.dom import minidom
+from elementtree import ElementTree, XMLTreeBuilder
+try:
+    import cElementTree
+except ImportError:
+    try:
+        from xml.etree import cElementTree
+    except ImportError:
+        cElementTree = None
+try:
+    from elementtree import SimpleXMLTreeBuilder # xmllib
+except ImportError:
+    SimpleXMLTreeBuilder = None
+try:
+    from elementtree import SgmlopXMLTreeBuilder # sgmlop
+except ImportError:
+    SgmlopXMLTreeBuilder = None
+try:
+    from xml.dom import minidom # pyexpat+minidom
+except ImportError:
+    minidom = None
 
 import sys, time
 
@@ -29,6 +46,14 @@ def benchmark(file, builder_module):
     raw_input("press return to continue...")
     del tree
 
+def benchmark_parse(file, driver):
+    t0 = time.time()
+    tree = driver.parse(file)
+    t1 = time.time()
+    print driver.__name__ + ".parse done in %.3f seconds" % (t1-t0)
+    raw_input("press return to continue...")
+    del tree
+
 def benchmark_minidom(file):
     t0 = time.time()
     dom = minidom.parse(file)
@@ -37,10 +62,18 @@ def benchmark_minidom(file):
     raw_input("press return to continue...")
     del dom
 
-benchmark(file, XMLTreeBuilder)
-benchmark(file, SimpleXMLTreeBuilder) # use xmllib
-try:
-    benchmark(file, SgmlopXMLTreeBuilder) # use sgmlop
-except RuntimeError, v:
-    print "=== SgmlopXMLTreeBuilder not available (%s)" % v
-benchmark_minidom(file)
+benchmark_parse(file, ElementTree)
+if cElementTree:
+    benchmark_parse(file, cElementTree)
+if sys.platform != "cli":
+    benchmark(file, XMLTreeBuilder)
+    benchmark(file, SimpleXMLTreeBuilder) # use xmllib
+    try:
+        benchmark(file, SgmlopXMLTreeBuilder) # use sgmlop
+    except RuntimeError, v:
+        print "=== SgmlopXMLTreeBuilder not available (%s)" % v
+
+if minidom:
+    benchmark_minidom(file)
+else:
+    print "=== minidom not available"
