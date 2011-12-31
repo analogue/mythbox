@@ -17,6 +17,7 @@ class SoupTest(unittest.TestCase):
             rep = toParse
         self.assertEqual(str(c(toParse)), rep)
 
+
 class FollowThatTag(SoupTest):
 
     "Tests the various ways of fetching tags from a soup."
@@ -62,8 +63,13 @@ class FollowThatTag(SoupTest):
         self.assertEqual(len(self.soup.findAll(href=True)), 1)
 
     def testFindallByClass(self):
-        soup = BeautifulSoup('<a>Foo</a><a class="1">Bar</a>')
+        soup = BeautifulSoup('<b class="foo">Foo</b><a class="1 23 4">Bar</a>')
+        self.assertEqual(soup.find(attrs='foo').string, "Foo")
         self.assertEqual(soup.find('a', '1').string, "Bar")
+        self.assertEqual(soup.find('a', '23').string, "Bar")
+        self.assertEqual(soup.find('a', '4').string, "Bar")
+
+        self.assertEqual(soup.find('a', '2'), None)
 
     def testFindAllByList(self):
         matching = self.soup(['a', 'ac'])
@@ -90,6 +96,29 @@ class FollowThatTag(SoupTest):
         matching = self.soup.findAll(matchTagWhereIDMatchesName)
         self.assertEqual(len(matching), 2)
         self.assertEqual(matching[0].name, 'a')
+
+    def testFindByIndex(self):
+        """For when you have the tag and you want to know where it is."""
+        tag = self.soup.find('a', id="a")
+        self.assertEqual(self.soup.index(tag), 3)
+
+        # It works for NavigableStrings as well.
+        s = tag.string
+        self.assertEqual(tag.index(s), 0)
+
+        # If the tag isn't present, a ValueError is raised.
+        soup2 = BeautifulSoup("<b></b>")
+        tag2 = soup2.find('b')
+        self.assertRaises(ValueError, self.soup.index, tag2)
+
+    def testConflictingFindArguments(self):
+        """The 'text' argument takes precedence."""
+        soup = BeautifulSoup('Foo<b>Bar</b>Baz')
+        self.assertEqual(soup.find('b', text='Baz'), 'Baz')
+        self.assertEqual(soup.findAll('b', text='Baz'), ['Baz'])
+
+        self.assertEqual(soup.find(True, text='Baz'), 'Baz')
+        self.assertEqual(soup.findAll(True, text='Baz'), ['Baz'])
 
     def testParents(self):
         soup = BeautifulSoup('<ul id="foo"></ul><ul id="foo"><ul><ul id="foo" a="b"><b>Blah')
@@ -175,6 +204,22 @@ class StringEmUp(SoupTest):
     def testLackOfString(self):
         s = BeautifulSoup("<b>f<i>e</i>o</b>")
         self.assert_(not s.b.string)
+
+    def testStringAssign(self):
+        s = BeautifulSoup("<b></b>")
+        b = s.b
+        b.string = "foo"
+        string = b.string
+        self.assertEquals(string, "foo")
+        self.assert_(isinstance(string, NavigableString))
+
+class AllText(SoupTest):
+    "Tests the use of 'text' to get all of string content from the tag."
+
+    def testText(self):
+        soup = BeautifulSoup("<ul><li>spam</li><li>eggs</li><li>cheese</li>")
+        self.assertEquals(soup.ul.text, "spameggscheese")
+        self.assertEquals(soup.ul.getText('/'), "spam/eggs/cheese")
 
 class ThatsMyLimit(SoupTest):
     "Tests the limit argument."
@@ -277,6 +322,16 @@ class WriteOnlyCode(SoupTest):
         a['href'] = 'http://foo.com/'
         self.assertRaises(KeyError, lambda : ol['href'])
 
+    def testNewTagWithAttributes(self):
+        """Makes sure new tags can be created complete with attributes."""
+        soup = BeautifulSoup()
+        a = Tag(soup, 'a', [('href', 'foo')])
+        b = Tag(soup, 'b', {'class':'bar'})
+        soup.insert(0,a)
+        soup.insert(1,b)
+        self.assertEqual(soup.a['href'], 'foo')
+        self.assertEqual(soup.b['class'], 'bar')
+
     def testTagReplacement(self):
         # Make sure you can replace an element with itself.
         text = "<a><b></b><c>Foo<d></d></c></a><a><e></e></a>"
@@ -351,6 +406,14 @@ class WriteOnlyCode(SoupTest):
         self.assertEqual(f.nextSibling, None)
         self.assertEqual(weText.nextSibling, f)
 
+    def testReplaceWithChildren(self):
+        soup = BeautifulStoneSoup(
+            "<top><replace><child1/><child2/></replace></top>",
+            selfClosingTags=["child1", "child2"])
+        soup.replaceTag.replaceWithChildren()
+        self.assertEqual(soup.top.contents[0].name, "child1")
+        self.assertEqual(soup.top.contents[1].name, "child2")
+
     def testAppend(self):
        doc = "<p>Don't leave me <b>here</b>.</p> <p>Don't leave me.</p>"
        soup = BeautifulSoup(doc)
@@ -411,6 +474,11 @@ class WriteOnlyCode(SoupTest):
         self.assertEqual(three.previous, one)
         self.assertEqual(one.parent.nextSibling, three)
         self.assertEqual(three.previousSibling, soup.a)
+        
+    def testClear(self):
+        soup = BeautifulSoup("<ul><li></li><li></li></ul>")
+        soup.ul.clear()
+        self.assertEqual(len(soup.ul.contents), 0)
 
 class TheManWithoutAttributes(SoupTest):
     "Test attribute access"
