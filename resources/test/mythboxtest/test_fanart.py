@@ -223,7 +223,7 @@ class ImdbFanartProviderTest(BaseFanartProviderTestCase):
         return self.getMovies()
     
     def getProvider(self):
-        return ImdbFanartProvider(nextProvider=None)
+        return ImdbFanartProvider()
                 
     def test_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
         self.base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably()
@@ -231,7 +231,7 @@ class ImdbFanartProviderTest(BaseFanartProviderTestCase):
     def test_getPosters_When_program_is_a_movie_Then_returns_fanart(self):
         # Setup
         program = TVProgram({'title':'Fargo', 'category_type':'movie'}, translator=Mock())
-        provider = ImdbFanartProvider(nextProvider=None)
+        provider = ImdbFanartProvider()
         
         # Test
         posters = provider.getPosters(program)
@@ -243,7 +243,7 @@ class ImdbFanartProviderTest(BaseFanartProviderTestCase):
 
     def test_getPosters_When_program_is_not_movie_Then_returns_empty_list(self):
         program = TVProgram({'title':'Seinfeld', 'category_type':'series'}, translator=Mock())
-        provider = ImdbFanartProvider(nextProvider=None)
+        provider = ImdbFanartProvider()
         self.assertListEqual([], provider.getPosters(program))
         
 
@@ -277,7 +277,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         return self.getTvShows()
     
     def getProvider(self):
-        return TvdbFanartProvider(self.platform, nextProvider=None)
+        return TvdbFanartProvider(self.platform)
 
     @skipIfTvdbDown
     def test_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
@@ -287,10 +287,9 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
     def test_getPosters_When_program_is_not_movie_Then_returns_posters(self):
         # Setup
         program = TVProgram({'title':'Seinfeld', 'category_type':'series'}, translator=Mock())
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
         
         # Test
-        posterUrls = provider.getPosters(program)
+        posterUrls = self.getProvider().getPosters(program)
         
         # Verify
         log.debug('Poster URLs = %s' % posterUrls)
@@ -300,17 +299,15 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
     @skipIfTvdbDown
     def test_getPosters_When_program_is_movie_Then_returns_empty_list(self):
         program = TVProgram({'title':'Departed', 'category_type':'movie'}, translator=Mock())
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
-        self.assertListEqual([], provider.getPosters(program))
+        self.assertListEqual([], self.getProvider().getPosters(program))
 
     @skipIfTvdbDown
     def test_getPosters_When_title_has_funny_chars_Then_dont_fail_miserably(self):
         # Setup
         program = TVProgram({'title': u'Königreich der Himmel', 'category_type':'series'}, translator=Mock())
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
         
         # Test
-        posters = provider.getPosters(program)
+        posters = self.getProvider().getPosters(program)
         
         # Verify
         log.debug('Posters = %s' % posters)
@@ -323,7 +320,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         programs = []
         for i in xrange(10): #@UnusedVariable
             programs.append(TVProgram({'title': 'Seinfeld', 'category_type':'series'}, translator=Mock()))
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
+        provider = self.getProvider()
         
         @run_async
         def work(p):
@@ -343,8 +340,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
         self.assertFalse(self.fail)
 
     def assertSeasonAndEpisode(self, program, expectedSeason, expectedEpisode):
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
-        season, episode = provider.getSeasonAndEpisode(program)
+        season, episode = self.getProvider().getSeasonAndEpisode(program)
         self.assertEqual(expectedSeason, season)
         self.assertEqual(expectedEpisode, episode)
         
@@ -417,10 +413,9 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
     def test_getBanners_When_program_is_not_movie_Then_returns_banners(self):
         # Setup
         program = TVProgram({'title':'Seinfeld', 'category_type':'series'}, translator=Mock())
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
         
         # Test
-        bannerUrls = provider.getBanners(program)
+        bannerUrls = self.getProvider().getBanners(program)
         
         # Verify
         [log.debug('Banner = %s' % banner) for banner in bannerUrls]
@@ -432,10 +427,9 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
     def test_getBackgrounds_When_program_is_not_movie_Then_returns_backgrounds(self):
         # Setup
         program = TVProgram({'title':'Seinfeld', 'category_type':'series'}, translator=Mock())
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
         
         # Test
-        urls = provider.getBackgrounds(program)
+        urls = self.getProvider().getBackgrounds(program)
         
         # Verify
         [log.debug('Background = %s' % url) for url in urls]
@@ -447,8 +441,7 @@ class TvdbFanartProviderTest(BaseFanartProviderTestCase):
     def test_getPosters_When_title_has_override_Then_returns_posters_for_override(self):
         # 'Conan' is mapped to 'Conan (2010)' as TVDB's official title
         program = TVProgram({'title':u'Conan', 'category_type':u'series'}, translator=Mock())
-        provider = TvdbFanartProvider(self.platform, nextProvider=None)
-        urls = provider.getPosters(program)
+        urls = self.getProvider().getPosters(program)
         self.assertTrue(len(urls) > 0)
         
         
@@ -458,7 +451,7 @@ class TheMovieDbFanartProviderTest(BaseFanartProviderTestCase):
         return self.getMovies()
     
     def getProvider(self):
-        return TheMovieDbFanartProvider(nextProvider=None)
+        return TheMovieDbFanartProvider()
 
     def test_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
         self.base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably()
@@ -466,7 +459,7 @@ class TheMovieDbFanartProviderTest(BaseFanartProviderTestCase):
     def test_getPosters_When_program_is_movie_Then_returns_posters(self):
         # Setup
         program = TVProgram({'title': 'Ghostbusters', 'category_type':'movie'}, translator=Mock())
-        provider = TheMovieDbFanartProvider(nextProvider=None)
+        provider = TheMovieDbFanartProvider()
         
         # Test
         posters = provider.getPosters(program)
@@ -478,7 +471,7 @@ class TheMovieDbFanartProviderTest(BaseFanartProviderTestCase):
 
     def test_getPosters_When_program_is_not_movie_Then_returns_empty_list(self):
         program = TVProgram({'title': 'Seinfeld', 'category_type':'series'}, translator=Mock())
-        provider = TheMovieDbFanartProvider(nextProvider=None)
+        provider = TheMovieDbFanartProvider()
         self.assertListEqual([], provider.getPosters(program))
 
 
@@ -488,7 +481,7 @@ class GoogleImageSearchProviderTest(BaseFanartProviderTestCase):
         return self.getMovies()
     
     def getProvider(self):
-        return GoogleImageSearchProvider(nextProvider=None)
+        return GoogleImageSearchProvider()
 
     def test_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably(self):
         self.base_getPosters_When_pounded_by_many_threads_Then_doesnt_fail_miserably()
@@ -496,7 +489,7 @@ class GoogleImageSearchProviderTest(BaseFanartProviderTestCase):
     def test_getPosters_works(self):
         # Setup
         program = TVProgram({'title': 'Top Chef', 'category_type':'series'}, translator=Mock())
-        provider = GoogleImageSearchProvider(nextProvider=None)
+        provider = GoogleImageSearchProvider()
         
         # Test
         posters = provider.getPosters(program)
@@ -510,7 +503,7 @@ class GoogleImageSearchProviderTest(BaseFanartProviderTestCase):
     def test_getPosters_When_title_has_funny_chars_Then_dont_fail_miserably(self):
         # Setup
         program = TVProgram({'title': u'Königreich der Himmel', 'category_type':'series'}, translator=Mock())
-        provider = GoogleImageSearchProvider(nextProvider=None)
+        provider = GoogleImageSearchProvider()
         
         # Test
         posters = provider.getPosters(program)

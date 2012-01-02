@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2011 analogue@yahoo.com
+#  Copyright (C) 2012 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -82,6 +82,7 @@ class RecordingDetailsWindow(BaseWindow):
             self.render()
         
     def doRefreshFanart(self):
+        log.debug('Refreshing fanart')
         self.fanArt.clear(self.program)
         self.refresh()
         self.bus.publish({'id' : Event.FANART_REFRESHED, 'program' : self.program})
@@ -241,6 +242,8 @@ class RecordingDetailsWindow(BaseWindow):
 
     @catchall_ui
     def onAction(self, action):
+        log.debug('onAction %s ' % action.getId())
+
         id = action.getId()
         if id in Action.GO_BACK:
             if self.isAdvancedBladeActive():
@@ -260,12 +263,14 @@ class RecordingDetailsWindow(BaseWindow):
     @catchall_ui 
     @window_busy
     def onClick(self, controlId):
-        #log.debug('onClick %s ' % controlId)
+        log.debug('onClick %s ' % controlId)
         source = self.getControl(controlId)
-        try:
+        
+        if source.getId() in self.dispatcher:
             self.dispatcher[source.getId()]()
             return True
-        except KeyError:
+        else:
+            # unhandled event
             return False
 
     @inject_conn

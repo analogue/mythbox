@@ -32,14 +32,8 @@ try:
 except ImportError:
     from urllib import quote
 
-try:
-    import xml.etree.cElementTree as et
-except ImportError:
-    try:
-        import xml.etree.ElementTree as et
-    except ImportError:
-        import elementtree.ElementTree as et
-    
+import elementtree.ElementTree as et
+
 BASE_URL = 'http://www.tvrage.com/feeds/%s.php?%s=%s'
     
 def _fetch_xml(url, node=None):
