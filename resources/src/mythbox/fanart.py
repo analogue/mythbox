@@ -756,7 +756,7 @@ class TheMovieDbFanartProvider(NoOpFanartProvider):
                 else:
                     log.debug('TMDB: Found nothing for: %s' % safe_str(program.title()))
             except Exception, e:
-                log.error('TMDB: Fanart search error: %s %s' % (safe_str(program.title()), safe_str(e)))
+                log.exception('TMDB: Fanart search error: %s %s' % (safe_str(program.title()), safe_str(e)))
         return posters
     
     

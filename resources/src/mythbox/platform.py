@@ -22,9 +22,6 @@ import socket
 import sys
 import xbmc
 import xbmcaddon
-import xbmcgui
-import urllib
-import stat
 
 log = logging.getLogger('mythbox.core')
 
@@ -107,9 +104,13 @@ class Platform(object):
             'unittest']
         
         for lib in libs:
-            sys.path.insert(0, os.path.join(self.getScriptDir(), 'resources', 'lib', lib))
+            path = os.path.join(self.getScriptDir(), 'resources', 'lib', lib)
+            if os.path.exists(path):
+                sys.path.insert(0, path)
         
-        sys.path.insert(0,os.path.join(self.getScriptDir(), 'resources', 'test'))
+        testPath = os.path.join(self.getScriptDir(), 'resources', 'test')
+        if os.path.exists(testPath):
+            sys.path.insert(0, testPath)
             
         for i, path in enumerate(sys.path):    
             log.debug('syspath[%d] = %s' % (i, path))

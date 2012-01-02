@@ -19,11 +19,7 @@ config['urls']['movie.search'] = "http://api.themoviedb.org/2.1/Movie.search/en/
 config['urls']['movie.getInfo'] = "http://api.themoviedb.org/2.1/Movie.getInfo/en/xml/%(apikey)s/%%s" % (config)
 
 import urllib
-
-try:
-    import xml.etree.cElementTree as ElementTree
-except ImportError:
-    import elementtree.ElementTree as ElementTree
+import elementtree.ElementTree as ElementTree
 
 # collections.defaultdict 
 # originally contributed by Yoav Goldberg <yoav.goldberg@gmail.com> 
