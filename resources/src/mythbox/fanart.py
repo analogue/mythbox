@@ -186,7 +186,10 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
         self.tag = tag
         
     def createKey(self, method, program):
-        return '%s-%s' % (method, md5(safe_str(program.title())).hexdigest())
+        if method != 'getSeasonAndEpisode':
+            return '%s-%s' % (method, md5(safe_str(program.title())).hexdigest())
+        else:
+            return ('getSeasonAndEpisode', program.title(), program.subtitle(), program.originalAirDate())
         
     @synchronized
     def hasStruckOut(self, key):
@@ -199,7 +202,7 @@ class OneStrikeAndYoureOutFanartProvider(PersistentFanartProvider):
             ts = bucket['timestamp']
             now = datetime.datetime.now()
             diff = now - ts
-            if diff < datetime.timedelta(days=30):
+            if diff < datetime.timedelta(days=14):
                 return True
             
             self.trace('Strikeout expired for %s:%s' % (key, safe_str(bucket['title'])))
