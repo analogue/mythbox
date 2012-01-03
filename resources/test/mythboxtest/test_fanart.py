@@ -580,6 +580,7 @@ class OneStrikeAndYoureOutFanartProviderTest(unittest.TestCase):
             'title': 'Two Fat Ladies', 
             'category_type':'series',
             'channum' : '5.1',
+            'originalairdate': '2001-01-01',
             'starttime' : datetime.datetime.now(),
             'endtime': datetime.datetime.now(),
             'subtitle': 'blah',
