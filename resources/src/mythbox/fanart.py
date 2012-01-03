@@ -939,7 +939,7 @@ class TvRageProvider(NoOpFanartProvider):
             try:
                 season = show.season(sn)
                 for en, episode in season.items():
-                    if episode.title.lower() == subtitle.lower():
+                    if episode.title and episode.title.lower() == subtitle.lower():
                         return str(sn), str(episode.number)
             except KeyError:
                 # For cases where an entire season is missing, keep going...
