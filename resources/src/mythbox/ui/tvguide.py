@@ -344,8 +344,8 @@ class TvGuideWindow(ui.BaseWindow):
                     log.debug('Banner queue size: %d' % self.bannerQueue.qsize())
                 program = self.bannerQueue.get(block=True, timeout=1)
                 bannerPath = self.fanArt.pickBanner(program)
-                self.setWindowProperty('banner', [u'',bannerPath][bannerPath is not None])
-                #log.debug('workerBee resolved %s to %s' % (safe_str(program.title()), bannerPath))
+                if program == self.program:
+                    self.setWindowProperty('banner', [u'',bannerPath][bannerPath is not None])
             except Queue.Empty:
                 pass
 
