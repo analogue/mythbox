@@ -129,7 +129,9 @@ class TvGuideWindow(ui.BaseWindow):
         self.pager = None           # Pager
         self.initialized = False
         
-        self.bannerQueue = Queue.Queue()
+        self.program = None         # currently focused
+        self.bannerQueue = Queue.LifoQueue()
+        self.episodeQueue = Queue.LifoQueue()
         self.bus.register(self)
         
 
@@ -150,7 +152,8 @@ class TvGuideWindow(ui.BaseWindow):
         log.debug('onInit')
         if self.win is None:
             self.win = xbmcgui.Window(xbmcgui.getCurrentWindowId())
-            self.workerBee()
+            self.bannerThread()
+            self.episodeThread()
             self.loadGuide()
             
     @catchall_ui
@@ -304,8 +307,9 @@ class TvGuideWindow(ui.BaseWindow):
                 log.warn('onFocus: ' + str(te))
             else:
                 raise
-
+ 
     def renderProgramInfo(self, program):
+        self.program = program
         if program:
             log.debug('Show info for ' + safe_str(program.title()))
             self.setWindowProperty('title', program.fullTitle())
@@ -315,20 +319,12 @@ class TvGuideWindow(ui.BaseWindow):
             self.setWindowProperty('airtime', program.formattedAirTime())
             self.setWindowProperty('duration', program.formattedDuration())
             self.setWindowProperty('originalAirDate', program.formattedOriginalAirDate())
-            
-            season, episode = self.fanArt.getSeasonAndEpisode(program)
-            if not season is None and not episode is None:
-                self.setWindowProperty('seasonAndEpisode', '%sx%s' % (season, episode))
-            else:
-                self.setWindowProperty('seasonAndEpisode', '-')
+
+            self.setWindowProperty('seasonAndEpisode', u'...')
+            self.episodeQueue.put(program) 
                 
             self.setWindowProperty('banner', u'')
-            if self.fanArt.hasBanners(program):
-                bannerPath = self.fanArt.pickBanner(program)
-                self.setWindowProperty('banner', [u'',bannerPath][bannerPath is not None])
-            else:
-                log.debug('Added to bannerqueue: %s' % safe_str(program.title()))
-                self.bannerQueue.put(program)
+            self.bannerQueue.put(program)
         else:
             self.setWindowProperty('title', u'')
             self.setWindowProperty('category', u'')
@@ -341,14 +337,28 @@ class TvGuideWindow(ui.BaseWindow):
             self.setWindowProperty('seasonAndEpisode', u'')
 
     @run_async
-    def workerBee(self):
+    def bannerThread(self):
         while not self.closed and not xbmc.abortRequested:
             try:
                 if not self.bannerQueue.empty():
                     log.debug('Banner queue size: %d' % self.bannerQueue.qsize())
                 program = self.bannerQueue.get(block=True, timeout=1)
                 bannerPath = self.fanArt.pickBanner(program)
-                log.debug('workerBee resolved %s to %s' % (safe_str(program.title()), bannerPath))
+                self.setWindowProperty('banner', [u'',bannerPath][bannerPath is not None])
+                #log.debug('workerBee resolved %s to %s' % (safe_str(program.title()), bannerPath))
+            except Queue.Empty:
+                pass
+
+    @run_async
+    def episodeThread(self):
+        while not self.closed and not xbmc.abortRequested:
+            try:
+                if not self.episodeQueue.empty():
+                    log.debug('Episode queue size: %d' % self.episodeQueue.qsize())
+                program = self.episodeQueue.get(block=True, timeout=1)
+                season, episode = self.fanArt.getSeasonAndEpisode(program)
+                if program == self.program:
+                    self.setWindowProperty('seasonAndEpisode', [u'-', u'%sx%s' % (season, episode)][bool(season) and bool(episode)])
             except Queue.Empty:
                 pass
 
