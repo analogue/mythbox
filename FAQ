@@ -10,39 +10,33 @@ Q5. How do I specify more than one recording directory in the settings?
 Q6. Where can I discuss MythBox online with other MythBox users?
 Q7. Commercial skipping doesn't seem to be accurate when 'Enable Streaming'
     is selected.  
-Q8. TODO: Placeholder
+Q8. Are there advantages to streaming vs remotely mounted storage groups?
 Q9. Where is the source code?
 Q10. When are you going to add feature <insert your feature here> to MythBox?
 Q11. What sort of MythTV setup do you use with MythBox?
 Q12. When I play a recorded program, I get nothing but a green screen.
 Q13. How do I fix a 'MySQL connection error 1043 bad handshake' error? 
 Q14. How do I fix a 'Connect to MySQL failed: Found EOF after Auth' error?
-Q15. What is the difference between XBMC's built-in myth:// protocol support and MythBox? 
-Q16. What is the plan to support the new Confluence skin released with XBMC 9.11?
+Q15. How do I run the unit tests in MythBox's debug shell?
 
 -------------------------------------------------------------------------
 Q1. What should I do if I run into problems or something doesn't work?
 
-A1. Please file a defect if the issue has not already been identified @
+A1. File a defect if the issue has not already been identified @
     http://code.google.com/p/mythbox/issues/list
 
     Creating a new defect:
     
-    1. Grab the MythBox log file:
-       - Linux  : ~/mythbox.log
-       - Mac    : ~/Library/Logs/mythbox.log
-       - Windows: Log file broken at the moment.
-       - Vista  : Log file broken at the moment.
-  
-    2. Grab the XBMC log file:
+    1. Grab the XBMC log file:
        - Linux  : ~/.xbmc/temp/xbmc.log
        - Mac    : ~/Library/logs/xbmc.log 
        - Windows: C:\Documents and Settings\[user]\Application Data\XBMC\xbmc.log
        - Vista  : C:\Users\[user]\AppData\Roaming\XBMC\xbmc.log
+       - iPad   : /var/mobile/Library/Preferences/xbmc.log
        
-    3. Take a screenshot in XBMC (PrintScreen key) if possible. 
+    2. Take a screenshot in XBMC (PrintScreen key) if possible. 
    
-    4. Create a defect @ http://code.google.com/p/mythbox/issues/list
+    3. Create a defect @ http://code.google.com/p/mythbox/issues/list
        - attach the log files and/or screenshot
        - enter the list of steps to reproduce the problem
 
@@ -58,6 +52,7 @@ A3. Linux  : ~/.xbmc/userdata/addon_data/script.mythbox/settings.xml
     Mac    : ~/Library/Application Support/UserData/addon_data/script.mythbox/settings.xml
     Windows: C:\Document and Settings\[user]\Application Data\XBMC\UserData\addon_data\script.mythbox\settings.xml
     Vista  : C:\Users\[user]\AppData\Roaming\XBMC\UserData\addon_data\script.mythbox\settings.xml
+    iPad   : /var/mobile/Library/Preferences/XBMC/userdata/addon_data/script.mythbox/settings.xml
 
 -------------------------------------------------------------------------------
 Q4. When is the next release coming out?
@@ -84,19 +79,23 @@ A7. When 'Enable Streaming' is selected, commercials are skipped using XBMC's
     built-in commercial skip support. I've found that there are some cases in
     which this is not entirely accurate. If you deselect 'Enable Streaming', 
     commercials will be skipped using MythBox's implementation which may
-    give you better results.
+    give you better results (you will have to mount your remote storage
+    groups locally).
 
 -------------------------------------------------------------------------------
-Q8. TODO: Placeholder
+Q8. Are there advantages to streaming vs remotely mounted storage groups?
 
-A8. TODO: Placeholder
+A8. Streaming uses XBMC's native implementation of commercial skipping. 
+    Remotely mounted storage groups uses MythBox's internal implemenation of
+    commercial skipping. Your results may vary. Use whichever one works best
+    for you.
 
 -------------------------------------------------------------------------------
 Q9. Where is the source code?  
     
 A9. To checkout the source (assuming you have Git installed): 
   
-    git clone git://github.com/analogue/MythBox.git
+    git clone git://github.com/analogue/mythbox.git
   
     Description of source tree:
     
@@ -109,16 +108,16 @@ A9. To checkout the source (assuming you have Git installed):
                 
     To run unit tests from the MythBox dir:
     
-        $ source bin/setenv; python2.4 resources/test/runtests.py                
+        $ source bin/setenv; python resources/test/runtests.py                
 
 -------------------------------------------------------------------------------    
 Q10. When are you going to add feature <insert your feature here> to MythBox?  
      
 A10. If I find the feature compelling enough, there is reasonable chance that
      it might make its way into the codebase. If you're technically inclined,
-     feel free to submit a patch. High quality patches are always welcome! 
-     Otherwise, create an enhancement request on Google Code's issue tracker
-     so that the feature can be tracked.
+     feel free to submit a patch via GitHub pull request. High quality patches 
+     are always welcome! Otherwise, create an enhancement request on Google 
+     Code's issue tracker so that the feature can be tracked.
 
 -------------------------------------------------------------------------------      
 Q11. What sort of MythTV setup do you use with MythBox? My setup doesn't seem
@@ -127,29 +126,28 @@ Q11. What sort of MythTV setup do you use with MythBox? My setup doesn't seem
      It is quite possible that you may be having problems getting MythBox to work
      if your setup is significantly different from mine.
 
-     FrontEnd + Slave Backend (Zotac HD-U11 - Atom 1.8Ghz - NVidia ION2 - 2GB)
-        Ubuntu 10.10 Maverick (32bit)
-        Hauppauge HD-PVR (capturing @ 1280x720x60fps) 
-        DirecTV HD receiver
-        Gigabit Ethernet
-        Recording dirs mounted via NFS
+     FrontEnd (Zotac HD-U11 - Atom 1.8Ghz - NVidia ION2 - 2GB)
+        Ubuntu 11.04 Natty (32bit)
+        XBMC 11.0 + VDPAU playback
         50" Plasma (1920x1080)
+        Realtek Gigabit Ethernet
+        Storage groups mounted via NFS
         HP MCE Remote
-        XBMC 10.10 + VDPAU playback
      
-     Master Backend (Athlon 4800+)
-        MythTV 0.23.1
-        Ubuntu Lucid (32bit)
-        SiliconDust HDHomeRun - 2xATSC  (OTA Chicago)
+     Master Backend (Athlon 4800+ / 6GB RAM)
+        Ubuntu 11.04 Natty (32bit)
+        MythTV 0.24.1
+        Silicon Dust HD HomeRunPrime Cablecard Tuner
         Intel Gigabit Ethernet
-        Recording dirs mounted via NFS
+        2 x 2TB HDs
         2 comm flagging slots
              
-     FrontEnd (Mac Book)
-        Mac OS X Snow Leopard
+     FrontEnd (Mac Book Pro)
+        Mac OS X Lion
+        XBMC 11.0
+        1680x1050
         Wireless 802.11n
-        Recording dirs mounted via NFS
-        XBMC 10.10
+        Streaming Enabled 
 
 ---------------------------------------------------------------------------------
 Q12. When I play a recorded program, I get nothing but a green screen.
@@ -174,34 +172,8 @@ Q14. How do I fix a 'Connect to MySQL failed: Found EOF after Auth' error?
      1. Edit /etc/mysql/my.cnf and change old_passwords=1 to old_passwords=0
      2. Reset the password for the MythTV database (see Q13) and restart MythBox
 
----------------------------------------------------------------------------------     
-Q15. What is the difference between XBMC's myth:// protocol support and MythBox?     
-     
-     Feature                  MythBox        XBMC + myth://
-     ==========================================================
-     Commercial skipping      Yes            Yes
-     Watch Live TV            Yes            Yes
-     Schedule Recordings      Yes            No 
-     Upcoming Recordings      Yes            No
-     Enhanced Program Guide   Yes            No 
-     Fan art for TV Programs  Yes            No
-     Fan art for Movies       Yes            Yes
-     Library Mode             No             Yes
-     Tuners/Jobs/Load stats   Yes            No
-     Detailed Recording Info  Yes            No
-     Support for Confluence   No (help!)     Yes
-     Network streaming        Yes            Yes
-
----------------------------------------------------------------------------------     
-Q16. What is the plan to support the new Confluence skin released in XBMC 9.11?
-     
-     While I've been able to cobble together the current look & feel of the
-     MythBox user interface based on the PM3.HD skin, I am by no means aesthetically 
-     gifted. If you've got the skills or think you're up to it, please get in touch 
-     and lets get you commit access.
- 
 ---------------------------------------------------------------------------------
-Q17. How do I run the unit tests in MythBox's debug shell?
+Q15. How do I run the unit tests in MythBox's debug shell?
 
      1. You have to be running MythBox directly as a clone of the hg repo, not as 
         an installed addon:
