@@ -5,14 +5,14 @@
 find . -name "*.pyc" -o -name "*.pyo" -o -name "mythbox.log" | xargs rm -fv
 
 export rev=$1
-export fname=script.mythbox.1.0.$rev-debug.zip
+export fname=script.mythbox.1.1.$rev-debug.zip
 echo Packaging $fname
 
 rm -rf target/script.mythbox
 mkdir -p target/script.mythbox
 cp -r * target/script.mythbox/  2>/dev/null
 cd target
-sed -i "s/version_tag/1\.0\.${rev}/g" script.mythbox/addon.xml
+sed -i "s/version_tag/1\.1\.${rev}/g" script.mythbox/addon.xml
  
 zip --quiet \
     --recurse-paths \
