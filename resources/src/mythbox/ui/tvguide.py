@@ -343,9 +343,14 @@ class TvGuideWindow(ui.BaseWindow):
                 if not self.bannerQueue.empty():
                     log.debug('Banner queue size: %d' % self.bannerQueue.qsize())
                 program = self.bannerQueue.get(block=True, timeout=1)
-                bannerPath = self.fanArt.pickBanner(program)
-                if program == self.program:
-                    self.setWindowProperty('banner', [u'',bannerPath][bannerPath is not None])
+                
+                try:
+                    bannerPath = self.fanArt.pickBanner(program)
+                    if program == self.program:
+                        self.setWindowProperty('banner', [u'',bannerPath][bannerPath is not None])
+                except:
+                    # don't let failures affect queue processing
+                    log.exception('bannerThread')
             except Queue.Empty:
                 pass
 
@@ -356,9 +361,13 @@ class TvGuideWindow(ui.BaseWindow):
                 if not self.episodeQueue.empty():
                     log.debug('Episode queue size: %d' % self.episodeQueue.qsize())
                 program = self.episodeQueue.get(block=True, timeout=1)
-                season, episode = self.fanArt.getSeasonAndEpisode(program)
-                if program == self.program:
-                    self.setWindowProperty('seasonAndEpisode', [u'-', u'%sx%s' % (season, episode)][bool(season) and bool(episode)])
+                try:
+                    season, episode = self.fanArt.getSeasonAndEpisode(program)
+                    if program == self.program:
+                        self.setWindowProperty('seasonAndEpisode', [u'-', u'%sx%s' % (season, episode)][bool(season) and bool(episode)])
+                except:
+                    # don't let failures affect queue processing
+                    log.exeception('episodeThread')
             except Queue.Empty:
                 pass
 
