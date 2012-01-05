@@ -367,7 +367,7 @@ class TvGuideWindow(ui.BaseWindow):
                         self.setWindowProperty('seasonAndEpisode', [u'-', u'%sx%s' % (season, episode)][bool(season) and bool(episode)])
                 except:
                     # don't let failures affect queue processing
-                    log.exeception('episodeThread')
+                    log.exception('episodeThread')
             except Queue.Empty:
                 pass
 
