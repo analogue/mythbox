@@ -1,9 +1,0 @@
-
-syntax: regexp
-^ondemandconfig\.ini$
-.*\.pyc$
-.*\.pyo$
-^mythbox\.log$
-^mythbox_report\.html$
-^target$
-.*tar\.gz$
