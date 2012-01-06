@@ -132,6 +132,7 @@ class TvGuideWindow(ui.BaseWindow):
         self.program = None         # currently focused
         self.bannerQueue = Queue.LifoQueue()
         self.episodeQueue = Queue.LifoQueue()
+        self.episodeCache = {}
         self.bus.register(self)
         
 
@@ -307,6 +308,15 @@ class TvGuideWindow(ui.BaseWindow):
                 log.warn('onFocus: ' + str(te))
             else:
                 raise
+
+    def renderEpisode(self, program):
+        cached = self.episodeCache.get(program, None)
+        if cached is None:
+            self.setWindowProperty('seasonAndEpisode', u'...')
+            self.episodeQueue.put(program)
+        else:
+            season, episode = cached
+            self.setWindowProperty('seasonAndEpisode', [u'-', u'%sx%s' % (season, episode)][bool(season) and bool(episode)])
  
     def renderProgramInfo(self, program):
         self.program = program
@@ -320,8 +330,7 @@ class TvGuideWindow(ui.BaseWindow):
             self.setWindowProperty('duration', program.formattedDuration())
             self.setWindowProperty('originalAirDate', program.formattedOriginalAirDate())
 
-            self.setWindowProperty('seasonAndEpisode', u'...')
-            self.episodeQueue.put(program) 
+            self.renderEpisode(program)
                 
             self.setWindowProperty('banner', u'')
             self.bannerQueue.put(program)
@@ -363,8 +372,9 @@ class TvGuideWindow(ui.BaseWindow):
                 program = self.episodeQueue.get(block=True, timeout=1)
                 try:
                     season, episode = self.fanArt.getSeasonAndEpisode(program)
+                    self.episodeCache[program] = (season, episode)
                     if program == self.program:
-                        self.setWindowProperty('seasonAndEpisode', [u'-', u'%sx%s' % (season, episode)][bool(season) and bool(episode)])
+                        self.renderEpisode(program)
                 except:
                     # don't let failures affect queue processing
                     log.exception('episodeThread')
