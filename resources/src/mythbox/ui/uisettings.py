@@ -299,7 +299,7 @@ class SettingsWindow(BaseWindow):
         self.setWindowProperty('AboutText', about)
         self.setWindowProperty('OpensourceText', opensource)
         self.setWindowProperty('ReadmeText', '%s\n%s' % (
-            open(os.path.join(self.platform.getScriptDir(), 'README'), 'r').read(),
+            open(os.path.join(self.platform.getScriptDir(), 'README.md'), 'r').read(),
             open(os.path.join(self.platform.getScriptDir(), 'FAQ'), 'r').read()))
 
     @window_busy
