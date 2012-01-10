@@ -161,7 +161,7 @@ class TvGuideWindow(ui.BaseWindow):
     @timed
     @inject_db
     @inject_conn
-    def loadGuide(self):
+    def loadGuide(self, skipChannels=False):
         """
         Method to load and display the tv guide information.  If this is
         the first time being called, it initializes the tv guide
@@ -213,7 +213,7 @@ class TvGuideWindow(ui.BaseWindow):
             self.setTime(datetime.now() - timedelta(minutes=30))
             self.initialized = True
 
-        self._render()
+        self._render(skipChannels)
 
         if not self.prevButtonInfo:
             # set focus to the first control on the screen
@@ -275,14 +275,14 @@ class TvGuideWindow(ui.BaseWindow):
     def scrollRightPage(self, focusTopLeft=True):
         log.debug('scrollRightPage')
         self.setTime(self.startTime + timedelta(hours=self.hoursPerPage))
-        self.loadGuide()
+        self.loadGuide(skipChannels=True)
         if focusTopLeft:
             self.setFocus(self.gridCells[0].control)
     
     def scrollLeftPage(self, focusTopLeft=True):
         log.debug('scrollLeftPage')
         self.setTime(self.startTime - timedelta(hours=self.hoursPerPage))
-        self.loadGuide()
+        self.loadGuide(skipChannels=True)
         if focusTopLeft:
             self.setFocus(self.gridCells[0].control)
     
@@ -749,12 +749,13 @@ class TvGuideWindow(ui.BaseWindow):
         log.debug("left count   = %d" % len(self.leftCtls))
         log.debug("right count  = %d" % len(self.rightCtls))
 
-    def _render(self):
+    def _render(self, skipChannels=False):
         """
         Method to draw all the dynamic controls that represent the program
         guide information.
         """
-        self.renderChannels()
+        if not skipChannels:
+            self.renderChannels()
         self.renderHeader()
         self._renderPrograms()
         self._doNavigation()
