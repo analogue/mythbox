@@ -101,20 +101,25 @@ def inject_conn(func, *args, **kwargs):
 
 
     def discard():
+        ilog.error('discard called')
         # discard only once
         if not threadlocals[tlsKey].discarded:
             # discard connections that have timed out since we no longer know if they are usable/functional
             ilog.error('\n\n\t\tSocket timed out. Discarding conn on thread %s\n\n' % tlsKey)
-            connPool.discard(threadlocals[tlsKey].conn)
+            try:
+                connPool.discard(threadlocals[tlsKey].conn)
+            except Exception, e: 
+                log.warn('While discarding: %s', str(e))
             threadlocals[tlsKey].conn = None
             threadlocals[tlsKey].discarded = True
+            del threadlocals[tlsKey]
         else:
-            ilog.debug('Conn %s already discarded. Skipping..' % tlsKey)
+            ilog.error('Conn %s already discarded. Skipping..' % tlsKey)
 
     
     def tryAgain():
         log.debug('-- TRY AGAIN BEGIN --')
-        ta_result = inject_conn(*args, **kwargs)
+        ta_result = inject_conn(func)
         log.debug('-- TRY AGAIN END --')
         return ta_result
 
@@ -128,7 +133,9 @@ def inject_conn(func, *args, **kwargs):
     def shouldReconnect(error):
         # 104 - Connection reset by peer  
         # 32  - Broken pipe
-        return error.errno in (104, 32,) 
+        # [Errno 54] Connection reset by peer
+        # 9, 'Bad file descriptor'
+        return error.errno in (104, 32, 54, 9) 
 
         
     def checkin():
@@ -158,6 +165,9 @@ def inject_conn(func, *args, **kwargs):
     
     try:        
         result = func(*args, **kwargs)
+    except socket.timeout, te:
+        discard()
+        raise
     except socket.error, se:
         if shouldReconnect(se):
             discard()
@@ -167,10 +177,8 @@ def inject_conn(func, *args, **kwargs):
             raise
         else:
             raise
-    except socket.timeout, te:
-        discard()
-        raise
     except:
+        log.exception('conn catchall')
         checkin()
         raise
     else:
@@ -1167,18 +1175,19 @@ class Connection(object):
         b = ''
         while len(b) < bytes:
             left = bytes - len(b)
-            try:
-                new = socket.recv(left)
-            except Exception, e:
-                if str(e) == "(9, 'Bad file descriptor')" or str(e) == "(10054, 'Connection reset by peer')":
-                    log.warn('Lost connection resetting')
-                    try:
-                        self.close()
-                    except Exception, e:
-                        log.exception('noclose')
-                    self.db_init()
-                    return b
-                raise e
+            new = socket.recv(left)
+#            try:
+#                new = socket.recv(left)
+#            except Exception, e:
+#                if str(e) == "(9, 'Bad file descriptor')" or str(e) == "(10054, 'Connection reset by peer')":
+#                    log.warn('Lost connection resetting')
+#                    try:
+#                        self.close()
+#                    except Exception, e:
+#                        log.exception('noclose')
+#                    self.db_init()
+#                    return b
+#                raise
             if new == '':
                 break # eof
             b += new
