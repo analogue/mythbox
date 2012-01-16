@@ -4,7 +4,7 @@ MythBox for XBMC
 About
 -----
 MythBox is a MythTV frontend for XBMC. Developed as an XBMC addon, MythBox aims to make 
-watching TV a simple (wife tested!) an enjoyable experience using only your remote control.
+watching TV a simple (wife tested!) and enjoyable experience using only your remote control.
 
 Features
 ------
