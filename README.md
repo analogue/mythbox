@@ -78,9 +78,9 @@ Keybindings/Remote Control
                     i              Info           Show program info                               
                     o              Guide          Show audio/video/fps stats
                     z              OK             Toggle zoom modes
-                    Tab            N/A            Toggle fullscreen/embedded player mode
+                    Tab            Enter          Toggle fullscreen/embedded player mode
     
-    Home Window     Context Menu   TV Guide Btn   Activate popup menu to delete
+    Home Window     Down           Down           Activate popup menu to delete
     Coverflow                                     or re-record the selected
                                                   recording
     
