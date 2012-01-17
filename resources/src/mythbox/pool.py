@@ -78,6 +78,16 @@ class Pool(object):
             self.factory.destroy(resource)
         except:
             log.exception('while discarding')
+
+    @sync_instance
+    def discard_all(self, resource):
+        """Discard the passed in resource and all other checked in resources
+        
+        If the passed in resource is stale, chances are the rest of the 
+        resources that are checked in are also stale.
+        """
+        self.discard(resource)
+        self.shrink()
             
     @sync_instance
     def shutdown(self):

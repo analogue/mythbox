@@ -89,7 +89,7 @@ def inject_conn(func, *args, **kwargs):
     def checkout():
         '''Only acquire resource once per thread'''
         threadlocals[tlsKey].level += 1
-        if threadlocals[tlsKey].level == 1:
+        if threadlocals[tlsKey].level == 1 or threadlocals[tlsKey].discarded:
             # not acquired - store conn in thread local storage
             threadlocals[tlsKey].conn = connPool.checkout()
             threadlocals[tlsKey].discarded = False
@@ -107,11 +107,9 @@ def inject_conn(func, *args, **kwargs):
             # discard connections that have timed out since we no longer know if they are usable/functional
             ilog.error('\n\n\t\tSocket timed out. Discarding conn on thread %s\n\n' % tlsKey)
             try:
-                connPool.discard(threadlocals[tlsKey].conn)
+                connPool.discard_all(threadlocals[tlsKey].conn)
             except Exception, e: 
                 log.warn('While discarding: %s', str(e))
-            threadlocals[tlsKey].conn = None
-            threadlocals[tlsKey].discarded = True
             del threadlocals[tlsKey]
         else:
             ilog.error('Conn %s already discarded. Skipping..' % tlsKey)
@@ -119,8 +117,14 @@ def inject_conn(func, *args, **kwargs):
     
     def tryAgain():
         log.debug('-- TRY AGAIN BEGIN --')
-        ta_result = inject_conn(func)
-        log.debug('-- TRY AGAIN END --')
+
+        try:
+            allocate_threadlocal()
+            checkout()
+            ta_result = func(*args, **kwargs)
+        finally:
+            checkin()    
+            log.debug('-- TRY AGAIN END --')
         return ta_result
 
 
@@ -133,15 +137,15 @@ def inject_conn(func, *args, **kwargs):
     def shouldReconnect(error):
         # 104 - Connection reset by peer  
         # 32  - Broken pipe
-        # [Errno 54] Connection reset by peer
-        # 9, 'Bad file descriptor'
+        # 54  - Connection reset by peer
+        # 9   - Bad file descriptor
         return error.errno in (104, 32, 54, 9) 
 
         
     def checkin():
         if threadlocals[tlsKey].level == 1:
             if not threadlocals[tlsKey].discarded:
-                ilog.debug('--> removed conn %s from %s at level %d' % (threadlocals[tlsKey].conn, threadlocals[tlsKey], threadlocals[tlsKey].level))
+                ilog.debug('<-- removed conn %s from %s at level %d' % (threadlocals[tlsKey].conn, threadlocals[tlsKey], threadlocals[tlsKey].level))
                 connPool.checkin(threadlocals[tlsKey].conn)
                 threadlocals[tlsKey].conn = None
                 threadlocals[tlsKey].discarded = None
