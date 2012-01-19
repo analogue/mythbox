@@ -408,12 +408,14 @@ class RecordingsWindow(BaseWindow):
                 # deleted last recording -- nothing to show
                 self.setFocus(self.getControl(ID_REFRESH_BUTTON))
             elif self.lastSelectedGroup in self.groupsByTitle:
-                log.debug("LSG %s not empty..selecting index %d" % (safe_str(self.lastSelectedGroup), savedLastSelectedGroupIndex))
-                self.selectListItemAtIndex(self.groupsListbox, savedLastSelectedGroupIndex)
-                self.selectListItemAtIndex(self.programsListbox, max(0, selectionIndex-1))
+                gi = savedLastSelectedGroupIndex
+                pi = min(selectionIndex, len(self.activeGroup.listItems)-1)
+                log.debug("LSG %s not empty..selecting group %d program %d", safe_str(self.lastSelectedGroup), gi, pi)
+                self.selectListItemAtIndex(self.groupsListbox, gi)
+                self.selectListItemAtIndex(self.programsListbox, pi)
             else:
                 log.debug("LSG %s is now empty..selected next best thing.." % self.lastSelectedGroup)
-                newGroupIndex = savedLastSelectedGroupIndex - 1
+                newGroupIndex = savedLastSelectedGroupIndex
                 self.selectListItemAtIndex(self.groupsListbox, newGroupIndex)
                 try:
                     newGroupTitle = [group.title for group in self.groupsByTitle.values() if group.index == newGroupIndex][0]

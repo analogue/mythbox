@@ -261,7 +261,7 @@ class WindowMixin(object):
         cnt = 0
         while listbox.getSelectedPosition() != index and cnt < maxtries:
             cnt += 1
-            log.debug("waiting for item select to happen...%d" % cnt)
+            log.debug("waiting for item %d select to happen on %s...%d", index, str(listbox), cnt)
             time.sleep(0.1)
         if cnt == maxtries:
             log.warn("timeout waiting for item select to happen")
