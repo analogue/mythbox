@@ -408,8 +408,8 @@
                           <description>Delete</description>
                           <width>150</width>
                           <label>Delete</label>
-                          <texturenofocus>button2-nofocus.png</texturenofocus>
-                          <texturefocus border="5">button-focus2.png</texturefocus>
+                          <texturenofocus>mb-button2-nofocus.png</texturenofocus>
+                          <texturefocus border="5">mb-button2-focus.png</texturefocus>
                           <align>center</align>
                           <pulseonselect>true</pulseonselect>
                           <onclick>SetFocus(500)</onclick>
@@ -420,8 +420,8 @@
                       <control type="button" id="302">
                           <description>Re-Record</description>
                           <width>150</width>
-                          <texturenofocus>button2-nofocus.png</texturenofocus>
-                          <texturefocus border="5">button-focus2.png</texturefocus>
+                          <texturenofocus>mb-button2-nofocus.png</texturenofocus>
+                          <texturefocus border="5">mb-button2-focus.png</texturefocus>
                           <align>center</align>
                           <pulseonselect>true</pulseonselect>
                           <label>Re-Record</label>

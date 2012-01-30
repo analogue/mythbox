@@ -412,8 +412,8 @@
                 <width>120</width>
                 <height>35</height>
                 <align>center</align>
-                <texturenofocus>button2-nofocus.png</texturenofocus>
-                <texturefocus border="5">button-focus2.png</texturefocus>
+                <texturenofocus>mb-button2-nofocus.png</texturenofocus>
+                <texturefocus border="5">mb-button2-focus.png</texturefocus>
             </control>
 
             <control type="button" id="251">
@@ -422,8 +422,8 @@
                 <width>120</width>
                 <height>35</height>
                 <align>center</align>
-                <texturenofocus>button2-nofocus.png</texturenofocus>
-                <texturefocus border="5">button-focus2.png</texturefocus>
+                <texturenofocus>mb-button2-nofocus.png</texturenofocus>
+                <texturefocus border="5">mb-button2-focus.png</texturefocus>
             </control>
             
             <control type="button" id="252">
@@ -432,8 +432,8 @@
                 <width>120</width>
                 <height>35</height>
                 <align>center</align>
-                <texturenofocus>button2-nofocus.png</texturenofocus>
-                <texturefocus border="5">button-focus2.png</texturefocus>
+                <texturenofocus>mb-button2-nofocus.png</texturenofocus>
+                <texturefocus border="5">mb-button2-focus.png</texturefocus>
             </control>
             
             <control type="image">

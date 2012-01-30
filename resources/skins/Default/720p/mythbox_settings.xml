@@ -439,7 +439,7 @@
                 <height>40</height>
                 <align>left</align>
                 <font>font12</font>
-                <texturefocus border="7">button-focus2.png</texturefocus>
+                <texturefocus border="7">mb-button2-focus.png</texturefocus>
                 <texturenofocus>-</texturenofocus>
                 <textcolor>88FFFFFF</textcolor>
                 <focusedcolor>ffffffff</focusedcolor>
