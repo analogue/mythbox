@@ -33,6 +33,7 @@ import tvrage.api
 import urllib2
 import urllib
 import Queue
+import zlib
 
 from hashlib import md5
 from decorator import decorator
@@ -136,7 +137,7 @@ class PersistentFanartProvider(BaseFanartProvider):
         try:
             if os.path.exists(self.pfilename):
                 with open(self.pfilename, 'rb') as f:
-                    cache = pickle.load(f)
+                    cache = pickle.loads(zlib.decompress(f.read()))
         except EOFError:
             log.error('EOF error loading persistent cache from %s. Starting fresh' % self.pfilename)
         except:
@@ -146,7 +147,7 @@ class PersistentFanartProvider(BaseFanartProvider):
     def saveCache(self):
         try:
             with open(self.pfilename, 'wb') as f:
-                pickle.dump(self.pcache, f)
+                f.write(zlib.compress(pickle.dumps(self.pcache)))
         except:
             log.exception('Error saving persistent cache to %s' % self.pfilename)
 
