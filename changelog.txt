@@ -1,6 +1,9 @@
 x/x/2011 - MythBox 1.1.1
 -----------------------------
 
+  New
+    - Protocol 71 support (Sebastian Astie)
+    
   Fixed
     - Don't redraw the channel column when scrolling left or right in 
       the TV Guide

@@ -429,6 +429,16 @@ class Protocol70(Protocol69):
     def protocolToken(self):
         return "53153836"
 
+
+class Protocol71(Protocol70):
+
+    def version(self):
+        return 71
+
+    def protocolToken(self):
+        return "05e82186"
+
+
 # Current rev in mythversion.h
 protocols = {
     40: Protocol40(), # 0.21
@@ -457,5 +467,6 @@ protocols = {
     67: Protocol67(),  # 0.25
     68: Protocol68(),  # 0.25 - VIDEO_LIST_UPDATE
     69: Protocol69(),  # 0.25 - QUERY_FILE_HASH 
-    70: Protocol70()   # 0.25 - REOPEN
+    70: Protocol70(),  # 0.25 - REOPEN
+    71: Protocol71()   # 0.25 - ASK_RECORDING GET_FREE_INPUTS
 }    
