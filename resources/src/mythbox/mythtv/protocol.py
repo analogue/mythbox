@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2011 analogue@yahoo.com
+#  Copyright (C) 2012 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -439,6 +439,15 @@ class Protocol71(Protocol70):
         return "05e82186"
 
 
+class Protocol72(Protocol71):
+
+    def version(self):
+        return 72
+
+    def protocolToken(self):
+        return "D78EFD6F"
+
+
 # Current rev in mythversion.h
 protocols = {
     40: Protocol40(), # 0.21
@@ -468,5 +477,6 @@ protocols = {
     68: Protocol68(),  # 0.25 - VIDEO_LIST_UPDATE
     69: Protocol69(),  # 0.25 - QUERY_FILE_HASH 
     70: Protocol70(),  # 0.25 - REOPEN
-    71: Protocol71()   # 0.25 - ASK_RECORDING GET_FREE_INPUTS
+    71: Protocol71(),  # 0.25 - ASK_RECORDING GET_FREE_INPUTS
+    72: Protocol72()   # 0.25 - QUERY_ACTIVE_BACKENDS
 }    
