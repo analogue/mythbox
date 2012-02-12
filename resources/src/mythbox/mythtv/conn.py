@@ -781,7 +781,7 @@ class Connection(object):
                 [self, None][self._db is None],
                 [self._db, None][self._db is None])) 
             offset += recordSize
-        programs = filter(lambda p: p.getRecordingGroup() != 'LiveTV', programs)
+        programs = filter(lambda p: p.getRecordingGroup() not in [ 'LiveTV', 'Deleted' ], programs)
         programs.sort(key=RecordedProgram.starttimeAsTime, reverse=True)
         return programs
     

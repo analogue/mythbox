@@ -87,8 +87,7 @@ class Protocol40(BaseProtocol):
         return MythLiveTvBrain(settings, translator)
 
     def getFileSize(self, program):
-        from mythbox.mythtv.conn import decodeLongLong
-        return decodeLongLong(int(program.getField('fs_low')), int(program.getField('fs_high'))) / 1024.0
+        return self.decodeLongLong(int(program.getField('fs_low')), int(program.getField('fs_high'))) / 1024.0
 
     def genPixMapCommand(self):
         return ['QUERY_GENPIXMAP']        
