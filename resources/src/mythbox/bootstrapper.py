@@ -72,15 +72,6 @@ class BootStrapper(object):
         
         import xbmcaddon
         scriptDir = xbmcaddon.Addon('script.mythbox').getAddonInfo('path')
-        
-#        if 'win32' in sys.platform:
-#            loggerIniFile = os.path.join(scriptDir, 'mythbox_win32_log.ini')
-#        elif 'darwin' in sys.platform:
-#            import StringIO, re
-#            loggerIniFile = os.path.join(scriptDir, 'mythbox_log.ini')
-#            logconfig = open(loggerIniFile, 'r').read()
-#            loggerIniFile = StringIO.StringIO(re.sub('mythbox\.log', os.path.expanduser(os.path.join('~', 'Library', 'Logs', 'mythbox.log')) , logconfig, 1))
-#        else:
         loggerIniFile = os.path.join(scriptDir, 'mythbox_log.ini')
 
         # needs to be in local scope for fileConfig to find it

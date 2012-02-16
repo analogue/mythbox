@@ -105,13 +105,19 @@ def inject_conn(func, *args, **kwargs):
         # discard only once
         if not threadlocals[tlsKey].discarded:
             # discard connections that have timed out since we no longer know if they are usable/functional
-            ilog.error('\n\n\t\tSocket timed out. Discarding conn on thread %s\n\n' % tlsKey)
+            ilog.error('Discarding conn on thread %s\n\n' % tlsKey)
+            
+            # discard current conn and all remaining in pool by shrinking (since they're probably all hosed too) 
             try:
                 connPool.discard(threadlocals[tlsKey].conn)
             except Exception, e: 
                 log.warn('While discarding: %s', str(e))
-            threadlocals[tlsKey].conn = None
-            threadlocals[tlsKey].discarded = True
+
+            try:
+                connPool.shrink()
+            except Exception, e:
+                log.warn('While shrinking after discard: %s', str(e))
+            
             del threadlocals[tlsKey]
         else:
             ilog.error('Conn %s already discarded. Skipping..' % tlsKey)
@@ -119,7 +125,12 @@ def inject_conn(func, *args, **kwargs):
     
     def tryAgain():
         log.debug('-- TRY AGAIN BEGIN --')
-        ta_result = inject_conn(func)
+        
+        @inject_conn
+        def blah(*args, **kwargs):
+            return func(*args, **kwargs)
+        
+        ta_result = blah(*args, **kwargs)
         log.debug('-- TRY AGAIN END --')
         return ta_result
 
@@ -171,7 +182,7 @@ def inject_conn(func, *args, **kwargs):
     except socket.error, se:
         if shouldReconnect(se):
             discard()
-            tryAgain()
+            return tryAgain()
         elif shouldGiveUp(se):
             discard()
             raise
