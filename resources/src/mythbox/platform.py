@@ -118,9 +118,6 @@ class Platform(object):
     def getName(self):
         return "N/A"
     
-    def getDebugLog(self):
-        raise Exception('Abstract method')
-    
     def getXbmcLog(self):
         raise Exception('abstract method')
     
@@ -206,9 +203,6 @@ class UnixPlatform(Platform):
     def getXbmcLog(self):    
         return os.path.join(xbmc.translatePath('special://temp'), 'xbmc.log')
     
-    def getDebugLog(self):
-        return os.path.join(os.getenv('HOME'), 'mythbox.log')
-
 
 class WindowsPlatform(Platform):
 
@@ -224,10 +218,6 @@ class WindowsPlatform(Platform):
     def getXbmcLog(self):    
         return os.path.join(xbmc.translatePath('special://home'), 'xbmc.log')
     
-    def getDebugLog(self):
-        # TODO: mythbox.log not working on windows
-        return self.getXbmcLog() 
-
         
 class MacPlatform(Platform):
 
@@ -243,9 +233,6 @@ class MacPlatform(Platform):
     def getXbmcLog(self):
         # TODO: verify    
         return os.path.expanduser(os.path.join('~', 'Library', 'Logs', 'xbmc.log'))
-
-    def getDebugLog(self):
-        return os.path.expanduser(os.path.join('~', 'Library', 'Logs', 'mythbox.log'))
 
     
 class IOSPlatform(Platform):
@@ -270,5 +257,3 @@ class IOSPlatform(Platform):
         #19:30:47 T:165597184 M: 72990720  NOTICE: Log File is located: /var/mobile/Library/Preferences/xbmc.log        
         return os.path.expanduser(os.path.join('~', 'Library', 'Preferences', 'xbmc.log'))
 
-    def getDebugLog(self):
-        return os.path.expanduser(os.path.join('~', 'Library', 'Logs', 'mythbox.log'))
