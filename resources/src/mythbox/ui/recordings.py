@@ -21,6 +21,7 @@ import datetime
 import logging
 import odict
 import os
+import Queue
 import time
 import xbmc
 import xbmcgui
@@ -97,6 +98,10 @@ class RecordingsWindow(BaseWindow):
             ('Title', {'translation_id': m.TITLE, 'reverse': False, 'sorter' : lambda g: [g.title, u'0000'][g.title == self.allGroupTitle]}),
             ('Date',  {'translation_id': m.DATE,  'reverse': True,  'sorter' : lambda g: [g.programs[0].starttimeAsTime(), datetime.datetime(datetime.MAXYEAR, 12, 31, 23, 59, 59, 999999, tzinfo=None)][g.title == self.allGroupTitle]})])
         self.dirty = False
+
+        self.episodeQueue = Queue.LifoQueue()        # recordings that need an episode lookup
+        self.backgroundQueue = Queue.LifoQueue()
+        self.posterQueue = Queue.LifoQueue()
         
     @catchall_ui
     def onInit(self):
@@ -105,6 +110,9 @@ class RecordingsWindow(BaseWindow):
             self.groupsListbox = self.getControl(ID_GROUPS_LISTBOX)
             self.programsListbox = self.getControl(ID_PROGRAMS_LISTBOX)
             self.readSettings()
+            self.episodeThread()
+            self.workerThread(self.backgroundQueue, 'background', self.lookupBackground)
+            self.workerThread(self.posterQueue, 'poster', self.lookupPoster)
             self.refresh()
         elif self.dirty:
             self.refresh()
@@ -428,35 +436,15 @@ class RecordingsWindow(BaseWindow):
         except Exception, e:
             log.warn(safe_str(e))
         
-    @run_async
     @catchall
     def renderPosters(self, myRenderToken, myGroup):
-        log.debug('renderPosters -- BEGIN --')
         for (listItem, program) in myGroup.programsByListItem.items()[:]:
-            if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken: 
-                return
-            try:
-                self.lookupPoster(listItem, program)
-            except:
-                log.exception('Program = %s' % safe_str(program.fullTitle()))
-        myGroup.postersDone = True
-        log.debug('renderPosters -- END --')
+            self.posterQueue.put((program, myRenderToken, listItem))
 
-    @run_async
     @catchall
     def renderBackgrounds(self, myRenderToken, myGroup):
-        try:
-            log.debug('renderBackgrounds -- BEGIN --')
-            for (listItem, program) in myGroup.programsByListItem.items()[:]:
-                if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken: 
-                    return
-                try:
-                    self.lookupBackground(listItem, program)
-                except:
-                    log.exception('renderBackground for Program = %s' % safe_str(program.fullTitle()))
-            myGroup.backgroundsDone = True
-        finally:
-            log.debug('renderBackgrounds -- END --')
+        for (listItem, program) in myGroup.programsByListItem.items()[:]:
+            self.backgroundQueue.put((program, myRenderToken, listItem))
 
     def sameBackground(self, program):
         t = program.title()
@@ -476,20 +464,48 @@ class RecordingsWindow(BaseWindow):
 
     @run_async
     @catchall
-    def renderEpisodeColumn(self, myRenderToken, myGroup):
-        results = odict.odict()
-        for (listItem, program) in myGroup.programsByListItem.items()[:]:
-            if self.closed or xbmc.abortRequested or myRenderToken != self.activeRenderToken:
-                return
+    def workerThread(self, workQueue, name, func):
+        while not self.closed and not xbmc.abortRequested:
             try:
-                season, episode = self.fanArt.getSeasonAndEpisode(program)
-                if season and episode:
-                    results[listItem] = '%sx%s' % (season, episode)
-                    self.updateListItemProperty(listItem, 'episode', results[listItem])
-            except:
-                log.exception('Rendering season and episode for program %s' % safe_str(program.fullTitle()))
-        myGroup.episodesDone = True
-        
+                if not workQueue.empty():
+                    log.debug('%s queue size: %d' % (name, workQueue.qsize()))
+                
+                program, renderToken, listItem = workQueue.get(block=True, timeout=1)
+
+                try:
+                    if renderToken == self.activeRenderToken:
+                        func(listItem, program)
+                except:
+                    log.exception('%s thread' % name)
+            except Queue.Empty:
+                pass
+    
+    @run_async
+    def episodeThread(self):
+        while not self.closed and not xbmc.abortRequested:
+            try:
+                if not self.episodeQueue.empty():
+                    log.debug('Episode queue size: %d' % self.episodeQueue.qsize())
+                
+                program, renderToken, listItem = self.episodeQueue.get(block=True, timeout=1)
+                
+                try:
+                    if renderToken == self.activeRenderToken:
+                        season, episode = self.fanArt.getSeasonAndEpisode(program)
+                        if season and episode and renderToken == self.activeRenderToken:
+                            self.updateListItemProperty(listItem, 'episode', '%sx%s' % (season, episode))
+                except:
+                    log.exception('episodeThread')
+            except Queue.Empty:
+                pass
+
+
+    @catchall
+    def renderEpisodeColumn(self, myRenderToken, myGroup):
+        for (listItem, program) in myGroup.programsByListItem.items()[:]:
+            self.episodeQueue.put((program, myRenderToken, listItem))
+
+            
     def goRecordingDetails(self):
         self.lastSelected = self.programsListbox.getSelectedPosition()
         selectedItem = self.programsListbox.getSelectedItem()

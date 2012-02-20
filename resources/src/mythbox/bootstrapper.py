@@ -280,7 +280,7 @@ class BootStrapper(object):
             else: 
                 level = logging.WARN
                 
-            loggerNames = 'unittest mysql core method skin ui perf fanart settings cache event inject'.split() # wire inject'.split()
+            loggerNames = 'unittest mysql core method skin ui perf fanart settings cache event'.split() # wire inject'.split()
                 
             for name in loggerNames:
                 logger = logging.getLogger('mythbox.%s' %  name)
