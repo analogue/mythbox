@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2011 analogue@yahoo.com
+#  Copyright (C) 2012 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -110,9 +110,9 @@ class RecordingsWindow(BaseWindow):
             self.groupsListbox = self.getControl(ID_GROUPS_LISTBOX)
             self.programsListbox = self.getControl(ID_PROGRAMS_LISTBOX)
             self.readSettings()
-            self.episodeThread()
-            self.workerThread(self.backgroundQueue, 'background', self.lookupBackground)
-            self.workerThread(self.posterQueue, 'poster', self.lookupPoster)
+            self.workerThread(self.episodeQueue, 'episode', self.cb_renderEpisode)
+            self.workerThread(self.backgroundQueue, 'background', self.cb_renderBackground)
+            self.workerThread(self.posterQueue, 'poster', self.cb_renderPoster)
             self.refresh()
         elif self.dirty:
             self.refresh()
@@ -330,13 +330,7 @@ class RecordingsWindow(BaseWindow):
                     self.setListItemProperty(listItem, 'date', p.formattedAirDate())
                     self.setListItemProperty(listItem, 'time', p.formattedStartTime())
                     self.setListItemProperty(listItem, 'index', str(i+1))
-                    
-                    if self.fanArt.hasPosters(p):
-                        p.needsPoster = False
-                        self.lookupPoster(listItem, p)
-                    else:
-                        p.needsPoster = True
-                        self.setListItemProperty(listItem, 'poster', 'loading.gif')
+                    self.setListItemProperty(listItem, 'poster', 'loading.gif')
                 except:
                     log.exception('Program = %s' % safe_str(p.fullTitle()))
         
@@ -350,21 +344,6 @@ class RecordingsWindow(BaseWindow):
             constructorTime()
             propertyTime()
         othertime()
-
-    def lookupPoster(self, listItem, p):
-        posterPath = self.fanArt.pickPoster(p)
-        if not posterPath:
-            posterPath = self.mythThumbnailCache.get(p)
-            if not posterPath:
-                posterPath = 'mythbox-logo.png'
-        #log.debug('lookupPoster setting %s tto %s' % (safe_str(p.title()), posterPath))
-        self.updateListItemProperty(listItem, 'poster', posterPath)
-
-        if log.isEnabledFor(logging.DEBUG):
-            try:
-                self.setListItemProperty(listItem, 'posterSize', formatSize(os.path.getsize(posterPath)/1000))
-            except:
-                pass
 
     @timed
     def renderProgramDeleted2(self, deletedProgram, selectionIndex):
@@ -439,28 +418,83 @@ class RecordingsWindow(BaseWindow):
     @catchall
     def renderPosters(self, myRenderToken, myGroup):
         for (listItem, program) in myGroup.programsByListItem.items()[:]:
-            self.posterQueue.put((program, myRenderToken, listItem))
+            if hasattr(program, 'poster'):
+                self.updateListItemProperty(listItem, 'poster', program.poster)
+            else:
+                self.posterQueue.put((program, myRenderToken, listItem))
 
     @catchall
     def renderBackgrounds(self, myRenderToken, myGroup):
         for (listItem, program) in myGroup.programsByListItem.items()[:]:
-            self.backgroundQueue.put((program, myRenderToken, listItem))
+            if hasattr(program, 'background'):
+                self.updateListItemProperty(listItem, 'background', program.background)
+            else:
+                self.backgroundQueue.put((program, myRenderToken, listItem))
 
+    @catchall
+    def renderEpisodeColumn(self, myRenderToken, myGroup):
+        for (listItem, program) in myGroup.programsByListItem.items()[:]:
+            if hasattr(program, 'seasonEpisode'):
+                self.updateListItemProperty(listItem, 'episode', program.seasonEpisode)
+            else:
+                self.episodeQueue.put((program, myRenderToken, listItem))
+                
     def sameBackground(self, program):
         t = program.title()
         if not t in self.sameBackgroundCache:
             self.sameBackgroundCache[t] = self.fanArt.pickBackground(program)
         return self.sameBackgroundCache[t]
 
-    def lookupBackground(self, listItem, p):
-        path = self.sameBackground(p)
-        if path is not None:
-            self.updateListItemProperty(listItem, 'background', path)
+    def cb_renderBackground(self, workTuple):
+        program, renderToken, listItem = workTuple
+        
+        if renderToken != self.activeRenderToken:
+            return
+        
+        # may not return immediately, so check token again below
+        program.background = self.sameBackground(program)
+        
+        if program.background is not None and renderToken == self.activeRenderToken:
+            self.updateListItemProperty(listItem, 'background', program.background)
             if log.isEnabledFor(logging.DEBUG):
                 try:
-                    self.setListItemProperty(listItem, 'wallpaperSize', formatSize(os.path.getsize(path)/1000))
+                    self.setListItemProperty(listItem, 'wallpaperSize', formatSize(os.path.getsize(program.background)/1000))
                 except:
                     pass
+
+    def cb_renderPoster(self, workTuple):
+        program, renderToken, listItem = workTuple
+
+        if renderToken != self.activeRenderToken:
+            return
+        
+        program.poster = self.fanArt.pickPoster(program)
+        if program.poster is None:
+            program.poster = self.mythThumbnailCache.get(program)
+        if program.poster is None:
+            program.poster = 'mythbox-logo.png'
+        self.updateListItemProperty(listItem, 'poster', program.poster)
+    
+        if log.isEnabledFor(logging.DEBUG):
+            try:
+                self.setListItemProperty(listItem, 'posterSize', formatSize(os.path.getsize(program.poster)/1000))
+            except:
+                pass
+
+    def cb_renderEpisode(self, workTuple):
+        program, renderToken, listItem = workTuple
+        
+        if renderToken != self.activeRenderToken:
+            return
+
+        season, episode = self.fanArt.getSeasonAndEpisode(program)
+        if season and episode:
+            program.seasonEpisode = u'%sx%s' % (season, episode)
+        else:
+            program.seasonEpisode = u''
+        
+        if renderToken == self.activeRenderToken:    
+            self.updateListItemProperty(listItem, 'episode', program.seasonEpisode)
 
     @run_async
     @catchall
@@ -469,43 +503,12 @@ class RecordingsWindow(BaseWindow):
             try:
                 if not workQueue.empty():
                     log.debug('%s queue size: %d' % (name, workQueue.qsize()))
-                
-                program, renderToken, listItem = workQueue.get(block=True, timeout=1)
-
-                try:
-                    if renderToken == self.activeRenderToken:
-                        func(listItem, program)
-                except:
-                    log.exception('%s thread' % name)
+                func(workQueue.get(block=True, timeout=1))
             except Queue.Empty:
                 pass
+            except:
+                log.exception('%s thread' % name)
     
-    @run_async
-    def episodeThread(self):
-        while not self.closed and not xbmc.abortRequested:
-            try:
-                if not self.episodeQueue.empty():
-                    log.debug('Episode queue size: %d' % self.episodeQueue.qsize())
-                
-                program, renderToken, listItem = self.episodeQueue.get(block=True, timeout=1)
-                
-                try:
-                    if renderToken == self.activeRenderToken:
-                        season, episode = self.fanArt.getSeasonAndEpisode(program)
-                        if season and episode and renderToken == self.activeRenderToken:
-                            self.updateListItemProperty(listItem, 'episode', '%sx%s' % (season, episode))
-                except:
-                    log.exception('episodeThread')
-            except Queue.Empty:
-                pass
-
-
-    @catchall
-    def renderEpisodeColumn(self, myRenderToken, myGroup):
-        for (listItem, program) in myGroup.programsByListItem.items()[:]:
-            self.episodeQueue.put((program, myRenderToken, listItem))
-
-            
     def goRecordingDetails(self):
         self.lastSelected = self.programsListbox.getSelectedPosition()
         selectedItem = self.programsListbox.getSelectedItem()
