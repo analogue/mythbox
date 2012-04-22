@@ -1052,7 +1052,7 @@ class Connection(object):
             scheduleId = schedule.getScheduleId()
             if scheduleId is None:
                 scheduleId = -1
-        reply = self._sendRequest(self.cmdSock, ['RESCHEDULE_RECORDINGS %s' % scheduleId])
+        reply = self._sendRequest(self.cmdSock, self.protocol.buildRescheduleRequest(scheduleId))
         if int(reply[0]) < 0:
             raise ServerException, 'Reschedule notify failed: %s' % reply
 

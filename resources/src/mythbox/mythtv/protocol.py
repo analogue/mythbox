@@ -82,6 +82,9 @@ class Protocol40(BaseProtocol):
     def buildAnnounceFileTransferCommand(self, hostname, filePath):
         return ["ANN FileTransfer %s" % hostname, filePath]        
 
+    def buildRescheduleRequest(self, scheduleId):
+        return ['RESCHEDULE_RECORDINGS %s' % scheduleId]
+
     def getLiveTvBrain(self, settings, translator):
         from mythbox.ui.livetv import MythLiveTvBrain
         return MythLiveTvBrain(settings, translator)
@@ -447,6 +450,22 @@ class Protocol72(Protocol71):
         return "D78EFD6F"
 
 
+class Protocol73(Protocol72):
+
+    def version(self):
+        return 73
+
+    def protocolToken(self):
+        return "D7FE8D6F"
+
+    def buildRescheduleRequest(self, scheduleId):
+        if scheduleId == 0:
+            return ['RESCHEDULE_RECORDINGS CHECK 0 0 0 MythBoxFrontend **any**']
+        else:
+            if scheduleId == -1:
+                scheduleId = 0
+            return ['RESCHEDULE_RECORDINGS MATCH %s 0 0 - MythBoxFrontend' % scheduleId]
+
 # Current rev in mythversion.h
 protocols = {
     40: Protocol40(), # 0.21
@@ -477,5 +496,6 @@ protocols = {
     69: Protocol69(),  # 0.25 - QUERY_FILE_HASH 
     70: Protocol70(),  # 0.25 - REOPEN
     71: Protocol71(),  # 0.25 - ASK_RECORDING GET_FREE_INPUTS
-    72: Protocol72()   # 0.25 - QUERY_ACTIVE_BACKENDS
+    72: Protocol72(),  # 0.25 - QUERY_ACTIVE_BACKENDS
+    73: Protocol73()   # 0.26 - RESCHEDULE_RECORDINGS 
 }    
