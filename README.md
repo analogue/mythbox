@@ -16,7 +16,7 @@ Features
 - Fanart downloaded from tvdb, tmdb, imdb, and google image search
 - Season and episode numbers downloaded from tvrage and tvdb
 - View tuner and job queue info
-- Compatible with MythTV 0.24
+- Compatible with MythTV 0.21-0.25+
 - Add your own public Twitter feeds
 - Move comm flagging jobs to the front of the queue
 - Trigger user jobs, comm flagging, or transcoding for a recording
@@ -26,7 +26,7 @@ Prerequisites
   
 - All Platforms
     - XBMC 11.x (Eden)
-    - A working MythTV 0.24 backend
+    - A working MythTV 0.24/0.25 backend
 
 - Linux
     - 32-bit or 64-bit distro (Ubuntu, Debian, Fedora, Gentoo, Arch, OpenSuse, etc) 
