@@ -466,6 +466,15 @@ class Protocol73(Protocol72):
                 scheduleId = 0
             return ['RESCHEDULE_RECORDINGS MATCH %s 0 0 - MythBoxFrontend' % scheduleId]
 
+class Protocol74(Protocol73):
+
+    def version(self):
+        return 74
+
+    def protocolToken(self):
+        return "SingingPotato"
+
+
 # Current rev in mythversion.h
 protocols = {
     40: Protocol40(), # 0.21
@@ -497,5 +506,6 @@ protocols = {
     70: Protocol70(),  # 0.25 - REOPEN
     71: Protocol71(),  # 0.25 - ASK_RECORDING GET_FREE_INPUTS
     72: Protocol72(),  # 0.25 - QUERY_ACTIVE_BACKENDS
-    73: Protocol73()   # 0.26 - RESCHEDULE_RECORDINGS 
+    73: Protocol73(),  # 0.26 - RESCHEDULE_RECORDINGS 
+    74: Protocol74()   # 0.26
 }    
