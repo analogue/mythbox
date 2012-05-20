@@ -346,6 +346,7 @@ class Connection(object):
         self._sendMsg(s, self.protocol.buildAnnounceFileTransferCommand('%s' % self.platform.getHostname(),  filePath))
         reply = self._readMsg(s)
         if not self._isOk(reply):
+            s.close()
             raise ServerException('Backend filetransfer refused: %s' % reply)
         del reply[0]    # remove OK
         return [reply, s]
@@ -1091,8 +1092,12 @@ class Connection(object):
                     log.error('XXX slave %s is not available...trying master' % backend)
                     return self.transferFile(backendPath, destPath, self.db().getMasterBackend().ipAddress, numBytes)
             closeCommandSocket = True 
-         
-        reply,dataSocket = self.annFileTransfer(backend.hostname, backendPath)
+        
+        try: 
+            reply,dataSocket = self.annFileTransfer(backend.hostname, backendPath)
+        except ServerException:
+            return False
+        
         filename = reply.pop(0)
         filesize = self.protocol.readLong(reply, remove=True)
         

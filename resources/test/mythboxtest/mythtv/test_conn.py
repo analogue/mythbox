@@ -343,8 +343,8 @@ class ConnectionTest(unittest.TestCase):
         dest = tempfile.mktemp('bogusfile.mpg')
         backendPath = "myth://" + self.db.getMasterBackend().ipAddress + ":" + str(self.db.getMasterBackend().port) + "/bogusfile.mpg"
         result = self.conn.transferFile(backendPath, dest, self.db.getMasterBackend().ipAddress)
-        self.assertFalse(os.path.exists(dest))
         self.assertFalse(result)
+        self.assertFalse(os.path.exists(dest))
 
     def test_transferFile_When_partial_transfer_requested_Then_only_send_part_of_file(self):
         # Setup
