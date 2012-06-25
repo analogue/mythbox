@@ -4,3 +4,4 @@ mythbox_report.html
 ondemandconfig.ini
 custom.py
 *.pyo
+.idea

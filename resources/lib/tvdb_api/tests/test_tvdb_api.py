@@ -3,22 +3,23 @@
 #author:dbr/Ben
 #project:tvdb_api
 #repository:http://github.com/dbr/tvdb_api
-#license:Creative Commons GNU GPL v2
-# (http://creativecommons.org/licenses/GPL/2.0/)
+#license:unlicense (http://unlicense.org/)
 
 """Unittests for tvdb_api
 """
 
+import os
 import sys
 import datetime
 import unittest
 
-sys.path.append("..")
+# Force parent directory onto path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import tvdb_api
 import tvdb_ui
-from tvdb_exceptions import (tvdb_error, tvdb_userabort, tvdb_shownotfound,
-    tvdb_seasonnotfound, tvdb_episodenotfound, tvdb_attributenotfound)
+from tvdb_exceptions import (tvdb_shownotfound, tvdb_seasonnotfound,
+tvdb_episodenotfound, tvdb_attributenotfound)
 
 class test_tvdb_basic(unittest.TestCase):
     # Used to store the cached instance of Tvdb()
@@ -54,7 +55,7 @@ class test_tvdb_basic(unittest.TestCase):
             len(
                 [season for season in self.t['Life on Mars']]
             ),
-            3
+            2
         )
     
     def test_season_iter(self):
@@ -76,6 +77,27 @@ class test_tvdb_basic(unittest.TestCase):
             True
         )
 
+    def test_get_parent(self):
+        """Check accessing series from episode instance
+        """
+        show = self.t['Battlestar Galactica (2003)']
+        season = show[1]
+        episode = show[1][1]
+
+        self.assertEquals(
+            season.show,
+            show
+        )
+
+        self.assertEquals(
+            episode.season,
+            season
+        )
+
+        self.assertEquals(
+            episode.season.show,
+            show
+        )
 
 
 class test_tvdb_errors(unittest.TestCase):
@@ -149,7 +171,7 @@ class test_tvdb_search(unittest.TestCase):
         """Checks the searching of an entire show"""
         self.assertEquals(
             len(self.t['CNNNN'].search('CNNNN', key='episodename')),
-            2
+            3
         )
 
     def test_aired_on(self):
@@ -187,7 +209,7 @@ class test_tvdb_misc(unittest.TestCase):
         """
         self.assertEquals(
             repr(self.t['CNNNN']),
-            "<Show Chaser Non-Stop News Network (CNNNN) (containing 2 seasons)>"
+            "<Show Chaser Non-Stop News Network (CNNNN) (containing 3 seasons)>"
         )
     def test_repr_season(self):
         """Check repr() of Season
@@ -405,7 +427,83 @@ class test_tvdb_doctest(unittest.TestCase):
         """Check docstring examples works"""
         import doctest
         doctest.testmod(tvdb_api)
-#end test_tvdb
+
+
+class test_tvdb_custom_caching(unittest.TestCase):
+    def test_true_false_string(self):
+        """Tests setting cache to True/False/string
+
+        Basic tests, only checking for errors
+        """
+
+        tvdb_api.Tvdb(cache = True)
+        tvdb_api.Tvdb(cache = False)
+        tvdb_api.Tvdb(cache = "/tmp")
+
+    def test_invalid_cache_option(self):
+        """Tests setting cache to invalid value
+        """
+
+        try:
+            tvdb_api.Tvdb(cache = 2.3)
+        except ValueError:
+            pass
+        else:
+            self.fail("Expected ValueError from setting cache to float")
+
+    def test_custom_urlopener(self):
+        class UsedCustomOpener(Exception):
+            pass
+
+        import urllib2
+        class TestOpener(urllib2.BaseHandler):
+            def default_open(self, request):
+                print request.get_method()
+                raise UsedCustomOpener("Something")
+
+        custom_opener = urllib2.build_opener(TestOpener())
+        t = tvdb_api.Tvdb(cache = custom_opener)
+        try:
+            t['scrubs']
+        except UsedCustomOpener:
+            pass
+        else:
+            self.fail("Did not use custom opener")
+
+class test_tvdb_by_id(unittest.TestCase):
+    t = None
+    def setUp(self):
+        if self.t is None:
+            self.__class__.t = tvdb_api.Tvdb(cache = True, actors = True)
+
+    def test_actors_is_correct_datatype(self):
+        """Check show/_actors key exists and is correct type"""
+        self.assertEquals(
+            self.t[76156]['seriesname'],
+            'Scrubs'
+            )
+
+
+class test_tvdb_zip(unittest.TestCase):
+    # Used to store the cached instance of Tvdb()
+    t = None
+
+    def setUp(self):
+        if self.t is None:
+            self.__class__.t = tvdb_api.Tvdb(cache = True, useZip = True)
+
+    def test_get_series_from_zip(self):
+        """
+        """
+        self.assertEquals(self.t['scrubs'][1][4]['episodename'], 'My Old Lady')
+        self.assertEquals(self.t['sCruBs']['seriesname'], 'Scrubs')
+
+    def test_spaces_from_zip(self):
+        """Checks shownames with spaces
+        """
+        self.assertEquals(self.t['My Name Is Earl']['seriesname'], 'My Name Is Earl')
+        self.assertEquals(self.t['My Name Is Earl'][1][4]['episodename'], 'Faked His Own Death')
+
 
 if __name__ == '__main__':
     runner = unittest.TextTestRunner(verbosity = 2)
