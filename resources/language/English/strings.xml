@@ -204,8 +204,9 @@ To submit translations for your native language
   <string id="256">User Job 2</string>
   <string id="257">User Job 3</string>
   <string id="258">User Job 4</string>
+  <string id="259">Metadata</string>
 
-  <!-- enums.JobStatus -->
+    <!-- enums.JobStatus -->
   <string id="260">Unknown</string>
   <string id="261">Queued</string>
   <string id="262">Pending</string>

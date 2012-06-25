@@ -431,6 +431,7 @@ class JobType:
     SYSTEMJOB    = 0x00ff
     TRANSCODE    = 0x0001
     COMMFLAG     = 0x0002
+    METADATA     = 0x0004 # 0.25
     USERJOB      = 0xff00
 
     USERJOB1     = 0x0100
@@ -447,7 +448,8 @@ class JobType:
         (USERJOB1,  255),
         (USERJOB2,  256),     
         (USERJOB3,  257),       
-        (USERJOB4,  258)])
+        (USERJOB4,  258),
+        (METADATA,  259)])
 
 
 class Upcoming(object):
