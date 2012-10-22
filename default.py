@@ -38,8 +38,9 @@ if __name__ == '__main__':
 
     import xbmcgui
     import xbmc
-    splash = xbmcgui.WindowXML('mythbox_splash.xml', scriptDir)
-    splash.show()
+    splash = None
+    #splash = xbmcgui.WindowXML('mythbox_splash.xml', scriptDir)
+    #splash.show()
     
     from mythbox.bootstrapper import BootStrapper
     BootStrapper(splash).run()

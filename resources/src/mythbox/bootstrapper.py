@@ -52,7 +52,8 @@ class BootStrapper(object):
                 if not self.failSilent:
                     self.handleFailure(ex)
         finally:
-            self.splash.close()
+			if self.splash:
+			    self.splash.close()
             
     def handleFailure(self, cause):
         msg = 'MythBox:%s - Error: %s' % (self.stage, cause)
@@ -261,7 +262,8 @@ class BootStrapper(object):
                 cachesByName=self.cachesByName,
                 bus=self.bus,
                 feedHose=self.feedHose)
-        self.splash.close()
+        if self.splash:
+            self.splash.close()
         #self.bootstrapXbmcShutdownListener()
         self.home.doModal()
 
