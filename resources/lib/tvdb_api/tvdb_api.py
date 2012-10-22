@@ -15,11 +15,13 @@ Example usage:
 u'Cabin Fever'
 """
 __author__ = "dbr/Ben"
-__version__ = "1.7.1"
+__version__ = "1.8.1"
 
-import os, time
+import os
+import time
 import urllib
 import urllib2
+import getpass
 import StringIO
 import tempfile
 import warnings
@@ -494,9 +496,17 @@ class Tvdb:
     #end __init__
 
     def _getTempDir(self):
-        """Returns the [system temp dir]/tvdb_api
+        """Returns the [system temp dir]/tvdb_api-u501 (or
+        tvdb_api-myuser)
         """
-        return os.path.join(tempfile.gettempdir(), "tvdb_api")
+        if hasattr(os, 'getuid'):
+            uid = "u%d" % (os.getuid())
+        else:
+            # For Windows
+            import getpass
+            uid = getpass.getpass()
+
+        return os.path.join(tempfile.gettempdir(), "tvdb_api-%s" % (uid))
 
     def _loadUrl(self, url, recache = False, language=None):
         global lastTimeout
@@ -528,12 +538,17 @@ class Tvdb:
             raise tvdb_error("Received gzip data from thetvdb.com, but could not correctly handle it")
 
         if 'application/zip' in resp.headers.get("Content-Type", ''):
-            # TODO: The zip contains actors.xml and banners.xml, which are currently ignored [GH-20]
-            log().debug("We recived a zip file unpacking now ...")
-            zipdata = StringIO.StringIO()
-            zipdata.write(resp.read())
-            myzipfile = zipfile.ZipFile(zipdata)
-            return myzipfile.read('%s.xml' % language)
+            try:
+                # TODO: The zip contains actors.xml and banners.xml, which are currently ignored [GH-20]
+                log().debug("We recived a zip file unpacking now ...")
+                zipdata = StringIO.StringIO()
+                zipdata.write(resp.read())
+                myzipfile = zipfile.ZipFile(zipdata)
+                return myzipfile.read('%s.xml' % language)
+            except zipfile.BadZipfile:
+                if 'x-local-cache' in resp.headers:
+                    resp.delete_cache()
+                raise tvdb_error("Bad zip file received from thetvdb.com, could not read it")
 
         return resp.read()
 
