@@ -42,12 +42,11 @@ def fetch(show, exact=False, ep=None):
     show_info = {}
     if 'No Show Results Were Found For' in resp:
         raise ShowNotFound(show)
-    else:    
+    else:
         data = resp.replace('<pre>', '').splitlines()
         for line in data:
             k, v = line.split('@')
             # TODO: use datetimeobj for dates
-            show_info[k] = (v.split(' | ') if ' | ' in v else 
-                                (v.split('^') if '^' in v else v)) 
+            show_info[k] = (v.split(' | ') if ' | ' in v else
+                            (v.split('^') if '^' in v else v))
     return show_info
-

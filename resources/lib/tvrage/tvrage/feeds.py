@@ -26,19 +26,20 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from util import _fetch
+from urllib2 import quote
 
 try:
-    from urllib2 import quote
+    import xml.etree.cElementTree as et
 except ImportError:
-    from urllib import quote
+    import xml.etree.ElementTree as et
 
-import elementtree.ElementTree as et
 
 BASE_URL = 'http://www.tvrage.com/feeds/%s.php?%s=%s'
-    
+
+
 def _fetch_xml(url, node=None):
-    """fetches the response of a simple xml-based webservice. If node is omitted 
-    the root of the parsed xml doc is returned as an ElementTree object
+    """fetches the response of a simple xml-based webservice. If node is
+    omitted the root of the parsed xml doc is returned as an ElementTree object
     otherwise the requested node is returned"""
     xmldoc = _fetch(url)
     result = et.parse(xmldoc)
@@ -48,19 +49,23 @@ def _fetch_xml(url, node=None):
     else:
         retval = root.find(node)
     return retval
-    
+
+
 def search(show, node=None):
-    return _fetch_xml(BASE_URL % ('search','show', quote(show)), node)
-    
+    return _fetch_xml(BASE_URL % ('search', 'show', quote(show)), node)
+
+
 def full_search(show, node=None):
-    return _fetch_xml(BASE_URL % ('full_search','show', quote(show)), node)
-    
+    return _fetch_xml(BASE_URL % ('full_search', 'show', quote(show)), node)
+
+
 def showinfo(sid, node=None):
     return _fetch_xml(BASE_URL % ('showinfo', 'sid', sid), node)
-    
+
+
 def episode_list(sid, node=None):
     return _fetch_xml(BASE_URL % ('episode_list', 'sid', sid), node)
-    
+
+
 def full_show_info(sid, node=None):
     return _fetch_xml(BASE_URL % ('full_show_info', 'sid', sid), node)
-    

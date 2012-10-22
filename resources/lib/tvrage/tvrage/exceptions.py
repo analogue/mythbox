@@ -27,13 +27,27 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+
 class BaseError(Exception):
+
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
-        
-class ShowHasEnded(BaseError): pass
-class NoNewEpisodesAnnounced(BaseError): pass
-class FinaleMayNotBeAnnouncedYet(BaseError): pass
-class ShowNotFound(BaseError): pass
+
+
+class ShowHasEnded(BaseError):
+    pass
+
+
+class NoNewEpisodesAnnounced(BaseError):
+    pass
+
+
+class FinaleMayNotBeAnnouncedYet(BaseError):
+    pass
+
+
+class ShowNotFound(BaseError):
+    pass

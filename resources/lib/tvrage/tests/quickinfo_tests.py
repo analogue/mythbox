@@ -1,4 +1,4 @@
-#!#!/opt/local/bin/python
+#!/usr/bin/env python
 
 # Copyright (c) 2009, Christian Kreutzer
 # All rights reserved.
@@ -28,15 +28,15 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import unittest
-import quickinfo
+from tvrage import quickinfo
 
-from exceptions import ShowNotFound
+from tvrage.exceptions import ShowNotFound
+
 
 class QuickInfoTest(unittest.TestCase):
-    
+
     def test_showinfo(self):
         show = quickinfo.fetch('Doctor Who 2005')
-        
         assert show['Show ID'] == '3332'
         assert show['Show Name'] == 'Doctor Who (2005)'
         assert show['Show URL'] == 'http://www.tvrage.com/DoctorWho_2005'
@@ -52,17 +52,15 @@ class QuickInfoTest(unittest.TestCase):
         assert show['Classification'] == 'Scripted'
         assert show['Genres'] == ['Action', 'Adventure', 'Sci-Fi']
         assert show['Network'] == 'BBC One (United Kingdom)'
-        assert show['Airtime'] == 'Saturday at 06:00 pm' #this may break
-        assert show['Runtime'] == '50'
-        
+        assert show['Airtime'] == 'Saturday at 07:35 pm'  # this may break
+        assert show['Runtime'] == '60'
+
     def test_epinfo(self):
-        
         show_ep = quickinfo.fetch('Doctor Who 2005', ep='1x01')
-        
         assert show_ep['Episode Info'] == ['01x01', 'Rose', '26/Mar/2005']
         assert show_ep['Episode URL'] == \
             'http://www.tvrage.com/DoctorWho_2005/episodes/52117'
-        
+
     def test_non_existant_show_raises_proper_exception(self):
         try:
             quickinfo.fetch('yaddayadda')
@@ -72,4 +70,3 @@ class QuickInfoTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-        

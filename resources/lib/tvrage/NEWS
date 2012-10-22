@@ -1,0 +1,15 @@
+0.4.1
+=====
+* some fixes for `Episodes.recap`
+* moved tests to separate folder
+* code is now pep8 compliant
+
+
+0.4.0
+=====
+* added the following fields to the `api.Episode` class: `id`, `recap_url` and 
+  `recap`
+* switched from parsing the `Episode.summary` and `Show.summary` with a regexp 
+  to BeautifulSoup which hopefully will be more stable than the regexp approach
+* BeautifulSoup is now an external dependency (see requiremets.txt)
+* added this file
