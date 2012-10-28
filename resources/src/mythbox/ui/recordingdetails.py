@@ -289,7 +289,7 @@ class RecordingDetailsWindow(BaseWindow):
         self.renderThumbnail()
         self.renderUserJobs()
         self.renderCommBreaks()       # async
-        self.renderSeasonAndEpisode(self.program) # async
+        #self.renderSeasonAndEpisode(self.program) # async
     
     def renderDetail(self):
         s = self.program
@@ -299,7 +299,7 @@ class RecordingDetailsWindow(BaseWindow):
         self.setWindowProperty('channel', s.formattedChannel())
         self.setWindowProperty('description', s.formattedDescription())
         self.setWindowProperty('category', s.category())
-        self.setWindowProperty('episode', '...')
+        self.setWindowProperty('episode', s.season() + 'x' + s.episode())
         self.setWindowProperty('fileSize', s.formattedFileSize())
         self.setWindowProperty('autoExpire', (('No', 'Yes')[s.isAutoExpire()]))
         self.setWindowProperty('commBreaks', '...')     
