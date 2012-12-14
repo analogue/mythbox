@@ -1,0 +1,2303 @@
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>MySQL Connector/Python</title><link rel="stylesheet" type="text/css" href="mysql-html.css"><meta name="generator" content="DocBook XSL Stylesheets V1.77.1">
+<script language="javascript" type="text/javascript">
+  function addOnload(theFunc)
+  {
+    var previous = window.onload;
+    if (typeof window.onload != 'function')
+    {
+      window.onload = theFunc;
+    }
+    else
+    {
+      window.onload = function()
+      {
+        previous();
+        theFunc();
+      }
+    }
+  }
+
+  addOnload(function()
+  {
+    var base = new Date(1347581414*1000);
+    var now = new Date();
+    var diff = ((now-base)/1000)/(24*3600);
+
+    if (diff > 90) {
+      var nodes = document.getElementsByClassName('titlepage');
+      nodes[0].innerHTML = '<p style="border: 5px #ff0000 solid; padding: 5px; margin 5px">' +
+        'This copy of the manual is more than 90 days old. We encourage you to download a ' +
+        'new version from <a href="http://dev.mysql.com">dev.mysql.com/doc</a>.</p>' + nodes[0].innerHTML;
+    }
+  });
+</script>
+<noscript></noscript>
+</head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div lang="en" class="book"><div class="titlepage"><div><div><h1 class="title"><a name="connectors"></a>MySQL Connector/Python</h1></div><div><div class="abstract"><p class="title"><b>Abstract</b></p><p>
+        This manual describes how to install, configure, and develop
+        database applications using MySQL Connector/Python, a
+        self-contained Python driver for communicating with MySQL
+        servers.
+      </p><p>
+        Document generated on:
+
+        2012-09-14
+
+
+
+        (revision: 32235)
+      </p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="preface"><a href="#preface">Preface and Legal Notices</a></span></dt><dt><span class="chapter"><a href="#connector-python">1. MySQL Connector/Python</a></span></dt><dt><span class="chapter"><a href="#connector-python-versions">2. Connector/Python Versions</a></span></dt><dt><span class="chapter"><a href="#connector-python-install">3. Connector/Python Installation</a></span></dt><dd><dl><dt><span class="section"><a href="#connector-python-installation-src-unix">3.1. Installing Connector/Python Source Distribution on Linux, UNIX, or OS X</a></span></dt><dt><span class="section"><a href="#connector-python-installation-src-windows">3.2. Installing Connector/Python Source Distribution on Microsoft Windows</a></span></dt><dt><span class="section"><a href="#connector-python-verification">3.3. Verifying Your Connector/Python Installation</a></span></dt></dl></dd><dt><span class="chapter"><a href="#connector-python-examples">4. Connector/Python Coding Examples</a></span></dt><dd><dl><dt><span class="section"><a href="#myconnpy_example_connecting">4.1. Connecting to MySQL Using Connector/Python</a></span></dt><dt><span class="section"><a href="#myconnpy_example_ddl">4.2. Creating Tables Using Connector/Python</a></span></dt><dt><span class="section"><a href="#myconnpy_example_cursor_transaction">4.3. Inserting Data Using Connector/Python</a></span></dt><dt><span class="section"><a href="#myconnpy_example_cursor_select">4.4. Querying Data Using Connector/Python</a></span></dt></dl></dd><dt><span class="chapter"><a href="#connector-python-tutorials">5. Connector/Python Tutorials</a></span></dt><dd><dl><dt><span class="section"><a href="#myconnpy_tutorial_CursorBuffered_GiveRaise">5.1. Tutorial: Raise employee's salary using a buffering cursor</a></span></dt></dl></dd><dt><span class="chapter"><a href="#connector-python-connectargs">6. Connector/Python Connection Arguments</a></span></dt><dt><span class="chapter"><a href="#connector-python-reference">7. Connector/Python API Reference</a></span></dt><dd><dl><dt><span class="section"><a href="#connector-python-apiref-errors">7.1. Errors and Exceptions</a></span></dt><dd><dl><dt><span class="section"><a href="#connector-python-apiref-errorcode">7.1.1. Module <code class="literal">errorcode</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-error">7.1.2. Exception <code class="literal">errors.Error</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-warning">7.1.3. Exception <code class="literal">errors.Warning</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-interfaceerror">7.1.4. Exception <code class="literal">errors.InterfaceError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-databaseerror">7.1.5. Exception <code class="literal">errors.DatabaseError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-internalerror">7.1.6. Exception <code class="literal">errors.InternalError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-operationalerror">7.1.7. Exception <code class="literal">errors.OperationalError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-programmingerror">7.1.8. Exception <code class="literal">errors.ProgrammingError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-integrityerror">7.1.9. Exception <code class="literal">errors.IntegrityError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-dataerror">7.1.10. Exception <code class="literal">errors.DataError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-notsupportederror">7.1.11. Exception <code class="literal">errors.NotSupportedError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-custom-error-exception">7.1.12. Function <code class="literal">errors.custom_error_exception(error=None,
+        exception=None)</code></a></span></dt></dl></dd><dt><span class="section"><a href="#connector-python-apiref-MySQLConnection">7.2. Class <code class="literal">connection.MySQLConnection</code></a></span></dt><dd><dl><dt><span class="section"><a href="#myconnpy_MySQLConnection">7.2.1. Constructor <code class="literal">connection.MySQLConnection(**kwargs)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_close">7.2.2. Method <code class="literal">MySQLConnection.close()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_config">7.2.3. Method <code class="literal">MySQLConnection.config(**kwargs)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_connect">7.2.4. Method <code class="literal">MySQLConnection.connect(**kwargs)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_commit">7.2.5. Method <code class="literal">MySQLConnection.commit()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cursor">7.2.6. Method <code class="literal">MySQLConnection.cursor(buffered=None, raw=None,
+        cursor_class=None)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_change_user">7.2.7. Method <code class="literal">MySQLConnection.cmd_change_user(username='',
+        password='', database='', charset=33)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_debug">7.2.8. Method <code class="literal">MySQLConnection.cmd_debug()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_init_db">7.2.9. Method <code class="literal">MySQLConnection.cmd_init_db(database)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_ping">7.2.10. Method <code class="literal">MySQLConnection.cmd_ping()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_process_info">7.2.11. Method <code class="literal">MySQLConnection.cmd_process_info()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_process_kill">7.2.12. Method <code class="literal">MySQLConnection.cmd_process_kill(mysql_pid)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_quit">7.2.13. Method <code class="literal">MySQLConnection.cmd_quit()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_query">7.2.14. Method <code class="literal">MySQLConnection.cmd_query(statement)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_query_iter">7.2.15. Method <code class="literal">MySQLConnection.cmd_query_iter(statement)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_refresh">7.2.16. Method <code class="literal">MySQLConnection.cmd_refresh(options)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_shutdown">7.2.17. Method <code class="literal">MySQLConnection.cmd_shutdown()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_statistics">7.2.18. Method <code class="literal">MySQLConnection.cmd_statistics()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_disconnect">7.2.19. Method <code class="literal">MySQLConnection.disconnect()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_get_rows">7.2.20. Method <code class="literal">MySQLConnection.get_rows(count=None)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_get_row">7.2.21. Method <code class="literal">MySQLConnection.get_row()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_get_server_info">7.2.22. Method <code class="literal">MySQLConnection.get_server_info()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_get_server_version">7.2.23. Method <code class="literal">MySQLConnection.get_server_version()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_is_connected">7.2.24. Method <code class="literal">MySQLConnection.is_connected()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_isset_client_flag">7.2.25. Method <code class="literal">MySQLConnection.isset_client_flag(flag)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_ping">7.2.26. Method <code class="literal">MySQLConnection.ping(attempts=1, delay=0)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnectoin_reconnect">7.2.27. Method <code class="literal">MySQLConnection.reconnect(attempts=1, delay=0)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_rollback">7.2.28. Method <code class="literal">MySQLConnection.rollback()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_set_charset_collation">7.2.29. Method <code class="literal">MySQLConnection.set_charset_collation(charset=None,
+        collation=None)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_set_client_flags">7.2.30. Method <code class="literal">MySQLConnection.set_client_flags(flags)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_autocommit">7.2.31. Property <code class="literal">MySQLConnection.autocommit</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_charset_name">7.2.32. Property <code class="literal">MySQLConnection.charset_name</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_collation_name">7.2.33. Property <code class="literal">MySQLConnection.collation_name</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_connection_id">7.2.34. Property <code class="literal">MySQLConnection.connection_id</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_database">7.2.35. Property <code class="literal">MySQLConnection.database</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_get_warnings">7.2.36. Property <code class="literal">MySQLConnection.get_warnings</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_raise_on_warnings">7.2.37. Property <code class="literal">MySQLConnection.raise_on_warnings</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_server_host">7.2.38. Property <code class="literal">MySQLConnection.server_host</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_server_port">7.2.39. Property <code class="literal">MySQLConnection.server_port</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_sql_mode">7.2.40. Property <code class="literal">MySQLConnection.sql_mode</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_time_zone">7.2.41. Property <code class="literal">MySQLConnection.time_zone</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_unix_socket">7.2.42. Property <code class="literal">MySQLConnection.unix_socket</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_user">7.2.43. Property <code class="literal">MySQLConnection.user</code></a></span></dt></dl></dd><dt><span class="section"><a href="#connector-python-apiref-MySQLCursor">7.3. Class <code class="literal">cursor.MySQLCursor</code></a></span></dt><dd><dl><dt><span class="section"><a href="#myconnpy_MySQLCursor">7.3.1. Constructor <code class="literal">cursor.MySQLCursor</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_callproc">7.3.2. Method <code class="literal">MySQLCursor.callproc(procname, args=())</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_close">7.3.3. Method <code class="literal">MySQLCursor.close()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_execute">7.3.4. Method <code class="literal">MySQLCursor.execute(operation, params=None,
+        multi=False)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_executemany">7.3.5. Method <code class="literal">MySQLCursor.executemany(operation, seq_params)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_fetchall">7.3.6. Method <code class="literal">MySQLCursor.fetchall()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_fetchmany">7.3.7. Method <code class="literal">MySQLCursor.fetchmany(size=1)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_fetchone">7.3.8. Method <code class="literal">MySQLCursor.fetchone()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_fetchwarnings">7.3.9. Method <code class="literal">MySQLCursor.fetchwarnings()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_stored_results">7.3.10. Method <code class="literal">MySQLCursor.stored_results()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_column_names">7.3.11. Property <code class="literal">MySQLCursor.column_names</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_statement">7.3.12. Property <code class="literal">MySQLCursor.statement</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_with_rows">7.3.13. Property <code class="literal">MySQLCursor.with_rows</code></a></span></dt></dl></dd><dt><span class="section"><a href="#connector-python-apiref-MySQLCursorBuffered">7.4. Class <code class="literal">cursor.MySQLCursorBuffered</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-ClientFlag">7.5. Class <code class="literal">constants.ClientFlag</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-FieldType">7.6. Class <code class="literal">constants.FieldType</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-SQLMode">7.7. Class <code class="literal">constants.SQLMode</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-CharacterSet">7.8. Class <code class="literal">constants.CharacterSet</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-RefreshOption">7.9. Class <code class="literal">constants.RefreshOption</code></a></span></dt></dl></dd><dt><span class="chapter"><a href="#cpython-news">8. MySQL Connector/Python Change History</a></span></dt></dl></div><div class="preface"><div class="titlepage"><div><div><h1 class="title"><a name="preface"></a>Preface and Legal Notices</h1></div></div></div><p>
+      This manual describes how to install, configure, and develop
+      database applications using MySQL Connector/Python, the a
+      self-contained Python driver for communicating with MySQL servers.
+    </p><h2><a name="legalnotice"></a>Legal Notices</h2><p>
+    Copyright © 2012, Oracle and/or its affiliates. All rights
+    reserved.
+  </p><p>
+    This software and related documentation are provided under a license
+    agreement containing restrictions on use and disclosure and are
+    protected by intellectual property laws. Except as expressly
+    permitted in your license agreement or allowed by law, you may not
+    use, copy, reproduce, translate, broadcast, modify, license,
+    transmit, distribute, exhibit, perform, publish, or display any
+    part, in any form, or by any means. Reverse engineering,
+    disassembly, or decompilation of this software, unless required by
+    law for interoperability, is prohibited.
+  </p><p>
+    The information contained herein is subject to change without notice
+    and is not warranted to be error-free. If you find any errors,
+    please report them to us in writing.
+  </p><p>
+    If this software or related documentation is delivered to the U.S.
+    Government or anyone licensing it on behalf of the U.S. Government,
+    the following notice is applicable:
+  </p><p>
+    U.S. GOVERNMENT RIGHTS Programs, software, databases, and related
+    documentation and technical data delivered to U.S. Government
+    customers are "commercial computer software" or "commercial
+    technical data" pursuant to the applicable Federal Acquisition
+    Regulation and agency-specific supplemental regulations. As such,
+    the use, duplication, disclosure, modification, and adaptation shall
+    be subject to the restrictions and license terms set forth in the
+    applicable Government contract, and, to the extent applicable by the
+    terms of the Government contract, the additional rights set forth in
+    FAR 52.227-19, Commercial Computer Software License (December 2007).
+    Oracle USA, Inc., 500 Oracle Parkway, Redwood City, CA 94065.
+  </p><p>
+    This software is developed for general use in a variety of
+    information management applications. It is not developed or intended
+    for use in any inherently dangerous applications, including
+    applications which may create a risk of personal injury. If you use
+    this software in dangerous applications, then you shall be
+    responsible to take all appropriate fail-safe, backup, redundancy,
+    and other measures to ensure the safe use of this software. Oracle
+    Corporation and its affiliates disclaim any liability for any
+    damages caused by use of this software in dangerous applications.
+  </p><p>
+    Oracle is a registered trademark of Oracle Corporation and/or its
+    affiliates. MySQL is a trademark of Oracle Corporation and/or its
+    affiliates, and shall not be used without Oracle's express written
+    authorization. Other names may be trademarks of their respective
+    owners.
+  </p><p>
+    This software and documentation may provide access to or information
+    on content, products, and services from third parties. Oracle
+    Corporation and its affiliates are not responsible for and expressly
+    disclaim all warranties of any kind with respect to third-party
+    content, products, and services. Oracle Corporation and its
+    affiliates will not be responsible for any loss, costs, or damages
+    incurred due to your access to or use of third-party content,
+    products, or services.
+  </p><p>
+    This documentation is in prerelease status and is intended for
+    demonstration and preliminary use only. It may not be specific to
+    the hardware on which you are using the software. Oracle Corporation
+    and its affiliates are not responsible for and expressly disclaim
+    all warranties of any kind with respect to this documentation and
+    will not be responsible for any loss, costs, or damages incurred due
+    to the use of this documentation.
+  </p><p>
+    The information contained in this document is for informational
+    sharing purposes only and should be considered in your capacity as a
+    customer advisory board member or pursuant to your beta trial
+    agreement only. It is not a commitment to deliver any material,
+    code, or functionality, and should not be relied upon in making
+    purchasing decisions. The development, release, and timing of any
+    features or functionality described in this document remains at the
+    sole discretion of Oracle.
+  </p><p>
+    This document in any form, software or printed matter, contains
+    proprietary information that is the exclusive property of Oracle.
+    Your access to and use of this material is subject to the terms and
+    conditions of your Oracle Software License and Service Agreement,
+    which has been executed and with which you agree to comply. This
+    document and information contained herein may not be disclosed,
+    copied, reproduced, or distributed to anyone outside Oracle without
+    prior written consent of Oracle or as specifically provided below.
+    This document is not part of your license agreement nor can it be
+    incorporated into any contractual agreement with Oracle or its
+    subsidiaries or affiliates.
+  </p><p>
+    This documentation is NOT distributed under a GPL license. Use of
+    this documentation is subject to the following terms:
+  </p><p>
+    You may create a printed copy of this documentation solely for your
+    own personal use. Conversion to other formats is allowed as long as
+    the actual content is not altered or edited in any way. You shall
+    not publish or distribute this documentation in any form or on any
+    media, except if you distribute the documentation in a manner
+    similar to how Oracle disseminates it (that is, electronically for
+    download on a Web site with the software) or on a CD-ROM or similar
+    medium, provided however that the documentation is disseminated
+    together with the software on the same medium. Any other use, such
+    as any dissemination of printed copies or use of this documentation,
+    in whole or in part, in another publication, requires the prior
+    written consent from an authorized representative of Oracle. Oracle
+    and/or its affiliates reserve any and all rights to this
+    documentation not expressly granted above.
+  </p><p>
+    For more information on the terms of this license, or for details on
+    how the MySQL documentation is built and produced, please visit
+    <a class="ulink" href="http://dev.mysql.com/contact/" target="_top">MySQL Contact &amp;
+    Questions</a>.
+  </p><p>
+    For additional licensing information, including licenses for
+    third-party libraries used by MySQL products, see
+    <a class="xref" href="#preface" title="Preface and Legal Notices">Preface and Legal Notices</a>.
+  </p><p>
+    For help with using MySQL, please visit either the
+    <a class="ulink" href="http://forums.mysql.com" target="_top">MySQL Forums</a> or
+    <a class="ulink" href="http://lists.mysql.com" target="_top">MySQL Mailing Lists</a>
+    where you can discuss your issues with other MySQL users.
+  </p><p>
+    For additional documentation on MySQL products, including
+    translations of the documentation into other languages, and
+    downloadable versions in variety of formats, including HTML and PDF
+    formats, see the <a class="ulink" href="http://dev.mysql.com/doc" target="_top">MySQL
+    Documentation Library</a>.
+  </p></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="connector-python"></a>Chapter 1. MySQL Connector/Python</h1></div></div></div><p>
+    MySQL Connector/Python allows Python programs to access MySQL
+    databases, using an API that is compliant with the
+    <a class="ulink" href="http://www.python.org/dev/peps/pep-0249/" target="_top">Python DB API
+    version 2.0</a>. It is written in pure Python and does not have
+    any dependencies except for the
+    <a class="ulink" href="http://docs.python.org/library/" target="_top">Python Standard
+    Library</a>.
+  </p><p>
+    MySQL Connector/Python includes support for:
+  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+        Almost all features provided by MySQL Server up to and including
+        MySQL Server version 5.5.
+      </p></li><li class="listitem"><p>
+        Converting parameter values back and forth between Python and
+        MySQL data types, for example Python <code class="literal">datetime</code>
+        and MySQL <code class="literal">DATETIME</code>. You can turn automatic
+        conversion on for convenience, or off for optimal performance.
+      </p></li><li class="listitem"><p>
+        All MySQL extensions to standard SQL syntax.
+      </p></li><li class="listitem"><p>
+        Protocol compression, which enables compressing the data stream
+        between the client and server.
+      </p></li><li class="listitem"><p>
+        Connections using TCP/IP sockets and on Unix using Unix sockets.
+      </p></li><li class="listitem"><p>
+        Secure TCP/IP connections using SSL.
+      </p></li><li class="listitem"><p>
+        Self-contained driver. Connector/Python does not require the
+        MySQL client library or any Python modules outside the standard
+        library.
+      </p></li></ul></div><p>
+    MySQL Connector/Python supports from Python version 2.4 through 2.7,
+    and Python 3.1 and later. Note that Connector/Python does not
+    support the old MySQL Server authentication methods, which means
+    that MySQL versions prior to 4.1 will not work.
+  </p></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="connector-python-versions"></a>Chapter 2. Connector/Python Versions</h1></div></div></div><p>
+    MySQL Connector/Python v1.0.x series is going through a series of
+    beta releases, leading to the first generally available (GA) version
+    (not released yet). Any development releases prior to general
+    availability will not be supported once the GA version is released.
+  </p><p>
+    The following table summarizes the available Connector/Python
+    versions:
+  </p><p>
+    </p><div class="informaltable"><table border="1"><colgroup><col><col><col><col></colgroup><thead><tr><th scope="col">Connector/Python version</th><th scope="col">MySQL Server version</th><th scope="col">Python version</th><th scope="col">Status</th></tr></thead><tbody><tr><td scope="row">1.0</td><td>5.6, 5.5 (5.1, 5.0, 4.1)</td><td>2.7, 2.6 (2.5, 2.4); 3.1 and later</td><td>Recommended version</td></tr></tbody></table></div><p>
+    </p><div xmlns="http://www.w3.org/1999/xhtml" class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><div class="admon-title">Note</div><p xmlns="">
+        MySQL server and Python versions within brackets are known to
+        work with Connector/Python, but are not officially supported.
+        Bugs might not get fixed for those versions.
+      </p></div><p>
+  </p></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="connector-python-install"></a>Chapter 3. Connector/Python Installation</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#connector-python-installation-src-unix">3.1. Installing Connector/Python Source Distribution on Linux, UNIX, or OS X</a></span></dt><dt><span class="section"><a href="#connector-python-installation-src-windows">3.2. Installing Connector/Python Source Distribution on Microsoft Windows</a></span></dt><dt><span class="section"><a href="#connector-python-verification">3.3. Verifying Your Connector/Python Installation</a></span></dt></dl></div><p>
+    Connector/Python runs on any platform where Python is installed.
+    Python comes pre-installed on almost any Linux distribution or
+    UNIX-like system such as Apple Mac OS X and FreeBSD. On Microsoft
+    Windows systems, you can install Python using the installer found on
+    the <a class="ulink" href="http://python.org/download/" target="_top">Python Download
+    website</a>.
+  </p><p>
+    Connector/Python is a pure Python implementation of the MySQL
+    Client/Server protocol, meaning it does not require any other MySQL
+    client libraries or other components. It also has no third-party
+    dependencies. If you need SSL support, verify that your Python
+    installation has been compiled using the
+    <a class="ulink" href="http://www.openssl.org/" target="_top">OpenSSL</a> libraries.
+  </p><p>
+    The installation of Connector/Python is similar on every platform
+    and follows the standard
+    <a class="ulink" href="http://docs.python.org/install/index.html#install-index" target="_top">Python
+    Distribution Utilities</a> or
+    <a class="ulink" href="http://docs.python.org/distutils/" target="_top">Distutils</a>.
+    Some platforms have specific packaging, for example RPM, and, when
+    made available, the installation of these will be covered in this
+    manual.
+  </p><p>
+    Python terminology regarding distributions:
+  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+        <span class="bold"><strong>Source Distribution</strong></span> is a
+        distribution that contains only source files and is generally
+        platform independent.
+      </p></li><li class="listitem"><p>
+        <span class="bold"><strong>Built Distribution</strong></span> can be
+        regarded as a binary package. It contains both sources and
+        platform-independent bytecode.
+      </p></li></ul></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connector-python-installation-src-unix"></a>3.1. Installing Connector/Python Source Distribution on Linux, UNIX, or OS X</h2></div></div></div><p>
+      On UNIX-like systems such as Linux distributions, Solaris, Apple
+      Mac OS X, and FreeBSD, you can download Connector/Python as a
+      <code class="literal">tar</code> archive from
+      <a class="ulink" href="http://dev.mysql.com/downloads/connector/python/" target="_top">http://dev.mysql.com/downloads/connector/python/</a>.
+    </p><p>
+      To install Connector/Python from the <code class="literal">.tar.gz</code>
+      file, download the latest version and follow these steps:
+    </p><pre class="programlisting">shell&gt; <strong class="userinput"><code>gunzip mysql-connector-python-1.0.6b1.tar.gz</code></strong>
+shell&gt; <strong class="userinput"><code>tar xf mysql-connector-python-1.0.6b1.tar</code></strong>
+shell&gt; <strong class="userinput"><code>cd mysql-connector-python-1.0.6b1</code></strong>
+shell&gt; <strong class="userinput"><code>sudo python setup.py install</code></strong>
+</pre><p>
+      On UNIX-like systems, Connector/Python gets installed in the
+      default location
+      <code class="filename">/<em class="replaceable"><code>prefix</code></em>/lib/python<em class="replaceable"><code>X.Y</code></em>/site-packages/</code>,
+      where <em class="replaceable"><code>prefix</code></em> is the location where
+      Python was installed and <em class="replaceable"><code>X.Y</code></em> is the
+      version of Python. See
+      <a class="ulink" href="http://docs.python.org/install/index.html#how-installation-works" target="_top">How
+      installation works</a> in the Python manual.
+    </p><p>
+      If you are not sure where Connector/Python was installed, do the
+      following to retrieve the location:
+    </p><pre class="programlisting">shell&gt; python
+&gt;&gt;&gt; from distutils.sysconfig import get_python_lib
+&gt;&gt;&gt; print get_python_lib()            # Python v2.x
+/Library/Python/2.7/site-packages
+&gt;&gt;&gt; print(get_python_lib())           # Python v3.x
+/Library/Frameworks/Python.framework/Versions/3.1/lib/python3.1/site-packages</pre><div xmlns="http://www.w3.org/1999/xhtml" class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><div class="admon-title">Note</div><p xmlns="">
+        The above example shows the default installation location on Mac
+        OS X 10.7.
+      </p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connector-python-installation-src-windows"></a>3.2. Installing Connector/Python Source Distribution on Microsoft Windows</h2></div></div></div><p>
+      On Microsoft Windows systems, you can download Connector/Python as
+      a <code class="literal">zip</code> archive from
+      <a class="ulink" href="http://dev.mysql.com/downloads/connector/python/" target="_top">http://dev.mysql.com/downloads/connector/python/</a>.
+    </p><p>
+      Make sure that the Python executable is available in the Windows
+      <code class="literal">%PATH%</code> setting. For more information about
+      installation and configuration of Python on Windows, see the
+      section
+      <a class="ulink" href="http://docs.python.org/using/windows.html" target="_top">Using
+      Python on Windows</a> in the Python documentation.
+    </p><p>
+      To install Connector/Python from the <code class="literal">.zip</code> file,
+      download the latest version and follow these steps:
+    </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>
+          Unpack the downloaded <code class="literal">zip</code> archive into a
+          directory of your choice. For example, into the folder
+          <code class="filename">C:\mysql-connector\</code>. Use the appropriate
+          unzip command for your system, for example,
+          <code class="literal">unzip</code>, <code class="literal">pkunzip</code>, and so
+          on.
+        </p></li><li class="listitem"><p>
+          Start a console window (or a DOS window) and change to the
+          folder where you unpacked the Connector/Python
+          <code class="literal">zip</code> archive.
+        </p><pre class="programlisting">shell&gt; <strong class="userinput"><code>cd C:\mysql-connector\</code></strong>
+</pre></li><li class="listitem"><p>
+          Once inside the Connector/Python folder, do the following:
+        </p><pre class="programlisting">shell&gt; <strong class="userinput"><code>python setup.py install</code></strong>
+</pre></li></ol></div><p>
+      On Windows, Connector/Python gets installed in the default
+      location
+      <code class="filename">C:\Python<em class="replaceable"><code>X.Y</code></em>\Lib\site-packages\</code>
+      where <em class="replaceable"><code>X.Y</code></em> is the Python version you
+      used to install the connector.
+    </p><p>
+      If you are not sure where Connector/Python ended up, do the
+      following to retrieve the location where packages get installed:
+    </p><pre class="programlisting">shell&gt; python
+&gt;&gt;&gt; from distutils.sysconfig import get_python_lib
+&gt;&gt;&gt; print get_python_lib()            # Python v2.x
+&gt;&gt;&gt; print(get_python_lib())           # Python v3.x</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connector-python-verification"></a>3.3. Verifying Your Connector/Python Installation</h2></div></div></div><p>
+      To test that your Connector/Python installation is working and is
+      able to connect to a MySQL database server, you can run a very
+      simple program where you substitute the login credentials and host
+      information of the MySQL server. See
+      <a class="xref" href="#myconnpy_example_connecting" title="4.1. Connecting to MySQL Using Connector/Python">Section 4.1, “Connecting to MySQL Using Connector/Python”</a> for an example.
+    </p></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="connector-python-examples"></a>Chapter 4. Connector/Python Coding Examples</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#myconnpy_example_connecting">4.1. Connecting to MySQL Using Connector/Python</a></span></dt><dt><span class="section"><a href="#myconnpy_example_ddl">4.2. Creating Tables Using Connector/Python</a></span></dt><dt><span class="section"><a href="#myconnpy_example_cursor_transaction">4.3. Inserting Data Using Connector/Python</a></span></dt><dt><span class="section"><a href="#myconnpy_example_cursor_select">4.4. Querying Data Using Connector/Python</a></span></dt></dl></div><p>
+    These coding examples illustrate how to develop Python applications
+    and scripts which connect to a MySQL Server using MySQL
+    Connector/Python.
+  </p><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="myconnpy_example_connecting"></a>4.1. Connecting to MySQL Using Connector/Python</h2></div></div></div><p>
+      The <code class="literal">connect()</code> constructor is used for creating
+      a connection to the MySQL server and returns a
+      <code class="literal">MySQLConnection</code> object.
+    </p><p>
+      The following example shows how to connect to the MySQL server:
+    </p><pre class="programlisting">import mysql.connector
+cnx = mysql.connector.connect(user='scott', password='tiger',
+                              host='127.0.0.1',
+                              database='employees')
+cnx.close()</pre><p>
+      See <a class="xref" href="#connector-python-connectargs" title="Chapter 6. Connector/Python Connection Arguments">Chapter 6, <i>Connector/Python Connection Arguments</i></a> for all
+      possible connection arguments.
+    </p><p>
+      It is also possible to create connection objects using the
+      <a class="link" href="#connector-python-apiref-MySQLConnection" title="7.2. Class connection.MySQLConnection">connection.MySQLConnection()</a>
+      class. Both methods, using the <code class="literal">connect()</code>
+      constructor, or the class directly, are valid and functionally
+      equal, but using <code class="literal">connector()</code> is preferred and
+      will be used in most examples in this manual.
+    </p><p>
+      To handle connection errors, use the <code class="literal">try</code>
+      statement and catch all errors using the
+      <a class="link" href="#connector-python-apiref-errors-error" title="7.1.2. Exception errors.Error">errors.Error</a>
+      exception:
+    </p><pre class="programlisting">import mysql.connector
+from mysql.connector import errorcode
+try:
+  cnx = mysql.connector.connect(user='scott',
+                                database='testt')
+except mysql.connector.Error as err:
+  if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+    print("Something is wrong your username or password")
+  elif err.errno == errorcode.ER_BAD_DB_ERROR:
+    print("Database does not exists")
+  else:
+    print(err)
+else:
+  cnx.close()</pre><p>
+      If you have lots of connection arguments, it's best to keep them
+      in a dictionary and use the <code class="literal">**</code>-operator. Here
+      is an example:
+    </p><pre class="programlisting">import mysql.connector
+config = {
+  'user': 'scott',
+  'password': 'tiger',
+  'host': '127.0.0.1',
+  'database': 'employees',
+  'raise_on_warnings': True,
+}
+cnx = mysql.connector.connect(**config)
+cnx.close()</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="myconnpy_example_ddl"></a>4.2. Creating Tables Using Connector/Python</h2></div></div></div><p>
+      All <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/glossary.html#glos_ddl" target="_top">DDL</a> (Data Definition Language)
+      statements are executed using a handle structure known as a
+      cursor. The following examples show how to create the tables of
+      the <code class="literal">employees</code> database. You will need them for
+      the other examples.
+    </p><p>
+      In a MySQL server, tables are very long-lived objects, and are
+      often accessed by multiple applications written in different
+      languages. You might typically work with tables that are already
+      set up, rather than creating them within your own application.
+      Avoid setting up and dropping tables over and over again, as that
+      is an expensive operation. The exception is
+      <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/glossary.html#glos_temporary_table" target="_top">temporary tables</a>,
+      which can be created and dropped quickly within an application.
+    </p><pre class="programlisting">from __future__ import print_function
+import mysql.connector
+from mysql.connector import errorcode
+DB_NAME = 'employees'
+TABLES = {}
+TABLES['employees'] = (
+    "CREATE TABLE `employees` ("
+    "  `emp_no` int(11) NOT NULL AUTO_INCREMENT,"
+    "  `birth_date` date NOT NULL,"
+    "  `first_name` varchar(14) NOT NULL,"
+    "  `last_name` varchar(16) NOT NULL,"
+    "  `gender` enum('M','F') NOT NULL,"
+    "  `hire_date` date NOT NULL,"
+    "  PRIMARY KEY (`emp_no`)"
+    ") ENGINE=InnoDB")
+TABLES['departments'] = (
+    "CREATE TABLE `departments` ("
+    "  `dept_no` char(4) NOT NULL,"
+    "  `dept_name` varchar(40) NOT NULL,"
+    "  PRIMARY KEY (`dept_no`), UNIQUE KEY `dept_name` (`dept_name`)"
+    ") ENGINE=InnoDB")
+TABLES['salaries'] = (
+    "CREATE TABLE `salaries` ("
+    "  `emp_no` int(11) NOT NULL,"
+    "  `salary` int(11) NOT NULL,"
+    "  `from_date` date NOT NULL,"
+    "  `to_date` date NOT NULL,"
+    "  PRIMARY KEY (`emp_no`,`from_date`), KEY `emp_no` (`emp_no`),"
+    "  CONSTRAINT `salaries_ibfk_1` FOREIGN KEY (`emp_no`) "
+    "     REFERENCES `employees` (`emp_no`) ON DELETE CASCADE"
+    ") ENGINE=InnoDB")
+TABLES['dept_emp'] = (
+    "CREATE TABLE `dept_emp` ("
+    "  `emp_no` int(11) NOT NULL,"
+    "  `dept_no` char(4) NOT NULL,"
+    "  `from_date` date NOT NULL,"
+    "  `to_date` date NOT NULL,"
+    "  PRIMARY KEY (`emp_no`,`dept_no`), KEY `emp_no` (`emp_no`),"
+    "  KEY `dept_no` (`dept_no`),"
+    "  CONSTRAINT `dept_emp_ibfk_1` FOREIGN KEY (`emp_no`) "
+    "     REFERENCES `employees` (`emp_no`) ON DELETE CASCADE,"
+    "  CONSTRAINT `dept_emp_ibfk_2` FOREIGN KEY (`dept_no`) "
+    "     REFERENCES `departments` (`dept_no`) ON DELETE CASCADE"
+    ") ENGINE=InnoDB")
+TABLES['dept_manager'] = (
+    "  CREATE TABLE `dept_manager` ("
+    "  `dept_no` char(4) NOT NULL,"
+    "  `emp_no` int(11) NOT NULL,"
+    "  `from_date` date NOT NULL,"
+    "  `to_date` date NOT NULL,"
+    "  PRIMARY KEY (`emp_no`,`dept_no`),"
+    "  KEY `emp_no` (`emp_no`),"
+    "  KEY `dept_no` (`dept_no`),"
+    "  CONSTRAINT `dept_manager_ibfk_1` FOREIGN KEY (`emp_no`) "
+    "     REFERENCES `employees` (`emp_no`) ON DELETE CASCADE,"
+    "  CONSTRAINT `dept_manager_ibfk_2` FOREIGN KEY (`dept_no`) "
+    "     REFERENCES `departments` (`dept_no`) ON DELETE CASCADE"
+    ") ENGINE=InnoDB")
+TABLES['titles'] = (
+    "CREATE TABLE `titles` ("
+    "  `emp_no` int(11) NOT NULL,"
+    "  `title` varchar(50) NOT NULL,"
+    "  `from_date` date NOT NULL,"
+    "  `to_date` date DEFAULT NULL,"
+    "  PRIMARY KEY (`emp_no`,`title`,`from_date`), KEY `emp_no` (`emp_no`),"
+    "  CONSTRAINT `titles_ibfk_1` FOREIGN KEY (`emp_no`)"
+    "     REFERENCES `employees` (`emp_no`) ON DELETE CASCADE"
+    ") ENGINE=InnoDB")</pre><p>
+      The above code shows how we are storing the
+      <code class="literal">CREATE</code> statements in a Python dictionary called
+      <code class="literal">TABLES</code>. We also define the database in a global
+      variable called <code class="literal">DB_NAME</code>, which allows you to
+      easily use a different schema.
+    </p><pre class="programlisting">cnx = mysql.connector.connect(user='scott')
+cursor = cnx.cursor()</pre><p>
+      A single MySQL server can contain multiple
+      <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/glossary.html#glos_database" target="_top">databases</a>. Typically, you
+      specify the database to switch to when connecting to the MySQL
+      server. This example does not connect to the database upon
+      connection, so that it can make sure the database exists, and
+      create it if not.
+    </p><pre class="programlisting">def create_database(cursor):
+    try:
+        cursor.execute(
+            "CREATE DATABASE {} DEFAULT CHARACTER SET 'utf8'".format(DB_NAME))
+    except mysql.connector.Error as err:
+        print("Failed creating database: {}".format(err))
+        exit(1)
+try:
+    cnx.database = DB_NAME    
+except mysql.connector.Error as err:
+    if err.errno == errorcode.ER_BAD_DB_ERROR:
+        create_database(cursor)
+        cnx.database = DB_NAME
+    else:
+        print(err)
+        exit(1)</pre><p>
+      We first try to change to a particular database using the
+      <code class="literal">database</code> property of the connection object
+      <code class="literal">cnx</code>. If there is an error, we examine the error
+      number to check if the database does not exist. If so, we call the
+      <code class="literal">create_database</code> function to create it for us.
+    </p><p>
+      On any other error, the application exits and displays the error
+      message.
+    </p><pre class="programlisting">for name, ddl in TABLES.iteritems():
+    try:
+        print("Creating table {}: ".format(name), end='')
+        cursor.execute(ddl)
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
+            print("already exists.")
+        else:
+            print(err.errmsg)
+    else:
+        print("OK")
+cursor.close()
+cnx.close()</pre><p>
+      After we succesfully created or changed to the target database, we
+      create the tables by iterating over the items of the
+      <code class="literal">TABLES</code> dictionary.
+    </p><p>
+      We handle the error when the table already exists by simply
+      notifying the user that it was already there. Other errors are
+      printed, but we simply continue creating tables. (We show how to
+      handle the <span class="quote">“<span class="quote">table already exists</span>”</span> condition for
+      illustration purposes. In a real application, we would typically
+      avoid the error condition entirely by using the <code class="literal">IF NOT
+      EXISTS</code> clause of the <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/create-table.html" target="_top"><code class="literal">CREATE
+      TABLE</code></a> statement.)
+    </p><p>
+      The output would be something like this:
+    </p><pre class="programlisting">Creating table employees: already exists.
+Creating table salaries: already exists.
+Creating table titles: OK
+Creating table departments: already exists.
+Creating table dept_manager: already exists.
+Creating table dept_emp: already exists.</pre><p>
+      To populate the employees tables, use the dump files of the
+      <a class="ulink" href="http://dev.mysql.com/doc/employee/en/index.html" target="_top">Employee
+      Sample Database</a>. Note that you only need the data dump
+      files that you will find in an archive named like
+      <code class="literal">employees_db-dump-files-1.0.5.tar.bz2</code>. After
+      downloading the dump files, do the following from the command
+      line, adding connection options to the <span class="command"><strong>mysql</strong></span>
+      commands if necessary:
+    </p><pre class="programlisting">shell&gt; tar xzf employees_db-dump-files-1.0.5.tar.bz2
+shell&gt; cd employees_db
+shell&gt; mysql employees &lt; load_employees.dump
+shell&gt; mysql employees &lt; load_titles.dump
+shell&gt; mysql employees &lt; load_departments.dump
+shell&gt; mysql employees &lt; load_salaries.dump
+shell&gt; mysql employees &lt; load_dept_emp.dump
+shell&gt; mysql employees &lt; load_dept_manager.dump</pre></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="myconnpy_example_cursor_transaction"></a>4.3. Inserting Data Using Connector/Python</h2></div></div></div><p>
+      Inserting or updating data is also done using the handler
+      structure known as a cursor. When you use a transactional storage
+      engine such as <code class="literal">InnoDB</code> (which is the default in
+      MySQL 5.5 and later), you must
+      <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/glossary.html#glos_commit" target="_top">commit</a> the data after a
+      sequence of <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/insert.html" target="_top"><code class="literal">INSERT</code></a>,
+      <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/delete.html" target="_top"><code class="literal">DELETE</code></a>, and
+      <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/update.html" target="_top"><code class="literal">UPDATE</code></a> statements.
+    </p><p>
+      In this example we show how to insert new data. The second
+      <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/insert.html" target="_top"><code class="literal">INSERT</code></a> depends on the value of the
+      newly created <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/glossary.html#glos_primary_key" target="_top">primary key</a>
+      of the first. We are also demonstrating how to use extended
+      formats. The task is to add a new employee starting to work
+      tomorrow with a salary set to 50000.
+    </p><div xmlns="http://www.w3.org/1999/xhtml" class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><div class="admon-title">Note</div><p xmlns="">
+        The following example uses tables created in the example
+        <a class="xref" href="#myconnpy_example_ddl" title="4.2. Creating Tables Using Connector/Python">Section 4.2, “Creating Tables Using Connector/Python”</a>. The
+        <code class="literal">AUTO_INCREMENT</code> column option for the primary
+        key of the <code class="literal">employees</code> table is important to
+        ensure reliable, easily searchable data.
+      </p></div><pre class="programlisting">from __future__ import print_function
+from datetime import date, datetime, timedelta
+import mysql.connector
+cnx = mysql.connector.connect(user='scott', database='employees')
+cursor = cnx.cursor()
+tomorrow = datetime.now().date() + timedelta(days=1)
+add_employee = ("INSERT INTO employees "
+               "(first_name, last_name, hire_date, gender, birth_date) "
+               "VALUES (%s, %s, %s, %s, %s)")
+add_salary = ("INSERT INTO salaries "
+              "(emp_no, salary, from_date, to_date) "
+              "VALUES (%(emp_no)s, %(salary)s, %(from_date)s, %(to_date)s)")
+data_employee = ('Geert', 'Vanderkelen', tomorrow, 'M', date(1977, 6, 14))
+# Insert new employee
+cursor.execute(add_employee, data_employee)
+emp_no = cursor.lastrowid
+# Insert salary information
+data_salary = {
+  'emp_no': emp_no,
+  'salary': 50000,
+  'from_date': tomorrow,
+  'to_date': date(9999, 1, 1),
+}
+cursor.execute(add_salary, data_salary)
+# Make sure data is committed to the database
+cnx.commit()
+cursor.close()
+cnx.close()</pre><p>
+      We first open a connection to the MySQL server and store the
+      <a class="link" href="#connector-python-apiref-MySQLConnection" title="7.2. Class connection.MySQLConnection">connection
+      object</a> in the variable <code class="literal">cnx</code>. We then
+      create a new cursor, by default a
+      <a class="link" href="#connector-python-apiref-MySQLCursor" title="7.3. Class cursor.MySQLCursor">MySQLCursor</a>
+      object, using the connection's
+      <a class="link" href="#myconnpy_MySQLConnection_cursor" title="7.2.6. Method MySQLConnection.cursor(buffered=None, raw=None, cursor_class=None)"><code class="literal">cursor()</code></a>
+      method.
+    </p><p>
+      We could calculate tomorrow by calling a database function, but
+      for clarity we do it in Python using the
+      <code class="literal">datetime</code> module.
+    </p><p>
+      Both <code class="literal">INSERT</code> statements are stored in the
+      variables called <code class="literal">add_employee</code> and
+      <code class="literal">add_salary</code>. Note that the second
+      <code class="literal">INSERT</code> statement uses extended Python format
+      codes.
+    </p><p>
+      The information of the new employee is stored in the tuple
+      <code class="literal">data_employee</code>. The query to insert the new
+      employee is executed and we retrieve the newly inserted value for
+      the column <code class="literal">emp_no</code> using the
+      <code class="literal">lastrowid</code> property of the cursor object.
+    </p><p>
+      Next, we insert the new salary for the new employee. We are using
+      the <code class="literal">emp_no</code> variable in the directory holding
+      the data. This directory is passed to the
+      <code class="literal">execute()</code> method of the cursor object.
+    </p><p>
+      Since by default Connector/Python turns
+      <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/glossary.html#glos_autocommit" target="_top">autocommit</a> off, and MySQL
+      5.5 and later uses transactional <code class="literal">InnoDB</code> tables
+      by default, it is necessary to commit your changes using the
+      connection's <code class="literal">commit()</code> method. You could also
+      <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/glossary.html#glos_rollback" target="_top">roll back</a> using the
+      <code class="literal">rollback()</code> method.
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="myconnpy_example_cursor_select"></a>4.4. Querying Data Using Connector/Python</h2></div></div></div><p>
+      The following example shows how to
+      <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/glossary.html#glos_query" target="_top">query</a> data using a cursor
+      created using the connection's
+      <a class="link" href="#myconnpy_MySQLConnection_cursor" title="7.2.6. Method MySQLConnection.cursor(buffered=None, raw=None, cursor_class=None)"><code class="literal">cursor()</code></a>
+      method. The data returned is formatted and printed on the console.
+    </p><p>
+      The task is to select all employees hired in the year 1999 and
+      print their names with their hire date to the console.
+    </p><pre class="programlisting">import datetime
+import mysql.connector
+cnx = mysql.connector.connect(user='scott', database='employees')
+cursor = cnx.cursor()
+query = ("SELECT first_name, last_name, hire_date FROM employees "
+         "WHERE hire_date BETWEEN %s AND %s")
+hire_start = datetime.date(1999, 1, 1)
+hire_end = datetime.date(1999, 12, 31)
+cursor.execute(query, (hire_start, hire_end))
+for (first_name, last_name, hire_date) in cursor:
+  print("{}, {} was hired on {:%d %b %Y}".format(
+    last_name, first_name, hire_date))
+cursor.close()
+cnx.close()</pre><p>
+      We first open a connection to the MySQL server and store the
+      <a class="link" href="#connector-python-apiref-MySQLConnection" title="7.2. Class connection.MySQLConnection">connection
+      object</a> in the variable <code class="literal">cnx</code>. We then
+      create a new cursor, by default a
+      <a class="link" href="#connector-python-apiref-MySQLCursor" title="7.3. Class cursor.MySQLCursor">MySQLCursor</a>
+      object, using the connection's
+      <a class="link" href="#myconnpy_MySQLConnection_cursor" title="7.2.6. Method MySQLConnection.cursor(buffered=None, raw=None, cursor_class=None)"><code class="literal">cursor()</code></a>
+      method.
+    </p><p>
+      In the preceding example, we store the <code class="literal">SELECT</code>
+      statement in the variable <code class="literal">query</code>. Note that we
+      are using unquoted <code class="literal">%s</code>-markers where dates
+      should have been. Connector/Python converts
+      <code class="literal">hire_start</code> and <code class="literal">hire_end</code> from
+      Python types to a data type that MySQL understands and adds the
+      required quotes. In this case, it replaces the first
+      <code class="literal">%s</code> with <code class="literal">'1999-01-01'</code>, and
+      the second with <code class="literal">'1999-12-31'</code>.
+    </p><p>
+      We then execute the operation stored in the
+      <code class="literal">query</code> variable using the
+      <a class="link" href="#myconnpy_MySQLCursor_execute" title="7.3.4. Method MySQLCursor.execute(operation, params=None, multi=False)"><code class="literal">execute()</code></a>
+      method. The data used to replace the <code class="literal">%s</code>-markers
+      in the query is passed as a tuple: <code class="literal">(hire_start,
+      hire_end)</code>.
+    </p><p>
+      After executing the query, the MySQL server is ready to send the
+      data. The result set could be zero rows, one row, or 100 million
+      rows. Depending on the expected volume, you can use different
+      techniques to process this result set. In this example, we use the
+      <code class="literal">cursor</code> object as an iterator. The first column
+      in the row will be stored in the variable
+      <code class="literal">first_name</code>, the second in
+      <code class="literal">last_name</code>, and the third in
+      <code class="literal">hire_date</code>.
+    </p><p>
+      We print the result, formatting the output using Python's built-in
+      <code class="literal">format()</code> function. Note that
+      <code class="literal">hire_date</code> was converted automatically by
+      Connector/Python to a Python <code class="literal">datetime.date</code>
+      object. This means that we can easily format the date in a more
+      human-readable form.
+    </p><p>
+      The output should be something like this:
+    </p><pre class="programlisting">..
+Wilharm, LiMin was hired on 16 Dec 1999
+Wielonsky, Lalit was hired on 16 Dec 1999
+Kamble, Dannz was hired on 18 Dec 1999
+DuBourdieux, Zhongwei was hired on 19 Dec 1999
+Fujisawa, Rosita was hired on 20 Dec 1999
+..</pre></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="connector-python-tutorials"></a>Chapter 5. Connector/Python Tutorials</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#myconnpy_tutorial_CursorBuffered_GiveRaise">5.1. Tutorial: Raise employee's salary using a buffering cursor</a></span></dt></dl></div><p>
+    These tutorials illustrate how to develop Python applications and
+    scripts that connect to a MySQL database server using MySQL
+    Connector/Python.
+  </p><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="myconnpy_tutorial_CursorBuffered_GiveRaise"></a>5.1. Tutorial: Raise employee's salary using a buffering cursor</h2></div></div></div><p>
+      The following example script will give a long-overdue raise
+      effective tomorrow to all employees who joined in the year 2000
+      and are still with the company.
+    </p><p>
+      We are using buffered cursors to iterate through the selected
+      employees. This way we do not have to fetch the rows in a new
+      variables, but can instead use the cursor as an iterator.
+    </p><p>
+      Note that the script is an example; there are other ways of doing
+      this simple task.
+    </p><pre class="programlisting">from __future__ import print_function
+from decimal import Decimal
+from datetime import datetime, date, timedelta
+import mysql.connector
+# Connect with the MySQL Server
+cnx = mysql.connector.connect(user='scott', database='employees')
+# Get two buffered cursors
+curA = cnx.cursor(buffered=True)
+curB = cnx.cursor(buffered=True)
+# Query to get employees who joined in a period defined by two dates
+query = (
+  "SELECT s.emp_no, salary, from_date, to_date FROM employees AS e "
+  "LEFT JOIN salaries AS s USING (emp_no) "
+  "WHERE to_date = DATE('9999-01-01')"
+  "AND e.hire_date BETWEEN DATE(%s) AND DATE(%s)")
+# UPDATE and INSERT statements for the old and new salary
+update_old_salary = (
+  "UPDATE salaries SET to_date = %s "
+  "WHERE emp_no = %s AND from_date = %s")
+insert_new_salary = (
+  "INSERT INTO salaries (emp_no, from_date, to_date, salary) "
+  "VALUES (%s, %s, %s, %s)")
+# Select the employes getting a raise
+curA.execute(query, (date(2000, 1, 1), date(2001, 1, 1)))
+# Iterate through the result of curA
+for (emp_no, salary, from_date, to_date) in curA:
+  # Update the old and insert the new salary
+  new_salary = int(round(salary * Decimal('1.15')))
+  curB.execute(update_old_salary, (tomorrow, emp_no, from_date))
+  curB.execute(insert_new_salary,
+               (emp_no, tomorrow, date(9999, 1, 1,), new_salary))
+  # Commit the changes
+  cnx.commit()
+cnx.close()</pre></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="connector-python-connectargs"></a>Chapter 6. Connector/Python Connection Arguments</h1></div></div></div><p>
+    The following lists the arguments which can be used to initiate a
+    connection with the MySQL server using either:
+  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+        Function <code class="literal">mysql.connector.connect()</code>
+      </p></li><li class="listitem"><p>
+        Class <code class="literal">mysql.connector.MySQLConnection()</code>
+      </p></li></ul></div><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th scope="col">Argument Name</th><th scope="col">Default</th><th scope="col">Description</th></tr></thead><tbody><tr><td scope="row"><code class="literal">user</code> (<code class="literal">username</code>*)</td><td> </td><td>The username used to authenticate with the MySQL Server.</td></tr><tr><td scope="row"><code class="literal">password</code> (<code class="literal">passwd</code>*)</td><td> </td><td>The password to authenticate the user with the MySQL Server.</td></tr><tr><td scope="row"><code class="literal">database</code> (<code class="literal">db</code>*)</td><td> </td><td>Database name to use when connecting with the MySQL Server.</td></tr><tr><td scope="row"><code class="literal">host</code></td><td>127.0.0.1</td><td>Hostname or IP address of the MySQL Server.</td></tr><tr><td scope="row"><code class="literal">port</code></td><td>3306</td><td>TCP/IP port of the MySQL Server. Must be an integer.</td></tr><tr><td scope="row"><code class="literal">unix_socket</code></td><td> </td><td>The location of the Unix socket file.</td></tr><tr><td scope="row"><code class="literal">use_unicode</code></td><td>True</td><td>Whether to use Unicode or not.</td></tr><tr><td scope="row"><code class="literal">charset</code></td><td>utf8</td><td>Which MySQL character set to use.</td></tr><tr><td scope="row"><code class="literal">collation</code></td><td>utf8_general_ci</td><td>Which MySQL collation to use.</td></tr><tr><td scope="row"><code class="literal">autocommit</code></td><td>False</td><td>Whether to <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/glossary.html#glos_autocommit" target="_top">autocommit</a>
+            transactions.</td></tr><tr><td scope="row"><code class="literal">time_zone</code></td><td> </td><td>Set the <code class="literal">time_zone</code> session variable at connection.</td></tr><tr><td scope="row"><code class="literal">sql_mode</code></td><td> </td><td>Set the <code class="literal">sql_mode</code> session variable at connection.</td></tr><tr><td scope="row"><code class="literal">get_warnings</code></td><td>False</td><td>Whether to fetch warnings.</td></tr><tr><td scope="row"><code class="literal">raise_on_warnings</code></td><td>False</td><td>Whether to raise an exception on warnings.</td></tr><tr><td scope="row"><code class="literal">connection_timeout</code>
+            (<code class="literal">connect_timeout</code>*)</td><td> </td><td>Timeout for the TCP and Unix socket connections.</td></tr><tr><td scope="row"><code class="literal">client_flags</code></td><td> </td><td>MySQL client flags.</td></tr><tr><td scope="row"><code class="literal">buffered</code></td><td>False</td><td>Whether cursor object fetches the result immediately after executing
+            query.</td></tr><tr><td scope="row"><code class="literal">raw</code></td><td>False</td><td>Whether MySQL results are returned as-is, rather than converted to
+            Python types.</td></tr><tr><td scope="row"><code class="literal">ssl_ca</code></td><td> </td><td>File containing the SSL certificate authority.</td></tr><tr><td scope="row"><code class="literal">ssl_cert</code></td><td> </td><td>File containing the SSL certificate file.</td></tr><tr><td scope="row"><code class="literal">ssl_key</code></td><td> </td><td>File containing the SSL key.</td></tr><tr><td scope="row"><code class="literal">dsn</code></td><td> </td><td>Not supported (raises <code class="literal">NotSupportedError</code> when used).</td></tr></tbody></table></div><p>
+    * Synonymous argument name, available only for compatibility with
+    other Python MySQL drivers. Oracle recommends not to use these
+    alternative names.
+  </p><p>
+    Authentication with MySQL will use <code class="literal">username</code> and
+    <code class="literal">password</code>. Note that MySQL Connector/Python does
+    not support the old, insecure password protocols of MySQL versions
+    prior to 4.1.
+  </p><p>
+    When the <code class="literal">database</code> parameter is given, the current
+    database is set to the given value. To later change the database,
+    execute the MySQL <code class="literal">USE</code> command or set the
+    <code class="literal">database</code> property of the
+    <code class="literal">MySQLConnection</code> instance.
+  </p><p>
+    By default, Connector/Python tries to connect to a MySQL server
+    running on <code class="literal">localhost</code> using TCP/IP. The
+    <code class="literal">host</code> argument defaults to IP address 127.0.0.1
+    and <code class="literal">port</code> to 3306. Unix sockets are supported by
+    setting <code class="literal">unix_socket</code>. Named pipes on the Windows
+    platform are not supported.
+  </p><p>
+    Strings coming from MySQL are by default returned as Python Unicode
+    literals. To change this behavior, set
+    <code class="literal">use_unicode</code> to <code class="literal">False</code>. You can
+    change the character setting for the client connection through the
+    <code class="literal">charset</code> argument. To change the character set
+    after connecting to MySQL, set the <code class="literal">charset</code>
+    property of the <code class="literal">MySQLConnection</code> instance. This
+    technique is preferred over using the MySQL <code class="literal">SET
+    NAMES</code> statement directly. Similar to the
+    <code class="literal">charset</code> property, you can set the
+    <code class="literal">collation</code> for the current MySQL session.
+  </p><p>
+    Transactions are not automatically committed; call the
+    <code class="literal">commit()</code> method of the
+    <code class="literal">MySQLConnection</code> instance within your application
+    after doing a set of related insert, update, and delete operations.
+    For data consistency and high throughput for write operations, it is
+    best to leave the <code class="literal">autocommit</code> configuration option
+    turned off when using <code class="literal">InnoDB</code> or other
+    transactional tables.
+  </p><p>
+    The time zone can be set per connection using the
+    <code class="literal">time_zone</code> argument. This is useful if the MySQL
+    server is set, for example, to UTC and <code class="literal">TIMESTAMP</code>
+    values should be returned by MySQL converted to the
+    <code class="literal">PST</code> time zone.
+  </p><p>
+    MySQL supports so called SQL Modes. which will change the behavior
+    of the server globally or per connection. For example, to have
+    warnings raised as errors, set <code class="literal">sql_mode</code> to
+    <code class="literal">TRADITIONAL</code>. For more information, see
+    <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/server-sql-mode.html" target="_top">Server SQL Modes</a>.
+  </p><p>
+    Warnings generated by queries are fetched automatically when
+    <code class="literal">get_warnings</code> is set to <code class="literal">True</code>.
+    You can also immediately raise an exception by setting
+    <code class="literal">raise_on_warnings</code> to <code class="literal">True</code>.
+    Consider using the MySQL
+    <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/server-sql-mode.html" target="_top">sql_mode</a> setting for turning
+    warnings into errors.
+  </p><p>
+    To set a timeout value for connections, use
+    <code class="literal">connection_timeout</code>.
+  </p><p>
+    MySQL uses <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/mysql-real-connect.html" target="_top">client flags</a> to
+    enable or disable features. Using the
+    <code class="literal">client_flags</code> argument, you have control of what
+    is set. To find out what flags are available, use the following:
+  </p><pre class="programlisting">from mysql.connector.constants import ClientFlag
+print '\n'.join(ClientFlag.get_full_info())</pre><p>
+    If <code class="literal">client_flags</code> is not specified (that is, it is
+    zero), defaults are used for MySQL v4.1 and later. If you specify an
+    integer greater than <code class="literal">0</code>, make sure all flags are
+    set. A better way to set and unset flags is to use a list. For
+    example, to set <code class="literal">FOUND_ROWS</code>, but disable the
+    default <code class="literal">LONG_FLAG</code>:
+  </p><pre class="programlisting">flags = [ClientFlag.FOUND_ROWS, -ClientFlag.LONG_FLAG]
+mysql.connector.connect(client_flags=flags)</pre><p>
+    By default, MySQL Connector/Python does not buffer or pre-fetch
+    results. This means that after a query is executed, your program is
+    responsible of fetching the data. This avoids using excessive memory
+    when queries return large result sets. If you know that the result
+    set is small enough to handle all at once, fetching the results
+    immediately by setting <code class="literal">buffered</code> to
+    <code class="literal">True</code>. It is also possible to set this per cursor
+    (see cursor manual).
+  </p><p>
+    MySQL types will be converted automatically to Python types. For
+    example, a <code class="literal">DATETIME</code> column becomes a
+    <a class="ulink" href="http://docs.python.org/library/datetime.html#datetime.datetime" target="_top">datetime.datetime</a>
+    object. When conversion should be done differently, for example to
+    get better performance, set <code class="literal">raw</code> to
+    <code class="literal">True</code>.
+  </p><p>
+    Using SSL connections is possible when your
+    <a class="ulink" href="http://docs.python.org/library/ssl.html" target="_top">Python
+    installation supports SSL</a>, that is, when it is compiled
+    against the OpenSSL libraries. When you provide the arguments
+    <code class="literal">ssl_ca</code>, <code class="literal">ssl_key</code> and
+    <code class="literal">ssl_cert</code>, the connection switches to SSL. You can
+    use this in combination with the <code class="literal">compressed</code>
+    argument set to <code class="literal">True</code>.
+  </p><p>
+    <code class="literal">passwd</code>, <code class="literal">db</code> and
+    <code class="literal">connect_timeout</code> are valid for compatibility with
+    other MySQL interfaces and are respectively the same as
+    <code class="literal">password</code>, <code class="literal">database</code> and
+    <code class="literal">connection_timeout</code>. The latter take precedence.
+    Data source name syntax or <code class="literal">dsn</code> is not used; if
+    specified, it raises a <code class="literal">NotSupportedError</code>
+    exception.
+  </p></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="connector-python-reference"></a>Chapter 7. Connector/Python API Reference</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#connector-python-apiref-errors">7.1. Errors and Exceptions</a></span></dt><dd><dl><dt><span class="section"><a href="#connector-python-apiref-errorcode">7.1.1. Module <code class="literal">errorcode</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-error">7.1.2. Exception <code class="literal">errors.Error</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-warning">7.1.3. Exception <code class="literal">errors.Warning</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-interfaceerror">7.1.4. Exception <code class="literal">errors.InterfaceError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-databaseerror">7.1.5. Exception <code class="literal">errors.DatabaseError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-internalerror">7.1.6. Exception <code class="literal">errors.InternalError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-operationalerror">7.1.7. Exception <code class="literal">errors.OperationalError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-programmingerror">7.1.8. Exception <code class="literal">errors.ProgrammingError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-integrityerror">7.1.9. Exception <code class="literal">errors.IntegrityError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-dataerror">7.1.10. Exception <code class="literal">errors.DataError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-notsupportederror">7.1.11. Exception <code class="literal">errors.NotSupportedError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-custom-error-exception">7.1.12. Function <code class="literal">errors.custom_error_exception(error=None,
+        exception=None)</code></a></span></dt></dl></dd><dt><span class="section"><a href="#connector-python-apiref-MySQLConnection">7.2. Class <code class="literal">connection.MySQLConnection</code></a></span></dt><dd><dl><dt><span class="section"><a href="#myconnpy_MySQLConnection">7.2.1. Constructor <code class="literal">connection.MySQLConnection(**kwargs)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_close">7.2.2. Method <code class="literal">MySQLConnection.close()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_config">7.2.3. Method <code class="literal">MySQLConnection.config(**kwargs)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_connect">7.2.4. Method <code class="literal">MySQLConnection.connect(**kwargs)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_commit">7.2.5. Method <code class="literal">MySQLConnection.commit()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cursor">7.2.6. Method <code class="literal">MySQLConnection.cursor(buffered=None, raw=None,
+        cursor_class=None)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_change_user">7.2.7. Method <code class="literal">MySQLConnection.cmd_change_user(username='',
+        password='', database='', charset=33)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_debug">7.2.8. Method <code class="literal">MySQLConnection.cmd_debug()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_init_db">7.2.9. Method <code class="literal">MySQLConnection.cmd_init_db(database)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_ping">7.2.10. Method <code class="literal">MySQLConnection.cmd_ping()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_process_info">7.2.11. Method <code class="literal">MySQLConnection.cmd_process_info()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_process_kill">7.2.12. Method <code class="literal">MySQLConnection.cmd_process_kill(mysql_pid)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_quit">7.2.13. Method <code class="literal">MySQLConnection.cmd_quit()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_query">7.2.14. Method <code class="literal">MySQLConnection.cmd_query(statement)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_query_iter">7.2.15. Method <code class="literal">MySQLConnection.cmd_query_iter(statement)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_refresh">7.2.16. Method <code class="literal">MySQLConnection.cmd_refresh(options)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_shutdown">7.2.17. Method <code class="literal">MySQLConnection.cmd_shutdown()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_statistics">7.2.18. Method <code class="literal">MySQLConnection.cmd_statistics()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_disconnect">7.2.19. Method <code class="literal">MySQLConnection.disconnect()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_get_rows">7.2.20. Method <code class="literal">MySQLConnection.get_rows(count=None)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_get_row">7.2.21. Method <code class="literal">MySQLConnection.get_row()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_get_server_info">7.2.22. Method <code class="literal">MySQLConnection.get_server_info()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_get_server_version">7.2.23. Method <code class="literal">MySQLConnection.get_server_version()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_is_connected">7.2.24. Method <code class="literal">MySQLConnection.is_connected()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_isset_client_flag">7.2.25. Method <code class="literal">MySQLConnection.isset_client_flag(flag)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_ping">7.2.26. Method <code class="literal">MySQLConnection.ping(attempts=1, delay=0)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnectoin_reconnect">7.2.27. Method <code class="literal">MySQLConnection.reconnect(attempts=1, delay=0)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_rollback">7.2.28. Method <code class="literal">MySQLConnection.rollback()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_set_charset_collation">7.2.29. Method <code class="literal">MySQLConnection.set_charset_collation(charset=None,
+        collation=None)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_set_client_flags">7.2.30. Method <code class="literal">MySQLConnection.set_client_flags(flags)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_autocommit">7.2.31. Property <code class="literal">MySQLConnection.autocommit</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_charset_name">7.2.32. Property <code class="literal">MySQLConnection.charset_name</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_collation_name">7.2.33. Property <code class="literal">MySQLConnection.collation_name</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_connection_id">7.2.34. Property <code class="literal">MySQLConnection.connection_id</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_database">7.2.35. Property <code class="literal">MySQLConnection.database</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_get_warnings">7.2.36. Property <code class="literal">MySQLConnection.get_warnings</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_raise_on_warnings">7.2.37. Property <code class="literal">MySQLConnection.raise_on_warnings</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_server_host">7.2.38. Property <code class="literal">MySQLConnection.server_host</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_server_port">7.2.39. Property <code class="literal">MySQLConnection.server_port</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_sql_mode">7.2.40. Property <code class="literal">MySQLConnection.sql_mode</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_time_zone">7.2.41. Property <code class="literal">MySQLConnection.time_zone</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_unix_socket">7.2.42. Property <code class="literal">MySQLConnection.unix_socket</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_user">7.2.43. Property <code class="literal">MySQLConnection.user</code></a></span></dt></dl></dd><dt><span class="section"><a href="#connector-python-apiref-MySQLCursor">7.3. Class <code class="literal">cursor.MySQLCursor</code></a></span></dt><dd><dl><dt><span class="section"><a href="#myconnpy_MySQLCursor">7.3.1. Constructor <code class="literal">cursor.MySQLCursor</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_callproc">7.3.2. Method <code class="literal">MySQLCursor.callproc(procname, args=())</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_close">7.3.3. Method <code class="literal">MySQLCursor.close()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_execute">7.3.4. Method <code class="literal">MySQLCursor.execute(operation, params=None,
+        multi=False)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_executemany">7.3.5. Method <code class="literal">MySQLCursor.executemany(operation, seq_params)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_fetchall">7.3.6. Method <code class="literal">MySQLCursor.fetchall()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_fetchmany">7.3.7. Method <code class="literal">MySQLCursor.fetchmany(size=1)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_fetchone">7.3.8. Method <code class="literal">MySQLCursor.fetchone()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_fetchwarnings">7.3.9. Method <code class="literal">MySQLCursor.fetchwarnings()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_stored_results">7.3.10. Method <code class="literal">MySQLCursor.stored_results()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_column_names">7.3.11. Property <code class="literal">MySQLCursor.column_names</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_statement">7.3.12. Property <code class="literal">MySQLCursor.statement</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_with_rows">7.3.13. Property <code class="literal">MySQLCursor.with_rows</code></a></span></dt></dl></dd><dt><span class="section"><a href="#connector-python-apiref-MySQLCursorBuffered">7.4. Class <code class="literal">cursor.MySQLCursorBuffered</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-ClientFlag">7.5. Class <code class="literal">constants.ClientFlag</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-FieldType">7.6. Class <code class="literal">constants.FieldType</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-SQLMode">7.7. Class <code class="literal">constants.SQLMode</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-CharacterSet">7.8. Class <code class="literal">constants.CharacterSet</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-RefreshOption">7.9. Class <code class="literal">constants.RefreshOption</code></a></span></dt></dl></div><p>
+    This section contains the public API reference of Connector/Python.
+    Although valid for both Python 2 and Python 3, examples should be
+    considered working for Python 2.7, and Python 3.1 and greater.
+  </p><p>
+    The following overview shows the <code class="literal">mysql.connector</code>
+    package with its modules. Currently, only the most useful modules,
+    classes and functions for end users are documented.
+  </p><pre class="programlisting">mysql.connector
+  errorcode
+  errors
+  connection
+  constants
+  conversion
+  cursor
+  dbapi
+  locales
+    eng
+      client_error
+  protocol
+  utils</pre><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connector-python-apiref-errors"></a>7.1. Errors and Exceptions</h2></div></div></div><div class="toc"><dl><dt><span class="section"><a href="#connector-python-apiref-errorcode">7.1.1. Module <code class="literal">errorcode</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-error">7.1.2. Exception <code class="literal">errors.Error</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-warning">7.1.3. Exception <code class="literal">errors.Warning</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-interfaceerror">7.1.4. Exception <code class="literal">errors.InterfaceError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-databaseerror">7.1.5. Exception <code class="literal">errors.DatabaseError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-internalerror">7.1.6. Exception <code class="literal">errors.InternalError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-operationalerror">7.1.7. Exception <code class="literal">errors.OperationalError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-programmingerror">7.1.8. Exception <code class="literal">errors.ProgrammingError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-integrityerror">7.1.9. Exception <code class="literal">errors.IntegrityError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-dataerror">7.1.10. Exception <code class="literal">errors.DataError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-notsupportederror">7.1.11. Exception <code class="literal">errors.NotSupportedError</code></a></span></dt><dt><span class="section"><a href="#connector-python-apiref-errors-custom-error-exception">7.1.12. Function <code class="literal">errors.custom_error_exception(error=None,
+        exception=None)</code></a></span></dt></dl></div><p>
+      The <code class="literal">mysql.connector.errors</code> module defines
+      exception classes for errors and warnings raised by MySQL
+      Connector/Python. Most classes defined in this module are
+      available when you import <code class="literal">mysql.connector</code>.
+    </p><p>
+      The exception classes defined in this module follow mostly the
+      Python Database Specification v2.0 (PEP-249). For some MySQL
+      client or server errors it is not always clear which exception to
+      raise. It is good to discuss whether an error should be
+      reclassified by opening a bug report.
+    </p><p>
+      MySQL Server errors are mapped with Python exception based on
+      their SQLState (see <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html" target="_top">Server Error Codes and Messages</a>). The
+      following list shows the <code class="literal">SQLState</code> classes and
+      the exception Connector/Python will raise. It is, however,
+      possible to redefine which exception is raised for each server
+      error. Note that the default exception is
+      <code class="literal">DatabaseError</code>.
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+          <code class="literal">02</code>: DataError
+        </p></li><li class="listitem"><p>
+          <code class="literal">07</code>: DatabaseError
+        </p></li><li class="listitem"><p>
+          <code class="literal">08</code>: OperationalError
+        </p></li><li class="listitem"><p>
+          <code class="literal">0A</code>: NotSupportedError
+        </p></li><li class="listitem"><p>
+          <code class="literal">21</code>: DataError
+        </p></li><li class="listitem"><p>
+          <code class="literal">22</code>: DataError
+        </p></li><li class="listitem"><p>
+          <code class="literal">23</code>: IntegrityError
+        </p></li><li class="listitem"><p>
+          <code class="literal">24</code>: ProgrammingError
+        </p></li><li class="listitem"><p>
+          <code class="literal">25</code>: ProgrammingError
+        </p></li><li class="listitem"><p>
+          <code class="literal">26</code>: ProgrammingError
+        </p></li><li class="listitem"><p>
+          <code class="literal">27</code>: ProgrammingError
+        </p></li><li class="listitem"><p>
+          <code class="literal">28</code>: ProgrammingError
+        </p></li><li class="listitem"><p>
+          <code class="literal">2A</code>: ProgrammingError
+        </p></li><li class="listitem"><p>
+          <code class="literal">2B</code>: DatabaseError
+        </p></li><li class="listitem"><p>
+          <code class="literal">2C</code>: ProgrammingError
+        </p></li><li class="listitem"><p>
+          <code class="literal">2D</code>: DatabaseError
+        </p></li><li class="listitem"><p>
+          <code class="literal">2E</code>: DatabaseError
+        </p></li><li class="listitem"><p>
+          <code class="literal">33</code>: DatabaseError
+        </p></li><li class="listitem"><p>
+          <code class="literal">34</code>: ProgrammingError
+        </p></li><li class="listitem"><p>
+          <code class="literal">35</code>: ProgrammingError
+        </p></li><li class="listitem"><p>
+          <code class="literal">37</code>: ProgrammingError
+        </p></li><li class="listitem"><p>
+          <code class="literal">3C</code>: ProgrammingError
+        </p></li><li class="listitem"><p>
+          <code class="literal">3D</code>: ProgrammingError
+        </p></li><li class="listitem"><p>
+          <code class="literal">3F</code>: ProgrammingError
+        </p></li><li class="listitem"><p>
+          <code class="literal">40</code>: InternalError
+        </p></li><li class="listitem"><p>
+          <code class="literal">42</code>: ProgrammingError
+        </p></li><li class="listitem"><p>
+          <code class="literal">44</code>: InternalError
+        </p></li><li class="listitem"><p>
+          <code class="literal">HZ</code>: OperationalError
+        </p></li><li class="listitem"><p>
+          <code class="literal">XA</code>: IntegrityError
+        </p></li><li class="listitem"><p>
+          <code class="literal">0K</code>: OperationalError
+        </p></li><li class="listitem"><p>
+          <code class="literal">HY</code>: DatabaseError
+        </p></li></ul></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="connector-python-apiref-errorcode"></a>7.1.1. Module <code class="literal">errorcode</code></h3></div></div></div><p>
+        This module contains both MySQL server and client error codes
+        defined as module attributes with the error number as value.
+        Using error codes instead of error numbers could make reading
+        the source code a bit easier.
+      </p><pre class="programlisting">
+&gt;&gt;&gt; from mysql.connector import errorcode
+&gt;&gt;&gt; errorcode.ER_BAD_TABLE_ERROR
+1051
+</pre><p>
+        See <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html" target="_top">Server Error Codes and Messages</a> and
+        <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/error-messages-client.html" target="_top">Client Error Codes and Messages</a>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="connector-python-apiref-errors-error"></a>7.1.2. Exception <code class="literal">errors.Error</code></h3></div></div></div><p>
+        This exception is the base class for all other exceptions in the
+        <code class="literal">errors</code> module. It can be used to catch all
+        errors in a single <code class="literal">except</code> statement.
+      </p><p>
+        The following example shows how we could catch syntax errors:
+      </p><pre class="programlisting">import mysql.connector
+try:
+  cnx = mysql.connector.connect(user='scott', database='employees')
+  cursor = cnx.cursor()
+  cursor.execute("SELECT * FORM employees")   # Syntax error in query
+  cnx.close()
+except mysql.connector.Error as err:
+  print("Something went wrong: {}".format(err))</pre><p>
+        Initializing the exception supports a few optional arguments,
+        namely <code class="literal">msg</code>, <code class="literal">errno</code>,
+        <code class="literal">values</code> and <code class="literal">sqlstate</code>. All
+        of them are optional and default to <code class="literal">None</code>.
+        <code class="literal">errors.Error</code> isinternally used by
+        Connector/Python to raise MySQL client and server errors and
+        should not be used by your application to raise exceptions.
+      </p><p>
+        The following examples show the result when using no or a
+        combination of the arguments:
+      </p><pre class="programlisting">
+&gt;&gt;&gt; from mysql.connector.errors import Error
+&gt;&gt;&gt; str(Error())
+'Unknown error'
+&gt;&gt;&gt; str(Error("Oops! There was an error."))
+'Oops! There was an error.'
+&gt;&gt;&gt; str(Error(errno=2006))
+'2006: MySQL server has gone away'
+&gt;&gt;&gt; str(Error(errno=2002, values=('/tmp/mysql.sock', 2)))
+"2002: Can't connect to local MySQL server through socket '/tmp/mysql.sock' (2)"
+&gt;&gt;&gt; str(Error(errno=1146, sqlstate='42S02', msg="Table 'test.spam' doesn't exist"))
+"1146 (42S02): Table 'test.spam' doesn't exist"
+</pre><p>
+        The example which uses error number 1146 is used when
+        Connector/Python receives an error packet from the MySQL Server.
+        The information is parsed and passed to the
+        <code class="literal">Error</code> exception as shown.
+      </p><p>
+        Each exception subclassing from <code class="literal">Error</code> can be
+        initialized using the above mentioned arguments. Additionally,
+        each instance has the attributes <code class="literal">errno</code>,
+        <code class="literal">msg</code> and <code class="literal">sqlstate</code> which can
+        be used in your code.
+      </p><p>
+        The following example shows how to handle errors when dropping a
+        table which does not exists (when you do not want to use the
+        <code class="literal">IF EXISTS</code> clause):
+      </p><pre class="programlisting">import mysql.connector
+from mysql.connector import errorcode
+cnx = mysql.connector.connect(user='scott', database='test')
+try:
+  cur.execute("DROP TABLE spam")
+except mysql.connector.Error as err:
+  if err.errno == errorcode.ER_BAD_TABLE_ERROR:
+    print("Creating table spam")
+  else:
+    raise</pre><p>
+        <code class="literal">errors.Error</code> is a subclass of the Python
+        <code class="literal">StandardError</code>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="connector-python-apiref-errors-warning"></a>7.1.3. Exception <code class="literal">errors.Warning</code></h3></div></div></div><p>
+        This exception is used for reporting important warnings,
+        however, Connector/Python does not use it. It is included to be
+        compliant with the Python Database Specification v2.0 (PEP-249).
+      </p><p>
+        Consider using either more strict
+        <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/server-sql-mode.html" target="_top">Server SQL Modes</a> or the
+        <a class="link" href="#connector-python-connectargs" title="Chapter 6. Connector/Python Connection Arguments">raise_on_warnings</a>
+        connection argument to make Connector/Python raise errors when
+        your queries produce warnings.
+      </p><p>
+        <code class="literal">errors.Warning</code> is a subclass of the Python
+        <code class="literal">StandardError</code>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="connector-python-apiref-errors-interfaceerror"></a>7.1.4. Exception <code class="literal">errors.InterfaceError</code></h3></div></div></div><p>
+        This exception is raised for errors originating from
+        Connector/Python itself, not related to the MySQL server.
+      </p><p>
+        <code class="literal">errors.InterfaceError</code> is a subclass of
+        <code class="literal">errors.Error</code>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="connector-python-apiref-errors-databaseerror"></a>7.1.5. Exception <code class="literal">errors.DatabaseError</code></h3></div></div></div><p>
+        This exception is the default for any MySQL error which does not
+        fit the other exceptions.
+      </p><p>
+        <code class="literal">errors.DatabaseError</code> is a subclass of
+        <code class="literal">errors.Error</code>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="connector-python-apiref-errors-internalerror"></a>7.1.6. Exception <code class="literal">errors.InternalError</code></h3></div></div></div><p>
+        This exception is raised when the MySQL server encounters an
+        internal error, for example, when a deadlock occurred.
+      </p><p>
+        <code class="literal">errors.InternalError</code> is a subclass of
+        <code class="literal">errors.DatabaseError</code>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="connector-python-apiref-errors-operationalerror"></a>7.1.7. Exception <code class="literal">errors.OperationalError</code></h3></div></div></div><p>
+        This exception is raised for errors which are related to MySQL's
+        operations. For example, to many connections, a hostname could
+        not be resolved, bad handshake, server is shutting down,
+        communication errors, and so on.
+      </p><p>
+        <code class="literal">errors.OperationalError</code> is a subclass of
+        <code class="literal">errors.DatabaseError</code>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="connector-python-apiref-errors-programmingerror"></a>7.1.8. Exception <code class="literal">errors.ProgrammingError</code></h3></div></div></div><p>
+        This exception is raised on programming errors, for example when
+        you have a syntax error in your SQL or a table was not found.
+      </p><p>
+        The following example shows how to handle syntax errors:
+      </p><pre class="programlisting">try:
+  cursor.execute("CREATE DESK t1 (id int, PRIMARY KEY (id))")
+except mysql.connector.ProgrammingError as err:
+  if err.errno == errorcode.ER_SYNTAX_ERROR:
+    print("Check your syntax!")
+  else:
+    print("Error: {}".format(err))</pre><p>
+        <code class="literal">errors.ProgrammingError</code> is a subclass of
+        <code class="literal">errors.DatabaseError</code>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="connector-python-apiref-errors-integrityerror"></a>7.1.9. Exception <code class="literal">errors.IntegrityError</code></h3></div></div></div><p>
+        This exception is raised when the relational integrity of the
+        data is affected. For example, a duplicate key was inserted or a
+        foreign key constraint would fail.
+      </p><p>
+        The following example shows a duplicate key error raised as
+        IntegrityError:
+      </p><pre class="programlisting">cursor.execute("CREATE TABLE t1 (id int, PRIMARY KEY (id))")
+try:
+  cursor.execute("INSERT INTO t1 (id) VALUES (1)")
+  cursor.execute("INSERT INTO t1 (id) VALUES (1)")
+except mysql.connector.IntegrityError as err:
+  print("Error: {}".format(err))</pre><p>
+        <code class="literal">errors.IntegrityError</code> is a subclass of
+        <code class="literal">errors.DatabaseError</code>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="connector-python-apiref-errors-dataerror"></a>7.1.10. Exception <code class="literal">errors.DataError</code></h3></div></div></div><p>
+        This exception is raised when there were problems with the data.
+        Examples are a column set to NULL when it can not, out of range
+        values for a column, division by zero, column count does not
+        match value count, and so on.
+      </p><p>
+        <code class="literal">errors.DataError</code> is a subclass of
+        <code class="literal">errors.DatabaseError</code>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="connector-python-apiref-errors-notsupportederror"></a>7.1.11. Exception <code class="literal">errors.NotSupportedError</code></h3></div></div></div><p>
+        This exception is raised is case some feature was used but not
+        supported by the version of MySQL which returned the error. It
+        is also raised when using functions or statements which are not
+        supported by stored routines.
+      </p><p>
+        <code class="literal">errors.NotSupportedError</code> is a subclass of
+        <code class="literal">errors.DatabaseError</code>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="connector-python-apiref-errors-custom-error-exception"></a>7.1.12. Function <code class="literal">errors.custom_error_exception(error=None,
+        exception=None)</code></h3></div></div></div><p>
+        This function defines custom exceptions for MySQL server errors
+        and returns current customizations.
+      </p><p>
+        If <code class="literal">error</code> is a MySQL Server error number, then
+        you have to pass also the <code class="literal">exception</code> class.
+        The <code class="literal">error</code> argument can also be a dictionary
+        in which case the key is the server error number, and value the
+        class of the exception to be raised.
+      </p><p>
+        To reset the customizations, simply supply an empty dictionary.
+      </p><pre class="programlisting">import mysql.connector
+from mysql.connector import errorcode
+# Server error 1028 should raise a DatabaseError
+mysql.connector.custom_error_exception(1028, mysql.connector.DatabaseError)
+# Or using a dictionary:
+mysql.connector.custom_error_exception({
+  1028: mysql.connector.DatabaseError,
+  1029: mysql.connector.OperationalError,
+})
+# To reset, pass an empty dictionary:
+mysql.connector.custom_error_exception({})</pre></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connector-python-apiref-MySQLConnection"></a>7.2. Class <code class="literal">connection.MySQLConnection</code></h2></div></div></div><div class="toc"><dl><dt><span class="section"><a href="#myconnpy_MySQLConnection">7.2.1. Constructor <code class="literal">connection.MySQLConnection(**kwargs)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_close">7.2.2. Method <code class="literal">MySQLConnection.close()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_config">7.2.3. Method <code class="literal">MySQLConnection.config(**kwargs)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_connect">7.2.4. Method <code class="literal">MySQLConnection.connect(**kwargs)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_commit">7.2.5. Method <code class="literal">MySQLConnection.commit()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cursor">7.2.6. Method <code class="literal">MySQLConnection.cursor(buffered=None, raw=None,
+        cursor_class=None)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_change_user">7.2.7. Method <code class="literal">MySQLConnection.cmd_change_user(username='',
+        password='', database='', charset=33)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_debug">7.2.8. Method <code class="literal">MySQLConnection.cmd_debug()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_init_db">7.2.9. Method <code class="literal">MySQLConnection.cmd_init_db(database)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_ping">7.2.10. Method <code class="literal">MySQLConnection.cmd_ping()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_process_info">7.2.11. Method <code class="literal">MySQLConnection.cmd_process_info()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_process_kill">7.2.12. Method <code class="literal">MySQLConnection.cmd_process_kill(mysql_pid)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_quit">7.2.13. Method <code class="literal">MySQLConnection.cmd_quit()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_query">7.2.14. Method <code class="literal">MySQLConnection.cmd_query(statement)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_query_iter">7.2.15. Method <code class="literal">MySQLConnection.cmd_query_iter(statement)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_refresh">7.2.16. Method <code class="literal">MySQLConnection.cmd_refresh(options)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_shutdown">7.2.17. Method <code class="literal">MySQLConnection.cmd_shutdown()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_cmd_statistics">7.2.18. Method <code class="literal">MySQLConnection.cmd_statistics()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_disconnect">7.2.19. Method <code class="literal">MySQLConnection.disconnect()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_get_rows">7.2.20. Method <code class="literal">MySQLConnection.get_rows(count=None)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_get_row">7.2.21. Method <code class="literal">MySQLConnection.get_row()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_get_server_info">7.2.22. Method <code class="literal">MySQLConnection.get_server_info()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_get_server_version">7.2.23. Method <code class="literal">MySQLConnection.get_server_version()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_is_connected">7.2.24. Method <code class="literal">MySQLConnection.is_connected()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_isset_client_flag">7.2.25. Method <code class="literal">MySQLConnection.isset_client_flag(flag)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_ping">7.2.26. Method <code class="literal">MySQLConnection.ping(attempts=1, delay=0)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnectoin_reconnect">7.2.27. Method <code class="literal">MySQLConnection.reconnect(attempts=1, delay=0)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_rollback">7.2.28. Method <code class="literal">MySQLConnection.rollback()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_set_charset_collation">7.2.29. Method <code class="literal">MySQLConnection.set_charset_collation(charset=None,
+        collation=None)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_set_client_flags">7.2.30. Method <code class="literal">MySQLConnection.set_client_flags(flags)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_autocommit">7.2.31. Property <code class="literal">MySQLConnection.autocommit</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_charset_name">7.2.32. Property <code class="literal">MySQLConnection.charset_name</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_collation_name">7.2.33. Property <code class="literal">MySQLConnection.collation_name</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_connection_id">7.2.34. Property <code class="literal">MySQLConnection.connection_id</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_database">7.2.35. Property <code class="literal">MySQLConnection.database</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_get_warnings">7.2.36. Property <code class="literal">MySQLConnection.get_warnings</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_raise_on_warnings">7.2.37. Property <code class="literal">MySQLConnection.raise_on_warnings</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_server_host">7.2.38. Property <code class="literal">MySQLConnection.server_host</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_server_port">7.2.39. Property <code class="literal">MySQLConnection.server_port</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_sql_mode">7.2.40. Property <code class="literal">MySQLConnection.sql_mode</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_time_zone">7.2.41. Property <code class="literal">MySQLConnection.time_zone</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_unix_socket">7.2.42. Property <code class="literal">MySQLConnection.unix_socket</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLConnection_user">7.2.43. Property <code class="literal">MySQLConnection.user</code></a></span></dt></dl></div><p>
+      The MySQLConnection class is used to open and manage a connection
+      to a MySQL server. It also used to send commands and SQL queries
+      and read result.
+    </p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection"></a>7.2.1. Constructor <code class="literal">connection.MySQLConnection(**kwargs)</code></h3></div></div></div><p>
+        The MySQLConnection constructor initializes the attributes and
+        when at least one argument is passed, it tries to connect with
+        the MySQL server.
+      </p><p>
+        For a complete list or arguments, see
+        <a class="xref" href="#connector-python-connectargs" title="Chapter 6. Connector/Python Connection Arguments">Chapter 6, <i>Connector/Python Connection Arguments</i></a>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_close"></a>7.2.2. Method <code class="literal">MySQLConnection.close()</code></h3></div></div></div><p>
+        See
+        <a class="link" href="#myconnpy_MySQLConnection_disconnect" title="7.2.19. Method MySQLConnection.disconnect()">disconnect()</a>.
+      </p><p>
+        Returns a tuple.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_config"></a>7.2.3. Method <code class="literal">MySQLConnection.config(**kwargs)</code></h3></div></div></div><p>
+        Allows to configure a MySQLConnection instance after it was
+        instantiated. See <a class="xref" href="#connector-python-connectargs" title="Chapter 6. Connector/Python Connection Arguments">Chapter 6, <i>Connector/Python Connection Arguments</i></a>
+        for a complete list of possible arguments.
+      </p><p>
+        You could use the <code class="literal">config()</code> method to change,
+        for example, the username and call
+        <code class="literal">reconnect()</code>.
+      </p><pre class="programlisting">cnx = MySQLConnection(user='joe', database='test')
+# Connected as 'joe'
+cnx.config(user='jane')
+cnx.reconnect()
+# Now connected as 'jane'</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_connect"></a>7.2.4. Method <code class="literal">MySQLConnection.connect(**kwargs)</code></h3></div></div></div><p>
+        This method sets up the connection to the MySQL server. If no
+        arguments are given, it uses the already configured or default
+        values. See <a class="xref" href="#connector-python-connectargs" title="Chapter 6. Connector/Python Connection Arguments">Chapter 6, <i>Connector/Python Connection Arguments</i></a> for a
+        complete list of possible arguments.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_commit"></a>7.2.5. Method <code class="literal">MySQLConnection.commit()</code></h3></div></div></div><p>
+        This method sends the <code class="literal">COMMIT</code> command to the
+        MySQL server, committing the current transaction. Since by
+        default, Connector/Python does not auto commit, it is important
+        to call this method after every transaction which updates data
+        for tables using transactional storage engines.
+      </p><p>
+        See the
+        <a class="link" href="#myconnpy_MySQLConnection_rollback" title="7.2.28. Method MySQLConnection.rollback()">rollback()</a>
+        method for rolling back transactions.
+      </p><pre class="programlisting">
+&gt;&gt;&gt; cursor.execute("INSERT INTO employees (first_name) VALUES (%s)", ('Jane'))
+&gt;&gt;&gt; cnx.commit()
+</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_cursor"></a>7.2.6. Method <code class="literal">MySQLConnection.cursor(buffered=None, raw=None,
+        cursor_class=None)</code></h3></div></div></div><p>
+        This method returns a MySQLCursor() object, or a subclass of it
+        depending the passed arguments.
+      </p><p>
+        When <code class="literal">buffered</code> is True, the cursor will fetch
+        all rows after the operation is executed. This is useful when
+        queries return small result sets. Setting <code class="literal">raw</code>
+        will skip the conversion from MySQL data types to Python types
+        when fetching rows. Raw is usually used when you want to have
+        more performance and/or you want to do the conversion yourself.
+      </p><p>
+        The <code class="literal">cursor_class</code> argument can be used to pass
+        a class to use for instantiating a new cursor. It has to be a
+        subclass of <code class="literal">cursor.CursorBase</code>.
+      </p><p>
+        The returned object depends on the combination of the
+        <code class="literal">buffered</code> and <code class="literal">raw</code>
+        arguments.
+      </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+            If not buffered and not raw:
+            <code class="literal">cursor.MySQLCursor</code>
+          </p></li><li class="listitem"><p>
+            If buffered and not raw:
+            <code class="literal">cursor.MySQLCursorBuffered</code>
+          </p></li><li class="listitem"><p>
+            If buffered and raw:
+            <code class="literal">cursor.MySQLCursorBufferedRaw</code>
+          </p></li><li class="listitem"><p>
+            If not buffered and raw:
+            <code class="literal">cursor.MySQLCursorRaw</code>
+          </p></li></ul></div><p>
+        Returns a <code class="literal">CursorBase</code> instance.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_cmd_change_user"></a>7.2.7. Method <code class="literal">MySQLConnection.cmd_change_user(username='',
+        password='', database='', charset=33)</code></h3></div></div></div><p>
+        Changes the user using <code class="literal">username</code> and
+        <code class="literal">password</code>. It also causes the specified
+        <code class="literal">database</code> to become the default (current)
+        database. It is also possible to change the character set using
+        the <code class="literal">charset</code> argument.
+      </p><p>
+        Returns a dictionary containing the OK packet information.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_cmd_debug"></a>7.2.8. Method <code class="literal">MySQLConnection.cmd_debug()</code></h3></div></div></div><p>
+        Instructs the server to write some debug information to the log.
+        For this to work, the connected user must have the
+        <code class="literal">SUPER</code> privilege.
+      </p><p>
+        Returns a dictionary containing the OK packet information.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_cmd_init_db"></a>7.2.9. Method <code class="literal">MySQLConnection.cmd_init_db(database)</code></h3></div></div></div><p>
+        This method makes specified database the default (current)
+        database. In subsequent queries, this database is the default
+        for table references that do not include an explicit database
+        specifier.
+      </p><p>
+        Returns a dictionary containing the OK packet information.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_cmd_ping"></a>7.2.10. Method <code class="literal">MySQLConnection.cmd_ping()</code></h3></div></div></div><p>
+        Checks whether the connection to the server is working.
+      </p><p>
+        This method is not to be used directly. Use
+        <a class="link" href="#myconnpy_MySQLConnection_ping" title="7.2.26. Method MySQLConnection.ping(attempts=1, delay=0)">ping()</a>
+        or
+        <a class="link" href="#myconnpy_MySQLConnection_is_connected" title="7.2.24. Method MySQLConnection.is_connected()">is_connected()</a>
+        instead.
+      </p><p>
+        Returns a dictionary containing the OK packet information.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_cmd_process_info"></a>7.2.11. Method <code class="literal">MySQLConnection.cmd_process_info()</code></h3></div></div></div><p>
+        This method raises the NotSupportedError exception. Instead, use
+        the <code class="literal">SHOW PROCESSLIST</code> statement or query the
+        tables found in the database
+        <code class="literal">INFORMATION_SCHEMA</code>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_cmd_process_kill"></a>7.2.12. Method <code class="literal">MySQLConnection.cmd_process_kill(mysql_pid)</code></h3></div></div></div><p>
+        Asks the server to kill the thread specified by
+        <code class="literal">mysql_pid</code>. Although still available, it's
+        better to use the SQL <code class="literal">KILL</code> command.
+      </p><p>
+        Returns a dictionary containing the OK packet information.
+      </p><p>
+        The following two lines do the same:
+      </p><pre class="programlisting">
+&gt;&gt;&gt; cnx.cmd_process_kill(123)
+&gt;&gt;&gt; cnx.cmd_query('KILL 123')
+</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_cmd_quit"></a>7.2.13. Method <code class="literal">MySQLConnection.cmd_quit()</code></h3></div></div></div><p>
+        This method sends the <code class="literal">QUIT</code> command to the
+        MySQL server, closing the current connection. Since there is no
+        response from the MySQL, the packet that was sent is returned.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_cmd_query"></a>7.2.14. Method <code class="literal">MySQLConnection.cmd_query(statement)</code></h3></div></div></div><p>
+        This method sends the given <code class="literal">statement</code> to the
+        MySQL server and returns a result. If you need to send multiple
+        statements, you have to use the
+        <a class="link" href="#myconnpy_MySQLConnection_cmd_query_iter" title="7.2.15. Method MySQLConnection.cmd_query_iter(statement)">cmd_query_iter()</a>
+        method.
+      </p><p>
+        The returned dictionary contains information depending on what
+        kind of query was executed. If the query is a
+        <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/select.html" target="_top"><code class="literal">SELECT</code></a> statement, the result
+        contains information about columns. Other statements return a
+        dictionary containing OK or EOF packet information.
+      </p><p>
+        Errors received from the MySQL server are raised as exceptions.
+        An <code class="literal">InterfaceError</code> is raised when multiple
+        results are found.
+      </p><p>
+        Returns a dictionary.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_cmd_query_iter"></a>7.2.15. Method <code class="literal">MySQLConnection.cmd_query_iter(statement)</code></h3></div></div></div><p>
+        Similar to the
+        <a class="link" href="#myconnpy_MySQLConnection_cmd_query" title="7.2.14. Method MySQLConnection.cmd_query(statement)">cmd_query()</a>
+        method, but returns a generator object to iterate through
+        results. Use <code class="literal">cmd_query_iter()</code> when sending
+        multiple statements, and separate the statements with
+        semicolons.
+      </p><p>
+        The following example shows how to iterate through the results
+        after sending multiple statements:
+      </p><pre class="programlisting">statement = 'SELECT 1; INSERT INTO t1 VALUES (); SELECT 2'
+for result in cnx.cmd_query(statement, iterate=True):
+  if 'columns' in result:
+    columns = result['columns']
+    rows = cnx.get_rows()
+  else:
+    # do something useful with INSERT result</pre><p>
+        Returns a generator object.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_cmd_refresh"></a>7.2.16. Method <code class="literal">MySQLConnection.cmd_refresh(options)</code></h3></div></div></div><p>
+        This method flushes tables or caches, or resets replication
+        server information. The connected user must have the
+        <code class="literal">RELOAD</code> privilege.
+      </p><p>
+        The <code class="literal">options</code> argument should be a bitwise
+        value using constants from the class
+        <code class="literal">constants.RefreshOption</code>.
+      </p><p>
+        See <a class="xref" href="#connector-python-apiref-RefreshOption" title="7.9. Class constants.RefreshOption">Section 7.9, “Class <code class="literal">constants.RefreshOption</code>”</a> for
+        a list of options.
+      </p><p>
+        Example:
+      </p><pre class="programlisting">
+&gt;&gt;&gt; from mysql.connector import RefreshOption
+&gt;&gt;&gt; refresh = RefreshOption.LOG | RefreshOption.THREADS
+&gt;&gt;&gt; cnx.cmd_refresh(refresh)
+</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_cmd_shutdown"></a>7.2.17. Method <code class="literal">MySQLConnection.cmd_shutdown()</code></h3></div></div></div><p>
+        Asks the database server to shut down. The connected user must
+        have the <code class="literal">SHUTDOWN</code> privilege.
+      </p><p>
+        Returns a dictionary containing the OK packet information.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_cmd_statistics"></a>7.2.18. Method <code class="literal">MySQLConnection.cmd_statistics()</code></h3></div></div></div><p>
+        Returns a dictionary containing information about the MySQL
+        server including uptime in seconds and the number of running
+        threads, questions, reloads, and open tables.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_disconnect"></a>7.2.19. Method <code class="literal">MySQLConnection.disconnect()</code></h3></div></div></div><p>
+        This method tries to send the <code class="literal">QUIT</code> command
+        and close the socket. It does not raise any exceptions.
+      </p><p>
+        <code class="literal">MySQLConnection.close()</code> is a synonymous
+        method name and more commonly used.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_get_rows"></a>7.2.20. Method <code class="literal">MySQLConnection.get_rows(count=None)</code></h3></div></div></div><p>
+        This method retrieves all or remaining rows of a query result
+        set, returning a tuple containing the rows as sequence and the
+        EOF packet information. The count argument can be used to get a
+        given amount of rows. If count is not specified or is
+        <code class="literal">None</code>, all rows are retrieved.
+      </p><p>
+        The tuple returned by <code class="literal">get_rows()</code> consists of:
+      </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+            A list of tuples containing the row data as byte objects, or
+            an empty list when no rows are available.
+          </p></li><li class="listitem"><p>
+            EOF packet information as a dictionary containing
+            <code class="literal">status_flag</code> and
+            <code class="literal">warning_count</code>.
+          </p></li></ul></div><p>
+        An <code class="literal">InterfaceError</code> is raised when all rows
+        have been retrieved.
+      </p><p>
+        The <code class="literal">get_rows()</code> method is used by
+        <a class="link" href="#connector-python-apiref-MySQLCursor" title="7.3. Class cursor.MySQLCursor">MySQLCursor</a>
+        to fetch rows.
+      </p><p>
+        Returns a tuple.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_get_row"></a>7.2.21. Method <code class="literal">MySQLConnection.get_row()</code></h3></div></div></div><p>
+        This method retrieves the next row of a query result set,
+        returning a tuple.
+      </p><p>
+        The tuple returned by <code class="literal">get_row()</code> consists of:
+      </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+            The row as a tuple containing byte objects, or
+            <code class="literal">None</code> when no more rows are available.
+          </p></li><li class="listitem"><p>
+            EOF packet information as a dictionary containing
+            <code class="literal">status_flag</code> and
+            <code class="literal">warning_count</code>, or <code class="literal">None</code>
+            when the row returned is not the last row.
+          </p></li></ul></div><p>
+        The <code class="literal">get_row()</code> method is used by
+        <a class="link" href="#connector-python-apiref-MySQLCursor" title="7.3. Class cursor.MySQLCursor">MySQLCursor</a>
+        to fetch rows.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_get_server_info"></a>7.2.22. Method <code class="literal">MySQLConnection.get_server_info()</code></h3></div></div></div><p>
+        This method returns the MySQL server information verbatim, for
+        example <code class="literal">'5.5.24-log'</code>, or
+        <code class="literal">None</code> when not connected.
+      </p><p>
+        Returns a string or <code class="literal">None</code>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_get_server_version"></a>7.2.23. Method <code class="literal">MySQLConnection.get_server_version()</code></h3></div></div></div><p>
+        This method returns the MySQL server version as a tuple, or
+        <code class="literal">None</code> when not connected.
+      </p><p>
+        Returns a tuple or <code class="literal">None</code>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_is_connected"></a>7.2.24. Method <code class="literal">MySQLConnection.is_connected()</code></h3></div></div></div><p>
+        Reports whether the connection to MySQL Server is available.
+      </p><p>
+        This method checks whether the connection to MySQL is available
+        using the
+        <a class="link" href="#myconnpy_MySQLConnection_ping" title="7.2.26. Method MySQLConnection.ping(attempts=1, delay=0)">ping()</a>
+        method, but unlike <code class="literal">ping()</code>,
+        <code class="literal">is_connected()</code> returns
+        <code class="literal">True</code> when the connection is available,
+        <code class="literal">False</code> otherwise.
+      </p><p>
+        Returns <code class="literal">True</code> or <code class="literal">False</code>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_isset_client_flag"></a>7.2.25. Method <code class="literal">MySQLConnection.isset_client_flag(flag)</code></h3></div></div></div><p>
+        This method returns <code class="literal">True</code> if the client flag
+        was set, <code class="literal">False</code> otherwise.
+      </p><p>
+        Returns <code class="literal">True</code> or <code class="literal">False</code>.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_ping"></a>7.2.26. Method <code class="literal">MySQLConnection.ping(attempts=1, delay=0)</code></h3></div></div></div><p>
+        Check whether the connection to the MySQL server is still
+        available.
+      </p><p>
+        When <code class="literal">reconnect</code> is set to
+        <code class="literal">True</code>, one or more attempts are made to try to
+        reconnect to the MySQL server using the
+        <code class="literal">reconnect()</code> method. Use the
+        <code class="literal">delay</code> argument (seconds) if you want to wait
+        between each retry.
+      </p><p>
+        When the connection is not available, an
+        <code class="literal">InterfaceError</code> is raised. Use the
+        <a class="link" href="#myconnpy_MySQLConnection_is_connected" title="7.2.24. Method MySQLConnection.is_connected()">is_connected()</a>
+        method to check the connection without raising an error.
+      </p><p>
+        Raises <code class="literal">InterfaceError</code> on errors.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnectoin_reconnect"></a>7.2.27. Method <code class="literal">MySQLConnection.reconnect(attempts=1, delay=0)</code></h3></div></div></div><p>
+        Attempt to reconnect with the MySQL server.
+      </p><p>
+        The argument <code class="literal">attempts</code> specifies the number of
+        times a reconnect is tried. The <code class="literal">delay</code>
+        argument is the number of seconds to wait between each retry.
+      </p><p>
+        You might set the number of attempts higher and use a longer
+        delay when you expect the MySQL server to be down for
+        maintenance, or when you expect the network to be temporarily
+        unavailable.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_rollback"></a>7.2.28. Method <code class="literal">MySQLConnection.rollback()</code></h3></div></div></div><p>
+        This method sends the <code class="literal">ROLLBACK</code> command to the
+        MySQL server, undoing all data changes from the current
+        <code class="literal">transaction</code>. Since by default,
+        Connector/Python does not auto commit, it is possible to cancel
+        transactions when using transactional storage engines such as
+        <code class="literal">InnoDB</code>.
+      </p><p>
+        See the
+        <a class="link" href="#myconnpy_MySQLConnection_commit" title="7.2.5. Method MySQLConnection.commit()">commit()</a>
+        method for <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/glossary.html#glos_commit" target="_top">committing</a>
+        transactions.
+      </p><pre class="programlisting">
+&gt;&gt;&gt; cursor.execute("INSERT INTO employees (first_name) VALUES (%s)", ('Jane'))
+&gt;&gt;&gt; cnx.rollback()
+</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_set_charset_collation"></a>7.2.29. Method <code class="literal">MySQLConnection.set_charset_collation(charset=None,
+        collation=None)</code></h3></div></div></div><p>
+        This method sets the character set and collation to be used for
+        the current connection. The <code class="literal">charset</code> argument
+        can be either the name of a character set, or the numerical
+        equivalent as defined in
+        <code class="literal">constants.CharacterSet</code>.
+      </p><p>
+        When <code class="literal">collation</code> is <code class="literal">None</code>,
+        the default will be looked up and used.
+      </p><p>
+        The <code class="literal">charset</code> argument then be either:
+      </p><p>
+        In the following example, we set the character set to
+        <code class="literal">latin1</code> and the collation will be set to the
+        default <code class="literal">latin1_swedish_ci</code>:
+      </p><pre class="programlisting">
+&gt;&gt;&gt; cnx = mysql.connector.connect(user='scott')
+&gt;&gt;&gt; cnx.set_charset('latin1')
+</pre><p>
+        Specify a specific collation as follows:
+      </p><pre class="programlisting">
+&gt;&gt;&gt; cnx = mysql.connector.connect(user='scott')
+&gt;&gt;&gt; cnx.set_charset('latin1', 'latin1_general_ci')
+</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_set_client_flags"></a>7.2.30. Method <code class="literal">MySQLConnection.set_client_flags(flags)</code></h3></div></div></div><p>
+        This method sets the client flags which are used when connecting
+        with the MySQL server and returns the new value. The
+        <code class="literal">flags</code> argument can be either an integer or a
+        sequence of valid client flag values (see
+        <a class="xref" href="#connector-python-apiref-ClientFlag" title="7.5. Class constants.ClientFlag">Section 7.5, “Class <code class="literal">constants.ClientFlag</code>”</a>).
+      </p><p>
+        If <code class="literal">flags</code> is a sequence, each item in the
+        sequence will set the flag when the value is positive or unset
+        it when negative. For example, to unset
+        <code class="literal">LONG_FLAG</code> and set the
+        <code class="literal">FOUND_ROWS</code> flags:
+      </p><pre class="programlisting">
+&gt;&gt;&gt; from mysql.connector.constants import ClientFlag
+&gt;&gt;&gt; cnx.set_client_flags([ClientFlag.FOUND_ROWS, -ClientFlag.LONG_FLAG])
+&gt;&gt;&gt; cnx.reconnect()
+</pre><p>
+        Note that client flags are only set or used when connecting with
+        the MySQL server. It is therefor necessary to reconnect after
+        making changes.
+      </p><p>
+        Returns an integer.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_autocommit"></a>7.2.31. Property <code class="literal">MySQLConnection.autocommit</code></h3></div></div></div><p>
+        This property is used to toggle the auto commit feature of MySQL
+        and retrieve the current state. When the value evaluates to
+        True, auto commit will be turned, otherwise it is turned off.
+      </p><p>
+        Note that auto commit is disabled by default when connecting
+        through Connector/Python. This can be toggled using the
+        <a class="link" href="#connector-python-connectargs" title="Chapter 6. Connector/Python Connection Arguments">connection
+        parameter</a> <code class="literal">autocommit</code>.
+      </p><p>
+        When the auto commit is turned off, you have to
+        <a class="link" href="#myconnpy_MySQLConnection_commit" title="7.2.5. Method MySQLConnection.commit()">commit</a>
+        transactions when using transactional storage engines such as
+        InnoDB or NDBCluster.
+      </p><pre class="programlisting">
+&gt;&gt;&gt; cnx.autocommit
+False
+&gt;&gt;&gt; cnx.autocommit = True
+&gt;&gt;&gt; cnx.autocommit
+True
+</pre><p>
+        Returns True or False.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_charset_name"></a>7.2.32. Property <code class="literal">MySQLConnection.charset_name</code></h3></div></div></div><p>
+        This property returns which character set is used for the
+        connection whether it is connected or not.
+      </p><p>
+        Returns a string.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_collation_name"></a>7.2.33. Property <code class="literal">MySQLConnection.collation_name</code></h3></div></div></div><p>
+        This property returns which collation is used for the connection
+        whether it is connected or not.
+      </p><p>
+        Returns a string.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_connection_id"></a>7.2.34. Property <code class="literal">MySQLConnection.connection_id</code></h3></div></div></div><p>
+        This property returns the connection ID (thread ID or session
+        ID) for the current connection or None when not connected.
+      </p><p>
+        Returns a integer or None.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_database"></a>7.2.35. Property <code class="literal">MySQLConnection.database</code></h3></div></div></div><p>
+        This property is used to set current (active) database executing
+        the <code class="literal">USE</code> command. The property can also be
+        used to retrieve the current database name.
+      </p><pre class="programlisting">
+&gt;&gt;&gt; cnx.database = 'test'
+&gt;&gt;&gt; cnx.database = 'mysql'
+&gt;&gt;&gt; cnx.database
+u'mysql'
+</pre><p>
+        Returns a string.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_get_warnings"></a>7.2.36. Property <code class="literal">MySQLConnection.get_warnings</code></h3></div></div></div><p>
+        This property is used to toggle whether warnings should be
+        fetched automatically or not. It accepts True or False
+        (default).
+      </p><p>
+        Fetching warnings automatically could be useful when debugging
+        queries. Cursors will make warnings available through the method
+        <a class="link" href="#myconnpy_MySQLCursor_fetchwarnings" title="7.3.9. Method MySQLCursor.fetchwarnings()">MySQLCursor.fetchwarnings()</a>.
+      </p><pre class="programlisting">
+&gt;&gt;&gt; cnx.get_warnings = True
+&gt;&gt;&gt; cursor.execute('SELECT "a"+1')
+&gt;&gt;&gt; cursor.fetchall()
+[(1.0,)]
+&gt;&gt;&gt; cursor.fetchwarnings()
+[(u'Warning', 1292, u"Truncated incorrect DOUBLE value: 'a'")]
+</pre><p>
+        Returns True or False.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_raise_on_warnings"></a>7.2.37. Property <code class="literal">MySQLConnection.raise_on_warnings</code></h3></div></div></div><p>
+        This property is used to toggle whether warnings should raise
+        exceptions or not. It accepts True or False (default).
+      </p><p>
+        Toggling <code class="literal">raise_on_warnings</code> will also toggle
+        <code class="literal">get_warnings</code> since warnings need to be
+        fetched so they can be raised as exceptions.
+      </p><p>
+        Note that you might always want to check setting SQL Mode if you
+        would like to have the MySQL server directly report warnings as
+        errors. It is also good to use transactional engines so
+        transactions can be rolled back when catching the exception.
+      </p><p>
+        Result sets needs to be fetched completely before any exception
+        can be raised. The following example shows the execution of a
+        query which produces a warning
+      </p><pre class="programlisting">
+&gt;&gt;&gt; cnx.raise_on_warnings = True
+&gt;&gt;&gt; cursor.execute('SELECT "a"+1')
+&gt;&gt;&gt; cursor.fetchall()
+..
+mysql.connector.errors.DataError: 1292: Truncated incorrect DOUBLE value: 'a'
+</pre><p>
+        Returns True or False.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_server_host"></a>7.2.38. Property <code class="literal">MySQLConnection.server_host</code></h3></div></div></div><p>
+        This read-only property returns the hostname or IP address used
+        for connecting with the MySQL server.
+      </p><p>
+        Returns a string.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_server_port"></a>7.2.39. Property <code class="literal">MySQLConnection.server_port</code></h3></div></div></div><p>
+        This read-only property returns the TCP/IP port used for
+        connecting with the MySQL server.
+      </p><p>
+        Returns a integer.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_sql_mode"></a>7.2.40. Property <code class="literal">MySQLConnection.sql_mode</code></h3></div></div></div><p>
+        This property is used to retrieve and set the SQL Modes for the
+        current. The value should be list of different modes separated
+        by comma (","), or a sequence of modes, preferably using the
+        constants.SQLMode class.
+      </p><p>
+        To unset all modes, pass an empty string or an empty sequence.
+      </p><pre class="programlisting">
+&gt;&gt;&gt; cnx.sql_mode = 'TRADITIONAL,NO_ENGINE_SUBSTITUTION'
+&gt;&gt;&gt; cnx.sql_mode.split(',')
+[u'STRICT_TRANS_TABLES', u'STRICT_ALL_TABLES', u'NO_ZERO_IN_DATE',
+u'NO_ZERO_DATE', u'ERROR_FOR_DIVISION_BY_ZERO', u'TRADITIONAL', 
+u'NO_AUTO_CREATE_USER', u'NO_ENGINE_SUBSTITUTION']
+&gt;&gt;&gt; from mysql.connector.constants import SQLMode
+&gt;&gt;&gt; cnx.sql_mode = [ SQLMode.NO_ZERO_DATE, SQLMode.REAL_AS_FLOAT]
+&gt;&gt;&gt; cnx.sql_mode
+
+u'REAL_AS_FLOAT,NO_ZERO_DATE'</pre><p>
+        Returns a string.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_time_zone"></a>7.2.41. Property <code class="literal">MySQLConnection.time_zone</code></h3></div></div></div><p>
+        This property is used to set the time zone session variable for
+        the current connection and retrieve it.
+      </p><pre class="programlisting">
+&gt;&gt;&gt; cnx.time_zone = '+00:00'
+&gt;&gt;&gt; cur.execute('SELECT NOW()') ; cur.fetchone()
+(datetime.datetime(2012, 6, 15, 11, 24, 36),)
+&gt;&gt;&gt; cnx.time_zone = '-09:00'
+&gt;&gt;&gt; cur.execute('SELECT NOW()') ; cur.fetchone()
+(datetime.datetime(2012, 6, 15, 2, 24, 44),)
+&gt;&gt;&gt; cnx.time_zone
+u'-09:00'
+</pre><p>
+        Returns a string.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_unix_socket"></a>7.2.42. Property <code class="literal">MySQLConnection.unix_socket</code></h3></div></div></div><p>
+        This read-only property returns the UNIX socket user for
+        connecting with the MySQL server.
+      </p><p>
+        Returns a string.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLConnection_user"></a>7.2.43. Property <code class="literal">MySQLConnection.user</code></h3></div></div></div><p>
+        This read-only property returns the username used for connecting
+        with the MySQL server.
+      </p><p>
+        Returns a string.
+      </p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connector-python-apiref-MySQLCursor"></a>7.3. Class <code class="literal">cursor.MySQLCursor</code></h2></div></div></div><div class="toc"><dl><dt><span class="section"><a href="#myconnpy_MySQLCursor">7.3.1. Constructor <code class="literal">cursor.MySQLCursor</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_callproc">7.3.2. Method <code class="literal">MySQLCursor.callproc(procname, args=())</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_close">7.3.3. Method <code class="literal">MySQLCursor.close()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_execute">7.3.4. Method <code class="literal">MySQLCursor.execute(operation, params=None,
+        multi=False)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_executemany">7.3.5. Method <code class="literal">MySQLCursor.executemany(operation, seq_params)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_fetchall">7.3.6. Method <code class="literal">MySQLCursor.fetchall()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_fetchmany">7.3.7. Method <code class="literal">MySQLCursor.fetchmany(size=1)</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_fetchone">7.3.8. Method <code class="literal">MySQLCursor.fetchone()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_fetchwarnings">7.3.9. Method <code class="literal">MySQLCursor.fetchwarnings()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_stored_results">7.3.10. Method <code class="literal">MySQLCursor.stored_results()</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_column_names">7.3.11. Property <code class="literal">MySQLCursor.column_names</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_statement">7.3.12. Property <code class="literal">MySQLCursor.statement</code></a></span></dt><dt><span class="section"><a href="#myconnpy_MySQLCursor_with_rows">7.3.13. Property <code class="literal">MySQLCursor.with_rows</code></a></span></dt></dl></div><p>
+      The MySQLCursor class is used to instantiate object which can
+      execute operation such as SQL queries. They interact with the
+      MySQL server using a MySQLConnection object.
+    </p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLCursor"></a>7.3.1. Constructor <code class="literal">cursor.MySQLCursor</code></h3></div></div></div><p>
+        The constructor initializes the instance with the optional
+        <code class="literal">connection</code>, which should be an instance of
+        <a class="link" href="#connector-python-apiref-MySQLConnection" title="7.2. Class connection.MySQLConnection">MySQLConnection</a>.
+      </p><p>
+        In most cases, the MySQLConnection method
+        <a class="link" href="#myconnpy_MySQLConnection_cursor" title="7.2.6. Method MySQLConnection.cursor(buffered=None, raw=None, cursor_class=None)"><code class="literal">cursor()</code></a>
+        is used to instantiate a MySQLCursor object.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLCursor_callproc"></a>7.3.2. Method <code class="literal">MySQLCursor.callproc(procname, args=())</code></h3></div></div></div><p>
+        This method calls a stored procedure with the given name. The
+        <code class="literal">args</code> sequence of parameters must contain one
+        entry for each argument that the routine expects. The result is
+        returned as modified copy of the input sequence. Input
+        parameters are left untouched, output and input/output
+        parameters replaced with possibly new values.
+      </p><p>
+        Result set provided by the stored procedure are automatically
+        fetched and stored as
+        <a class="link" href="#connector-python-apiref-MySQLCursorBuffered" title="7.4. Class cursor.MySQLCursorBuffered">MySQLBufferedCursor</a>
+        instances. See
+        <a class="link" href="#myconnpy_MySQLCursor_stored_results" title="7.3.10. Method MySQLCursor.stored_results()">stored_results()</a>
+        for more information.
+      </p><p>
+        The following example shows how to execute a stored procedure
+        which takes two parameters, multiplies the values and returns
+        the product:
+      </p><pre class="programlisting">
+# Definition of the multiply stored procedure:
+# CREATE PROCEDURE multiply(IN pFac1 INT, IN pFac2 INT, OUT pProd INT)
+# BEGIN
+#  SET pProd := pFac1 * pFac2;
+# END
+&gt;&gt;&gt; args = (5, 5, 0) # 0 is to hold value of the OUT parameter pProd
+&gt;&gt;&gt; cursor.callproc('multiply', args)
+('5', '5', 25L)
+</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLCursor_close"></a>7.3.3. Method <code class="literal">MySQLCursor.close()</code></h3></div></div></div><p>
+        This method will close the MySQL cursor, resetting all results
+        and removing the connection.
+      </p><p>
+        Use <code class="literal">close()</code> every time you are done using the
+        cursor.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLCursor_execute"></a>7.3.4. Method <code class="literal">MySQLCursor.execute(operation, params=None,
+        multi=False)</code></h3></div></div></div><p>
+        This method prepare the given database
+        <code class="literal">operation</code> (query or command). The parameters
+        found in the tuple or dictionary <code class="literal">params</code> will
+        be bound to the variables in the operation. Variables are
+        specified using %s markers or named markers %(name)s.
+      </p><p>
+        For example, insert information about a new employee and
+        selecting again the data of this person:
+      </p><pre class="programlisting">insert = (
+"INSERT INTO employees (emp_no, first_name, last_name, hire_date) "
+"VALUES (%s, %s, %s, %s)")
+data = (2, 'Jane', 'Doe', datetime.date(2012, 3, 23))
+cursor.execute(insert, data)
+select = "SELECT * FROM employees WHERE emp_no = %(emp_no)s"
+cursor.execute(select, { 'emp_no': 2 })</pre><p>
+        Note that the data is converted from Python object to something
+        MySQL understand. In the above example, the datetime.date()
+        instance is converted to '2012-03-23' in the above example.
+      </p><p>
+        When <code class="literal">multi</code> is set to True,
+        <code class="literal">execute()</code> will be able to execute multiple
+        statements. It will return an iterator which makes it possible
+        to go through all results for each statement. Note that using
+        parameters is not working well in this case, and it's usually a
+        good idea to execute each statement on its own.
+      </p><p>
+        In the following example we select and insert data in one
+        operation and display the result:
+      </p><pre class="programlisting">operation = 'SELECT 1; INSERT INTO t1 VALUES (); SELECT 2'
+for result in cursor.execute(operation):
+  if result.with_rows:
+    print("Statement '{}' has following rows:".format(
+      result.statement))
+    print(result.fetchall())
+  else:
+    print("Affected row(s) by query '{}' was {}".format(
+      result.statement, result.rowcount))</pre><p>
+        If the connection was configured to fetch warnings, warnings
+        generated by the operation will be available through the method
+        <a class="link" href="#myconnpy_MySQLCursor_fetchwarnings" title="7.3.9. Method MySQLCursor.fetchwarnings()">MySQLCursor.fetchwarnings()</a>.
+      </p><p>
+        Returns an iterator when multi is True.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLCursor_executemany"></a>7.3.5. Method <code class="literal">MySQLCursor.executemany(operation, seq_params)</code></h3></div></div></div><p>
+        This method prepares a database operation (query or command) and
+        then execute it against all parameter sequences or mappings
+        found in the sequence <code class="literal">seq_of_params</code>.
+      </p><p>
+        The <code class="literal">executemany()</code> is simply iterating through
+        the sequence of parameters calling the
+        <code class="literal">execute()</code> method. Inserting data, however, is
+        optimized by batching them using the multiple rows syntax.
+      </p><p>
+        In the following example we are inserting 3 records:
+      </p><pre class="programlisting">data = [
+  ('Jane', date(2005, 2, 12)),
+  ('Joe', date(2006, 5, 23)),
+  ('John', date(2010, 10, 3)),
+]
+stmt = "INSERT INTO employees (first_name, hire_date) VALUES (%s, %s)"
+cursor.executemany(stmt, data)</pre><p>
+        In the above example, the INSERT statement sent to MySQL would
+        be as follows: <code class="literal">INSERT INTO employees (first_name,
+        hire_date) VALUES ('Jane', '2005-02-12'), ('Joe', '2006-05-23'),
+        ('John', '2010-10-03')</code>.
+      </p><p>
+        Note that it is not possible to execute multiple statements
+        using the <code class="literal">executemany()</code> method. Doing so will
+        raise an <code class="literal">InternalError</code> exception.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLCursor_fetchall"></a>7.3.6. Method <code class="literal">MySQLCursor.fetchall()</code></h3></div></div></div><p>
+        The method fetches all or remaining rows of a query result set,
+        returning a list of tuples. An empty list is returned when no
+        rows are (anymore) available.
+      </p><p>
+        The following examples shows how to retrieve the first 2 rows of
+        a result set, and then retrieve the remaining rows:
+      </p><pre class="programlisting">
+&gt;&gt;&gt; cursor.execute("SELECT * FROM employees ORDER BY emp_no")
+&gt;&gt;&gt; head_rows = cursor.fetchmany(size=2)
+&gt;&gt;&gt; remaining_rows = cursor.fetchall()
+</pre><p>
+        Note that you have to fetch all rows before being able to
+        execute new queries using the same connection.
+      </p><p>
+        Returns a list of tuples or empty list when no rows available.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLCursor_fetchmany"></a>7.3.7. Method <code class="literal">MySQLCursor.fetchmany(size=1)</code></h3></div></div></div><p>
+        This method fetches the next set of rows of a query results,
+        returning a list of tuples. An empty list is returned when no
+        more rows are available.
+      </p><p>
+        The number of rows returned can be specified using the size
+        argument, which defaults to one. Fewer rows might be returned,
+        when there are not more rows available than specified by the
+        argument.
+      </p><p>
+        Note that you have to fetch all rows before being able to
+        execute new queries using the same connection.
+      </p><p>
+        Returns a list of tuples or empty list when no rows available.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLCursor_fetchone"></a>7.3.8. Method <code class="literal">MySQLCursor.fetchone()</code></h3></div></div></div><p>
+        This method retrieves the next row of a query result set,
+        returning a single sequence, or None when no more data is
+        available.The returned tuple consists of data returned by the
+        MySQL server converted to Python objects.
+      </p><p>
+        The <code class="literal">fetchone()</code> method is used by
+        <a class="link" href="#myconnpy_MySQLCursor_fetchmany" title="7.3.7. Method MySQLCursor.fetchmany(size=1)">fetchmany()</a>
+        and
+        <a class="link" href="#myconnpy_MySQLCursor_fetchall" title="7.3.6. Method MySQLCursor.fetchall()">fetchall()</a>.
+        It is also used when using the MySQLCursor instance as an
+        iterator.
+      </p><p>
+        The following examples show how to iterate through the result of
+        a query using <code class="literal">fetchone()</code>:
+      </p><pre class="programlisting"># Using a while-loop
+cursor.execute("SELECT * FROM employees")
+row = cursor.fetchone()
+while row is not None:
+  print(row)
+  row = cursor.fetchone()
+# Using the cursor as iterator 
+cursor.execute("SELECT * FROM employees")
+for row in cursor:
+  print(row)</pre><p>
+        Note that you have to fetch all rows before being able to
+        execute new queries using the same connection.
+      </p><p>
+        Returns a tuple or None.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLCursor_fetchwarnings"></a>7.3.9. Method <code class="literal">MySQLCursor.fetchwarnings()</code></h3></div></div></div><p>
+        This method returns a list of tuples containing warnings
+        generated by previously executed statement. Use the connection's
+        <code class="literal">get_warnings</code> property to toggle whether
+        warnings has to be fetched.
+      </p><p>
+        The following example shows a SELECT statement which generated a
+        warning:
+      </p><pre class="programlisting">
+&gt;&gt;&gt; cnx.get_warnings = True
+&gt;&gt;&gt; cursor.execute('SELECT "a"+1')
+&gt;&gt;&gt; cursor.fetchall()
+[(1.0,)]
+&gt;&gt;&gt; cursor.fetchwarnings()
+[(u'Warning', 1292, u"Truncated incorrect DOUBLE value: 'a'")]
+</pre><p>
+        It is also possible to raise errors when warnings are found. See
+        the MySQLConnection property
+        <a class="link" href="#myconnpy_MySQLConnection_raise_on_warnings" title="7.2.37. Property MySQLConnection.raise_on_warnings">raise_on_warnings</a>.
+      </p><p>
+        Returns a list of tuples.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLCursor_stored_results"></a>7.3.10. Method <code class="literal">MySQLCursor.stored_results()</code></h3></div></div></div><p>
+        This method returns an list iterator object which can be used to
+        go through result sets provided by stored procedures after
+        calling them using the
+        <a class="link" href="#myconnpy_MySQLCursor_callproc" title="7.3.2. Method MySQLCursor.callproc(procname, args=())">callproc()</a>
+        method.
+      </p><p>
+        In the following example we execute a stored procedure which
+        will provide two result sets. We use
+        <code class="literal">stored_results()</code> to retrieve them:
+      </p><pre class="programlisting">
+&gt;&gt;&gt; cursor.callproc('sp1')
+()
+&gt;&gt;&gt; for result in cursor.stored_results():
+...     print result.fetchall()
+... 
+[(1,)]
+[(2,)]
+</pre><p>
+        Note that the result sets stay available until you executed
+        another operation or call another stored procedure.
+      </p><p>
+        Returns a listiterator.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLCursor_column_names"></a>7.3.11. Property <code class="literal">MySQLCursor.column_names</code></h3></div></div></div><p>
+        This read-only property returns the column names of a result set
+        as sequence of (unicode) strings.
+      </p><p>
+        The following example shows how you can create a dictionary out
+        of a tuple containing data with keys using
+        <code class="literal">column_names</code>:
+      </p><pre class="programlisting">cursor.execute("SELECT last_name, first_name, hire_date "
+  "FROM employees WHERE emp_no = %s", (123,))
+row = dict(zip(cursor.column_names, cursor.fetchone())
+print("{last_name}, {first_name}: {hire_date}".format(row))</pre><p>
+        Returns a tuple.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLCursor_statement"></a>7.3.12. Property <code class="literal">MySQLCursor.statement</code></h3></div></div></div><p>
+        This read-only property returns the last executed statement. In
+        case multiple statements where executed, it will show the actual
+        statement.
+      </p><p>
+        The <code class="literal">statement</code> property might be useful for
+        debugging and showing what was send to the MySQL server.
+      </p><p>
+        Returns a string.
+      </p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="myconnpy_MySQLCursor_with_rows"></a>7.3.13. Property <code class="literal">MySQLCursor.with_rows</code></h3></div></div></div><p>
+        This read-only property will return True when the result of the
+        executed operation provides rows.
+      </p><p>
+        The <code class="literal">with_rows</code> property is useful when
+        executing multiple statements and you need to fetch rows. In the
+        following example we only report the affected rows by the
+        <code class="literal">UPDATE</code> statement:
+      </p><pre class="programlisting">import mysql.connector
+cnx = mysql.connector.connect(user='scott', database='test')
+cursor = cnx.cursor()
+operation = 'SELECT 1; UPDATE t1 SET c1 = 2; SELECT 2'
+for result in cursor.execute(operation, multi=True):
+  if result.with_rows:
+    result.fetchall()
+  else:
+    print("Updated row(s): {}".format(result.rowcount))</pre></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connector-python-apiref-MySQLCursorBuffered"></a>7.4. Class <code class="literal">cursor.MySQLCursorBuffered</code></h2></div></div></div><p>
+      This class is inheriting from cursor.MySQLCursor and if needed
+      automatically retrieves rows after an operation has been executed.
+    </p><p>
+      MySQLCursorBuffered can be useful in situations where two queries,
+      with small result sets, need to be combined or computed with each
+      other.
+    </p><p>
+      You can either use the <code class="literal">buffered</code> argument when
+      using the connection's
+      <a class="link" href="#myconnpy_MySQLConnection_cursor" title="7.2.6. Method MySQLConnection.cursor(buffered=None, raw=None, cursor_class=None)">
+      <code class="literal">cursor()</code></a> method, or you can use the
+      <code class="literal">buffered</code>
+      <a class="link" href="#connector-python-connectargs" title="Chapter 6. Connector/Python Connection Arguments">connection
+      option</a> to make all created cursors by default buffering.
+    </p><pre class="programlisting">import mysql.connector
+cnx = mysql.connector.connect()
+# Only this particular cursor will be buffering results
+cursor.cursor(buffered=True)
+# All cursors by default buffering
+cnx = mysql.connector.connect(buffered=True)</pre><p>
+      See <a class="xref" href="#myconnpy_tutorial_CursorBuffered_GiveRaise" title="5.1. Tutorial: Raise employee's salary using a buffering cursor">Section 5.1, “Tutorial: Raise employee's salary using a buffering cursor”</a>
+      for a practical use case.
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connector-python-apiref-ClientFlag"></a>7.5. Class <code class="literal">constants.ClientFlag</code></h2></div></div></div><p>
+      This class provides constants defining MySQL client flags which
+      can be used upon connection to configure the session. The
+      ClientFlag class is available when importing mysql.connector.
+    </p><pre class="programlisting">
+&gt;&gt;&gt; import mysql.connector
+&gt;&gt;&gt; mysql.connector.ClientFlag.FOUND_ROWS
+2
+</pre><p>
+      See <a class="xref" href="#myconnpy_MySQLConnection_set_client_flags" title="7.2.30. Method MySQLConnection.set_client_flags(flags)">Section 7.2.30, “Method <code class="literal">MySQLConnection.set_client_flags(flags)</code>”</a>
+      and the <a class="link" href="#connector-python-connectargs" title="Chapter 6. Connector/Python Connection Arguments">connection
+      argument</a> <code class="literal">client_flag</code>.
+    </p><p>
+      Note that the ClientFlag class can not be instantiated.
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connector-python-apiref-FieldType"></a>7.6. Class <code class="literal">constants.FieldType</code></h2></div></div></div><p>
+      This class provides all supported MySQL field or data types. They
+      can be useful when dealing with raw data or defining your own
+      converters. The field type is stored with every cursor in the
+      description for each column.
+    </p><p>
+      The following example shows how you can print the name of the data
+      types for each of the columns in the result set.
+    </p><pre class="programlisting">from __future__ import print_function
+import mysql.connector
+from mysql.connector import FieldType
+cnx = mysql.connector.connect(user='scott', database='test')
+cursor = cnx.cursor()
+cursor.execute(
+  "SELECT DATE(NOW()) AS `c1`, TIME(NOW()) AS `c2`, "
+  "NOW() AS `c3`, 'a string' AS `c4`, 42 AS `c5`")
+rows = cursor.fetchall()
+for desc in cursor.description:
+  colname = desc[0]
+  coltype = desc[1]
+  print("Column {} has type {}".format(
+    colname, FieldType.get_info(coltype)))
+cursor.close()
+cnx.close()</pre><p>
+      Note that the FieldType class can not be instantiated.
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connector-python-apiref-SQLMode"></a>7.7. Class <code class="literal">constants.SQLMode</code></h2></div></div></div><p>
+      This class provides all known MySQL
+      <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/server-sql-mode.html" target="_top">Server SQL Modes</a>. It is
+      mostly used when setting the SQL modes at connection time using
+      the connection's property <code class="literal">sql_mode</code>. See
+      <a class="xref" href="#myconnpy_MySQLConnection_sql_mode" title="7.2.40. Property MySQLConnection.sql_mode">Section 7.2.40, “Property <code class="literal">MySQLConnection.sql_mode</code>”</a>.
+    </p><p>
+      Note that the SQLMode class can not be instantiated.
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connector-python-apiref-CharacterSet"></a>7.8. Class <code class="literal">constants.CharacterSet</code></h2></div></div></div><p>
+      This class provides all known MySQL characters sets and their
+      default collations. See
+      <a class="xref" href="#myconnpy_MySQLConnection_set_charset_collation" title="7.2.29. Method MySQLConnection.set_charset_collation(charset=None, collation=None)">Section 7.2.29, “Method <code class="literal">MySQLConnection.set_charset_collation(charset=None,
+        collation=None)</code>”</a>
+      for examples.
+    </p><p>
+      Note that the CharacterSet class can not be instantiated.
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connector-python-apiref-RefreshOption"></a>7.9. Class <code class="literal">constants.RefreshOption</code></h2></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+          <code class="literal">RefreshOption.GRANT</code>
+        </p><p>
+          Refresh the grant tables, like
+          <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/flush.html" target="_top"><code class="literal">FLUSH
+          PRIVILEGES</code></a>.
+        </p></li><li class="listitem"><p>
+          <code class="literal">RefreshOption.LOG</code>
+        </p><p>
+          Flush the logs, like
+          <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/flush.html" target="_top"><code class="literal">FLUSH LOGS</code></a>.
+        </p></li><li class="listitem"><p>
+          <code class="literal">RefreshOption.TABLES</code>
+        </p><p>
+          Flush the table cache, like
+          <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/flush.html" target="_top"><code class="literal">FLUSH TABLES</code></a>.
+        </p></li><li class="listitem"><p>
+          <code class="literal">RefreshOption.HOSTS</code>
+        </p><p>
+          Flush the host cache, like
+          <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/flush.html" target="_top"><code class="literal">FLUSH HOSTS</code></a>.
+        </p></li><li class="listitem"><p>
+          <code class="literal">RefreshOption.STATUS</code>
+        </p><p>
+          Reset status variables, like <code class="literal">FLUSH STATUS</code>.
+        </p></li><li class="listitem"><p>
+          <code class="literal">RefreshOption.THREADS</code>
+        </p><p>
+          Flush the thread cache.
+        </p></li><li class="listitem"><p>
+          <code class="literal">RefreshOption.SLAVE</code>
+        </p><p>
+          On a slave replication server, reset the master server
+          information and restart the slave, like
+          <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/reset-slave.html" target="_top"><code class="literal">RESET SLAVE</code></a>.
+        </p></li><li class="listitem"><p>
+          <code class="literal">RefreshOption.MASTER</code>
+        </p><p>
+          On a master replication server, remove the binary log files
+          listed in the binary log index and truncate the index file,
+          like <a class="ulink" href="http://dev.mysql.com/doc/refman/5.5/en/reset-master.html" target="_top"><code class="literal">RESET MASTER</code></a>.
+        </p></li></ul></div></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="cpython-news"></a>Chapter 8. MySQL Connector/Python Change History</h1></div></div></div><h2><a name="cpython-news-1-0-6"></a>
+    Changes in MySQL Connector/Python 1.0.6 (30 August 2012, beta)
+  </h2><p class="release-level">
+        Second beta release.
+      </p><p><span class="bold"><strong>Functionality Added or Changed</strong></span></p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+        Changed name and version of distributions to align with other
+        MySQL projects:
+      </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>
+            The version now includes the suffix 'b' for beta and 'a' for
+            alpha followed by a number. This version is used in the
+            source and built distributions. GA versions will have no
+            suffix.
+          </p></li><li class="listitem"><p>
+            The RPM spec files have been updated to create packages
+            whose names are aligned with RPMs from other MySQL projects.
+          </p></li></ul></div></li><li class="listitem"><p>
+        Changed how MySQL server errors are mapped to Python exceptions.
+        We now use the <code class="literal">SQLState</code> (when available) to
+        raise a better error.
+      </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>
+            Incompatibility: some server errors are now raised with a
+            different exception.
+          </p></li><li class="listitem"><p>
+            It is possible to override how errors are raised using the
+            <code class="literal">mysql.connector.custom_error_exception()</code>
+            function, defined in the
+            <code class="literal">mysql.connector.errors</code> module. This can
+            be useful for certain frameworks to align with other
+            database drivers.
+          </p></li></ul></div></li></ul></div><p><span class="bold"><strong>Bugs Fixed</strong></span></p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+        Fixed version-specific code so Connector/Python works with
+        Python 3.3.
+       (Bug #14524942)</p></li><li class="listitem"><p>
+        Fixed <code class="literal">MySQLCursorRaw.fetchall()</code> so it does
+        not raise an exception when results are available.
+       (Bug #14517262, Bug #66465)</p></li><li class="listitem"><p>
+        Fixed installation of <code class="filename">version.py</code> on OS X:
+      </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>
+            <code class="filename">version.py</code> is now correctly installed
+            on OS X in the <code class="literal">mysql.connector</code> package.
+            Previously, it was installed through
+            <code class="literal">data_files</code>, and
+            <code class="filename">version.py</code> ended up in the system-wide
+            package location of Python, from which it could not be
+            imported.
+          </p></li><li class="listitem"><p>
+            <code class="literal">data_files</code> is not used any longer in
+            <code class="filename">setup.py</code> and is removed. Extra files
+            like <code class="filename">version.py</code> are now copied in the
+            custom <code class="literal">Distutils</code> commands.
+          </p></li></ul></div><p>(Bug #14483142)</p></li><li class="listitem"><p>
+        Timeout for unit tests has been set to 10 seconds. Test cases
+        can individually adjust it to be higher or lower.
+       (Bug #14487502)</p></li><li class="listitem"><p>
+        Fixed test cases in <code class="filename">test_mysql_database.py</code>
+        that failed when using <code class="literal">YEAR(2)</code> with MySQL
+        5.6.6 and greater.
+       (Bug #14460680)</p></li><li class="listitem"><p>
+        Fixed SSL unit testing for source distributions:
+      </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>
+            The SSL keys and certificates were missing and are now added
+            to the source distribution. Now SSL testing works properly.
+          </p></li><li class="listitem"><p>
+            Additionally for the Windows platform, forward slashes were
+            added to the option file creation so the MySQL server can
+            pick up the needed SSL files.
+          </p></li></ul></div><p>(Bug #14402737)</p></li></ul></div><h2><a name="cpython-news-1-0-5"></a>
+    Changes in MySQL Connector/Python 1.0.5 (17 July 2012, beta)
+  </h2><p>
+        First beta release.
+      </p><p><span class="bold"><strong>Functionality Added or Changed</strong></span></p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+        Added SQLMode class in the constants module to make it easier to
+        set modes. For example:
+      </p><pre class="programlisting">cnx.sql_mode = [SQLMode.REAL_AS_FLOAT, SQLMode.NO_ZERO_DATE]</pre></li><li class="listitem"><p>
+        Added descriptive error codes for both client and server errors
+        in the module <code class="literal">errorcode</code>. A new sub-package
+        <code class="literal">locales</code> has been added, which currently only
+        supports English client error messages.
+      </p><p>
+        For example, <code class="literal">errorcode.CR_CONNECTION_ERROR</code> is
+        2002.
+      </p></li></ul></div><h2><a name="cpython-news-1-0-4"></a>
+    Changes in MySQL Connector/Python 1.0.4 (07 July 2012, alpha)
+  </h2><p>
+        Internal alpha release.
+      </p><p><span class="bold"><strong>Bugs Fixed</strong></span></p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="bold"><strong>Incompatible Change</strong></span>: 
+        The <code class="literal">MySQLConnection</code> methods
+        <code class="literal">unset_client_flag()</code> and
+        <code class="literal">set_client_flag()</code> have been removed. Use
+        the<code class="literal">set_client_flags()</code> method instead using a
+        sequence.
+       (Bug #14259996)</p></li><li class="listitem"><p><span class="bold"><strong>Incompatible Change</strong></span>: 
+        The method <code class="literal">MySQLConnection.set_charset()</code> has
+        been removed and replaced by
+        <code class="literal">MySQLConnection.set_charset_collation()</code> to
+        simplify setting and retrieving character set and collation
+        information. The <code class="literal">MySQLConnection</code> properties
+        <code class="literal">collation</code> and <code class="literal">charset</code> are
+        now read-only.
+       (Bug #14260052)</p></li><li class="listitem"><p><span class="bold"><strong>Incompatible Change</strong></span>: 
+        Fixed <code class="literal">MySQLConnection.cmd_query()</code> to raise an
+        error when the operation has multiple statements. We introduced
+        a new method <code class="literal">MySQLConnection.cmd_query_iter()</code>
+        which needs to be used when multiple statements send to the
+        MySQL server. It returns a generator object to iterate through
+        results.
+      </p><p>
+        When executing single statements,
+        <code class="literal">MySQLCursor.execute()</code> will always return
+        <code class="literal">None</code>. You can use the
+        <code class="literal">MySQLCursor</code> property
+        <code class="literal">with_rows</code> to check whether a result could
+        have rows or not.
+      </p><p>
+        <code class="literal">MySQLCursor.execute()</code> returns a generator
+        object with which you can iterate over results when executing
+        multiple statements.
+      </p><p>
+        The <code class="literal">MySQLCursor.next_resultset()</code> became
+        obsolete and was removed and the
+        <code class="literal">MySQLCursor.next_proc_result()</code> method has
+        been renamed to <code class="literal">MySQLCursor.proc_results()</code>,
+        which returns a generator object. The
+        <code class="literal">MySQLCursor.with_rows</code> property can be used to
+        check if a result could return rows. The
+        <code class="filename">multiple_resultset.py</code> example script shows
+        how to go through results produced by sending multiple
+        statements.
+       (Bug #14208326)</p></li><li class="listitem"><p>
+        Fixed <code class="literal">MySQLCursor.executemany()</code> when
+        <code class="literal">INSERT</code> statements use the <code class="literal">ON
+        DUPLICATE KEY</code> clause with a function such as
+        <code class="literal">VALUES()</code>.
+       (Bug #14259954)</p></li><li class="listitem"><p>
+        Fixed unit testing on the Microsoft Windows platform.
+       (Bug #14236592)</p></li><li class="listitem"><p>
+        Fixed converting a <code class="literal">datetime.time</code> to a MySQL
+        type using Python 2.4 and 2.5. The <code class="literal">strftime()</code>
+        function has no support for the <code class="literal">%f</code> mark in
+        those Python versions.
+       (Bug #14231941)</p></li><li class="listitem"><p>
+        Fixed <code class="literal">cursor.CursorBase</code> attributes
+        <code class="literal">description</code>, <code class="literal">lastrowid</code> and
+        <code class="literal">rowcount</code> to be read-only properties.
+       (Bug #14231160)</p></li><li class="listitem"><p>
+        Fixed <code class="literal">MySQLConnection.cmd_query()</code> and other
+        methods so they check first whether there are unread results.
+       (Bug #14184643)</p></li></ul></div><h2><a name="cpython-news-1-0-3"></a>
+    Changes in MySQL Connector/Python 1.0.3 (08 June 2012, alpha)
+  </h2><p>
+        Internal alpha release.
+      </p><p><span class="bold"><strong>Functionality Added or Changed</strong></span></p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+        Adding new <code class="literal">Distutils</code> commands to create
+        Windows Installers using WiX and RPM packages.
+      </p></li><li class="listitem"><p>
+        Adding support for time values with a fractional part, for MySQL
+        5.6.4 and greater. A new example script
+        <code class="filename">microseconds.py</code> was added to show this
+        functionality.
+      </p></li></ul></div><h2><a name="cpython-news-1-0-2"></a>
+    Changes in MySQL Connector/Python 1.0.2 (19 May 2012, alpha)
+  </h2><p>
+        Internal alpha release.
+      </p><p><span class="bold"><strong>Functionality Added or Changed</strong></span></p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+        Added more unit tests for modules like
+        <code class="literal">connection</code> and <code class="literal">network</code> as
+        well as testing the SSL functionality.
+      </p></li></ul></div><p><span class="bold"><strong>Bugs Fixed</strong></span></p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+        Fixed bootstrapping MySQL 5.6 running unit tests.
+      </p><p>
+        Messages send by the bootstrapped MySQL server to
+        <code class="literal">stdout</code> and <code class="literal">stderr</code> are now
+        discarded.
+       (Bug #14048685)</p></li><li class="listitem"><p>
+        Fixing and refactoring the
+        <code class="literal">mysql.connector.errors</code> module.
+       (Bug #14039339)</p></li></ul></div><h2><a name="cpython-news-1-0-1"></a>
+    Changes in MySQL Connector/Python 1.0.1 (26 April 2012, alpha)
+  </h2><p>
+        Internal alpha release.
+      </p><p><span class="bold"><strong>Functionality Added or Changed</strong></span></p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+        Change the version so it only contain integers. The 'a' or
+        'alpha' suffix will not be present in packages, but it will be
+        mentioned in the <code class="filename">_version.py</code> module since
+        <code class="filename">metasetupinfo.py</code> uses this information to
+        set, for example, the Trove classifiers dynamically.
+      </p></li></ul></div><h2><a name="cpython-news-1-0-0"></a>
+    Changes in MySQL Connector/Python 1.0.0 (22 April 2012, alpha)
+  </h2><p>
+        Internal alpha release.
+      </p><p><span class="bold"><strong>Functionality Added or Changed</strong></span></p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="bold"><strong>Incompatible Change</strong></span>: 
+        <code class="literal">MySQLConnection.reconnect()</code> can be used to
+        reconnect to the MySQL server. It accepts number of retries and
+        an optional delay between attempts.
+      </p><p>
+        <code class="literal">MySQLConnectiong.ping()</code> is now a method and
+        works the way the MySQL C API <code class="literal">mysql_ping()</code>
+        function works: it raises an error. It can also optionally
+        reconnect.
+      </p><p>
+        <code class="literal">MySQLConnection.is_connected()</code> now returns
+        <code class="literal">True</code> when connection is available,
+        <code class="literal">False</code> otherwise.
+      </p><p>
+        <code class="literal">ping()</code> and <code class="literal">is_connected()</code>
+        are backwards incompatible.
+       (Bug #13392739)</p></li><li class="listitem"><p>
+        Refactored the modules connection and protocol and created a new
+        module <code class="literal">network</code>. The
+        <code class="literal">MySQLProtocol</code> does not keep a reference to
+        the connection object any more and deals only with creating and
+        parsing MySQL packets. Network interaction is now done by the
+        <code class="literal">MySQLConnection</code> objects (with the exception
+        of <code class="literal">MySQLProtocol.read_text_result()</code>).
+      </p></li></ul></div><p><span class="bold"><strong>Bugs Fixed</strong></span></p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+        Fixed <code class="filename">metasetupinfo.py</code> to use the
+        Connector/Python which is being installed instead of the version
+        already installed.
+       (Bug #13962765)</p></li><li class="listitem"><p>
+        Fixed <code class="literal">MySQLCursor.description</code> so it stores
+        column names as Unicode.
+       (Bug #13792575)</p></li><li class="listitem"><p>
+        Fixed <code class="literal">dbapi.Binary</code> to be a bytes types for
+        Python 3.x.
+       (Bug #13780676)</p></li><li class="listitem"><p>
+        Fixed automatic garbage collection which caused memory usage to
+        grow over time. Note that <code class="literal">MySQLConnection</code>
+        does not keep track of its cursors any longer.
+       (Bug #13435186)</p></li><li class="listitem"><p>
+        Fixed setting time zone for current MySQL session.
+       (Bug #13395083)</p></li><li class="listitem"><p>
+        Fixed setting and retrieving character set and collation.
+       (Bug #13375632)</p></li><li class="listitem"><p>
+        Fixed handling of errors after authentication for Python 3.
+       (Bug #13364285)</p></li></ul></div></div></div><div class="copyright-footer">
+    Copyright © 2012, Oracle and/or its affiliates. All rights
+    reserved.
+  <a href="#legalnotice">Legal Notices</a></div></body></html>

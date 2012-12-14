@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # MySQL Connector/Python - MySQL driver written in Python.
-# Copyright (c) 2009,2010, Oracle and/or its affiliates. All rights reserved.
-# Use is subject to license terms. (See COPYING)
+# Copyright (c) 2009, 2012, Oracle and/or its affiliates. All rights reserved.
 
+# MySQL Connector/Python is licensed under the terms of the GPLv2
+# <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>, like most
+# MySQL Connectors. There are special exceptions to the terms and
+# conditions of the GPLv2 as it is applied to this software, see the
+# FLOSS License Exception
+# <http://www.mysql.com/about/legal/licensing/foss-exception.html>.
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation.
-# 
-# There are special exceptions to the terms and conditions of the GNU
-# General Public License as it is applied to this software. View the
-# full text of the exception in file EXCEPTIONS-CLIENT in the directory
-# of this software distribution or see the FOSS License Exception at
-# www.mysql.com.
 # 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -64,6 +64,7 @@ MY_CNF = """
 [mysqld]
 basedir = %(mysqld_basedir)s
 datadir = %(mysqld_datadir)s
+tmpdir = %(mysqld_tmpdir)s
 port = %(mysqld_port)d
 socket = %(mysqld_socket)s
 bind_address = %(mysqld_bind_address)s
@@ -72,11 +73,33 @@ sql_mode = ""
 default_time_zone = +00:00
 log-error = myconnpy_mysqld.err
 log-bin = myconnpy_bin
+general_log = ON
+ssl
 """
+
+if os.name == 'nt':
+    MY_CNF += '\n'.join((
+        "ssl-ca = %(ssl_dir)s\\\\tests_CA_cert.pem",
+        "ssl-cert = %(ssl_dir)s\\\\tests_server_cert.pem",
+        "ssl-key = %(ssl_dir)s\\\\tests_server_key.pem",
+        ))
+else:
+    MY_CNF += '\n'.join((
+        "ssl-ca = %(ssl_dir)s/tests_CA_cert.pem",
+        "ssl-cert = %(ssl_dir)s/tests_server_cert.pem",
+        "ssl-key = %(ssl_dir)s/tests_server_key.pem",
+        ))
 
 def _add_options(p):
     p.add_option('-t','--test', dest='testcase', metavar='NAME',
         help='Tests to execute, one of %s' % tests.get_test_names())
+    p.add_option('-T','--one-test', dest='onetest', metavar='NAME',
+        help='Particular test to execute, format: '\
+             '<module>[.<class>[.<method>]]. '\
+             'For example, to run a particular '\
+             'test BugOra13392739.test_reconnect() from the tests.test_bugs '\
+             'module, use following value for the -T option: '\
+             ' tests.test_bugs.BugOra13392739.test_reconnect')
     p.add_option('-l','--log', dest='logfile', metavar='NAME',
         default=None,
         help='Log file location (if not given, logging is disabled)')
@@ -140,14 +163,17 @@ def main():
     _set_config(options, unix_socket=unix_socket)
     
     # Init the MySQL Server object
-    mysql_server = mysqld.MySQLInit(options.mysql_basedir,
+    mysql_server = mysqld.MySQLInit(
+        options.mysql_basedir,
         options.mysql_topdir,
         MY_CNF,
         option_file,
         options.bind_address,
         options.port,
-        unix_socket)
+        unix_socket,
+        os.path.abspath(tests.SSL_DIR))
     mysql_server._debug = options.debug
+    tests.MYSQL_VERSION = mysql_server.version
     
     # Force removal of previous test data
     if options.force is True:
@@ -160,8 +186,12 @@ def main():
         else:
             msg = "Test case is not one of %s" % tests.get_test_names()
             _show_help(msg=msg,parser=parser,exit=1)
+        testsuite = unittest.TestLoader().loadTestsFromNames(testcases)
+    elif options.onetest is not None:
+        testsuite = unittest.TestLoader().loadTestsFromName(options.onetest)
     else:
         testcases = tests.active_testcases
+        testsuite = unittest.TestLoader().loadTestsFromNames(testcases)
     
     # Enabling logging
     formatter = logging.Formatter("%(asctime)s [%(name)s:%(levelname)s] %(message)s")
@@ -179,27 +209,46 @@ def main():
     else:
         myconnpy_logger.setLevel(logging.INFO)
     myconnpy_logger.addHandler(fh)
-    logger.info("MySQL Connector/Python unittest started")
+    myconnpy_logger.info(
+        "MySQL Connector/Python unittest started: "
+        "Python v%s ; MySQL v%s" % (
+            '.'.join([ str(v) for v in sys.version_info[0:3]]),
+            '.'.join([ str(v) for v in mysql_server.version[0:3]])))
     
     # Bootstrap and start a MySQL server
+    myconnpy_logger.info("Bootstrapping a MySQL server")
     mysql_server.bootstrap()
+    myconnpy_logger.info("Starting a MySQL server")
     mysql_server.start()
     
-    # Run test cases
-    suite = unittest.TestLoader().loadTestsFromNames(testcases)
-    result = unittest.TextTestRunner(verbosity=options.verbosity).run(suite)
+    myconnpy_logger.info("Starting unit tests")
+    was_successful = False
+    try:
+        # Run test cases
+        result = unittest.TextTestRunner(verbosity=options.verbosity).run(
+            testsuite)
+        was_successful = result.wasSuccessful()
+    except KeyboardInterrupt:
+        logger.info("Unittesting was interrupted")
+        was_successful = False
+
+    # Clean up
+    if not options.keep:
+        mysql_server.stop()
+        mysql_server.remove()
+        myconnpy_logger.info("MySQL server stopped and cleaned up")
+    else:
+        myconnpy_logger.info("MySQL server kept running on %s:%d" %
+                             (options.bind_address, options.port))
+
     txt = ""
-    if not result.wasSuccessful():
+    if not was_successful:
         txt = "not "
     logger.info("MySQL Connector/Python unittests were %ssuccessful" % txt)
-    
-    # Clean up
-    mysql_server.stop()
-    if options.keep is not True:
-        mysql_server.remove()
-    
+
     # Return result of tests as exit code
-    sys.exit(not result.wasSuccessful())
+    sys.exit(not was_successful)
     
 if __name__ == '__main__':
     main()
+

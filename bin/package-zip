@@ -39,9 +39,11 @@ zip --quiet \
     --exclude="script.mythbox/resources/lib/IMDbPY/bin/*" \
     --exclude="script.mythbox/resources/lib/IMDbPY/docs/*" \
     --exclude="script.mythbox/resources/lib/mockito/*" \
-    --exclude="script.mythbox/resources/lib/mysql-connector-python/examples/*" \
-    --exclude="script.mythbox/resources/lib/mysql-connector-python/py3k/*" \
-    --exclude="script.mythbox/resources/lib/mysql-connector-python/tests/*" \
+    --exclude="script.mythbox/resources/lib/mysql-connector-python/python3/*" \
+    --exclude="script.mythbox/resources/lib/mysql-connector-python/docs/*" \
+    --exclude="script.mythbox/resources/lib/mysql-connector-python/support/*" \
+    --exclude="script.mythbox/resources/lib/mysql-connector-python/python2/tests/*" \
+    --exclude="script.mythbox/resources/lib/mysql-connector-python/python2/examples/*" \
     --exclude="script.mythbox/resources/lib/simplejson/*" \
     --exclude="script.mythbox/resources/lib/threadpool/*" \
     --exclude="script.mythbox/resources/lib/tvdb_api/tests/*" \

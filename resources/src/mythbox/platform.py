@@ -85,26 +85,26 @@ class Platform(object):
             
     def addLibsToSysPath(self):
         '''Add 3rd party libs in ${scriptdir}/resources/lib to the PYTHONPATH'''
-        libs = [
-            'decorator', 
-            'odict',
-            'bidict', 
-            'elementtree', 
-            'tvdb_api', 
-            'tvrage',
-            'themoviedb', 
-            'IMDbPY', 
-            'simplejson', 
-            'mysql-connector-python',
-            'python-twitter',
-            'twisted',
-            'zope.interface',
-            'mockito',
-            'unittest2',
-            'unittest']
+        lib_paths = [
+            ('decorator',), 
+            ('odict',),
+            ('bidict',), 
+            ('elementtree',), 
+            ('tvdb_api',), 
+            ('tvrage',),
+            ('themoviedb',), 
+            ('IMDbPY',), 
+            ('simplejson',), 
+            ('mysql-connector-python','python2'),
+            ('python-twitter',),
+            ('twisted',),
+            ('zope.interface',),
+            ('mockito',),
+            ('unittest2',),
+            ('unittest',)]
         
-        for lib in libs:
-            path = os.path.join(self.getScriptDir(), 'resources', 'lib', lib)
+        for lib_path in lib_paths:
+            path = os.path.join(self.getScriptDir(), 'resources', 'lib', *lib_path)
             if os.path.exists(path):
                 sys.path.insert(0, path)
         
