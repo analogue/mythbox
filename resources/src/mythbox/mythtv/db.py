@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2011 analogue@yahoo.com
+#  Copyright (C) 2013 analogue@yahoo.com
 # 
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -162,39 +162,21 @@ class MythDatabase(object):
         # Static data cached on demand
         self._master = None
         self._slaves = None
-        
-        if len(args) == 3:
-            self.initWithSettings(args[0], args[1], args[2])
-        else:
-            self.initWithDict(args[0])
-    
-    def initWithDict(self, dbSettings):
-        self.settings = dbSettings
-        self.translator = None
-        
-        log.debug("Initializing myth database connection")
-        self.conn = MySQLdb.connect(
-            host = self.settings['mysql_host'].encode('utf-8'), 
-            db = self.settings['mysql_database'].encode('utf-8'),
-            user = self.settings['mysql_user'].encode('utf-8'),
-            password = self.settings['mysql_password'].encode('utf-8'),
-            port = int(self.settings['mysql_port']),
-            connection_timeout = 60)
-                
-    def initWithSettings(self, settings, translator, domainCache):
+        self.initWithSettings(*args)
+
+    def initWithSettings(self, settings, translator=None, domainCache=None):
         self.settings = settings
         self.translator = translator
         self.domainCache = domainCache
-
-        log.debug("Initializing myth database connection")
         self.conn = MySQLdb.connect(
-            host = self.settings.get('mysql_host').encode('utf-8'), 
+            host = self.settings.get('mysql_host').encode('utf-8'),
             db = self.settings.get('mysql_database').encode('utf-8'),
             user = self.settings.get('mysql_user').encode('utf-8'),
             password = self.settings.get('mysql_password').encode('utf-8'),
             port = int(self.settings.get('mysql_port')),
-            connection_timeout = 60)
-    
+            autocommit = True,
+            connection_timeout = 90)
+
     @staticmethod
     def toDict(cursor, row):
         """Compensate for myconnpy's lack of a dict based cursor"""
@@ -1023,7 +1005,7 @@ class OfflineDatabase(MythDatabase):
     def getSlaveBackends(self):
         return []
     
-    def initWithSettings(self, settings, translator, domainCache):
+    def initWithSettings(self, settings, translator=None, domainCache=None):
         pass
     
     def close(self):
