@@ -434,9 +434,14 @@ class RecordingsWindow(BaseWindow):
     @catchall
     def renderEpisodeColumn(self, myRenderToken, myGroup):
         for (listItem, program) in myGroup.programsByListItem.items()[:]:
-            if hasattr(program, 'seasonEpisode'):
+            if program.hasSeasonAndEpisode():
+                # from mythtv db
+                self.updateListItemProperty(listItem, 'episode', program.formattedSeasonAndEpisode())
+            elif hasattr(program, 'seasonEpisode'):
+                # cached on program
                 self.updateListItemProperty(listItem, 'episode', program.seasonEpisode)
             else:
+                # delegate to fanart lookup
                 self.episodeQueue.put((program, myRenderToken, listItem))
                 
     def sameBackground(self, program):

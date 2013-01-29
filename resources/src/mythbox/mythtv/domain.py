@@ -716,6 +716,12 @@ class RecordedProgram(Program):
         """
         return self._data['category']
 
+    def hasSeasonAndEpisode(self):
+        return self.episode() != '0' and self.season() != '0'
+
+    def formattedSeasonAndEpisode(self):
+        return u'%sx%s' % (self.season(), self.episode())
+
     def season(self):
         return self._data.get('season', '0')
 
