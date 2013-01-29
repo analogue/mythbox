@@ -654,24 +654,6 @@ class RecordedProgram(Program):
         for key, value in zip(self.protocol.recordFields(), data):
             self._data[key] = value
 
-#        for index, item in enumerate(self.protocol.recordFields()):
-#            self._rec_program_dict[item] = index
-#
-#        for index, item in enumerate(self.protocol.emptyRecordFields()):
-#            self._rec_program_dict_empty[item] = index
-
-#    def getField(self, fieldName):
-#        return self._data[self.getFieldPos(fieldName)]
-#
-#    def getFieldPos(self, fieldName):
-#        if fieldName in self._rec_program_dict:
-#            return self._rec_program_dict[fieldName]
-#        elif fieldName in self._rec_program_dict_empty:
-#            return ""
-#        else:
-#            from mythbox.mythtv.conn import ClientException
-#            raise ClientException("Can't get position of fieldName %s in RecordingInfo as does not exist" % (fieldName))
-
     def isMovie(self):
         """
         @todo: not available via myth protocol record. Fix me!
