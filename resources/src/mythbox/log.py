@@ -41,7 +41,8 @@ class XbmcLogHandler(Handler):
         try:
             msg = self.format(record)
             fs = "%s" % msg
-            xbmc.log(fs, level=self.to_xbmc_level.get(record.levelname, xbmc.LOGINFO))
+            #xbmc.log(fs, level=self.to_xbmc_level.get(record.levelname, xbmc.LOGINFO))
+            xbmc.log(fs, level=xbmc.LOGERROR)
         except:
             self.handleError(record)
 

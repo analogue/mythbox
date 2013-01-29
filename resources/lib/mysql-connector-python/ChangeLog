@@ -1,48 +1,333 @@
 MySQL Connector/Python - Release Notes / ChangeLog
-Copyright (c) 2009,2011, Oracle and/or its affiliates. All rights reserved.
-Use is subject to license terms. (See COPYING)
+Copyright (c) 2009, 2012, Oracle and/or its affiliates. All rights reserved.
 
+1.0.7 (2012-08-19)
 -----------------------------------------------------------------------
-0.3.2
------------------------------------------------------------------------
-Bugs fixed:
-o lp:701081 - Doesn't install with Python 2.4
+- Fixed formatting of client errors changing numeric to string
+  placeholders. (BUG#14548043)
+    * Client and server errors have been regenerated using latest
+      development release of MySQL v5.6.6.
 
+1.0.6-beta (2012-08-28)
 -----------------------------------------------------------------------
-0.3.1
+- Fixed Python v3 code so it works with Python v3.3. (BUG#14524942)
+
+- Fixed MySQLCursorRaw.fetchall() to not raise when results are available.
+  This was only a problem in the Python v3 code. (BUG#14517262, BUG#66465)
+
+- Changed name and version of distributions to align with other MySQL
+  projects (WL#6450)
+    * The version now includes the suffix 'b' for beta and 'a' for alpha
+      followed by a number. This version is used in the source and built
+      distributions. GA versions will have no suffix.
+    * The RPM spec files have been updated to create packages which names
+      are aligned with RPMs from other MySQL projects.
+
+- Fixed installation of version.py on OS X. (BUG#14483142)
+    * version.py is now correctly installed on OS X in the mysql.connector
+      package. Previously it was installed through data_files, and version.py
+      ended up in the system wide package location of Python from where it
+      could not be imported.
+    * data_files is not used any longer in setup.py and is removed. Extra
+      files like version.py are now copied in the custom Distutils
+      commands.
+
+- Fixed SSL unit testing for source distributions. (BUG#14402737)
+    * The SSL keys and certificates were missing and have been added to
+      the source distribution. Now SSL testing works properly.
+    * Additionally for the Windows platform, forward slashes had to
+      be added to the option file creation so the MySQL server can
+      pickup the needed SSL files.
+
+- Timeout for unit tests has been set to 10 seconds. Test cases can
+  individually adjust it to be higher or lower. (BUG#14487502)
+
+- Fixed test cases in test_mysql_database.py which failed when using
+  using YEAR(2) with MySQL v5.6.6 and greater. (BUG#14460680)
+
+- Changed how MySQL server errors are mapped to Python exceptions. We now
+  use the SQLState (when available) to raise a better error. (WL#6412)
+    * Incompatibility: some server errors are now raised with a different
+      exception.
+    * It is possible to override how errors are raised using the
+      mysql.connector.custom_error_exception() function, defined in
+      the mysql.connector.errors module. This can be useful for certain
+      frameworks to align with other database drivers.
+
+1.0.5-beta (2012-07-17)
 -----------------------------------------------------------------------
-Bugs fixed:
-o lp:695514 - Infinite recursion when setting connection client_flags
-o lp:691836 - Incorrect substitution by cursor.execute when tuple args
-  contains '%s'
+- Added SQL Modes as constants, making it easier to use them (WL#6411)
+    * Setting the SQL Modes meant that developers had to make sure the
+      string passed to MySQL was correctly formatted and contains the correct
+      modes. To make it easier, a new class constants.SQLMode containing all
+      the SQL Modes was added: for example, constants.SQLMode.TRADITIONAL will
+      return the string 'TRADITIONAL'.
+    * Additionally, MySQLConnection.sql_mode property now accepts a sequence of
+      SQL Modes. For example, to set 2 SQL Modes, you can do the following
+      cnx.sql_mode = [SQLMode.REAL_AS_FLOAT, SQLMode.NO_ZERO_DATE]
 
+- Added descriptive error codes for both client and server errors (WL#6351)
+    * The errorcode module contains client and server error codes which can
+      be used instead of the error numbers. For example,
+      errorcode.CR_CONNECTION_ERROR is 2002.
+    * A new locales sub-package has been created in mysql.connector. This will
+      provided localized content. The first support language is the default
+      English and contains the client error messages: locales.eng.client_error.
+      To retrieve a client error based on the error number or code (name) you
+      can use the get_client_error() function importing it from locales:
+      from mysql.connector.locales import get_client_error()
+    * Error messages and error codes are automatically fetch from the latest
+      development release of MySQL. The errorcode.py and all files in the
+      locales package are generated. You can see the generation date and the
+      version of MySQL which was used in those files.
+
+1.0.4-alpha (2012-07-08)
 -----------------------------------------------------------------------
-0.3.0
+- Redundant MySQLConnection methods unset_client_flag() and set_client_flag()
+  have been removed. Use set_client_flags() using a sequence of flags to
+  change the client flags. (BUG#14259996)
+
+- Greatly simplified setting and retrieving character set and collation
+  information (BUG#14260052):
+    * Incompatible change: MySQLConnection's set_charset() has been replaced
+      by the method set_charset_collation() with which it is possible to set
+      character set and collation. The properties collation and charset are
+      now read-only.
+
+- Fixed MySQLCursor.executemany() when INSERT statements use the
+  'ON DUPLICATE KEY'-clause with a function like VALUES() (BUG#14259954)
+
+- Fixing unit testing on the MS Windows platform (BUG#14236592)
+    * tests/mysqld.py has been updated to make sure Windows binaries are
+      looked up. Also, backslashes are now replaced by double forward
+      slashes in the option file.
+    * Bootstrapping is done using --no-defaults and we make sure that
+      --standalone is used when launching mysqld.exe on Windows.
+    * examples/dates.py has been updated to produce more predictable
+      output and to work in environments where SQL Modes are set by
+      default, for example, MySQL installation on Windows.
+    * Some unit test have been update for Windows.
+
+- Converting a datetime.time for MySQL failed for Python v2.4/2.5
+  because strftime() has no support for the %f mark (BUG#14231941)
+
+- cursor.CursorBase attributes description, lastrowid and rowcount are now
+  read-only properties. This change was needed to to comply with Python's
+  DB API v2.0 specification or PEP-249. (BUG#14231160)
+
+- Server error 1426 has been classified as ProgrammingError for
+  MySQL 5.6.4 and later (BUG#14201459)
+    * Additionally, the unit tests will now show the actual version of the
+      MySQL server being bootstrapped and started. The version is also
+      available to all tests.
+
+- MySQLConnection.cmd_query() could and can not handle multiple statements.
+  There for, a new method cmd_query_iter() has been introduced which will
+  return an generator object to iterate through results. To prevent
+  duplication of functionality/code, we made a few changes to the
+  cursors in the cursor module. Here is a list of what is new and
+  incompatible changes (BUG#14208326):
+    * MySQLConnection.cmd_query() will raise an error when multiple
+      statements are given; cmd_query_iter() should be used.
+    * MySQLCursor.execute() returns a generator object with which you can
+      iterate over results when executing multiple statements. Previously
+      it returned -1 or the row count. MySQLCursor.execute() yields True
+      when there are rows available (for example, after a SELECT), or False
+      when no rows need to be or can be fetched.
+    * The method MySQLCursor.next_resultset() has been removed since you
+      can now iterate through results using MySQLCursor.execute().
+    * The method MySQLCursor.next_proc_result() has been renamed to
+      MySQLCursor.proc_results() and returns a generator object.
+    * MySQLCursor.statement will return the executed statement.
+    * MySQLCursor.with_rows returns True when there is result which could
+      return rows (which has columns definitions returned by MySQL).
+    * The multiple_resultset.py example shows how to go through results
+      produced by sending multiple statements.
+
+- MySQLConnection.cmd_query() and other methods sending server commands
+  did not take into consideration that there might be unread results. This
+  could possibly lead to wrong results and the application waiting forever.
+  (BUG#14184643)
+
+1.0.3-alpha (2012-06-08)
 -----------------------------------------------------------------------
-Highlights:
-o Python v2.4 support is back.
-o Support for compressed protocol.
-o Support for SSL connections (when Python's ssl module is available)
-o Support for packets which are bigger than 16MB.
-o Max allowed packetsize defaults to 1GB.
-o Some performance improvements.
+- Facilitate the creation of source and built distributions (WL#6250)
+    * New Distutils commands for creating packages. Every command can be
+      given with the setup script, `python setup.py <command>`. These
+      commands are a good base for later adding more distribution types.
+      All commands are either specific to a particular Python minor version
+      or major version (that is Python 2.x or Python 3.x).
+    * sdist_gpl: GPLv2 distribution created in a folder in dist/. This is
+      the base command for other GPLv2 source distributions.
+    * bdist_com: Commercial distribution created in a folder in dist/. This
+      the base command for other commercial built distributions. Before
+      the source byte-compiled and removed, the GPL license is removed.
+    * sdist_gpl_msi: Based on command sdist_gpl, it creates a Windows
+      Installer installing a source distribution using WiX v3.5 (see
+      support/MSWindows).
+    * bdist_com_msi: Based on command bdist_com, it creates a Windows
+      Installer installing a commercial built distribution
+      using WiX v3.5 (see support/MSWindows).
+    * sdist_gpl_rpm: Based on command sdist_gpl, it creates an architecture
+      independent, but Python version specific, source distribution
+      using a RPM spec file (see support/RPM).
+    * bdist_com_rpm: Based on command bdist_com, it creates a architecture
+      independent, but Python version specific, built distribution
+      using a RPM spec file (see support/RPM).
+    * There is an additional command to make Egg, but this proved to be not
+      working due to the fact that Connector/Python is installed in a folder
+      or package used by other projects (like MySQL Utilities). We, however,
+      leave the code as it might be useful later.
+    * The support/ directory is not part of any distribution and the setup.py
+      will silently ignore when the extra Distutils commands are not
+      available.
+    * The distribution name of the Connector/Python (metasetupinfo.py) has
+      changed from MySQL-Connector-Python to MySQL_Connector_Python to avoid
+      problems installing using easy_install and others.
+    * The docs/ directory now contains placeholder files for various
+      documentation formats which will be part of the distribution later. We
+      added these to facilitate the development and testing of the extra
+      Distutils commands.
+    * We removed the support/make_release.py script because we now use the
+      Distutils. The file _version.py has been renamed to version.py so it
+      can be imported without to much problems as it is also part of the
+      distributions.
+  
+- Adding support for time values with a fractional part (WL#6149)
+    * In MySQL 5.6.4, the fractional part of DATETIME, TIME, and TIMESTAMP
+      values can be stored (provided the table schema supports it). 
+      Connector/Python will send the fractional part and read it from results.
+      Support is transparent and there is no extra option needed to enable
+      this feature.
+    * The new example script microseconds.py was added showing how to use
+      Connector/Python to save and read TIME values with a fractional part.
 
-Changes:
-o Changing code in python2/ and some unittest code to support Python v2.4.
-o Max allowed packetsize is now set to the default of 1GB when authenticating.
-o It was not possible to read and send big packets (>=16MB).
-o (Py2) MySQLConnection.recv() has been refactor and simplified.
-o (Py3) MySQLConnection.recv() refactored to use bytearray() instead
-  of doing string like operations with bytes.
-o Adding utils.int8store()
-o Fixing utils.read_lc_string() to read big strings.
-o (Py3) Optimized utils.read_lc_string_list() using memoryview
-o (Py3) Refactored utils.read_lc_int()
-o Adding support for the MySQL compressed protocol. To use you need to set
-the client constants.ClientFlag.COMPRESS
-o Supporting SSL connections when Python's ssl module is available. SSL
-certificates and keys can be given during connection using the ssl_ca, ssl_cert, ssl_key=None arguments for MySQLConnection.connect().
+1.0.2-alpha (2012-05-19)
+-----------------------------------------------------------------------
+- Adding missing unittests (WL#6069):
+    * Adding missing unit tests for important modules like connection and
+      network.
+    * SSL wasn't tested and the bootstrapped MySQL server can now setup
+      secure connections using certificates and keys found in the
+      /support/ssl folder of the source.
+    * Some bugs around SSL have been found and fixed together with some
+      refactoring.
+    * Some code in mysql.connector.connection has been refactored or removed.
+
+- Fixing and refactoring the mysql.connector.errors module (BUG#14039339):
+    * class ClientError has been removed. The client error messages are
+      now found in errors._CLIENT_ERROR and the function returning the
+      MySQL Client error message is named errors._get_mysql_client_error.
+    * Some server errors were incorrectly or classified twice.
+    * errors.raise_error will raise a ValueError when the packet does not
+      contain a MySQL error.
+    * Removed Python mapping keys from client error messages
+      in _CLIENT_ERROR.
+    * The SQLState returned by MySQL errors were not reported in the
+      raised exceptions.
+    * Unit tests were missing for the errors module and have been added.
+
+- Bootstrapping MySQL v5.6 running unittests have been fixed. (BUG#14048685)
+    * A semicolon was missing issuing the USE command when loading the
+      system table when bootstrapping. It seems that this is a problem
+      with more recent MySQL versions.
+    * STDOUT and STDERR when bootstrapping and starting the MySQL server
+      for unittest testing is being redirected to devnull.
+    * There is now an info logger line when we bootstrap and when we start
+      the MySQL server. This should help showing at which state has been
+      reached.
 
 
-Bugs fixed:
+1.0.1-alpha (2012-04-26)
+-----------------------------------------------------------------------
+- Updating copyright notice and license: the FLOSS License Exception is
+  now explicitly mentioned in all source files. (WL#6273)
+
+- The version does only contain integers now. The 'a' or 'alpha' suffix will
+  not be present in packages, but it will be mentioned in the _version.py
+  module since metasetupinfo.py uses this information to set, for example,
+  the Trove classifiers dynamically.
+
+1.0.0-alpha (2012-04-22)
+-----------------------------------------------------------------------
+- Preparation for first Alpha release in the MySQL Connector/Python v1.0
+  series (WL#6273):
+    * _version.py was removed from the mysql.connector package and moved
+      now only used when installing and making packages.
+    * The README and AUTHORS files have been updated. The ChangeLog has
+      been revamped to included only v1.0 releases.
+    * Documentation is moving to the MySQL manual: contains of docs/ folder
+      has been removed and for now replaced by a README.
+    * metasetupinfo.py has been updated.
+    * The make_release.py script has been updated and moved to the subfolder
+      support/.
+    * MANIFEST.in does not include setup.cfg anymore.
+
+- The metasetupinfo.py was using the already installed modules of
+  Connector/Python instead of the ones going to be installed. This meant that
+  upgrading would haven't worked when new modules would have been added.
+  The metasetupinfo.py now alters the sys.path to make sure the to be
+  installed modules are loaded first. (BUG#13962765)
+
+- Refactoring the modules connection and protocol (WL#6196):
+    * Moving socket classes connection to the new module 
+      mysql.connector.network.
+    * The MySQLProtocol class does not keep a reference to a 
+      MySQLConnection-object any more. MySQLProtocol is now only dealing
+      with creating and parsing MySQL packets. Network interaction is now
+      done only by the MySQLConnection objects with the exception of the
+      MySQLProtocol.read_text_result, which needs a socket object to be
+      passed.
+    * MySQLConnection handles handshaking, authentication,
+      OK/EOF packets and Error packets, all which was done previously by the
+      MySQLProtocol class.
+    * Packet numbers are now tracked by network.BaseMySQLSocket. This was
+      previously done by MySQLProtocol.
+
+- MySQLCursor.description now stores column names as Unicode (BUG#13792575).
+
+- The dbapi.Binary is now bytes for Python v3 (BUG#13780676)
+
+- Fixed automatic garbage collection which caused memory usage to grow
+  over time. (Bug#13435186)
+    * MySQLConverter uses getattr() instead of mapping types and methods in
+      a dictionary.
+    * MySQLCursor keeps a weak reference to the MySQLConnection object that
+      created it.
+    * MySQLConnection does not keep track of its cursors any longer.
+    * Some changes where reworked with refactoring the connection and
+      protocol modules. (WL#6196)
+
+- Implemented reconnect and fixed the ping()-method (BUG#13392739)
+    * MySQLConnection.reconnect() can be used to reconnect to the MySQL
+      server. It accepts number of retries and an optional delay between
+      attempts.
+    * MySQLConnectiong.ping() is now a method and works the way the MySQL
+      C API mysql_ping() function works: it raises an error. It can also
+      optionally reconnect.
+    * MySQLConnection.is_connected() now returns True when connection is
+      available, False otherwise.
+    * ping() and is_connected() are backwards incompatible.
+
+- Fixed setting time zone for current MySQL session. (BUG#13395083)
+
+- Fixed setting and retrieving character set and collation. (Bug#13375632)
+    * Setting the character set using the MySQLConnection charset property
+      or set_charset() method can now be done in 3 ways: using MySQL's ID,
+      using a name or using a tuple with second element the collation.
+    * Setting the collation will retrieve and reset MySQLConnection's
+      _charset_id attribute to the correct character set.
+    * The MySQLConnection.charset_name and MySQLConnection.collation_name
+      properties can be used to retrieve respectively the character set and
+      the collation name.
+
+- Fixed setting sql_mode to a list of modes. (BUG#13365985)
+
+- Fixed handling of errors after authentication for Python v3 (BUG#13364285)
+
+- Various improvements around receiving and sending MySQL packets:
+    * Refactored MySQLBaseSocket.recv_plain and
+      MySQLBaseSocket.recv_compressed: they are now simpler and handle socket
+      errors better.
+    * Using sendall() for sending packets.
 

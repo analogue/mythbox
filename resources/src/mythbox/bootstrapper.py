@@ -52,8 +52,8 @@ class BootStrapper(object):
                 if not self.failSilent:
                     self.handleFailure(ex)
         finally:
-			if self.splash:
-			    self.splash.close()
+            if self.splash:
+                self.splash.close()
             
     def handleFailure(self, cause):
         msg = 'MythBox:%s - Error: %s' % (self.stage, cause)
