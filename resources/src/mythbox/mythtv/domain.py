@@ -650,7 +650,7 @@ class RecordedProgram(Program):
         self._commercials = None
         self._localPath = None
 
-        self._data = {}
+        self._data = odict()
         for key, value in zip(self.protocol.recordFields(), data):
             self._data[key] = value
 
