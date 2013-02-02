@@ -27,10 +27,21 @@
 import os
 import sys
 import socket
+import errno
 import datetime
 import logging
 import inspect
 import unittest
+
+SSL_AVAILABLE = True
+try:
+    import ssl
+except ImportError:
+    SSL_AVAILABLE = False
+
+# Note that IPv6 support for Python is checked here, but it can be disabled
+# when the bind_address of MySQL was not set to '::1'.
+IPV6_AVAILABLE = socket.has_ipv6
 
 MYSQL_CONFIG = {
     'host' : '127.0.0.1',
@@ -40,6 +51,13 @@ MYSQL_CONFIG = {
     'password' : '',
     'database' : 'myconnpy',
     'connection_timeout': 10,
+}
+
+# Following dictionary holds messages which were added by test cases
+# but only logged at the end.
+MESSAGES = {
+    'WARNINGS': [],
+    'INFO': [],
 }
 
 MYSQL_VERSION = None
@@ -97,16 +115,24 @@ class DummySocket(object):
         self._socket = socket.socket(*args)
         self._server_replies = b''
         self._client_sends = []
+        self._raise_socket_error = 0
     
     def __getattr__(self, attr):
         return getattr(self._socket, attr)
+
+    def raise_socket_error(self, err=errno.EPERM):
+        self._raise_socket_error = err
     
     def recv(self, bufsize=4096, flags=0):
+        if self._raise_socket_error:
+            raise socket.error(self._raise_socket_error)
         res = self._server_replies[0:bufsize]
         self._server_replies = self._server_replies[bufsize:]
         return res
     
     def send(self, string, flags=0):
+        if self._raise_socket_error:
+            raise socket.error(self._raise_socket_error)
         self._client_sends.append(string)
         return len(string)
         
@@ -122,6 +148,7 @@ class DummySocket(object):
             self._server_replies += packet
             
     def reset(self):
+        self._raise_socket_error = 0
         self._server_replies = b''
         self._client_sends = []
 

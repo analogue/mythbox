@@ -7,7 +7,7 @@ MySQL Connector/Python
    database applications using MySQL Connector/Python, a
    self-contained Python driver for communicating with MySQL servers.
 
-   Document generated on: 2012-09-14 (revision: 32235)
+   Document generated on: 2012-12-17 (revision: 33584)
      _______________________________________________________
 
 Preface and Legal Notices
@@ -184,20 +184,20 @@ Chapter 1. MySQL Connector/Python
 
 Chapter 2. Connector/Python Versions
 
-   MySQL Connector/Python v1.0.x series is going through a series of
-   beta releases, leading to the first generally available (GA)
-   version (not released yet). Any development releases prior to
-   general availability will not be supported once the GA version is
+   MySQL Connector/Python v1.0.x series went going through a series
+   of beta releases, leading to the first generally available (GA)
+   version 1.0.7. Any development releases prior to general
+   availability are not supported now that the GA version is
    released.
 
    The following table summarizes the available Connector/Python
    versions:
 
-   Connector/Python version MySQL Server version Python version
-   Status
+   Table 2.1. Connector/Python Version Reference
+   Connector/Python Version MySQL Server Versions Python Versions
+   Support Status for Connector
    1.0 5.6, 5.5 (5.1, 5.0, 4.1) 2.7, 2.6 (2.5, 2.4); 3.1 and later
    Recommended version
-
    Note
 
    MySQL server and Python versions within brackets are known to work
@@ -763,6 +763,7 @@ Chapter 6. Connector/Python Connection Arguments
 
      * Class mysql.connector.MySQLConnection()
 
+   Table 6.1. Connection Arguments for Connector/Python
    Argument Name Default Description
    user (username*)   The username used to authenticate with the
    MySQL Server.
@@ -2119,7 +2120,29 @@ cnx.close()
 
 Chapter 8. MySQL Connector/Python Change History
 
-Changes in MySQL Connector/Python 1.0.6 (30 August 2012, beta)
+8.1. Changes in MySQL Connector/Python 1.0.8 (Not yet released,
+Generally Available)
+
+   Fixes bugs since the initial 1.0.7 GA release.
+
+   Version 1.0.8 has no changelog entries.
+
+8.2. Changes in MySQL Connector/Python 1.0.7 (29 September 2012,
+Generally Available)
+
+   GA release. Connector/Python is now production-ready.
+
+   Functionality Added or Changed
+
+     * Client and server errors have been regenerated using the MySQL
+       5.6.6 development release.
+
+   Bugs Fixed
+
+     * Fixed formatting of client errors changing numeric to string
+       placeholders. (Bug #14548043)
+
+8.3. Changes in MySQL Connector/Python 1.0.6 (30 August 2012, beta)
 
    Second beta release.
 
@@ -2190,7 +2213,7 @@ Changes in MySQL Connector/Python 1.0.6 (30 August 2012, beta)
             server can pick up the needed SSL files.
        (Bug #14402737)
 
-Changes in MySQL Connector/Python 1.0.5 (17 July 2012, beta)
+8.4. Changes in MySQL Connector/Python 1.0.5 (17 July 2012, beta)
 
    First beta release.
 
@@ -2206,7 +2229,7 @@ cnx.sql_mode = [SQLMode.REAL_AS_FLOAT, SQLMode.NO_ZERO_DATE]
        messages.
        For example, errorcode.CR_CONNECTION_ERROR is 2002.
 
-Changes in MySQL Connector/Python 1.0.4 (07 July 2012, alpha)
+8.5. Changes in MySQL Connector/Python 1.0.4 (07 July 2012, alpha)
 
    Internal alpha release.
 
@@ -2262,7 +2285,7 @@ Changes in MySQL Connector/Python 1.0.4 (07 July 2012, alpha)
      * Fixed MySQLConnection.cmd_query() and other methods so they
        check first whether there are unread results. (Bug #14184643)
 
-Changes in MySQL Connector/Python 1.0.3 (08 June 2012, alpha)
+8.6. Changes in MySQL Connector/Python 1.0.3 (08 June 2012, alpha)
 
    Internal alpha release.
 
@@ -2275,7 +2298,7 @@ Changes in MySQL Connector/Python 1.0.3 (08 June 2012, alpha)
        MySQL 5.6.4 and greater. A new example script microseconds.py
        was added to show this functionality.
 
-Changes in MySQL Connector/Python 1.0.2 (19 May 2012, alpha)
+8.7. Changes in MySQL Connector/Python 1.0.2 (19 May 2012, alpha)
 
    Internal alpha release.
 
@@ -2286,14 +2309,14 @@ Changes in MySQL Connector/Python 1.0.2 (19 May 2012, alpha)
 
    Bugs Fixed
 
+     * Fixing and refactoring the mysql.connector.errors module. (Bug
+       #14039339)
+
      * Fixed bootstrapping MySQL 5.6 running unit tests.
        Messages send by the bootstrapped MySQL server to stdout and
        stderr are now discarded. (Bug #14048685)
 
-     * Fixing and refactoring the mysql.connector.errors module. (Bug
-       #14039339)
-
-Changes in MySQL Connector/Python 1.0.1 (26 April 2012, alpha)
+8.8. Changes in MySQL Connector/Python 1.0.1 (26 April 2012, alpha)
 
    Internal alpha release.
 
@@ -2305,7 +2328,7 @@ Changes in MySQL Connector/Python 1.0.1 (26 April 2012, alpha)
        uses this information to set, for example, the Trove
        classifiers dynamically.
 
-Changes in MySQL Connector/Python 1.0.0 (22 April 2012, alpha)
+8.9. Changes in MySQL Connector/Python 1.0.0 (22 April 2012, alpha)
 
    Internal alpha release.
 

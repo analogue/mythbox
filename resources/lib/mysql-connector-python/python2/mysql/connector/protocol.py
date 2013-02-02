@@ -54,12 +54,17 @@ class MySQLProtocol(object):
 
     def _prepare_auth(self, usr, pwd, db, flags, seed):
         """Prepare elements of the authentication packet"""
+
         if usr is not None and len(usr) > 0:
+            if isinstance(usr, unicode):
+                usr = usr.encode('utf8')
             _username = usr + '\x00'
         else:
             _username = '\x00'
 
         if pwd is not None and len(pwd) > 0:
+            if isinstance(pwd, unicode):
+                pwd = pwd.encode('utf8')
             _password = utils.int1store(20) +\
                 self._scramble_password(pwd,seed)
         else:

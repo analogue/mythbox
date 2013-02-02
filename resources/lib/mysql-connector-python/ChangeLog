@@ -1,6 +1,45 @@
 MySQL Connector/Python - Release Notes / ChangeLog
 Copyright (c) 2009, 2012, Oracle and/or its affiliates. All rights reserved.
 
+1.0.9 (not released yet)
+-----------------------------------------------------------------------
+
+1.0.8 (2012-12-17)
+-----------------------------------------------------------------------
+- Fixed MySQLConnection.ping() so it only reconnects when the reconnect
+  argument is set to True. (BUG#15915243)
+
+- Fixed storing multiple results after calling stored procedures which
+  are using arguments. (BUG#15916486)
+
+- Fixed support for connecting to MySQL using IPv6 addresses. (BUG#15876886)
+
+- Fixed handling MySQL errors when doing handshake. (BUG#15836979)
+
+- Fixed support for connecting to MySQL using IPv6 addresses. (BUG#15876886,
+  BUG#15927825)
+
+- Fixed reading the header of MySQL packets. Previously, we were reading
+  the MySQL packet headers as 4 (or 7) bytes long buffers from the socket.
+  When we did have the correct length, we would immediately raise an exception.
+  We now keep reading data from the socket until we got the full header
+  or bail out on errors. (BUG#14829471)
+
+- Fixed the error message when the TCP/IP port number is not a valid integer.
+  Strings are first converted to integer and raise an error with a proper
+  error when this fails. (BUG#13808727)
+
+- Fixed authenticating for Python v2 using usernames and/or passwords which
+  contain Unicode characters using Python v2. (BUG#14843456)
+
+- Fixed reporting of socket errors. (BUG#14802017)
+
+- Fixed executemany() to support the pyformat parameter style. (BUG#14754894)
+    * The regular expression parsing the INSERT statement did not work when
+      pyformat markers where used, that is, '%(c1)s' for example. This is now
+      fixed so both ANSI C printf and Python extended format codes can be
+      used by MySQLCursor.executemany().
+
 1.0.7 (2012-08-19)
 -----------------------------------------------------------------------
 - Fixed formatting of client errors changing numeric to string

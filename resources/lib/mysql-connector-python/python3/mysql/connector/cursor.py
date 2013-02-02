@@ -33,7 +33,9 @@ from . import errors
 from . import utils
 
 RE_SQL_COMMENT = re.compile("\/\*.*\*\/")
-RE_SQL_INSERT_VALUES = re.compile(r'\sVALUES\s*(\(.*?\))', re.I)
+RE_SQL_INSERT_VALUES = re.compile(
+    r'VALUES\s*(\(\s*(?:%(?:\(.*\)|)s\s*(?:,|)\s*)+\))',
+    re.I | re.M)
 RE_SQL_INSERT_STMT = re.compile(r'INSERT\s+INTO', re.I)
 RE_PY_PARAM = re.compile(b'(%s)')
 RE_SQL_SPLIT_STMTS = re.compile(
@@ -544,7 +546,9 @@ class MySQLCursor(CursorBase):
         Raises exceptions when something is wrong.
         """
         argfmt = "@_%s_arg%d"
-        
+        self._stored_results = []
+
+        results = []
         try:
             procargs = self._process_params(args)
             argnames = []
@@ -561,13 +565,15 @@ class MySQLCursor(CursorBase):
                 if 'columns' in result:
                     tmp = MySQLCursorBuffered(self._connection._get_self())
                     tmp._handle_result(result)
-                    self._stored_results.append(tmp)
+                    results.append(tmp)
 
             if argnames:
                 select = "SELECT %s" % ','.join(argnames)
                 self.execute(select)
+                self._stored_results = results
                 return self.fetchone()
             else:
+                self._stored_results = results
                 return ()
             
         except errors.Error:

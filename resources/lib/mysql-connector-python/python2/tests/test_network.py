@@ -50,6 +50,29 @@ class NetworkTests(tests.MySQLConnectorTests):
         ]
         self.assertEqual(exp, network._prepare_packets(*(data)))
 
+    def test_inet_pton(self):
+        """Define inet_pton"""
+        if os.name == 'nt':
+            self.assertTrue(hasattr(network.inet_pton, '__call__'))
+        else:
+            self.assertEqual(socket.inet_pton, network.inet_pton)
+
+        cases = [
+            ('::1', socket.AF_INET6, False),
+            ('127.0.0.1', socket.AF_INET, False),
+            ('2001::14:06:77', socket.AF_INET6, False),
+            ('xx:00:xx', socket.AF_INET6, True),
+            ]
+        for addr, family, should_raise in cases:
+            try:
+                network.inet_pton(family, addr)
+            except socket.error, err:
+                if not should_raise:
+                    self.fail('%s incorrectly raised socket.error' % addr)
+            else:
+                if should_raise:
+                    self.fail('%s should have raised socket.error' % addr)
+
 class BaseMySQLSocketTests(tests.MySQLConnectorTests):
     """Testing mysql.connector.network.BaseMySQLSocket"""
     def setUp(self):
@@ -177,6 +200,9 @@ class BaseMySQLSocketTests(tests.MySQLConnectorTests):
     def test_recv_plain(self):
         """Receive data from the socket"""
         self.cnx.sock = tests.DummySocket()
+        def get_address():
+            return 'dummy'
+        self.cnx.get_address = get_address
 
         # Receive a packet which is not 4 bytes long
         self.cnx.sock.add_packet('\01\01\01')
@@ -184,6 +210,10 @@ class BaseMySQLSocketTests(tests.MySQLConnectorTests):
 
         # Receive the header of a packet, but nothing more
         self.cnx.sock.add_packet('\01\00\00\00')
+        self.assertRaises(errors.InterfaceError, self.cnx.recv_plain)
+
+        # Socket fails to receive and produces an error
+        self.cnx.sock.raise_socket_error()
         self.assertRaises(errors.InterfaceError, self.cnx.recv_plain)
 
         # Receive packets after a query, SELECT "Ham"
@@ -210,6 +240,9 @@ class BaseMySQLSocketTests(tests.MySQLConnectorTests):
     def test_recv_compressed(self):
         """Receive compressed data from the socket"""
         self.cnx.sock = tests.DummySocket()
+        def get_address():
+            return 'dummy'
+        self.cnx.get_address = get_address
 
         # Receive a packet which is not 7 bytes long
         self.cnx.sock.add_packet('\01\01\01\01\01\01')
@@ -217,6 +250,10 @@ class BaseMySQLSocketTests(tests.MySQLConnectorTests):
 
         # Receive the header of a packet, but nothing more
         self.cnx.sock.add_packet('\01\00\00\00\00\00\00')
+        self.assertRaises(errors.InterfaceError, self.cnx.recv_compressed)
+
+        # Socket fails to receive and produces an error
+        self.cnx.sock.raise_socket_error()
         self.assertRaises(errors.InterfaceError, self.cnx.recv_compressed)
 
         # Receive result of query SELECT REPEAT('a',1*1024*1024), 'XYZ'
@@ -265,6 +302,11 @@ class BaseMySQLSocketTests(tests.MySQLConnectorTests):
     
     def test_switch_to_ssl(self):
         """Switch the socket to use SSL"""
+        if not tests.SSL_AVAILABLE:
+            tests.MESSAGES['WARNINGS'].append(
+                "Could not test switch to SSL. Make sure Python supports SSL.")
+            return
+        
         args = {
             'ca': os.path.join(tests.SSL_DIR, 'tests_CA_cert.pem'),
             'cert': os.path.join(tests.SSL_DIR, 'tests_client_cert.pem'),
@@ -274,9 +316,21 @@ class BaseMySQLSocketTests(tests.MySQLConnectorTests):
                           self.cnx.switch_to_ssl, **args)
 
         # Handshake failure
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            (host,) = self._host.split('%')
+            network.inet_pton(socket.AF_INET6, host)
+            family = socket.AF_INET6
+        except socket.error:
+            family = socket.AF_INET
+
+        (family, socktype, proto, canonname, sockaddr) = socket.getaddrinfo(
+            self._host,
+            self._port,
+            family,
+            socket.SOCK_STREAM)[0]
+        sock = socket.socket(family, socktype, proto)
         sock.settimeout(4)
-        sock.connect((self._host, self._port))
+        sock.connect(sockaddr)
         self.cnx.sock = sock
         self.assertRaises(errors.InterfaceError,
                           self.cnx.switch_to_ssl, **args)

@@ -24,18 +24,17 @@
 """Unittests for bugs
 """
 
-import sys
-import struct
 import os
 import gc
-import time
-import itertools
 import tempfile
+import logging
 from datetime import datetime
 
 import tests
 from mysql.connector import (connection, cursor, conversion, protocol,
     utils, errors, constants)
+
+logger = logging.getLogger(tests.LOGGER_NAME)
 
 class Bug328998Tests(tests.MySQLConnectorTests):
     
@@ -157,7 +156,7 @@ class Bug380528(tests.MySQLConnectorTests):
         db = connection.MySQLConnection(**config)
         c = db.cursor()
 
-        if config['unix_socket']:
+        if config['unix_socket'] and os.name != 'nt':
             user = "'myconnpy'@'localhost'"
         else:
             user = "'myconnpy'@'%s'" % (config['host'])
@@ -344,7 +343,8 @@ class Bug507466(tests.MySQLConnectorTests):
     
     def tearDown(self):
         try:
-            c = db.cursor("DROP TABLE IF EXISTS myconnpy_bits")
+            c = self.db.cursor()
+            c.execute("DROP TABLE IF EXISTS myconnpy_bits")
         except:
             pass
         self.db.close()
@@ -401,8 +401,8 @@ class Bug510110(tests.MySQLConnectorTests):
     
     def tearDown(self):
         try:
-            self.c = db.cursor("DROP TABLE IF EXISTS %s" % (self.tbl))
-            self.c.close()
+            c = self.db.cursor()
+            c.execute("DROP TABLE IF EXISTS %s" % (self.tbl))
         except:
             pass
         self.db.close()
@@ -484,8 +484,8 @@ class Bug571201(tests.MySQLConnectorTests):
     
     def tearDown(self):
         try:
-            self.c = db.cursor("DROP TABLE IF EXISTS %s" % (self.tbl))
-            self.c.close()
+            c = self.db.cursor()
+            c.execute("DROP TABLE IF EXISTS %s" % (self.tbl))
         except:
             pass
         self.db.close()
@@ -524,8 +524,8 @@ class Bug551533and586003(tests.MySQLConnectorTests):
 
     def tearDown(self):
         try:
-            self.c = db.cursor("DROP TABLE IF EXISTS %s" % (self.tbl))
-            self.c.close()
+            c = self.db.cursor()
+            c.execute("DROP TABLE IF EXISTS %s" % (self.tbl))
         except:
             pass
         self.db.close()
@@ -576,8 +576,8 @@ class Bug675425(tests.MySQLConnectorTests):
 
     def tearDown(self):
         try:
-            self.c = db.cursor("DROP TABLE IF EXISTS %s" % (self.tbl))
-            self.c.close()
+            c = self.db.cursor()
+            c.execute("DROP TABLE IF EXISTS %s" % (self.tbl))
         except:
             pass
         self.db.close()
@@ -712,8 +712,9 @@ class BugOra13392739(tests.MySQLConnectorTests):
         
         # Temper with the host to which we reconnect to simulate the
         # MySQL not being available.
+        cnx.disconnect()
         cnx._host = 'some-unknown-host-somwhere-on.mars'
-        self.assertRaises(errors.InterfaceError,cnx.ping,reconnect=False)
+        self.assertRaises(errors.InterfaceError, cnx.ping, reconnect=True)
 
     def test_reconnect(self):
         """BUG#13392739: MySQLConnection.reconnect()"""
@@ -880,17 +881,18 @@ class BugOra14201459(tests.MySQLConnectorTests):
         else:
             self.fail("ProgrammingError not raised")
 
-class BugOra14208326(tests.MySQLConnectorTests):
-    """BUG#14208326: lastrowid, description and rowcount read-only"""
+class BugOra14231160(tests.MySQLConnectorTests):
+    """BUG#14231160: lastrowid, description and rowcount read-only"""
     def test_readonly_properties(self):
-        try:
-            self.c.description = 'spam'
-            self.c.rowcount = 1
-            self.c.lastrowid = 2
-        except AttributeError, e:
-            pass
-        else:
-            self.fail('Need read-only property: %s' %s)
+        cur = cursor.MySQLCursor()
+        for attr in ('description', 'rowcount', 'lastrowid'):
+            try:
+                setattr(cur, attr, 'spam')
+            except AttributeError, err:
+                # It's readonly, that's OK
+                pass
+            else:
+                self.fail('Need read-only property: %s' % attr)
 
 class BugOra14259954(tests.MySQLConnectorTests):
     """BUG#14259954: ON DUPLICATE KEY UPDATE VALUE FAILS REGEX"""
@@ -912,8 +914,9 @@ class BugOra14259954(tests.MySQLConnectorTests):
                  "ON DUPLICATE KEY UPDATE c1=VALUES(c1)") % self.tbl
         try:
             self.cursor.executemany(query, [(1,1),(2,2)])
-        except errors.ProgrammingError:
-            self.fail("Regular expression fails with executmany()")
+        except errors.ProgrammingError, err:
+            self.fail("Regular expression fails with executemany(): %s" %
+                      err)
 
 
 class BugOra14548043(tests.MySQLConnectorTests):
@@ -932,3 +935,198 @@ class BugOra14548043(tests.MySQLConnectorTests):
             cnx = connection.MySQLConnection(**config)
         except errors.InterfaceError, err:
             self.assertEqual(exp, str(err))
+
+class BugOra14754894(tests.MySQLConnectorTests):
+    """
+    """
+    def setUp(self):
+        config = self.getMySQLConfig()
+        self.cnx = connection.MySQLConnection(**config)
+        self.cursor = self.cnx.cursor()
+
+        self.tbl = 'BugOra14754894'
+        self.cursor.execute("DROP TABLE IF EXISTS %s" % (self.tbl))
+        self.cursor.execute("CREATE TABLE %s (c1 INT)" % (self.tbl))
+
+    def test_executemany(self):
+        insert = "INSERT INTO %s (c1) VALUES (%%(c1)s)" % (self.tbl)
+        data = [{'c1': 1}]
+        self.cursor.executemany(insert, [{'c1': 1}])
+
+        try:
+            self.cursor.executemany(insert, [{'c1': 1}])
+        except ValueError, err:
+            self.fail(err)
+
+        self.cursor.execute("SELECT c1 FROM %s" % self.tbl)
+        self.assertEqual(data[0]['c1'], self.cursor.fetchone()[0])
+
+class BugOra14843456(tests.MySQLConnectorTests):
+    """BUG#14843456: UNICODE USERNAME AND/OR PASSWORD FAILS
+    """
+    def setUp(self):
+        config = self.getMySQLConfig()
+        self.cnx = connection.MySQLConnection(**config)
+        self.cursor = self.cnx.cursor()
+
+        if config['unix_socket'] and os.name != 'nt':
+            host = 'localhost'
+        else:
+            host = config['host']
+
+        grant = (u"CREATE USER '%s'@'%s' "
+                 u"IDENTIFIED BY '%s'")
+
+        self._credentials = [
+            (u'Herne', u'Herne'),
+            (u'\u0141owicz', u'\u0141owicz'),
+            ]
+        for user, password in self._credentials:
+            self.cursor.execute(grant % (user, host, password))
+
+    def test_unicode_credentials(self):
+        config = self.getMySQLConfig()
+        for user, password in self._credentials:
+            config['user'] = user
+            config['password'] = password
+            config['database'] = None
+            try:
+                cnx = connection.MySQLConnection(**config)
+            except (UnicodeDecodeError, errors.InterfaceError):
+                self.fail('Failed using unicode username or password')
+
+class BugOra13808727(tests.MySQLConnectorTests):
+    """BUG#13808727: ERROR UNCLEAR WHEN TCP PORT IS NOT AN INTEGER
+    """
+    def test_portnumber(self):
+        config = self.getMySQLConfig()
+        try:
+            config['port'] = str(config['port'])
+            connection.MySQLConnection(**config)
+        except:
+            self.fail("Port number as string is not accepted.")
+
+        self.assertRaises(errors.InterfaceError,
+                          connection.MySQLConnection, port="spam")
+
+class BugOra15876886(tests.MySQLConnectorTests):
+    """BUG#15876886: CONNECTOR/PYTHON CAN NOT CONNECT TO MYSQL THROUGH IPV6
+    """
+    def test_ipv6(self):
+        if not tests.IPV6_AVAILABLE:
+            tests.MESSAGES['WARNINGS'].append(
+                           "Could not test IPv6. Use options "
+                           "--bind-address=:: --host=::1 and"
+                           " make sure the OS and Python supports IPv6.")
+            return
+
+        config = self.getMySQLConfig()
+        config['host'] = '::1'
+        config['unix_socket'] = None
+        try:
+            cnx = connection.MySQLConnection(**config)
+        except errors.InterfaceError:
+            self.fail("Can not connect using IPv6")
+
+class BugOra15915243(tests.MySQLConnectorTests):
+    """BUG#15915243: PING COMMAND ALWAYS RECONNECTS TO THE DATABASE
+    """
+    def test_ping(self):
+        config = self.getMySQLConfig()
+
+        cnx = connection.MySQLConnection(**config)
+        cid = cnx.connection_id
+        cnx.ping()
+        # Do not reconnect
+        self.assertEqual(cid, cnx.connection_id)
+        cnx.close()
+        # Do not reconnect
+        self.assertRaises(errors.InterfaceError, cnx.ping)
+        # Do reconnect
+        cnx.ping(reconnect=True)
+        self.assertNotEqual(cid, cnx.connection_id)
+        cnx.close()
+
+class BugOra15916486(tests.MySQLConnectorTests):
+    """BUG#15916486: RESULTS AFTER STORED PROCEDURE WITH ARGUMENTS ARE NOT KEPT
+    """
+    def setUp(self):
+        config = self.getMySQLConfig()
+        self.cnx = connection.MySQLConnection(**config)
+        self.cur = self.cnx.cursor()
+
+        self.cur.execute("DROP PROCEDURE IF EXISTS sp1")
+        self.cur.execute("DROP PROCEDURE IF EXISTS sp2")
+        sp1 = ("CREATE PROCEDURE sp1(IN pIn INT, OUT pOut INT)"
+               " BEGIN SELECT 1; SET pOut := pIn; SELECT 2; END")
+        sp2 = ("CREATE PROCEDURE sp2 ()"
+               " BEGIN SELECT 1; SELECT 2; END")
+
+        self.cur.execute(sp1)
+        self.cur.execute(sp2)
+
+    def tearDown(self):
+        try:
+            self.cur.execute("DROP PROCEDURE IF EXISTS sp1")
+            self.cur.execute("DROP PROCEDURE IF EXISTS sp2")
+        except:
+            pass # Clean up fail is acceptable for this test
+
+        self.cnx.close()
+
+    def test_callproc_with_args(self):
+        exp = (u'5', 5)
+        self.assertEqual(exp, self.cur.callproc('sp1', (5, 0)))
+
+        exp = [[(1,)], [(2,)]]
+        results = []
+        for result in self.cur.stored_results():
+            results.append(result.fetchall())
+        self.assertEqual(exp, results)
+
+    def test_callproc_with_args(self):
+        exp = ()
+        self.assertEqual(exp, self.cur.callproc('sp2'))
+
+        exp = [[(1,)], [(2,)]]
+        results = []
+        for result in self.cur.stored_results():
+            results.append(result.fetchall())
+        self.assertEqual(exp, results)
+
+class BugOra15836979(tests.MySQLConnectorTests):
+    """BUG#15836979: UNCLEAR ERROR MESSAGE CONNECTING USING UNALLOWED IP ADDRESS
+    """
+    def setUp(self):
+        if os.name == 'nt':
+            return
+        config = self.getMySQLConfig()
+        cnx = connection.MySQLConnection(**config)
+        cnx.cmd_query("DROP USER 'root'@'127.0.0.1'")
+        cnx.cmd_query("DROP USER 'root'@'::1'")
+        cnx.close()
+
+    def tearDown(self):
+        if os.name == 'nt':
+            return
+        config = self.getMySQLConfig()
+        cnx = connection.MySQLConnection(**config)
+        cnx.cmd_query(
+            "GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' "
+            "WITH GRANT OPTION")
+        cnx.cmd_query(
+            "GRANT ALL PRIVILEGES ON *.* TO 'root'@'::1' "
+            "WITH GRANT OPTION")
+        cnx.close()
+
+    def test_handshake(self):
+        if os.name == 'nt':
+            tests.MESSAGES['WARNINGS'].append(
+                "Can't test error handling when doing handshake "
+                "on Windows (lacking named pipe support)")
+            return
+        config = self.getMySQLConfig()
+        config['host'] = '127.0.0.1'
+        config['unix_socket'] = None
+        self.assertRaises(errors.DatabaseError,
+                          connection.MySQLConnection, **config)

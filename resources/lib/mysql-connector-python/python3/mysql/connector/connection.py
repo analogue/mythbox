@@ -74,7 +74,6 @@ class MySQLConnection(object):
         self._socket = None
         self._handshake = None
         self._server_version = None
-        self._socket = None
         self.converter = None
         self._converter_class = None
         
@@ -116,8 +115,12 @@ class MySQLConnection(object):
 
     def _do_handshake(self):
         """Get the handshake from the MySQL server"""
+        packet = self._socket.recv()
+        if packet[4] == 255:
+            raise errors.get_exception(packet)
+
         try:
-            handshake = self._protocol.parse_handshake(self._socket.recv())
+            handshake = self._protocol.parse_handshake(packet)
         except Exception as err:
             raise errors.InterfaceError(
                 'Failed parsing handshake; {}'.format(err))
@@ -244,6 +247,16 @@ class MySQLConnection(object):
             except KeyError:
                 password = self._password
             self.set_login(user, password)
+
+        # Check network locations
+        try:
+            self._port = int(config['port'])
+            del config['port']
+        except KeyError:
+            pass # Missing port argument is OK
+        except ValueError:
+            raise errors.InterfaceError(
+                "TCP/IP port number should be an integer")
 
         # Other configuration
         for key,value in config.items():
@@ -735,11 +748,11 @@ class MySQLConnection(object):
         try:
             self.cmd_ping()
         except:
-            if not reconnect:
+            if reconnect:
+                self.reconnect(attempts=attempts, delay=delay)
+            else:
                 raise errors.InterfaceError("Connection to MySQL is"
                                             " not available.")
-        
-        self.reconnect(attempts=attempts, delay=delay)
 
     def set_converter_class(self, convclass):
         """

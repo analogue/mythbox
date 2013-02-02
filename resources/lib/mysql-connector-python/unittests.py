@@ -68,6 +68,7 @@ tmpdir = %(mysqld_tmpdir)s
 port = %(mysqld_port)d
 socket = %(mysqld_socket)s
 bind_address = %(mysqld_bind_address)s
+skip_name_resolve
 server_id = 19771406
 sql_mode = ""
 default_time_zone = +00:00
@@ -91,6 +92,8 @@ else:
         ))
 
 def _add_options(p):
+    default_topdir = os.path.join(os.path.dirname(
+        os.path.abspath(__file__)), 'mysql_myconnpy')
     p.add_option('-t','--test', dest='testcase', metavar='NAME',
         help='Tests to execute, one of %s' % tests.get_test_names())
     p.add_option('-T','--one-test', dest='onetest', metavar='NAME',
@@ -122,24 +125,30 @@ def _add_options(p):
          'run a MySQL server which is used for unittesting only.')
     p.add_option('','--mysql-topdir', dest='mysql_topdir',
         metavar='NAME',
-        default=os.path.join(os.path.dirname(os.path.abspath(__file__)),
-            'mysql_myconnpy'),
+        default=default_topdir,
         help='Where to bootstrap the new MySQL instance for testing. '\
          'Defaults to current ./mysql_myconnpy')
     p.add_option('','--bind-address', dest='bind_address', metavar='NAME',
         default='127.0.0.1',
         help='IP address to bind to')
-    p.add_option('-P','--port', dest='port', metavar='NUMBER',
-        default='33770', type="int",
-        help='Port to use for TCP/IP connections.')
 
-def _set_config(options, unix_socket=None):
-    if options.bind_address:
-        tests.MYSQL_CONFIG['host'] = options.bind_address
+    p.add_option('-H', '--host', dest='host', metavar='NAME',
+        default='127.0.0.1',
+        help='Hostname or IP address for TCP/IP connections.')
+    p.add_option('-P', '--port', dest='port', metavar='NUMBER',
+        default=33770, type="int",
+        help='Port to use for TCP/IP connections.')
+    p.add_option('', '--unix-socket', dest='unix_socket', metavar='NAME',
+        default=os.path.join(default_topdir, 'myconnpy_mysql.sock'),
+        help='Unix socket location.')
+
+def _set_config(options):
+    if options.host:
+        tests.MYSQL_CONFIG['host'] = options.host
     if options.port:
         tests.MYSQL_CONFIG['port'] = options.port
-    if unix_socket:
-        tests.MYSQL_CONFIG['unix_socket'] = unix_socket
+    if options.unix_socket:
+        tests.MYSQL_CONFIG['unix_socket'] = options.unix_socket
     tests.MYSQL_CONFIG['user'] = 'root'
     tests.MYSQL_CONFIG['password'] = ''
     tests.MYSQL_CONFIG['database'] = 'myconnpy'
@@ -159,8 +168,7 @@ def main():
     # Set options
     (options, args) = parser.parse_args()
     option_file = os.path.join(options.mysql_topdir,'myconnpy_my.cnf')
-    unix_socket = os.path.join(options.mysql_topdir,'myconnpy_mysql.sock')
-    _set_config(options, unix_socket=unix_socket)
+    _set_config(options)
     
     # Init the MySQL Server object
     mysql_server = mysqld.MySQLInit(
@@ -170,10 +178,14 @@ def main():
         option_file,
         options.bind_address,
         options.port,
-        unix_socket,
+        options.unix_socket,
         os.path.abspath(tests.SSL_DIR))
     mysql_server._debug = options.debug
     tests.MYSQL_VERSION = mysql_server.version
+
+    # Check if we can test IPv6
+    if options.bind_address.strip() != '::':
+        tests.IPV6_AVAILABLE = False
     
     # Force removal of previous test data
     if options.force is True:
@@ -231,6 +243,12 @@ def main():
     except KeyboardInterrupt:
         logger.info("Unittesting was interrupted")
         was_successful = False
+
+    # Log messages added by test cases
+    for msg in tests.MESSAGES['WARNINGS']:
+        myconnpy_logger.warning(msg)
+    for msg in tests.MESSAGES['INFO']:
+        myconnpy_logger.info(msg)
 
     # Clean up
     if not options.keep:

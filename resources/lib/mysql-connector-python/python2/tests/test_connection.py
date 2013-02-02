@@ -31,15 +31,6 @@ import inspect
 import timeit
 from decimal import Decimal
 
-SSL_SUPPORT = False
-try:
-    import ssl
-    SSL_SUPPORT = True
-except ImportError:
-    # If import fails, we don't have SSL support.
-    pass
-
-import os
 import tests
 from tests import mysqld
 from mysql.connector import (connection, network, errors, constants, utils,
@@ -663,9 +654,6 @@ class MySQLConnectionTests(tests.MySQLConnectorTests):
             
     def test__do_auth(self):
         """Authenticate with the MySQL server"""
-        if not SSL_SUPPORT:
-            self.fail("No support for SSL. Please use a Python installation "
-                      "compiled with OpenSSL support.")
         self.cnx._socket.sock = tests.DummySocket()
         flags = constants.ClientFlag.get_default()
         kwargs = {
@@ -704,7 +692,11 @@ class MySQLConnectionTests(tests.MySQLConnectorTests):
         self.assertRaises(errors.ProgrammingError,
                           self.cnx._do_auth, **kwargs)
 
-        # Testing SSL
+    def test__do_auth_ssl(self):
+        """Authenticate with the MySQL server"""
+        if not tests.SSL_AVAILABLE:
+            return
+        self.cnx._socket.sock = tests.DummySocket()
         flags = constants.ClientFlag.get_default()
         flags |= constants.ClientFlag.SSL
         kwargs = {

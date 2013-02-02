@@ -135,6 +135,7 @@ def get_exception(packet):
     if packet[4] != '\xff':
         raise ValueError("Packet is not an error packet")
     
+    sqlstate = None
     try:
         packet = packet[5:]
         (packet, errno) = utils.read_int(packet, 2)

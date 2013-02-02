@@ -135,12 +135,13 @@ def get_exception(packet):
     if packet[4] != 255:
         raise ValueError("Packet is not an error packet")
     
+    sqlstate = None
     try:
         packet = packet[5:]
         (packet, errno) = utils.read_int(packet, 2)
         if packet[0] != 35:
             # Error without SQLState
-            errmsg = buf
+            errmsg = packet
         else:
             (packet, sqlstate) = utils.read_bytes(packet[1:], 5)
             sqlstate = sqlstate.decode('utf8')

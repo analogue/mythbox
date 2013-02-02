@@ -24,6 +24,7 @@
 """Module implementing low-level socket communication with MySQL servers.
 """
 
+import os
 import socket
 import struct
 from collections import deque
@@ -33,7 +34,23 @@ try:
 except:
     # If import fails, we don't have SSL support.
     pass
-    
+
+# socket.inet_pton() is not available on the Windows platform 
+if os.name == 'nt':
+    import ctypes
+    _WIN_DDL = ctypes.WinDLL("ws2_32.dll")
+    def inet_pton(address_family, ip_string):
+        # ctypes functions expect bytes
+        try:
+            ipaddr = ip_string.encode('ascii')
+        except AttributeError:
+            ipaddr = ip_string
+        res = _WIN_DDL.inet_pton(address_family, ipaddr, b'')
+        if res == 0:
+            raise socket.error("illegal IP address string passed to inet_pton")
+else:
+    inet_pton = socket.inet_pton
+
 from . import (constants, errors)
 
 def _prepare_packets(buf, pktnr):
@@ -158,25 +175,36 @@ class BaseMySQLSocket(object):
             zpktlen = len(zip_packet)
             try:
                 self.sock.sendall(zip_packet)
-            except Exception as e:
-                raise errors.OperationalError(str(e))
+            except Exception as err:
+                raise errors.OperationalError(str(err))
     
     def recv_plain(self):
         """Receive packets from the MySQL server"""
+        packet = b''
         try:
-            header = self.sock.recv(4)
-            if len(header) < 4:
-                raise errors.InterfaceError(errno=2013)
-            self._packet_number = header[3]
-            payload_length = struct.unpack("<I", header[0:3] + b'\x00')[0]
-            payload = b''
-            while len(payload) < payload_length:
-                chunk = self.sock.recv(payload_length - len(payload))
-                if len(chunk) == 0:
+            # Read the header of the MySQL packet, 4 bytes
+            packet = self.sock.recv(1)
+            while len(packet) < 4:
+                chunk = self.sock.recv(1)
+                if not chunk:
                     raise errors.InterfaceError(errno=2013)
-                payload = payload + chunk
-            return header + payload
-        except socket.timeout as e:
+                packet += chunk
+
+            # Save the packet number and total packet length from header
+            self._packet_number = packet[3]
+            packet_totlen = struct.unpack("<I", packet[0:3] + b'\x00')[0] + 4
+
+            # Read the rest of the packet
+            rest = packet_totlen - len(packet)
+            while rest > 0:
+                chunk = self.sock.recv(rest)
+                if not chunk:
+                    raise errors.InterfaceError(errno=2013)
+                packet += chunk
+                rest = packet_totlen - len(packet)
+
+            return packet
+        except socket.timeout as err:
             raise errors.InterfaceError(errno=2013)
         except socket.error as err:
             raise errors.InterfaceError(
@@ -198,16 +226,20 @@ class BaseMySQLSocket(object):
         except IndexError:
             pass
         
+        header = b''
         packets = []
         try:
-            header = self.sock.recv(7)
+            abyte = self.sock.recv(1)
+            while abyte and len(header) < 7:
+                header += abyte
+                abyte = self.sock.recv(1)
             while header:
                 if len(header) < 7:
                     raise errors.InterfaceError(errno=2013)
                 zip_payload_length = struct.unpack("<I",
                                                    header[0:3] + b'\x00')[0]
                 payload_length = struct.unpack("<I", header[4:7] + b'\x00')[0]
-                zip_payload = b''
+                zip_payload = abyte
                 while len(zip_payload) < zip_payload_length:
                     chunk = self.sock.recv(zip_payload_length
                                            - len(zip_payload))
@@ -220,10 +252,14 @@ class BaseMySQLSocket(object):
                 packets.append(header + zip_payload)
                 if payload_length != 16384:
                     break
-                header = self.sock.recv(7)
-        except socket.timeout as e:
+                header = b''
+                abyte = self.sock.recv(1)
+                while abyte and len(header) < 7:
+                    header += abyte
+                    abyte = self.sock.recv(1)
+        except socket.timeout as err:
             raise errors.InterfaceError(errno=2013)
-        except socket.error as e:
+        except socket.error as err:
             raise errors.InterfaceError(
                 errno=2055, values=(self.get_address(), err.errno))
         
@@ -309,10 +345,24 @@ class MySQLTCPSocket(BaseMySQLSocket):
         return "{}:{}".format(self.server_host, self.server_port)
         
     def open_connection(self):
+        """Open the TCP/IP connection to the MySQL server
+        """
+        # Detect address family.
         try:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            inet_pton(socket.AF_INET6, self.server_host.split('%')[0])
+            family = socket.AF_INET6
+        except socket.error:
+            family = socket.AF_INET
+
+        try:
+            (family, socktype, proto, canonname, sockaddr) = socket.getaddrinfo(
+                self.server_host,
+                self.server_port,
+                family,
+                socket.SOCK_STREAM)[0]
+            self.sock = socket.socket(family, socktype, proto)
             self.sock.settimeout(self._connection_timeout)
-            self.sock.connect((self.server_host, self.server_port))
+            self.sock.connect(sockaddr)
         except socket.error as err:
             try:
                 msg = err.errno
@@ -321,6 +371,6 @@ class MySQLTCPSocket(BaseMySQLSocket):
             except AttributeError:
                 msg = str(err)
             raise errors.InterfaceError(
-                errno=2002, values=(self.get_address(), msg))
+                errno=2003, values=(self.get_address(), msg))
         except Exception as err:
             raise errors.OperationalError(str(err))

@@ -1163,3 +1163,40 @@ span.term
 {
     background-color: green;
 }
+
+
+/*  Keep global th rule from rendering 'table-contents' and 'informaltable'   */
+/*  table header cell borders invisible... Also add a bit of padding to       */
+/*  alleviate crowding.                                                       */
+
+div.table-contents th, div.informaltable th 
+{
+  border: 0.1em solid grey; 
+  padding: 3px; 
+  margin: 0;
+}
+
+/* 
+  The following formats the front page of articles (not any subsequent pages), 
+  in order to work around a couple of glitches in the site-wide CSS of dev.mysql.com:
+	- "Resets" the font size in paragraphs to "normal" (100%);
+	  not setting the text explicitly to 100% would result 
+	  in the text being smaller on the front page.
+	- Sets the font size of the article title to 250% explicitly, 
+	  which matches the font size of book titles.
+	- Sets the font size of the word "Abstract" a tad bigger (120%) 
+	  than it's set for book.
+	- Sets the font size of subtitles a tad smaller than the word "Abstract",
+	  and a tad bigger than the continuous text. Note that this should affect 
+	  only subtitles that sit in an <articleinfo>.
+  The formatting shouldn't affect any articles we publish, except the ones on
+  dev.mysql.com.
+*/
+div.article h2.title { 
+  font-size: 250%; }
+div.article p.title { 
+  font-size: 120%; }
+div.article h2.subtitle { 
+  font-size: 110%; }
+div.article p { 
+  font-size: 100%; }

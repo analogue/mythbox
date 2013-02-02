@@ -34,7 +34,9 @@ from mysql.connector import errors
 from mysql.connector import utils
 
 RE_SQL_COMMENT = re.compile("\/\*.*\*\/")
-RE_SQL_INSERT_VALUES = re.compile(r'\sVALUES\s*(\(.*?\))', re.I)
+RE_SQL_INSERT_VALUES = re.compile(
+    r'VALUES\s*(\(\s*(?:%(?:\(.*\)|)s\s*(?:,|)\s*)+\))',
+    re.I | re.M)
 RE_SQL_INSERT_STMT = re.compile(r'INSERT\s+INTO', re.I)
 RE_SQL_SPLIT_STMTS = re.compile(
     r''';(?=(?:[^"'`]*["'`][^"'`]*["'`])*[^"'`]*$)''')
@@ -410,7 +412,7 @@ class MySQLCursor(CursorBase):
             ('Joe', '555-001'),
             ('John', '555-003')
             ]
-        stmt = "INSERT INTO employees (name, phone) VALUES ('%s','%s)"
+        stmt = "INSERT INTO employees (name, phone) VALUES ('%s','%s')"
         cursor.executemany(stmt, data)
         
         INSERT statements are optimized by batching the data, that is
@@ -492,6 +494,7 @@ class MySQLCursor(CursorBase):
         argfmt = "@_%s_arg%d"
         self._stored_results = []
 
+        results = []
         try:
             procargs = self._process_params(args)
             argnames = []
@@ -508,13 +511,15 @@ class MySQLCursor(CursorBase):
                 if 'columns' in result:
                     tmp = MySQLCursorBuffered(self._connection._get_self())
                     tmp._handle_result(result)
-                    self._stored_results.append(tmp)
+                    results.append(tmp)
 
             if argnames:
                 select = "SELECT %s" % ','.join(argnames)
                 self.execute(select)
+                self._stored_results = results
                 return self.fetchone()
             else:
+                self._stored_results = results
                 return ()
 
         except errors.Error:
@@ -522,7 +527,7 @@ class MySQLCursor(CursorBase):
         except StandardError, e:
             raise errors.InterfaceError(
                 "Failed calling stored routine; %s" % e)
-    
+
     def getlastrowid(self):
         """Returns the value generated for an AUTO_INCREMENT column
         

@@ -30,6 +30,7 @@ from decimal import Decimal
 import time
 import datetime
 import inspect
+import re
 
 import tests
 from mysql.connector import (connection, cursor, conversion, protocol, 
@@ -69,6 +70,29 @@ class TestsCursor(tests.MySQLConnectorTests):
         except (StandardError), e:
             self.fail("Failed cleaning up test table; %s" % e)
         cursor.close()
+
+class CursorModule(tests.MySQLConnectorTests):
+    """
+    Tests for the cursor module functions and attributes
+    """
+    def test_RE_SQL_INSERT_VALUES(self):
+        regex = cursor.RE_SQL_INSERT_VALUES
+
+        cases = [
+            ("(%s, %s)",
+             "INSERT INTO t1 VALUES (%s, %s)"),
+            ("( %s, \n  %s   )",
+             "INSERT INTO t1 VALUES  ( %s, \n  %s   )"),
+            ("(%(c1)s, %(c2)s)",
+             "INSERT INTO t1 VALUES (%(c1)s, %(c2)s)"),
+            ("(\n%(c1)s\n, \n%(c2)s\n)",
+             "INSERT INTO t1 VALUES \n(\n%(c1)s\n, \n%(c2)s\n)"),
+            ("(  %(c1)s  ,  %(c2)s  )",
+             "INSERT INTO t1 VALUES   (  %(c1)s  ,  %(c2)s  ) ON DUPLICATE"),
+            ]
+
+        for exp, stmt in cases:
+            self.assertEqual(exp, re.search(regex, stmt).group(1))
 
 class CursorBaseTests(tests.MySQLConnectorTests):
     
