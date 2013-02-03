@@ -579,61 +579,8 @@ from mythbox.mythtv.conn import inject_conn
 
 
 class RecordedProgram(Program):
-    """
-    Recorded program retrieved via Myth's socket interface.
-    
-    1     STR_TO_LIST(title)
-    2     STR_TO_LIST(subtitle)
-    3     STR_TO_LIST(description)
-    4     STR_TO_LIST(category)
-    5     STR_TO_LIST(chanid)
-    6     STR_TO_LIST(chanstr)
-    7     STR_TO_LIST(chansign)
-    8     STR_TO_LIST(channame)
-    9     STR_TO_LIST(pathname)
-    10    LONGLONG_TO_LIST(filesize)
-    11    DATETIME_TO_LIST(startts)
-    12    DATETIME_TO_LIST(endts)
-    13    INT_TO_LIST(findid)
-    14    STR_TO_LIST(hostname)
-    15    INT_TO_LIST(sourceid)
-    16    INT_TO_LIST(cardid)
-    17    INT_TO_LIST(inputid)
-    18    INT_TO_LIST(recpriority)
-    19    INT_TO_LIST(recstatus)
-    20    INT_TO_LIST(recordid)
-    21    INT_TO_LIST(rectype)
-    22    INT_TO_LIST(dupin)
-    23    INT_TO_LIST(dupmethod)
-    24    DATETIME_TO_LIST(recstartts)
-    25    DATETIME_TO_LIST(recendts)
-    26    INT_TO_LIST(programflags)
-    27    STR_TO_LIST((recgroup != "") ? recgroup : "Default")
-    28    STR_TO_LIST(chanOutputFilters)
-    29    STR_TO_LIST(seriesid)
-    30    STR_TO_LIST(programid)
-    31    DATETIME_TO_LIST(lastmodified)
-    32    FLOAT_TO_LIST(stars)
-    33    DATE_TO_LIST(originalAirDate)
-    34    STR_TO_LIST((playgroup != "") ? playgroup : "Default")
-    35    INT_TO_LIST(recpriority2)
-    36    INT_TO_LIST(parentid)
-    37    STR_TO_LIST((storagegroup != "") ? storagegroup : "Default")
-    38    INT_TO_LIST(audioproperties)
-    39    INT_TO_LIST(videoproperties)
-    40    INT_TO_LIST(subtitleType)
-    41    STR_TO_LIST(year)
-    """
-    _rec_program_dict = {}
-    _rec_program_dict_empty = {}
-    
-    _fps_overrides = {
-        'hdpvr_1080i': {
-            'fps'  : 29.97,
-            'tags' : {'format': 'mpegts', 'pixel_format': 'yuv420p', 'frame_rate': '59.94', 'video_codec': ': h264',       'dimension': '1920x1080 [PAR 1:1 DAR 16:9]'}
-        }
-    }
-    
+    """Recorded program retrieved via Myth's socket interface."""
+
     def __init__(self, data, settings, translator, platform, protocol, conn=None, db=None):
         '''
         @param data: list of fields from mythbackend. libs/libmythtv/programinfo.cpp in the mythtv source 
