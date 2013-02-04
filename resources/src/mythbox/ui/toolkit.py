@@ -287,3 +287,39 @@ class BaseDialog(xbmcgui.WindowXMLDialog, WindowMixin):
     def __init__(self, *args, **kwargs):
         xbmcgui.WindowXMLDialog.__init__(self, *args, **kwargs)
         self.win = None        
+
+
+def _isWidgetOfType(base_type, widget, test_method_name, widget_type_name):
+    """
+    Since Frodo, all xbmcgui.Control subclasses no longer return the correct type
+    when calling `type(control)`.  So, we have to resort to hacks figure out if
+    a given widget is really of a given type.  xbmcgui.Contorl now contains the
+    all methods on all subclasses.  If a method is not implemented, take advantage
+    of it throwing a RuntimeException to narrow down the exact type.
+
+    @param base_type: xbmcgui.Control
+    @param widget: widget to test for type of
+    @param test_method_name: name of method on widget to execute
+    @param widget_type_name: used in logging messages only
+    """
+    if not isinstance(widget, base_type):
+        return False
+
+    try:
+        test_method = getattr(widget, test_method_name)
+        test_method()
+        return True
+    except RuntimeError, re:
+        unimplemented = 'Unimplemented method' in str(re)
+        if unimplemented:
+            log.debug('Control %s is not a %s' % (widget.getId(), widget_type_name))
+            return False
+        else:
+            raise
+
+def isButton(widget):
+    return _isWidgetOfType(xbmcgui.Control, widget, 'getLabel2', 'ControlButton')
+
+def isRadioButton(widget):
+    return _isWidgetOfType(xbmcgui.Control, widget, 'isSelected', 'ControlRadioButton')
+

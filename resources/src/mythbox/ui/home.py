@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2011 analogue@yahoo.com
+#  Copyright (C) 2013 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -307,7 +307,9 @@ class HomeWindow(BaseWindow):
         
     def goSettings(self):
         from uisettings import SettingsWindow
-        SettingsWindow('mythbox_settings.xml', self.platform.getScriptDir(), **self.deps).doModal() 
+        self.settingsWindow = SettingsWindow('mythbox_settings.xml', self.platform.getScriptDir(), **self.deps)
+        self.settingsWindow.doModal()
+        self.settingsWindow = None
 
     @window_busy
     def refresh(self):

@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2011 analogue@yahoo.com
+#  Copyright (C) 2013 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -22,6 +22,7 @@ import xbmcgui
 import mythbox.msg as m
 
 from mythbox.settings import MythSettings, SettingsException
+from mythbox.ui import toolkit
 from mythbox.ui.toolkit import window_busy, BaseWindow, enterNumeric, enterText, Action
 from mythbox.util import catchall, timed, safe_str
 from mythbox.advanced import AdvancedSettings
@@ -103,10 +104,10 @@ class Setting(object):
             ok, value = enterNumeric(control=self.widget, validator=self.validator, current= str(int(self.store.get(self.key)) * -1))
             if value != '0':
                 value = '-' + value
-        elif self.type == bool and type(self.widget) == xbmcgui.ControlRadioButton:
+        elif self.type == bool and toolkit.isRadioButton(self.widget):
             ok, value = True, ['False', 'True'][self.widget.isSelected()]
         else:
-            log.warn('readinput() not activated for type %s and widget %s' % (self.type, type(self.widget)))
+            log.warn('readinput() not activated for type %s and widget %s with id %s' % (self.type, type(self.widget), self.widget.getId()))
 
         if ok:
             self.store.put(self.key, value)
@@ -114,8 +115,8 @@ class Setting(object):
 
     def render(self):
         value = self.store.get(self.key)
-        
-        if type(self.widget) == xbmcgui.ControlButton:
+
+        if toolkit.isButton(self.widget):
             if self.type == str:
                 self.widget.setLabel(label=self.widget.getLabel(), label2=value)
             elif self.type == int:
@@ -126,13 +127,13 @@ class Setting(object):
                 self.widget.setLabel(label=self.widget.getLabel(), label2='%s seconds' % str(int(value) * -1))                
             else:
                 raise Exception('Dont know how to handle type %s in render()' % self.type)
-        elif type(self.widget) == xbmcgui.ControlRadioButton:
+        elif toolkit.isRadioButton(self.widget):
             if self.type == bool:
                 self.widget.setSelected(self.store.get(self.key) in ('True', 'true', '1'))
             else:
                 raise Exception('Dont know how to handle type %s in render()' % self.type)
         else:
-            raise Exception('Unknown widget in render(): %s' % type(self.widget))
+            raise Exception('Unknown widget in render(): %s with id %s' % (type(self.widget), self.widget.getId()))
             
 class Seconds(object):
     
