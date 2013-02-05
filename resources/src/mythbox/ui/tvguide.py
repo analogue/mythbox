@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2011 analogue@yahoo.com
+#  Copyright (C) 2013 analogue@yahoo.com
 #  Copyright (C) 2005 Tom Warkentin <tom@ixionstudios.com>
 #
 #  This program is free software; you can redistribute it and/or
@@ -31,14 +31,14 @@ import mythbox.ui.toolkit as ui
 import Queue
 
 from datetime import datetime, timedelta
+from mythbox.bus import Event
 from mythbox.mythtv.conn import inject_conn
 from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.domain import RecordingSchedule, Channel
-from mythbox.mythtv.enums import Upcoming
 from mythbox.ui.schedules import ScheduleDialog
+from mythbox.ui import toolkit
 from mythbox.ui.toolkit import Action, Align, AspectRatio, window_busy
 from mythbox.util import catchall_ui, timed, catchall, safe_str, run_async
-from mythbox.bus import Event
 
 log = logging.getLogger('mythbox.ui')
 
@@ -297,10 +297,8 @@ class TvGuideWindow(ui.BaseWindow):
         
         try:
             control = self.getControl(controlId)
-            if isinstance(control, xbmcgui.ControlButton):
-            #if self.cellsByButton.has_key(control):
+            if toolkit.isButton(control):
                 matches = filter(lambda c: c.control == control, self.gridCells)
-                #cell = self.cellsByButton[control]
                 if matches:
                     self.renderProgramInfo(matches[0].program)
         except TypeError, te:
