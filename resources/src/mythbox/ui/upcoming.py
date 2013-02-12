@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2011 analogue@yahoo.com
+#  Copyright (C) 2013 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -30,6 +30,8 @@ from mythbox.mythtv.db import inject_db
 from mythbox.mythtv.domain import Channel
 from mythbox.ui.schedules import ScheduleDialog
 from mythbox.ui.toolkit import BaseWindow, window_busy, Action
+from mythbox.ui.toolkit import ProgramListItem
+from mythbox.ui.toolkit import ProgramListBox
 from mythbox.util import catchall_ui, run_async, catchall
 
 log = logging.getLogger('mythbox.ui')
@@ -67,7 +69,7 @@ class UpcomingRecordingsWindow(BaseWindow):
     def onInit(self):
         if not self.win:
             self.win = xbmcgui.Window(xbmcgui.getCurrentWindowId())
-            self.programsListBox = self.getControl(600)
+            self.programsListBox = ProgramListBox(self.getControl(600))
             self.refreshButton = self.getControl(250)
             self.refresh()
         
@@ -159,7 +161,7 @@ class UpcomingRecordingsWindow(BaseWindow):
         def buildListItems():
             previous = None
             for i, p in enumerate(self.programs):
-                listItem = xbmcgui.ListItem()
+                listItem = ProgramListItem(p)
                 self.setListItemProperty(listItem, 'airdate', self.formattedAirDate(previous, p))    
                 self.setListItemProperty(listItem, 'title', p.title())
                 self.setListItemProperty(listItem, 'description', p.formattedDescription())

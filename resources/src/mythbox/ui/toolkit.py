@@ -1,6 +1,6 @@
 #
 #  MythBox for XBMC - http://mythbox.googlecode.com
-#  Copyright (C) 2011 analogue@yahoo.com
+#  Copyright (C) 2013 analogue@yahoo.com
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -323,3 +323,72 @@ def isButton(widget):
 def isRadioButton(widget):
     return _isWidgetOfType(xbmcgui.Control, widget, 'isSelected', 'ControlRadioButton')
 
+
+class ProgramListItem(object):
+    """
+    Wraps xbmcgui.ListItem so that RecordedProgram and ListItem
+    can maintain a mapping since object identity of ListItems
+    in Frodo has changed.
+    """
+    def __init__(self, program, *args, **kwargs):
+        self.program = program
+        self.delegate = xbmcgui.ListItem(*args, **kwargs)
+        self.delegate.setProperty('key', str(self.program.key()))
+
+    def __getattr__(self, name):
+        if name == 'getProperty':
+            return self.delegate.getProperty
+        if name == 'setProperty':
+            return self.delegate.setProperty
+        if name == 'setThumbnailImage':
+            return self.delegate.setThumbnailImage
+        raise AttributeError('ProgramListItem has no attribute %s' % str(name))
+
+    def __eq__(self, other):
+        return self.getProperty('key') == other.getProperty('key')
+
+
+class ProgramListBox(object):
+    """
+    xbmcgui.ListBox changed between Eden and Frodo. The ListItem object
+    that you put is no longer is the same instance that you get out.
+    Hence, you can no longer make comparisons based based on object identity.
+
+    To re-associate a program with it's associated ListItem, a key is set
+    as a property on the ListItem.
+
+    This ProgramListBox decorates xbmcgui.ListBox and handles the mapping
+    transparently so no code changes are necessary.
+
+    Since xbmcgui.ListItem is backed by native code, __getattr__ can't be
+    used to do straight delegation. Individual attributes have been setup
+    to delegate appropriately.
+    """
+    def __init__(self, delegate):
+        self.delegate = delegate
+        self.mapping = {}
+
+    def __getattr__(self, name):
+        if name == 'getSelectedPosition':
+            return self.delegate.getSelectedPosition
+        if name == 'selectItem':
+            return self.delegate.selectItem
+
+        raise AttributeError('ProgramListBox has no attribute %s' % str(name))
+
+    def getSelectedItem(self):
+        """Proxy xbmcgui.ListItem with its associated ProgramLisItem"""
+        listItem = self.delegate.getSelectedItem()
+        key = listItem.getProperty('key')
+        return self.mapping[key]
+
+    def reset(self):
+        self.mapping.clear()
+        return self.delegate.reset()
+
+    def addItems(self, programItems):
+        listItems = []
+        for programItem in programItems:
+            self.mapping[programItem.getProperty('key')] = programItem
+            listItems.append(programItem.delegate)
+        self.delegate.addItems(listItems)
