@@ -92,11 +92,7 @@ WIDTH_CHANNEL_ICON = 40
 
 
 class TvGuideWindow(ui.BaseWindow):
-    """
-    @todo: Don't re-render channels when scrolling page left/right
-    @todo: possible rendering optimizations - reuse widgets instead of creating them over and over
-    """
-    
+
     def __init__(self, *args, **kwargs):
         ui.BaseWindow.__init__(self, *args, **kwargs)
         [setattr(self,k,v) for k,v in kwargs.iteritems() if k in ('settings','translator','platform','fanArt','cachesByName', 'bus')]
@@ -777,35 +773,17 @@ class TvGuideWindow(ui.BaseWindow):
         
         for i in range(self.startChan, self.endChan + 1):
             c = ChannelCell()
-            
-            # create shade image around channel label/icon
-            #c.shade = xbmcgui.ControlImage(
-            #    x, 
-            #    y, 
-            #    self.channel_w, 
-            #    h, 
-            #    "shade_50.png")
-            #
-            #self.addControl(c.shade)
 
             # create label control
-            labelText = '%s %s' % (self.channels[i].getChannelNumber(), '') # self.channels[i].getCallSign())
+            labelText = '%s' % self.channels[i].getChannelNumber()
             label2Text = '%s' % self.channels[i].getCallSign()
-            #label2Text = "%s" % self.channels[i].getChannelName()
-            
+
             c.label = xbmcgui.ControlButton(
-                x + iconW + self.channel_dx, 
-                y, 
-                labelW,        # hack for cell dividers 
-                h, 
-                label=labelText,      # Text empty on purpose. Label overlay responsible for this
-                #focusTexture=self.platform.getMediaPath('gradient_maroon.png'),
+                x + iconW + self.channel_dx, y, labelW, h,
+                label=labelText,
                 noFocusTexture=self.platform.getMediaPath('gradient_channel.png'),
-                #textXOffset=2,
-                #textYOffset=0,
                 alignment=Align.CENTER_Y|Align.TRUNCATED)
             
-            c.label.setLabel(label=labelText, label2=label2Text)
             self.addControl(c.label)
 
             # create channel icon image if icon exists
@@ -815,11 +793,13 @@ class TvGuideWindow(ui.BaseWindow):
                     if iconFile:
                         hackW = iconW * 2
                         c.icon = xbmcgui.ControlImage(x + self.channel_w - hackW - 15, y, hackW, h, iconFile, AspectRatio.SCALE_DOWN)
-                        c.label.setLabel(label=labelText, label2='')
+                        # label2 is a single space since empty string won't blank out the value
+                        label2Text = ' '
                         self.addControl(c.icon)
             except:
                 log.exception('channel = %s' % self.channels[i])
-            
+
+            c.label.setLabel(label=labelText, label2=label2Text)
             self.channelCells.append(c)
             y += h + self.guide_dy
     
