@@ -5,7 +5,7 @@
     version="version_tag"
     provider-name="analogue@yahoo.com (Semir Patel)">
     <requires>
-        <import addon="xbmc.python" version="2.0" />
+        <import addon="xbmc.python" version="2.1.0" />
         <import addon="script.module.beautifulsoup" version="3.2.0" />
         <import addon="script.module.elementtree" version="1.2.7"/>
         <import addon="script.module.simplejson" version="2.0.10"/>
@@ -26,7 +26,7 @@
         - Enhanced program guide
         - Show upcoming recordings
         - Tuner and job status
-        - Supports MythTV 0.24
+        - Supports MythTV 0.25
         </description>
         <description lang="fr">[B]MythBox est un frontal MythTV pour XBMC[/B]
 
@@ -37,7 +37,7 @@
         - Guide de programme amélioré
         - Afficher les enregistrements à venir
         - Statut du syntoniseur et des travaux
-        - Support de MythTV 0.24
+        - Support de MythTV 0.25
         </description>
     </extension>
 </addon>

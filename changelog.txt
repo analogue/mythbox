@@ -1,7 +1,8 @@
-x/x/2011 - MythBox 1.1.1
+x/x/2013 - MythBox 1.2.0
 -----------------------------
 
   New
+    - Support for XBMC 12.0 Frodo
     - Protocol 71 and 72 support (Sebastian Astie)
 
   Fixed
