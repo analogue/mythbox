@@ -56,7 +56,7 @@ class ProgramCell(object):
         self.control    = None   # ControlButton 
         self.label      = None   # ControlLabel
         self.hdOverlay  = None   # ControlImage
-        self.scheduleId = None  # int
+        self.scheduleId = None   # int
 
 
 class ChannelCell(object):
@@ -101,8 +101,6 @@ class TvGuideWindow(ui.BaseWindow):
         self._upcomingByProgram = None
         self._upcomingStale = True
         
-        # =============================================================
-
         self.gridCells = []      # ProgramCell[] for grid of visible programs
         self.startTime = None    # datetime - start time for visibile grid
         self.endTime   = None    # datetime - end time for visible grid
@@ -915,18 +913,16 @@ class TvGuideWindow(ui.BaseWindow):
         w = (self.guide_w - numCols * self.guide_dx) / numCols
         t = self.startTime
         lastDay = t.day
-        i = 0
         log.debug("numCols=%d guide_w=%d"%(numCols, self.guide_w))
+        gradient = self.platform.getMediaPath('gradient_header.png')
 
         if len(self.timeLabels) == 0:
             c = xbmcgui.ControlButton(
-                self.channel_x + self.channel_dx + WIDTH_CHANNEL_ICON + 2, 
-                y, 
-                self.channel_w - self.channel_dx - WIDTH_CHANNEL_ICON - 14, 
-                h, 
+                self.channel_x + self.channel_dx + WIDTH_CHANNEL_ICON + 2, y,
+                self.channel_w - self.channel_dx - WIDTH_CHANNEL_ICON - 14, h,
                 label='', 
                 font='font13', 
-                noFocusTexture=self.platform.getMediaPath('gradient_header.png'))
+                noFocusTexture=gradient)
             self.timeLabels.append(c)
             self.addControl(c)
                                                   
@@ -934,7 +930,7 @@ class TvGuideWindow(ui.BaseWindow):
                 c = xbmcgui.ControlButton(
                     x, y, w+10, h, label='', 
                     font='font13', 
-                    noFocusTexture=self.platform.getMediaPath('gradient_header.png'))
+                    noFocusTexture=gradient)
                 self.timeLabels.append(c)
                 self.addControl(c)
                 x = x + w + self.guide_dx
